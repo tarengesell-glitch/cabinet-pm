@@ -49,6 +49,8 @@ samples/
   cabinet-vision/         Raw discovery material from the shop (Phase 0), kept untouched
 docs/
   cabinet-vision/         ORDX format reference and other vendor findings (Phase 0)
+cabinet-vision-ucs/       Separate project: the shop's UCS library (see its CLAUDE.md). Not part of
+                          the platform; nothing imports from it and the platform checks skip it.
 ```
 
 **Why `platform/` is separate from `core/` (PROPOSED).** The spec says Core depends on nothing, and P5 needs translation to be repeatable. The earlier plan put users, audit, alerts and locks in "core", but those need a database. Splitting them out keeps Core pure and testable without a database. `platform/` may import `core/`; `core/` imports nothing.
@@ -82,7 +84,7 @@ These are enforced by `eslint-plugin-boundaries` and `dependency-cruiser`. A vio
 
 On top of the table:
 - **Contracts only.** A module imports another module only through its `contract.ts` (and `ui/index.ts` for the app). Internals are private.
-- **The vendor-name check.** A script fails the check if "Cabinet Vision", "CabinetVision" or "ORDX" (any case) appears outside `src/adapters/cabinet-vision/`, `helpers/cabinet-vision/`, `golden/cabinet-vision/`, `samples/cabinet-vision/` and `docs/`. When the UI needs to name the target (for example "Send to …"), it gets the name from the adapter's contract.
+- **The vendor-name check.** A script fails the check if "Cabinet Vision", "CabinetVision" or "ORDX" (any case) appears outside `src/adapters/cabinet-vision/`, `helpers/cabinet-vision/`, `golden/cabinet-vision/`, `samples/cabinet-vision/`, `cabinet-vision-ucs/` and `docs/`. When the UI needs to name the target (for example "Send to …"), it gets the name from the adapter's contract.
 - **No AI in the translation path.** `adapters/**` and `core/**` may not import an AI SDK. Code in `core/` and in the writer and reader may not read the clock or random numbers. Times and IDs are passed in.
 
 ## The master copy (P1)

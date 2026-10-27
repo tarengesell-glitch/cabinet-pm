@@ -13,6 +13,8 @@ The spec's owner amendments (OA-1 to OA-10, at the top of `docs/BUILD_SPEC.md`) 
 - client reminders;
 - automatic ordering.
 
+**Separate project in this repo:** `cabinet-vision-ucs/` is the shop's UCS library (code pasted into the CAD program by hand). It is not part of the platform. For work in that folder, follow `cabinet-vision-ucs/CLAUDE.md` instead of this file. Platform code never reads from it, and it never reads from the platform.
+
 Before any work, read:
 - `docs/BUILD_SPEC.md` (the owner's spec; authority);
 - `docs/ARCHITECTURE.md`;
@@ -28,7 +30,7 @@ When docs disagree, `docs/BUILD_SPEC.md` wins. Then the "Decided" list in `docs/
 
 1. **Stay inside the module you were asked to change.** Each module has its own `CLAUDE.md`. If a change elsewhere seems necessary, stop and explain what and why instead of doing it.
 2. **Dependencies point inward** (spec P2). Follow the dependency table in `docs/ARCHITECTURE.md`. Modules import each other only through `contract.ts`. The boundary checks enforce this; never disable or weaken them.
-3. **Only the adapter knows the vendor.** The words "Cabinet Vision" and "ORDX" never appear outside `src/adapters/cabinet-vision/`, `helpers/cabinet-vision/`, `golden/cabinet-vision/`, `samples/cabinet-vision/` and `docs/`. The catalog uses our own IDs, never CAD codes.
+3. **Only the adapter knows the vendor.** The words "Cabinet Vision" and "ORDX" never appear outside `src/adapters/cabinet-vision/`, `helpers/cabinet-vision/`, `golden/cabinet-vision/`, `samples/cabinet-vision/`, `cabinet-vision-ucs/` and `docs/`. The catalog uses our own IDs, never CAD codes.
 4. **The master copy is the single source of truth** (P1). The editor draws only from it (P6). Pricing reads from the catalog and the master copy, never from Cabinet Vision.
 5. **One owner per piece of data.** Only the owning module writes a table (`docs/DATA_MODEL.md`).
 6. **Data, not code** (P3). Size ranges, increments, options, invalid combinations, mappings, design rules, prices, roles, permissions and statuses are data with a recorded source. Never hard-code them, and never make one up.

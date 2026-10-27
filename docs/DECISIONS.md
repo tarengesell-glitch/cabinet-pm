@@ -33,6 +33,10 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
   - automated client reminders with a deadline ticker;
   - automatic ordering of materials, doors, counters, handles and add-ons when a job goes into production.
 
+### 2026-10-27: UCS library kept apart from the platform
+- `cabinet-vision-ucs/` holds the shop's Cabinet Vision UCS library under its own `CLAUDE.md`. It is a separate project: platform code never imports or reads it, and the platform's lint, boundary and test checks skip it. It is on the vendor-name check's allowed list.
+- The same library was also set up in the `cabinet-vision-ucs` repo. The owner will choose one home; the other copy is then deleted.
+
 ### Still in force from the earlier plan (2026-10-24 and before)
 - Modular monolith with enforced module boundaries; one owner per table; data, not code.
 - Fail loudly: alerts persist until a person resolves them with a note. Never show false success.

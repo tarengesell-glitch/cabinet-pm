@@ -18,6 +18,21 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 - Out of scope for v1: engineering cabinets, CNC output, cutlists, machining, a Mozaik push, and photorealistic rendering.
 - Mozaik may come back later as read-back only (Phase 8).
 
+### 2026-10-27: Owner answers and the fuller workflow (BUILD_SPEC "Owner amendments" OA-1 to OA-10)
+- **A shop is a manufacturing partner: today one Hutterite colony; possibly more colonies later.** In-house only: "We will not sell this software to other people, it will only be used for our own sales." (Answers S-0.)
+- The tool's job is to remove manual drawing. Rough inputs, the visual intake and the design rules produce a well-designed room, with **photorealistic viewing** and **live pricing**. No parametrics, construction or sheet optimization.
+- **Photorealistic viewing is in scope.** This reverses the spec's section 2.
+- The push to Cabinet Vision happens once, and only when four things are true:
+  - the client has signed off the design;
+  - the appliances are confirmed;
+  - the site is measured;
+  - the job is paid.
+- The library sync and the job read-back are **automatic loops**.
+- In scope:
+  - the conversation tally (email, texts, meeting transcripts);
+  - automated client reminders with a deadline ticker;
+  - automatic ordering of materials, doors, counters, handles and add-ons when a job goes into production.
+
 ### Still in force from the earlier plan (2026-10-24 and before)
 - Modular monolith with enforced module boundaries; one owner per table; data, not code.
 - Fail loudly: alerts persist until a person resolves them with a note. Never show false success.
@@ -40,19 +55,27 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 ## Open questions
 
 ### Needed before Phase 1 code
-- **S-0 Who is a "shop"?** The spec has `shop_id`, a catalog per shop, onboarding shops and "target shops". The earlier plan said "in-house tool only, not sold to other companies". Is a shop:
-  - one of your manufacturing partners, each running its own Cabinet Vision library, with this staying in-house; or
-  - another cabinet business that would use this platform as a customer?
-
-  The answer decides logins, data separation between shops, and how much onboarding tooling is needed.
-- **U-1 Base unit (spec Q5).** Options:
+- **CV-1 Where does Cabinet Vision run, and who works in it?** Is it on a computer at the colony, operated by colony staff, or with you? How reliable is that computer's internet? The automatic library sync and read-back (OA-6) need something running on that computer. Phase 0's samples also come from there.
+- **U-1 Base unit (spec Q5).** The intake uses feet (7', 8', 10'), so the shop looks imperial. Options:
+  - 1/64 inch (the spec's candidate);
   - millimetres (the earlier plan);
-  - 1/64 inch (the spec's candidate for imperial shops);
-  - nanometres (what closet-builder used). It holds both mm and 1/64 inch exactly (1/64 in = 396,875 nm), but it needs care with areas, because area numbers grow too large.
+  - nanometres (closet-builder). It holds both mm and 1/64 inch exactly (1/64 in = 396,875 nm), but area numbers grow too large.
 
   Recommendation: decide once Phase 0 shows which units and precision ORDX uses.
 - **A-1 Angle convention.** Proposed for Phase 1: degrees as integers or fixed decimals, counter-clockwise, measured from the room's +X axis. Confirm or change.
-- **PROPOSED:** the `core/` / `platform/` split, and the master copy stored as versioned JSON with the named writers (ARCHITECTURE).
+- **PROPOSED:**
+  - the `core/` / `platform/` split, and the master copy stored as versioned JSON with the named writers (ARCHITECTURE);
+  - dimension provenance and appliance placements added to the master copy (DATA_MODEL "core").
+
+### From the owner's workflow (2026-10-27)
+- **CV-2 More than one colony.** Will each colony have its own Cabinet Vision library (so its own catalog mappings), or will all colonies share one library? And does each have its own prices?
+- **SM-1 Measuring after sign-off.** The client signs off on a design drawn from rough dimensions; the site measure may then change sizes. The earlier plan (2026-10-24) said small within-tolerance differences are absorbed without client re-approval or repricing. Does that still hold? If so, what tolerance? Above it, does the client re-sign?
+- **PAY-1 "Paid".** Does "paid" mean paid in full, or a deposit? closet-builder had a deposit to commit and the balance before production. Which payment tool?
+- **R-1 Photorealistic.** A realistic 3D view the client can turn in the browser, or rendered still images (slower, more realistic), or both? This is the most expensive part of the editor; the answer sets its cost.
+- **DL-1 Deadline ticker.** How is the "everything in by" date worked out? From the colony's production lead time (as data) and the promised delivery date? Who sets the delivery date?
+- **PO-1 Automatic ordering.** Who places the orders (you or the colony), which suppliers, and how does each take orders (email, portal, API)? Do "materials" mean sheet goods sent to the colony?
+- **MSG-1 Channels.** Which email (Gmail?), which texting service, and which meeting tool's transcripts? Do reminders go by text, email or both?
+- **IK-1 to IK-7** Kitchen intake questions, in `docs/intake/kitchen.md`.
 
 ### From the spec (section 11)
 - **S-1** Which Cabinet Vision versions do target shops run, and does ORDX behave the same across them?
@@ -62,12 +85,12 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 - **S-5** = U-1.
 - **S-6** Which design rules block and which only warn, by default?
 
-### Earlier plan features the new spec doesn't mention: keep, defer or drop?
-- **E-1 Room states.** The earlier plan had four separate states per room (client approval, invoicing, site verification, production release) and "never one combined status". The spec has one status per job (`draft … released`). Do the four states move into Projects & Sales, or are they gone?
-- **E-2 Client approval.** The earlier plan had per-room client approval of an exact version, frozen as a snapshot. The spec has only designer approval for the gate. Is client approval still needed, and where?
+### Earlier plan features: keep, defer or drop?
+- **E-1 Room states.** Mostly answered by OA-5: the push needs sign-off, appliances, measure and payment, tracked as separate gate conditions. Still open: are these tracked per room or per job? Is invoicing tracked here or only in accounting?
+- ~~E-2 Client approval~~ Answered (OA-5): the client signs off before the push.
 - **E-3 Pricing structure.** The earlier plan had price lists per manufacturing partner, chosen by region, plus tax per province. The spec says pricing reads from the catalog. Are regions and partners still part of this?
-- **E-4 Site measuring** with provenance and "verified only after explicit confirmation". The spec's room capture is done by the designer. Is a separate site-measure step still wanted?
-- **E-5** The quick quote, visual client intake questionnaire, appliance library, email/text job notes, purchasing and supplier orders, CRM and accounting triggers. In v1, later, or dropped?
+- ~~E-4 Site measuring~~ Answered (OA-5): the site must be measured before the push.
+- **E-5** Answered for the visual intake, appliances, the conversation tally, reminders and ordering (all in). Still open: CRM (or do the reminders replace it?) and accounting triggers. Live pricing probably replaces the separate quick quote; confirm.
 - **E-6 Locking unit:** job or room?
 
 ### Carried over from closet-builder
@@ -81,10 +104,10 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 - **C-2 Look and feel.** closet-builder has an owner-approved design system (Geist and Newsreader fonts, its own tokens, 2026-10-07/08). `docs/ux/UX_BRIEF.md` has a different palette. Which one applies here?
 - **C-3** closet-builder decisions (its `docs/architecture.md` Part 1, 2026-10-08 to 10-10) that differ from this plan. Each needs a yes or no here:
   - **Price list:** one price list, priced per inch by cabinet type, plus % adjustments and flat add-ons (A-1, A-7). Compare E-3.
-  - **Shops:** one shop on Biesse machines, maybe more later (A-18). Compare S-0.
+  - ~~Shops~~ Answered (OA-1): a Hutterite colony. Is it the same Biesse shop closet-builder was written for?
   - **Freezing:** frozen at full payment, except changes that don't touch the design; truly frozen once files are sent to the shop (A-8, A-9, A-11). The spec freezes at "sent".
-  - **Payments:** a deposit to commit and the balance before production, through a third-party payment tool (A-8).
-  - **Customer change approval:** text and email with a tap to approve, daily reminders, and a decline notifies the designer (A-10). Compare E-2.
+  - **Payments:** a deposit to commit and the balance before production, through a third-party payment tool (A-8). Compare PAY-1.
+  - **Customer change approval:** text and email with a tap to approve, daily reminders, and a decline notifies the designer (A-10). This fits OA-8's reminders and SM-1.
   - **Batches:** a customer can have several batches over the years, each priced as its own project (A-4). Is a job a batch?
   - **Prospects:** customers can sign up themselves and do their own intake (A-3, A-15, A-16).
 

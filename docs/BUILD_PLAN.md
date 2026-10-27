@@ -1,6 +1,6 @@
 # Build Plan
 
-The phases are `docs/BUILD_SPEC.md` section 10. This file breaks them into sessions: one Claude Code session per row, then review, test and commit before the next. Rule of thumb: if a session wants to touch more than one module, split it.
+The phases are `docs/BUILD_SPEC.md` section 10. Phases 9 and 10 and the additions to 2, 4, 5 and 7 come from the owner amendments (2026-10-27). This file breaks them into sessions: one Claude Code session per row, then review, test and commit before the next. Rule of thumb: if a session wants to touch more than one module, split it.
 
 "Owner" rows are done by you (and the shop), not by Claude.
 
@@ -36,6 +36,7 @@ The phases are `docs/BUILD_SPEC.md` section 10. This file breaks them into sessi
 | 2b | Independent verification from Cabinet Vision's engineered output (adapter) |
 | 2c | Comparer (pure, no vendor knowledge) |
 | 2d | Test library runner, correction records, and the "fix ships only if every case passes" check |
+| 2e | The helper app on the Cabinet Vision computer, so read-back is **automatic** (OA-6). Needs CV-1 answered. Can move to Phase 3 if the manual path is enough to prove Phase 2. |
 
 ## Phase 3: Expand coverage
 
@@ -47,29 +48,57 @@ Work through this list, one item type or feature per session, each adding golden
 
 **Exit:** a shop's catalog can be mapped and kept in sync; stale mappings are detected.
 
-Full Product Catalog with versions and the editor for it; catalog sync; mapping tools (AI drafts mappings, a person verifies them); Shop Settings with design rules.
+Full Product Catalog with versions and the editor for it; **automatic** catalog sync through the helper app (OA-6); mapping tools (AI drafts mappings, a person verifies them); Shop Settings with design rules, including the drawer levels from the kitchen intake. Shops are colonies: build for more than one from the start, even though there is only one today (OA-1, CV-2).
 
 ## Phase 5: Designer
 
 **Exit:** designers produce jobs that pass the gate and import cleanly.
 
-Before this phase: a UX session that turns `docs/ux/UX_BRIEF.md` into screen specs and design tokens (C-2 must be decided). Then room capture, the visual editor (draws only from the master copy), live validation, and the ready-to-send gate screen.
+Before this phase: a UX session that turns `docs/ux/UX_BRIEF.md` into screen specs and design tokens (C-2 must be decided). Then:
+- room capture (rough dimensions first);
+- the visual editor, drawn only from the master copy, with **live pricing**;
+- **photorealistic viewing** (OA-3; its form depends on R-1);
+- live validation;
+- the ready-to-send gate screen with the four push conditions.
 
 ## Phase 6: AI Design
 
 **Exit:** AI drafts pass validation and need only light designer edits on typical jobs.
 
-Design rules applied, draft generation, decision explanations, and the review flow with AI-placed items marked.
+Design rules applied, draft generation from rough dimensions + rough appliance locations + intake answers (OA-3), decision explanations, and the review flow with AI-placed items marked.
 
-## Phase 7: Projects & Sales (can run in parallel with 3–6)
+## Phase 7: Projects, intake and the road to the push (can run in parallel with 3–6)
 
-**Exit:** customers, quotes, pricing and status tracking work, and quotes are priced from the catalog.
+**Exit:** a job can go from first contact to "ready to push": intake answered, client signed off, appliances confirmed, site measured, paid. The client is reminded automatically along the way.
 
-Depends only on Core and Catalog. Its scope depends on the answers to E-1 to E-5 and C-3.
+One module per session, in this order (PROPOSED):
+
+| # | Module | Notes |
+|---|---|---|
+| 7a | `projects` | Customers, jobs, quotes priced from the catalog, payment status (PAY-1) |
+| 7b | `intake` | The image selector, seeded from `docs/intake/`. Needs real photos per option |
+| 7c | `appliances` | Rough, then confirmed specs |
+| 7d | `site-measure` | Verified measurements with provenance; tablet and phone (SM-1) |
+| 7e | `approvals` | Client sign-off on an exact version, with a frozen snapshot |
+| 7f | `client-messaging` + connectors | Reminders and the deadline ticker (DL-1, MSG-1) |
+
+7b and 7c feed Phase 6 (the AI needs intake answers), so start them before Phase 6.
 
 ## Phase 8 (optional): Mozaik read-back
 
 A Mozaik reader (from its SQLite export) plus a build sheet for entering the design by hand. No changes outside the new adapter.
+
+## Phase 9: The conversation tally (OA-7)
+
+**Exit:** email, texts and meeting transcripts for a job produce a running list of requirements. AI-extracted items are marked unconfirmed until a person confirms them. Each item is ticked off only when it is reflected in the design. Unticked items appear on the gate screen.
+
+Connectors one per session: email first, then texts, then transcripts (MSG-1).
+
+## Phase 10: Automatic ordering (OA-9)
+
+**Exit:** when a job goes into production, orders for materials, doors, counters, handles and add-ons are created from the pushed master copy and sent. Every failure stays visible until resolved, and nothing shows "sent" unless it was.
+
+Needs PO-1 answered. One supplier connector per session.
 
 ## Prompts
 

@@ -1,6 +1,7 @@
 <!--
 Owner's spec, received from Taren on 2026-10-27, recorded word for word.
 It is the authority for scope, principles, modules, the master copy and the build phases.
+Owner amendments are added as dated rows in the "Owner amendments" table, without editing the original text.
 The other docs in docs/ turn it into folders, tables and sessions; where they disagree, this file wins.
 Change it only with the owner's yes, and bump the version line when you do.
 -->
@@ -8,6 +9,25 @@ Change it only with the owner's yes, and bump the version line when you do.
 # Cabinet Design & CAD Handoff Platform: Build Spec
 
 Version 0.1 · October 26, 2026 · Status: Draft for review
+
+---
+
+## Owner amendments (newer than the text below; where they differ, these win)
+
+From Taren, 2026-10-27, in their own words where quoted.
+
+| # | Amendment | Changes |
+|---|---|---|
+| OA-1 | **Who the shop is.** "A shop is currently one Hutterite colony who is the manufacturing partner, but in the future we may need to expand to multiple Hutterite colonies." **"We will not sell this software to other people, it will only be used for our own sales."** | `shop_id` means a manufacturing partner (a colony). There is one now, and more must be possible later. There is no outside customer of the software. |
+| OA-2 | **The purpose.** "What we are building is the tool that removes the need to manually draw things." | Section 1 |
+| OA-3 | **Design from rough inputs.** Rough room dimensions + rough appliance and layout locations + design desires from the visual intake (image selector) + a library of cabinet design rules and preferences = "a well designed visual room with **photorealistic viewing**", with **live pricing**. It "does not need to deal with parametric rules, cabinet construction, or sheet optimization. It simply needs to look good and provide a price." | Adds visual intake as the AI's input (stage 3–4). **Reverses "photorealistic rendering" being out of scope (section 2).** Pricing is live in the design. |
+| OA-4 | **Translation inputs.** "A job that's been designed visually + confirmed room dimensions + confirmed appliance specs" → ORDX. | Designs start from rough dimensions and must be on confirmed ones before translation. |
+| OA-5 | **When the push happens.** Not "until the client has signed off on the design, the appliances are confirmed, the site is measured, and the job is paid for. Then it's a single push to Cabinet Vision." | Adds four conditions to the ready-to-send gate (section 7). |
+| OA-6 | **Two sync loops.** (a) "Cabinet Vision library changes > our tool needs to change so the two are always synced." (b) "Cabinet Vision jobs need to **auto push back** to our tool to make sure there's a match with all selections and no uncertain default selections were made." | Section 5.8: catalog sync and read-back happen automatically, not by hand. |
+| OA-7 | **Conversation tally.** Listen to email, text messages and online meeting transcripts, "document all conversations and create a running tally of all the things that need to be reflected in the final job going to production", so nothing discussed is missed. | New module. |
+| OA-8 | **Client reminders and deadline ticker.** Automated messages remind the client of outstanding items, so the project manager doesn't chase them. A deadline ticker makes the customer aware, e.g. "Get all this information to us and pay for the job by November 2nd at 4pm to have your cabinetry delivered by December 2nd." | New module. |
+| OA-9 | **Automatic ordering.** "Once a job goes into production the system should automatically order all the required materials, doors, counters, handles, and add ons." | New module. Previously not in this spec. |
+| OA-10 | **The kitchen intake** (incomplete) is recorded in `docs/intake/kitchen.md`. | Intake content is data. |
 
 ---
 

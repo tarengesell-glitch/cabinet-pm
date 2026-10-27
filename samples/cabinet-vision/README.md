@@ -1,6 +1,6 @@
 # Cabinet Vision discovery samples (Phase 0)
 
-Put the raw material from one shop here, untouched. Claude reads it in `prompts/00-cabinet-vision-discovery.md` to write the ORDX format reference. Anything the samples don't show becomes an open question; nothing is guessed. So the more varied the jobs, the fewer the guesses.
+Put the raw material from the shop (the colony running Cabinet Vision) here, untouched. Claude reads it in `prompts/00-cabinet-vision-discovery.md` to write the ORDX format reference. Anything the samples don't show becomes an open question; nothing is guessed. So the more varied the jobs, the fewer the guesses.
 
 **Use test or old jobs, or remove customer names and addresses first.** This folder is committed to git.
 
@@ -23,5 +23,7 @@ Put the raw material from one shop here, untouched. Claude reads it in `prompts/
 4. **The shop's catalog / library export** in `catalog/`.
 5. **Versions:** a screenshot of Cabinet Vision's Help > About and the S2M version, in `versions/`.
 6. **Database (if the shop allows it):** where Cabinet Vision's SQL database lives and which SQL Server version it uses. Note it in `versions/database.txt`. Don't copy the database itself yet.
+
+Also note where Cabinet Vision is installed, who uses it, and how good that computer's internet connection is (DECISIONS CV-1). The automatic sync and read-back depend on it.
 
 Note in `notes.txt` at the top of this folder: who at the shop helped, the date, and anything they said about how they normally import or fix jobs.

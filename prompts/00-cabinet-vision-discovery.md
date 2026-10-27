@@ -23,7 +23,7 @@ Write `docs/cabinet-vision/FORMAT_REFERENCE.md`, the ORDX format reference that 
 6. **IDs:** which IDs are stable across exports, and whether a renamed item keeps its ID. Use the v1/v2 pair.
 7. **The catalog export:** its format, how entries and their parameters are listed, and what changes would look like between syncs.
 8. **Engineered output:** the format of the cutlist and reports, and how each part traces back to a cabinet in the ORDX. This is the independent verification path (P7).
-9. **Read-back options (spec Q3):** ORDX export, the SQL database, or reports. For each, list what it contains, how fragile it is, and what access it needs (for example a helper app on the shop's computer). Give a recommendation for the owner to choose.
+9. **Read-back options (spec Q3, and automatic per BUILD_SPEC OA-6):** ORDX export, the SQL database, or reports. For each, list what it contains, how fragile it is, and what access it needs (for example a helper app on the shop's computer). Give a recommendation for the owner to choose.
 10. **Variation:** anything that differs between jobs or Cabinet Vision versions in ways that matter.
 11. **Open questions:** everything the samples don't explain. List these; never guess them.
 

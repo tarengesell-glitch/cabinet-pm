@@ -4,7 +4,7 @@ Master brief for establishing the visual UX/UI specification. If anything here c
 
 > **Updated 2026-10-27 for the Cabinet Vision build spec.**
 > - Parts 1, 5 and 6 now describe the v1 screens.
-> - The screens from the earlier Mozaik-based plan are kept under "Later screens", waiting on the owner's answers (DECISIONS E-1 to E-6). Don't build them until confirmed.
+> - The screens from the earlier Mozaik-based plan are kept under "Later screens", and are reused by the v1 screens where the owner's 2026-10-27 workflow confirmed them.
 > - The colour tokens in Part 4 are not settled: closet-builder has an owner-approved design system that may apply instead (DECISIONS C-2).
 > - UX work starts before Phase 5 (`docs/BUILD_PLAN.md`).
 
@@ -23,9 +23,18 @@ The platform runs sales, intake and design for residential cabinetry jobs, then 
 - the ready-to-send gate;
 - sending to the CAD software, reading the engineered job back and comparing it;
 - the product catalog and its mappings;
-- the translator test library and corrections.
+- the translator test library and corrections;
+- from the owner amendments (2026-10-27):
+  - the visual intake (image selector);
+  - appliances;
+  - site measuring;
+  - client sign-off;
+  - payment status;
+  - client reminders with a deadline ticker;
+  - the conversation tally;
+  - automatic ordering.
 
-The platform does not engineer cabinets. The editor must look right and be dimensionally exact; it is not a showroom renderer.
+The platform does not engineer cabinets. The editor must look right and be dimensionally exact, and the client view is **photorealistic** (OA-3; its form is open question R-1).
 
 It should feel like a polished purpose-built operational system, not a generic project manager.
 
@@ -146,7 +155,8 @@ For each screen document: purpose, roles, platform, layout, interactions, compon
 - Required selections that are missing are shown as blockers.
 
 **V6 Ready-to-send gate.**
-- One row per layer: layout, buildability, design rules, translation preflight, approval.
+- One row per layer: layout, buildability, design rules, translation preflight, designer approval, and the four push conditions (client sign-off, appliances confirmed, site measured, paid).
+- Unticked items from the conversation tally are shown here too.
 - Every issue names the item and the reason in plain language, and links to it in the editor.
 - The designer's Approve action has explicit confirmation.
 - Send stays disabled while any blocker exists, and inspecting it lists exactly what is outstanding. No bypass.
@@ -169,10 +179,32 @@ For each screen document: purpose, roles, platform, layout, interactions, compon
 
 **V10 Quotes.** Old screen 03, adapted. Priced from the catalog and a named master copy version. An issued quote is frozen. A missing price is an error, never zero.
 
-### Later screens (from the earlier plan, status waiting on the owner)
+**V11 Visual intake (old screen 04, now confirmed).**
+- One question at a time with large images. Line drawings for shape; photorealistic images for feel, colour tone, door style and colours.
+- Questions and options come from `docs/intake/` as data.
+- Presentation mode shows no prices, except where the intake itself asks for them (the drawer level's cost).
 
-The screens below come from the earlier Mozaik-based plan.
-- **Not settled:** 01, 02, 04, 05, 07, 08, 09, 10, 11 and 12 depend on DECISIONS E-1 to E-6. Parts of them (photo tiles, measuring interactions, the discrepancy cards, version history, locking) are reused in the v1 screens above.
+**V12 Site measuring (old screen 07, now confirmed).** Unchanged from the earlier plan: entering a value never verifies it. Measurements that differ from the design's rough dimensions are flagged.
+
+**V13 Client sign-off (old screen 09, adapted).**
+- The client sees the photorealistic design and the price, and signs off on that exact version.
+- Explicit confirmation. Viewing is never signing.
+
+**V14 Client deadline ticker (client-facing).**
+- A countdown in plain words: "Get all this information to us and pay for the job by November 2nd at 4pm to have your cabinetry delivered by December 2nd."
+- Below it, the list of what is still outstanding: selections, appliance specs, measuring, payment.
+- Each item links to where the client can provide it.
+
+**V15 Conversation tally (old screen 12, adapted).**
+- A running list per job of requirements from email, texts and meeting transcripts. Each one links to its source.
+- Each is marked "AI-extracted, unconfirmed" until a person confirms it, then ticked off when the design reflects it.
+
+**V16 Purchasing (old screen 10, now confirmed).** Orders created automatically at production. Failed orders stay in Failed with the error until resolved. Nothing shows "sent" unless it was.
+
+### Earlier screens
+
+- **Reused in the screens above:** 01, 02, 03, 04, 05, 07, 08, 09, 10 and 12. The four-state room card in 02 now shows the four push conditions (DECISIONS E-1).
+- **11 Collaboration and locking:** still applies (E-6 open).
 - **Dropped:** 06 Guided Mozaik Drawing (2026-10-27).
 
 ### 01 Job Command Centre (critical; Linear + JobTread)

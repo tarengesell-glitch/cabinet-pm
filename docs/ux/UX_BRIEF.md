@@ -1,6 +1,12 @@
 # UX/UI Brief — Cabinetry Job Platform
 
-Master brief for establishing the visual UX/UI specification. Corrected to match `docs/PRODUCT_SPEC.md`, `docs/ARCHITECTURE.md` and `docs/DECISIONS.md`. If anything here conflicts with those, they win; flag the conflict.
+Master brief for establishing the visual UX/UI specification. If anything here conflicts with `docs/BUILD_SPEC.md`, `docs/ARCHITECTURE.md` or `docs/DECISIONS.md`, they win; flag the conflict.
+
+> **Updated 2026-10-27 for the Cabinet Vision build spec.**
+> - Parts 1, 5 and 6 now describe the v1 screens.
+> - The screens from the earlier Mozaik-based plan are kept under "Later screens", waiting on the owner's answers (DECISIONS E-1 to E-6). Don't build them until confirmed.
+> - The colour tokens in Part 4 are not settled: closet-builder has an owner-approved design system that may apply instead (DECISIONS C-2).
+> - UX work starts before Phase 5 (`docs/BUILD_PLAN.md`).
 
 Act as senior product designer, UX architect, UI designer and frontend engineer. Define actual screens, layouts, dimensions, components, interactions and states, not generic advice.
 
@@ -8,7 +14,18 @@ Act as senior product designer, UX architect, UI designer and frontend engineer.
 
 ## Part 1 — Product
 
-The tool manages residential cabinetry jobs around Mozaik (which does design and manufacturing files). It handles: quick quotes, guided visual client sessions, structured selections, guided Mozaik drawing, site measuring, automated checks, room approvals and versions, invoicing triggers, supplier purchasing, manufacturing handoff, and team collaboration.
+The platform runs sales, intake and design for residential cabinetry jobs, then hands the finished design to the shop's CAD software (Cabinet Vision first) for engineering. v1 covers:
+- projects and customers;
+- room capture;
+- selections;
+- an AI first draft;
+- a visual design editor;
+- the ready-to-send gate;
+- sending to the CAD software, reading the engineered job back and comparing it;
+- the product catalog and its mappings;
+- the translator test library and corrections.
+
+The platform does not engineer cabinets. The editor must look right and be dimensionally exact; it is not a showroom renderer.
 
 It should feel like a polished purpose-built operational system, not a generic project manager.
 
@@ -77,21 +94,86 @@ Status never relies on colour alone; always icon and/or text. Provide dark-mode 
 
 **Responsive.** Desktop baseline. Collapse secondary panels before shrinking the workspace. Presentation mode prioritises images. Tablet split views; phone full-width plan with bottom sheets. No horizontal scrolling for core tasks.
 
-**Units.** All lengths stored in mm. Display units are a user preference; inputs convert to mm on entry.
+**Units.** Lengths are stored as exact integers in Core's base unit (not chosen yet; DECISIONS U-1). Display units are a user preference. Inputs convert on entry and refuse values that don't land exactly on an allowed increment.
 
 ---
 
 ## Part 5 — Information architecture
 
-**Desktop shell.** Left sidebar (~232): Dashboard, Jobs, Quotes, My Tasks, Approvals, Purchasing, Activity, Alerts; settings and profile at the bottom. Top bar (~60): breadcrumbs, job title, Cmd/Ctrl+K quick switch, notifications, global alert indicator, profile. Main workspace takes the rest; detail panels are contextual and collapsible.
+**Desktop shell.**
+- **Left sidebar (~232):** Projects, Jobs, Quotes, Send & Compare, Catalog, Test Library, Alerts. Settings (shop settings, users) and profile at the bottom.
+- **Top bar (~60):** breadcrumbs, job title, Cmd/Ctrl+K quick switch, global alert indicator, profile.
+- **Main workspace:** takes the rest. Detail panels are contextual and collapsible.
 
-**Navigation.** Dashboard → Job → Room → Workflow. Deep links, browser navigation, preserved context.
+Menu items show only when the user has permission for them.
+
+**Navigation.** Projects → Job → Room → Editor. Deep links, browser navigation, preserved context.
 
 ---
 
 ## Part 6 — Screens
 
 For each screen document: purpose, roles, platform, layout, interactions, components, data, states (loading, empty, partial, missing images, permission denied, save failure, network loss, conflict, unsaved changes, locked by another user, completed), responsive behaviour, acceptance criteria.
+
+### v1 screens (from BUILD_SPEC; detailed in the Phase 5 UX session)
+
+**V1 Projects list (Linear + JobTread).**
+- Compact list: customer, job, status (spec section 6), owner, next action, blocker count, failed-automation indicator.
+- The default sort puts blocked and urgent jobs first.
+- No big metric cards or charts.
+
+**V2 Job overview.**
+- Rooms with thumbnails.
+- The current master copy version and its history, with AI and designer edits told apart.
+- Gate state and the latest send or comparison.
+- Who holds the lock.
+
+**V3 Room capture (magicplan).**
+- Tap-to-select plan for walls, angles, ceiling height, openings, obstacles and utilities.
+- Numeric entry converts to the base unit.
+- Missing values are shown as missing, never assumed.
+
+**V4 Visual editor (the core screen).**
+- Plan, elevation and 3D views, all drawn only from the master copy.
+- The item palette shows only catalog items available to this shop. Items marked "manual work required" are flagged.
+- Sizes snap to allowed ranges and increments while dragging or typing.
+- A live issues panel; clicking an issue selects the item.
+- AI-placed items are visibly marked until a designer edits or approves them. The AI's explanation of its key decisions is one click away.
+
+**V5 Selections (Typeform + Houzz picture choice; reuses the photo tiles from old screen 04).**
+- Job-level defaults, room overrides and item overrides.
+- Every item shows its resolved value and where it came from.
+- Required selections that are missing are shown as blockers.
+
+**V6 Ready-to-send gate.**
+- One row per layer: layout, buildability, design rules, translation preflight, approval.
+- Every issue names the item and the reason in plain language, and links to it in the editor.
+- The designer's Approve action has explicit confirmation.
+- Send stays disabled while any blocker exists, and inspecting it lists exactly what is outstanding. No bypass.
+
+**V7 Send & compare (Filestage).**
+- For each job: the versions sent (file, time, who), the read-back, and the comparison.
+- Each discrepancy shows the sent value and the returned value side by side (missing, extra, dimension, position, selection).
+- Release is done by shop staff after a clean comparison and a human review, with explicit confirmation.
+- A failed send or read-back stays visible until it is resolved.
+
+**V8 Catalog & mappings.**
+- Our items with their ranges, options and versions.
+- Each item's mapping status: current, stale or unverified.
+- The latest catalog sync's diff, with the stale mappings it caused.
+- AI-drafted mappings are shown as unverified until a person confirms them.
+
+**V9 Test library & corrections.**
+- Golden cases, run results by code version and CAD version, and failing cases first.
+- A correction form saves the job, what was sent, what came back and the correct result as a new case.
+
+**V10 Quotes.** Old screen 03, adapted. Priced from the catalog and a named master copy version. An issued quote is frozen. A missing price is an error, never zero.
+
+### Later screens (from the earlier plan, status waiting on the owner)
+
+The screens below come from the earlier Mozaik-based plan.
+- **Not settled:** 01, 02, 04, 05, 07, 08, 09, 10, 11 and 12 depend on DECISIONS E-1 to E-6. Parts of them (photo tiles, measuring interactions, the discrepancy cards, version history, locking) are reused in the v1 screens above.
+- **Dropped:** 06 Guided Mozaik Drawing (2026-10-27).
 
 ### 01 Job Command Centre (critical; Linear + JobTread)
 Heading, search, New Job, saved filters. Four compact counts: Needs Attention, Waiting on Client, In Progress, Ready for Production. Job list (optional board): job, client, room status summary, owner, next required action, blocker count, due date, failed-automation indicator. Default sort surfaces blocked and urgent work. Click job → overview; blocker count → issues; next action → that workflow. No big metric cards or charts.
@@ -149,7 +231,7 @@ Image-based screens must use meaningful images during development. Preference: a
 
 Starter asset categories: vanities (floating, floor-standing, open shelf); door profiles (shaker, flat panel, raised panel, handleless, slim shaker); finishes (light oak, natural oak, walnut, matte white, charcoal); countertops (white quartz, marble-look, concrete-look, dark stone); handles (bar, knob, edge pull, recessed); rooms (kitchen, ensuite, laundry, wardrobe). Options in a group must look clearly different.
 
-Demo jobs (marked as demo, consistent across all screens):
+Demo jobs (marked as demo, consistent across all screens). *These were written for the earlier plan. Rewrite them for the v1 screens in the Phase 5 UX session, for example a job with an AI draft, one blocked at the gate by a stale mapping, and one with a comparison discrepancy.*
 - **Wilson Residence** — kitchen, ensuite; kitchen approved and invoiced but 2 walls unverified and 3 open discrepancies; mixed confirmed/unresolved selections.
 - **Martin Renovation** — kitchen, laundry; waiting on client approval; multiple versions; kitchen locked by another designer.
 - **Oak Street Project** — kitchen, wardrobe; measured and verified; one within-tolerance correction approved internally; production ready.
@@ -182,11 +264,13 @@ Each documented with data/props, behaviour, variants, states. Shared components 
 
 ## Part 10 — Data consistency
 
-Follow `docs/DATA_MODEL.md`. Selections store option ids (not labels) with status, user, timestamp, dependencies and history. Approvals are separate records tied to exact immutable versions. Room states are four separate fields. UI never invents its own data shapes; it reads module contracts.
+Follow `docs/DATA_MODEL.md`. Selections store option ids (not labels) with status, user, timestamp, dependencies and history. Approvals are separate records tied to exact immutable versions. Job status follows BUILD_SPEC section 6. Whether the earlier four per-room states survive is open (DECISIONS E-1). UI never invents its own data shapes; it reads module contracts.
 
 ---
 
 ## Part 11 — Clickable prototypes
+
+*Written for the earlier plan. In the Phase 5 UX session, replace A–C with prototypes of the v1 screens: the editor (V4), the gate (V6) and send & compare (V7).*
 
 Build in an isolated demo area (`src/app/demo/` plus demo seed data), using shared design-system components and module contracts where they exist. Mocked integrations are labelled.
 

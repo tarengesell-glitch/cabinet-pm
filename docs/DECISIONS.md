@@ -1,54 +1,95 @@
 # Decisions
 
-Add new decisions at the bottom of each list with the date.
+Add new decisions at the bottom of the right list, with the date. Only the owner (Taren) decides. A PROPOSED item stays open until the owner says yes.
 
 ## Decided
-- In-house tool only, not sold to other cabinet companies.
-- Cabinetry only, all residential room types; room types are data.
-- Mozaik is the design source of truth; this tool cannot write to Mozaik.
-- Modular monolith with enforced module boundaries; data, not code.
-- Modules communicate through events and contracts; one owner per table.
-- Fail loudly: no silent failures, alerts persist until resolved.
-- Lengths in integer mm, money in integer cents (CAD).
-- Permission framework from day one; only owner, admin and designer roles set up initially.
-- Regions route jobs to manufacturing partners; price lists per partner; tax per province.
-- Online-only for site measuring initially.
-- Room is the main unit of work and of locking; job level is also lockable.
-- Locks release at end of day or when the session drops; manager override.
-- Approval, invoicing, site verification and production release are separate per-room states.
-- Clients may approve and be invoiced before measurement; production is blocked until measured.
-- Approved room versions are immutable; one imported version per room is flagged approved.
-- Small within-tolerance fit differences are absorbed without client reapproval or repricing.
-- Full change history and audit log from day one.
-- Quick quote starts with manual entry.
-- CRM and accounting are swappable connectors.
-- Build starts with the quick quote, after foundation.
-- 2026-10-24: Hosting is Netlify + Supabase (not Vercel).
-- 2026-10-24: Mozaik data is captured from the SketchUp export files plus the saved job files, found by our own investigation.
-- 2026-10-24: Mozaik import starts as manual upload; a Windows desktop uploader comes later (step 14).
-- 2026-10-24: Upload matches are always confirmed by a person; Mozaik IDs preferred over names.
-- 2026-10-24: This project replaces closet-builder's own design, parametrics and send-to-production engine. Mozaik does that work now. closet-builder (`tarengesell-glitch/closet-builder`) is kept for reference only; no code is carried over.
+
+### 2026-10-27: The Cabinet Vision build spec (`docs/BUILD_SPEC.md` v0.1)
+- The platform does sales, intake and design: room capture, selections, an AI first draft, and a visual editor. Cabinet Vision engineers the job and makes the production files. This replaces the 2026-10-24 plan, where Mozaik was the design tool.
+- Our master copy is the single source of truth for every job (P1).
+- Cabinet Vision is the first CAD target. We write its ORDX import file, read the engineered job back, and compare.
+- The product stays independent of any CAD vendor. Only the Cabinet Vision adapter knows it exists (P2, G4).
+- Size ranges, options, mappings and design rules are data (P3).
+- Fail closed: anything missing, unmapped, out of range or ambiguous blocks the step (P4, G5).
+- AI writes the translators and drafts designs. Translation itself is ordinary, repeatable code (P5).
+- The editor draws only from the master copy (P6).
+- At least one read-back check uses Cabinet Vision's own engineered output (P7).
+- Build order: test translation first. Phases 0 and 1 end in a go/no-go before the editor and AI are built.
+- Out of scope for v1: engineering cabinets, CNC output, cutlists, machining, a Mozaik push, and photorealistic rendering.
+- Mozaik may come back later as read-back only (Phase 8).
+
+### Still in force from the earlier plan (2026-10-24 and before)
+- Modular monolith with enforced module boundaries; one owner per table; data, not code.
+- Fail loudly: alerts persist until a person resolves them with a note. Never show false success.
+- Money in integer cents (CAD).
+- A permission framework from day one. Owner, admin and designer roles first; more roles are added as data.
+- Full change history and audit log from day one. History is never overwritten.
+- Hosting: Netlify + Supabase (Canada region).
+- CRM and accounting are swappable connectors (later).
+- Quotes freeze the prices and tax used.
+- Multi-user locking: one editor at a time, others read-only. Locks release when the session drops; managers can override.
+
+### Replaced on 2026-10-27
+- ~~Mozaik is the design source of truth; this tool can't write to Mozaik.~~ The master copy is the source of truth; Cabinet Vision is the target.
+- ~~Lengths in integer mm.~~ The base unit is open (U-1).
+- ~~Mozaik data captured from the SketchUp export and job files; manual upload, then a Windows desktop uploader; upload matches confirmed by a person.~~ Dropped. A Mozaik reader may come back in Phase 8, from its SQLite export.
+- ~~Guided Mozaik drawing.~~ Replaced by the AI draft and the visual editor.
+- ~~Build starts with the quick quote, after the foundation.~~ Build starts with Phase 0 discovery and the Phase 1 proof slice.
+- ~~(2026-10-24) closet-builder is kept for reference only; no code is carried over.~~ Reopened as C-1, because a visual editor and room capture are back in scope.
 
 ## Open questions
-- Mozaik export format and contents; whether it exports a whole job or one room.
-- Whether Mozaik's price data can be read directly.
-- Whether to archive the Mozaik job file at approval.
-- Tolerance values (mm or %), and whether per measurement, cabinet or room.
-- Which adjustments qualify for internal approval, and who can approve them.
-- Whether over-tolerance changes can ever be absorbed without reapproval.
-- Required measurements per job type before production.
-- CRM choice; QuickBooks vs Xero; texting service; call recorder.
-- What clients see in the portal.
-- Final tech stack confirmation (see ARCHITECTURE.md).
-- Desktop uploader stack (.NET vs Electron/Tauri) and code signing.
-- How to produce a web 3D model from Mozaik data (convert export vs build from parts data).
 
-### Earlier owner decisions from closet-builder that differ from this pack (2026-10-24)
-These were decided for closet-builder (`docs/architecture.md` Part 1 there, 2026-10-08 to 10-10). Each one either still applies here or has been replaced by this pack. None of them is authority here until it's confirmed.
-- **Price list.** closet-builder: one company, one price list, priced per inch by cabinet type, plus % adjustments for selections and flat add-ons (A-1, A-7). This pack: a price list per manufacturing partner, chosen by region. Which is right now?
-- **Shops.** closet-builder: one shop on Biesse machines, maybe more later (A-18). This pack: manufacturing partners routed by region. Is the Biesse shop one of those partners?
-- **When the design freezes.** closet-builder: frozen at full payment, except changes that don't touch the design; truly frozen once cut files are sent (A-8, A-9, A-11). This pack: frozen at client approval; changes within tolerance are absorbed. Does payment still play a part in freezing?
-- **Deposit and balance.** closet-builder: deposit to commit, balance before production, through a third-party payment tool (A-8). This pack: accounting triggers (QuickBooks or Xero). Is the payment tool still separate from accounting?
-- **Change approval by the customer.** closet-builder: automated text and email with a tap to approve, daily reminders, and a decline notifies the designer (A-10). Is this wanted here for over-tolerance changes?
-- **Batches.** closet-builder: a customer can have several batches over the years, each priced as its own project (A-4). This pack: clients → jobs → rooms. Is a job the same as a batch?
-- **Prospect self-onboarding.** closet-builder: customers can sign up themselves, start the CRM and fill in their intake (A-3, A-15, A-16). This pack: the client portal comes later and its contents are open. Is self-onboarding still a goal?
+### Needed before Phase 1 code
+- **S-0 Who is a "shop"?** The spec has `shop_id`, a catalog per shop, onboarding shops and "target shops". The earlier plan said "in-house tool only, not sold to other companies". Is a shop:
+  - one of your manufacturing partners, each running its own Cabinet Vision library, with this staying in-house; or
+  - another cabinet business that would use this platform as a customer?
+
+  The answer decides logins, data separation between shops, and how much onboarding tooling is needed.
+- **U-1 Base unit (spec Q5).** Options:
+  - millimetres (the earlier plan);
+  - 1/64 inch (the spec's candidate for imperial shops);
+  - nanometres (what closet-builder used). It holds both mm and 1/64 inch exactly (1/64 in = 396,875 nm), but it needs care with areas, because area numbers grow too large.
+
+  Recommendation: decide once Phase 0 shows which units and precision ORDX uses.
+- **A-1 Angle convention.** Proposed for Phase 1: degrees as integers or fixed decimals, counter-clockwise, measured from the room's +X axis. Confirm or change.
+- **PROPOSED:** the `core/` / `platform/` split, and the master copy stored as versioned JSON with the named writers (ARCHITECTURE).
+
+### From the spec (section 11)
+- **S-1** Which Cabinet Vision versions do target shops run, and does ORDX behave the same across them?
+- **S-2** How much room placement and elevation detail does ORDX keep on import?
+- **S-3** Which read-back source is most reliable: ORDX export, SQL database, or reports? If it's the database or files on the shop's computer, do we need a small helper app there?
+- **S-4** Is there a Cabinet Vision or Cyncly partner program with documentation or support? Licensing and terms must be reviewed before Phase 3.
+- **S-5** = U-1.
+- **S-6** Which design rules block and which only warn, by default?
+
+### Earlier plan features the new spec doesn't mention: keep, defer or drop?
+- **E-1 Room states.** The earlier plan had four separate states per room (client approval, invoicing, site verification, production release) and "never one combined status". The spec has one status per job (`draft … released`). Do the four states move into Projects & Sales, or are they gone?
+- **E-2 Client approval.** The earlier plan had per-room client approval of an exact version, frozen as a snapshot. The spec has only designer approval for the gate. Is client approval still needed, and where?
+- **E-3 Pricing structure.** The earlier plan had price lists per manufacturing partner, chosen by region, plus tax per province. The spec says pricing reads from the catalog. Are regions and partners still part of this?
+- **E-4 Site measuring** with provenance and "verified only after explicit confirmation". The spec's room capture is done by the designer. Is a separate site-measure step still wanted?
+- **E-5** The quick quote, visual client intake questionnaire, appliance library, email/text job notes, purchasing and supplier orders, CRM and accounting triggers. In v1, later, or dropped?
+- **E-6 Locking unit:** job or room?
+
+### Carried over from closet-builder
+- **C-1 Reuse.** closet-builder already has pieces that match parts of this spec:
+  - room geometry, including "floating walls" for islands and peninsulas (its A-21);
+  - a 3D view and a wall elevation view;
+  - integer-unit handling;
+  - a cabinetry knowledge base (`docs/cabinetry-intelligence/`) that already separates hard design limits from preferences. That is close to the spec's block-vs-warn design rules, and could seed Shop Settings.
+
+  Should any of these be ported (Phase 4–6), or should this project start clean?
+- **C-2 Look and feel.** closet-builder has an owner-approved design system (Geist and Newsreader fonts, its own tokens, 2026-10-07/08). `docs/ux/UX_BRIEF.md` has a different palette. Which one applies here?
+- **C-3** closet-builder decisions (its `docs/architecture.md` Part 1, 2026-10-08 to 10-10) that differ from this plan. Each needs a yes or no here:
+  - **Price list:** one price list, priced per inch by cabinet type, plus % adjustments and flat add-ons (A-1, A-7). Compare E-3.
+  - **Shops:** one shop on Biesse machines, maybe more later (A-18). Compare S-0.
+  - **Freezing:** frozen at full payment, except changes that don't touch the design; truly frozen once files are sent to the shop (A-8, A-9, A-11). The spec freezes at "sent".
+  - **Payments:** a deposit to commit and the balance before production, through a third-party payment tool (A-8).
+  - **Customer change approval:** text and email with a tap to approve, daily reminders, and a decline notifies the designer (A-10). Compare E-2.
+  - **Batches:** a customer can have several batches over the years, each priced as its own project (A-4). Is a job a batch?
+  - **Prospects:** customers can sign up themselves and do their own intake (A-3, A-15, A-16).
+
+### Still open from earlier
+- CRM choice; QuickBooks vs Xero.
+- What clients see, if a client portal is built.
+- Tech stack confirmation (ARCHITECTURE "Stack").
+- The Comparer's strict tolerance: the values, and whether they are per dimension or per item.

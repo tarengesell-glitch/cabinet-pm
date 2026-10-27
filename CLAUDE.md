@@ -1,25 +1,45 @@
-# CLAUDE.md — Rules for every AI coding session
+# CLAUDE.md: rules for every AI coding session
 
-You are working on an in-house job management tool for a residential cabinetry business. Mozaik (cabinet software) is the source of truth for design, parametrics, construction rules and manufacturing files. This tool handles everything around it.
+You are working on a cabinet design and CAD handoff platform for a residential cabinetry business. It runs sales, intake and design in its own software, keeps every job in our own **master copy** format, and hands finished designs to Cabinet Vision (through its ORDX import) for engineering and production, then reads the result back and checks it. **This platform does not engineer cabinets.**
 
-Read before any work: `docs/PRODUCT_SPEC.md`, `docs/ARCHITECTURE.md`, `docs/DATA_MODEL.md`, `docs/DECISIONS.md`. For any UI work also read `docs/ux/UX_BRIEF.md`.
+Before any work, read:
+- `docs/BUILD_SPEC.md` (the owner's spec; authority);
+- `docs/ARCHITECTURE.md`;
+- `docs/DATA_MODEL.md`;
+- `docs/DECISIONS.md`;
+- `docs/BUILD_PLAN.md`.
+
+For any UI work, also read `docs/ux/UX_BRIEF.md`. For anything touching the adapter, also read `docs/cabinet-vision/FORMAT_REFERENCE.md`.
+
+When docs disagree, `docs/BUILD_SPEC.md` wins. Then the "Decided" list in `docs/DECISIONS.md`. Anything marked PROPOSED is not authority. Say so when you find a conflict.
 
 ## Hard rules
 
-1. **Stay inside the module you were asked to change.** Each module lives in `src/modules/<name>/` and has its own `CLAUDE.md`. Do not edit files in other modules. If a change elsewhere seems necessary, stop and explain what and why instead of doing it.
-2. **No module imports another module's internals.** Modules may only import from `src/core/` public exports and from another module's `contract.ts`. The boundary lint enforces this; never disable or weaken it.
-3. **One owner per piece of data.** Only the owning module writes a table (see ownership table in `docs/ARCHITECTURE.md`). Others read through contracts or react to events.
-4. **Data, not code.** Prices, taxes, questions, images, appliance specs, clearance rules, tolerances, measurement prompts, drawing steps, room types, roles, permissions, stages, CRM triggers, suppliers and routing are data. Never hardcode business values or option lists in components or logic.
-5. **Fail loudly, never silently.** No empty `catch` blocks, no default values that hide missing data (a missing price is never zero), no skipping unmatched records. Failures stop the step, write an alert to the alerts table and show in the UI until a person resolves them. Never show a success message that isn't true.
-6. **Units.** Store every length as integer millimetres. Money as integer cents (CAD). Convert only for display.
-7. **Never overwrite history.** Imports, approvals, quotes and measurements are versioned or snapshotted. Every write goes through the audit log.
-8. **Approved versions are immutable.** Never modify an approved room snapshot. Corrections create new linked records.
-9. **Permissions on everything.** Every screen and action checks the user's permissions via `core/permissions`. No role-name checks scattered in code.
-10. **No fake integrations.** Mocked connectors must be labelled as mocked in code and UI.
-11. **Ask, don't assume,** when a requirement isn't covered by the docs. Add open questions to `docs/DECISIONS.md`.
+1. **Stay inside the module you were asked to change.** Each module has its own `CLAUDE.md`. If a change elsewhere seems necessary, stop and explain what and why instead of doing it.
+2. **Dependencies point inward** (spec P2). Follow the dependency table in `docs/ARCHITECTURE.md`. Modules import each other only through `contract.ts`. The boundary checks enforce this; never disable or weaken them.
+3. **Only the adapter knows the vendor.** The words "Cabinet Vision" and "ORDX" never appear outside `src/adapters/cabinet-vision/`, `golden/cabinet-vision/`, `samples/cabinet-vision/` and `docs/`. The catalog uses our own IDs, never CAD codes.
+4. **The master copy is the single source of truth** (P1). The editor draws only from it (P6). Pricing reads from the catalog and the master copy, never from Cabinet Vision.
+5. **One owner per piece of data.** Only the owning module writes a table (`docs/DATA_MODEL.md`).
+6. **Data, not code** (P3). Size ranges, increments, options, invalid combinations, mappings, design rules, prices, roles, permissions and statuses are data with a recorded source. Never hard-code them, and never make one up.
+7. **Fail closed, fail loudly** (P4). Anything missing, unmapped, out of range or ambiguous blocks the step with a plain-language reason. That means:
+   - no empty `catch`;
+   - no silent defaults (a missing price is never zero; a missing option is never "the usual one");
+   - no skipped records.
+
+   Failures write an alert that stays until a person resolves it. Never show a success that isn't true.
+8. **Translation is deterministic** (P5). The writer and reader are ordinary code: no AI calls, no clock, no randomness. The same input gives the same bytes. AI drafts designs and writes code; it never translates at runtime and never changes mappings without review.
+9. **Never guess how Cabinet Vision behaves.** If the samples and format reference don't answer it, add an open question to `docs/DECISIONS.md` and stop.
+10. **Every translator fix comes with a golden test case**, and ships only if the whole golden library passes (spec section 8).
+11. **Units.** Every length is an exact integer in the base unit defined in `src/core/`. Convert only at the edges (display and adapters), and refuse inexact conversions. Until the base unit is decided (DECISIONS U-1), write no length code. Money is integer cents, CAD.
+12. **Never overwrite history.** Master copy versions, sent files, returned jobs, quotes and test runs are versioned. A version that has been sent is frozen. Every write goes through the audit log.
+13. **Permissions on everything.** Every screen and action checks `can(user, permission)` from `src/platform/`. Never check role names in code.
+14. **No fake integrations.** Mocked connectors are labelled as mocked in code and UI.
+15. **Ask, don't assume,** when the docs don't cover a requirement. Add the question to `docs/DECISIONS.md`.
 
 ## Workflow
 
 - Small, focused changes. One module per session where possible.
-- Run lint, type-check and tests before saying a task is done. Report what was actually run.
+- Run `npm run check` before saying a task is done (once the scaffold exists). There is no CI, so this is the gate before every push. Report what was actually run.
+- For every new check or rule, break it on purpose, show that it fails, restore it, and say so in the report.
 - Update the module's `README.md` and `docs/DECISIONS.md` when behaviour or decisions change.
+- The owner, Taren, is not a programmer. Write reports and questions in plain English, short, with only the questions that matter.

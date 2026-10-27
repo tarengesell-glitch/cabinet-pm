@@ -34,8 +34,10 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
   - automatic ordering of materials, doors, counters, handles and add-ons when a job goes into production.
 
 ### 2026-10-27: UCS library kept apart from the platform
-- `cabinet-vision-ucs/` holds the shop's Cabinet Vision UCS library under its own `CLAUDE.md`. It is a separate project: platform code never imports or reads it, and the platform's lint, boundary and test checks skip it. It is on the vendor-name check's allowed list.
-- The same library was also set up in the `cabinet-vision-ucs` repo. The owner will choose one home; the other copy is then deleted.
+- The shop's Cabinet Vision UCS library lives in its own repo, `cabinet-vision-ucs`, not in this one (owner's choice, so platform work can't change it by accident).
+- Sessions on this repo attach it **read-only** and never commit, push or open pull requests to it. Changes to UCSs happen only in sessions on that repo.
+- The adapter needs UCS knowledge at build time, not runtime: which UCS settings it may send, and what changes UCSs make to the engineered job so the read-back check doesn't flag them as errors.
+- **PROPOSED:** mapping entries that name a UCS setting record the UCS repo commit they were checked against, and the golden tests catch a UCS change that breaks a mapping.
 
 ### Still in force from the earlier plan (2026-10-24 and before)
 - Modular monolith with enforced module boundaries; one owner per table; data, not code.
@@ -66,6 +68,7 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
   - nanometres (closet-builder). It holds both mm and 1/64 inch exactly (1/64 in = 396,875 nm), but area numbers grow too large.
 
   Recommendation: decide once Phase 0 shows which units and precision ORDX uses.
+- **CV-2 Can the import file set our UCS settings?** For example, can it switch on a sidebar choice like "Floating Vanity?" for one cabinet? If not, those choices must be made in Cabinet Vision after import. Answer from the Phase 0 samples, not by guessing.
 - **A-1 Angle convention.** Proposed for Phase 1: degrees as integers or fixed decimals, counter-clockwise, measured from the room's +X axis. Confirm or change.
 - **PROPOSED:**
   - the `core/` / `platform/` split, and the master copy stored as versioned JSON with the named writers (ARCHITECTURE);

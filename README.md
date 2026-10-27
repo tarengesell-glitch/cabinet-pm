@@ -19,7 +19,8 @@ No application code yet. The plan comes first: translation is proven (Phases 0â€
 | `modules/_TEMPLATE/CLAUDE.md` | Rules file copied into every new module folder. |
 | `prompts/` | Ready-to-paste prompts for the Phase 0 and Phase 1 sessions. |
 | `samples/cabinet-vision/` | Where the shop's real jobs and exports go (Phase 0). |
-| `cabinet-vision-ucs/` | Separate project: the library of our Cabinet Vision UCSs. Has its own `CLAUDE.md` and `README.md`. |
+
+The shop's Cabinet Vision UCS library is a separate repo, `cabinet-vision-ucs`. Sessions here may read it but never change it.
 
 ## How to start
 

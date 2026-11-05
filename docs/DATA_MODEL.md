@@ -26,6 +26,7 @@ Core owns no tables. It owns the master copy *format*: Job, Room, Wall, PlacedIt
 **Proposed additions to the master copy format** (needed for OA-3 to OA-5, not in spec section 6):
 - **Dimension provenance.** Every wall length, opening and ceiling height records whether it is `rough` (from the customer or intake), `measured` (entered on site) or `verified`. The push gate needs every value the design depends on to be `verified`.
 - **Appliances in the room.** An appliance placement has a reference to the job's appliance record, its position, its size, and a status (`rough` or `confirmed`). Cabinets fit around it. Its specs live in `appliances`; the master copy keeps a copy of the confirmed size it was designed to.
+- **Exact settings, approximate drawing (OA-17).** Each PlacedItem's settings (doors or drawers, sections, shelves and their positions, drawer heights, box materials) are exact values, defined by the catalog as allowed settings, never free-form. The editor draws a likeness of the construction from them.
 - **Price shown live** is calculated from the catalog and is never stored in the master copy. Quotes freeze it (`projects`).
 
 ## catalog
@@ -53,7 +54,7 @@ Core owns no tables. It owns the master copy *format*: Job, Room, Wall, PlacedIt
 
 ## adapters/cabinet-vision
 
-- **mappings**: our catalog item plus option combination → the shop's Cabinet Vision entry and parameters, the Cabinet Vision catalog version it was verified against, status (current | stale | unverified), and who verified it.
+- **mappings**: our catalog item plus option combination → the shop's Cabinet Vision entry and parameters, and any **UCS parameters** with their values and types (OA-17; each must exist in the `cabinet-vision-ucs` repo's parameter list, at a recorded commit), the Cabinet Vision catalog version it was verified against, status (current | stale | unverified), and who verified it.
 - **catalog_syncs**: the raw library export (in Storage), the diff found (added, removed, changed) and the mappings it flagged.
 - **translations**: master copy version, mapping snapshot, writer code version, file (in Storage), content hash.
 - **readbacks**: the source (decided in Phase 0), raw file reference, and the returned master copy version.

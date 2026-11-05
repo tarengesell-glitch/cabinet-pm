@@ -23,7 +23,7 @@ The phases are `docs/BUILD_SPEC.md` section 10. Phases 9 and 10 and the addition
 | 1a | Claude | Scaffold the repo and its guardrails: folders, dependency rules, vendor-name check, purity checks, test runners. Can run alongside Phase 0. | `prompts/01-scaffold-and-guardrails.md` |
 | 1b | Claude | Core: master copy schemas, base unit, angles, selection resolution, check interface, first layout checks. **Needs U-1 and A-1 decided.** | `prompts/02-core-master-copy.md` |
 | 1c | Claude | Catalog, minimal: the proof-slice items as versioned data, plus the buildability checks | `prompts/03-catalog-proof-slice.md` |
-| 1d | Claude | Cabinet Vision adapter, minimal: mapping data, preflight, deterministic writer, first golden cases | `prompts/04-ordx-writer-proof-slice.md` |
+| 1d | Claude | Cabinet Vision adapter, minimal: mapping data (Cabinet Vision values and UCS parameters, OA-17), preflight, deterministic writer, first golden cases | `prompts/04-ordx-writer-proof-slice.md` |
 | 1e | Owner | Import the generated files into Cabinet Vision and record the go/no-go in `DECISIONS.md` | `golden/cabinet-vision/README.md` (written in 1d) |
 
 ## Phase 2: Read-back and compare
@@ -42,7 +42,7 @@ The phases are `docs/BUILD_SPEC.md` section 10. Phases 9 and 10 and the addition
 
 **Exit:** the agreed coverage list passes; every fix has a test case.
 
-Work through this list, one item type or feature per session, each adding golden cases: uppers, talls, corners, fillers, panels, islands, more door styles and options. The coverage list is agreed with the owner before starting. **The licensing and partner-program review (S-4) happens before this phase.**
+Work through this list, one item type or feature per session, each adding golden cases. Each new editor setting needs a Cabinet Vision value or a UCS behind it; new UCSs are written in the `cabinet-vision-ucs` repo, in their own session, and tested by a person in Cabinet Vision before the mapping can use them: uppers, talls, corners, fillers, panels, islands, more door styles and options. The coverage list is agreed with the owner before starting. **The licensing and partner-program review (S-4) happens before this phase.**
 
 ## Phase 4: Catalog and shop onboarding
 

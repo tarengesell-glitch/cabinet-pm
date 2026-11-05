@@ -41,6 +41,7 @@ src/
   adapters/
     cabinet-vision/       Mapping tables, catalog sync, preflight, ORDX writer, reader,
                           independent verification. The only code that knows Cabinet Vision exists.
+                          Sends ORDX plus UCS parameter values (OA-17).
 helpers/
   cabinet-vision/         Later: the small helper app on the computer running Cabinet Vision (OA-6). Not a module.
 golden/
@@ -149,6 +150,16 @@ Cabinet Vision runs on Windows. Both loops must run without anyone remembering t
 - the job read-back (every engineered job comes back and is compared).
 
 That almost certainly needs a small helper app on the computer running Cabinet Vision. It watches for exports or reads the database and sends them up with a per-device key. It holds no business logic. Which computer that is, and its internet connection, is open question CV-1. The read-back source (ORDX export, SQL database or reports) is chosen in Phase 0. Raw files are always stored untouched before parsing.
+
+## Exact settings, approximate picture (OA-17)
+
+The editor is not a construction tool. It saves **exact settings** into the master copy and draws a **likeness** of how each cabinet is built.
+- Exact (EX-1, PROPOSED): cabinet positions, overall sizes, and every setting the designer changes (doors or drawers, sections, shelves, drawer heights, materials, handles).
+- Approximate: part thicknesses, joinery, reveals, gaps, interior details in the drawing.
+
+The Cabinet Vision adapter turns each setting into either a built-in Cabinet Vision value in the ORDX, or a **UCS parameter value** that one of our UCSs reads. The UCS library is the `cabinet-vision-ucs` repository; the adapter reads it (read-only) to know which UCS parameters exist, their types and what they change. A mapping can point to a UCS parameter only if that parameter is recorded there (`shop/custom-parameters.md`). An editor setting with no Cabinet Vision parameter and no UCS behind it blocks at preflight, with a plain-language reason. How UCS values get into Cabinet Vision on import is open (CV-3).
+
+Read-back compares settings and overall sizes, not construction, because Cabinet Vision owns construction.
 
 ## Photorealistic viewing (OA-3)
 

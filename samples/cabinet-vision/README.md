@@ -20,6 +20,7 @@ Put the raw material from the shop (the colony running Cabinet Vision) here, unt
    - more than one door style or finish;
    - uppers, talls and moldings.
 3. **The same job, changed once.** Export one job, change one cabinet's width, export again. Put both in `jobs/<name>-v1/` and `jobs/<name>-v2/`. This shows what a change looks like in the file.
+3b. **The same job with UCS settings changed** (OA-17). Export one job, then change only UCS sidebar settings on one cabinet (for example a toggle or a height), and export the ORDX again. Put both in `jobs/<name>-ucs-v1/` and `jobs/<name>-ucs-v2/`. This shows whether, and how, ORDX carries our UCS settings (DECISIONS CV-3). Also export the "User Created Standard List" report into the `cabinet-vision-ucs` repo's `exports/` folder.
 4. **The shop's catalog / library export** in `catalog/`.
 5. **Versions:** a screenshot of Cabinet Vision's Help > About and the S2M version, in `versions/`.
 6. **Database (if the shop allows it):** where Cabinet Vision's SQL database lives and which SQL Server version it uses. Note it in `versions/database.txt`. Don't copy the database itself yet.

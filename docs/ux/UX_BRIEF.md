@@ -34,7 +34,7 @@ The platform runs sales, intake and design for residential cabinetry jobs, then 
   - the conversation tally;
   - automatic ordering.
 
-The platform does not engineer cabinets. The editor must look right and be dimensionally exact, and the client view is **photorealistic** (OA-3; its form is open question R-1).
+The platform does not engineer cabinets. The editor must look right and save exact settings, but its drawing of how cabinets are built is only a likeness: Cabinet Vision makes the accurate construction (OA-17), and the client view is **photorealistic** (OA-3; its form is open question R-1).
 
 It should feel like a polished purpose-built operational system, not a generic project manager.
 

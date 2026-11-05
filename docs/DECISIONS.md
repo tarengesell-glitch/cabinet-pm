@@ -45,6 +45,13 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 - Exterior materials come from Tafisa's melamine line; handles from Richelieu.
 - The database is the Supabase project "closet-builder" in the Gesell/Gray organization. How it is used is open (CL-1).
 
+### 2026-11-05: The editor shows intent; Cabinet Vision makes it accurate (BUILD_SPEC OA-17)
+- We are **not** building a construction-accurate editor. The editor shows the design, the intent and the look, and lets the designer change every setting of every cabinet.
+- How a cabinet is drawn being built (part thicknesses, joinery, reveals, gaps, exact interior details) only has to look right.
+- The translator (the "interpreter") sends an ORDX file **plus UCS parameter values** to Cabinet Vision. Cabinet Vision and our UCSs turn that into the accurate construction drawing.
+- So the master copy holds **exact settings**, and those are what get translated and compared on read-back. The picture is a likeness drawn from them (P6 still holds: the picture draws only from the master copy).
+- Our UCS library (`cabinet-vision-ucs` repo) becomes part of the translation: each editor setting that Cabinet Vision has no built-in parameter for needs a UCS that reads it.
+
 ### Still in force from the earlier plan (2026-10-24 and before)
 - Modular monolith with enforced module boundaries; one owner per table; data, not code.
 - Fail loudly: alerts persist until a person resolves them with a note. Never show false success.
@@ -57,6 +64,7 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 - Multi-user locking: one editor at a time, others read-only. Locks release when the session drops; managers can override.
 
 ### Replaced on 2026-10-27
+- ~~(spec section 2, P6) The editor is dimensionally exact; what the designer sees is exactly what will be translated.~~ The settings are exact and are what's translated; the construction drawing in the editor is a likeness (OA-17, 2026-11-05).
 - ~~Mozaik is the design source of truth; this tool can't write to Mozaik.~~ The master copy is the source of truth; Cabinet Vision is the target.
 - ~~Lengths in integer mm.~~ The base unit is open (U-1).
 - ~~Mozaik data captured from the SketchUp export and job files; manual upload, then a Windows desktop uploader; upload matches confirmed by a person.~~ Dropped. A Mozaik reader may come back in Phase 8, from its SQLite export.
@@ -91,6 +99,12 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 
 ### From the design software outline (2026-11-05)
 Details and context for each: `docs/intake/design-workflow.md`.
+- **EX-1 What must stay exact (PROPOSED, please confirm).** Our reading of OA-17:
+  - **exact:** where each cabinet sits on its wall, its overall width, height and depth, and every setting (door or drawer, number of sections and shelves and where they go, drawer heights, materials, handles);
+  - **a likeness only:** how the box is drawn being built.
+
+  Overall sizes and positions have to stay exact, because Cabinet Vision places the cabinets from them and the read-back compares them. Is that right?
+- **CV-3 How UCS values get into Cabinet Vision.** Can an ORDX file set our UCS parameters (the `MT_` settings) on each cabinet when it's imported? If not, what's the route: a UCS that reads something ORDX can carry, or a step on the Cabinet Vision computer? Phase 0 answers this from samples; nobody guesses it (CLAUDE.md rule 9). This replaces PS-1.
 - **PR-1** Please share the pricing spreadsheet; it wasn't in the upload.
 - **H-1** Cabinet heights: 7', 8', 10', to the ceiling (image selector) or 84", 96", 108", custom (design software)?
 - **PV-1** The client sees no price until fine-tuning, but the "Maximum" drawers option shows a drawer cost. When is that shown?
@@ -98,7 +112,7 @@ Details and context for each: `docs/intake/design-workflow.md`.
 - **SH-1** Should the image selector's kitchen shape pre-select the room shape?
 - **CL-1** Does this tool live in the existing "closet-builder" Supabase project and reuse its tables, or get a fresh schema there? (Ties to C-1.)
 - **CAL-1** Which calendar feeds the home screen's meetings?
-- **PS-1** Can ORDX carry section, shelf and drawer positions? (Phase 0; until known, these edits are "manual work in Cabinet Vision".)
+- ~~**PS-1**~~ Replaced by CV-3: section, shelf and drawer positions are settings sent as ORDX or UCS values (OA-17).
 - **POP-1** Where does "most popular" come from before we have job history?
 - **RT-1** The starting list of room types. Is "Closet Builder" the fine-tune screen or the whole tool?
 - **R-1** is now partly answered (OA-15): a live 3D view plus an on-demand AI render. Still open: is the AI render shown to clients as a likeness only? (We propose labelling it "illustration", since an AI picture can't be guaranteed exact.)

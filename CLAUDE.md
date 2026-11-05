@@ -4,7 +4,7 @@ You are working on a cabinet design and CAD handoff platform for a residential c
 
 It is used only for our own sales, never sold. The manufacturing partner (a "shop") is a Hutterite colony: there is one today, and the code must allow more.
 
-The spec's owner amendments (OA-1 to OA-16, at the top of `docs/BUILD_SPEC.md`) add:
+The spec's owner amendments (OA-1 to OA-17, at the top of `docs/BUILD_SPEC.md`) add:
 - the visual intake;
 - photorealistic viewing and live pricing;
 - a push gated on client sign-off, confirmed appliances, a site measure and payment;
@@ -21,7 +21,7 @@ Before any work, read:
 - `docs/DECISIONS.md`;
 - `docs/BUILD_PLAN.md`.
 
-For any UI work, also read `docs/ux/UX_BRIEF.md`. For anything touching the adapter, also read `docs/cabinet-vision/FORMAT_REFERENCE.md`.
+For any UI work, also read `docs/ux/UX_BRIEF.md`. For anything touching the adapter, also read `docs/cabinet-vision/FORMAT_REFERENCE.md` and the `cabinet-vision-ucs` repo's `CLAUDE.md` and `shop/custom-parameters.md` (read-only: never edit that repo from a platform session).
 
 When docs disagree, `docs/BUILD_SPEC.md` wins. Then the "Decided" list in `docs/DECISIONS.md`. Anything marked PROPOSED is not authority. Say so when you find a conflict.
 
@@ -30,7 +30,7 @@ When docs disagree, `docs/BUILD_SPEC.md` wins. Then the "Decided" list in `docs/
 1. **Stay inside the module you were asked to change.** Each module has its own `CLAUDE.md`. If a change elsewhere seems necessary, stop and explain what and why instead of doing it.
 2. **Dependencies point inward** (spec P2). Follow the dependency table in `docs/ARCHITECTURE.md`. Modules import each other only through `contract.ts`. The boundary checks enforce this; never disable or weaken them.
 3. **Only the adapter knows the vendor.** The words "Cabinet Vision" and "ORDX" never appear outside `src/adapters/cabinet-vision/`, `helpers/cabinet-vision/`, `golden/cabinet-vision/`, `samples/cabinet-vision/` and `docs/`. The catalog uses our own IDs, never CAD codes.
-4. **The master copy is the single source of truth** (P1). The editor draws only from it (P6). Pricing reads from the catalog and the master copy, never from Cabinet Vision.
+4. **The master copy is the single source of truth** (P1). The editor draws only from it (P6). Its **settings are exact**; its drawing of how a cabinet is built is a likeness, because Cabinet Vision and our UCSs make the construction (OA-17). Pricing reads from the catalog and the master copy, never from Cabinet Vision.
 5. **One owner per piece of data.** Only the owning module writes a table (`docs/DATA_MODEL.md`).
 6. **Data, not code** (P3). Size ranges, increments, options, invalid combinations, mappings, design rules, prices, roles, permissions and statuses are data with a recorded source. Never hard-code them, and never make one up.
 7. **Fail closed, fail loudly** (P4). Anything missing, unmapped, out of range or ambiguous blocks the step with a plain-language reason. That means:

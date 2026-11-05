@@ -140,7 +140,7 @@ The same upload also held the "Software Setup" overview, the build spec and the 
 | Rooms, shapes, measurements | Designer room capture → master copy | The shape, positioning and layout libraries are data that grows as designers add to them. |
 | Room-by-room loop and "the tool generates the recommendation" | AI Design | The spec's AI draft (stage 4). Review = "current vs. recommended", accept/decline per change (spec 5.7). |
 | Preset layouts per run | Shop Settings / AI Design data | A preset is a starting draft; it still has to pass every check. |
-| Primary settings, per-cabinet edits | Designer → master copy selections (job, room, item) | Section, shelf and drawer positions must reach Cabinet Vision. Whether ORDX can carry them is unknown (S-2, new question PS-1). |
+| Primary settings, per-cabinet edits | Designer → master copy selections (job, room, item) | Settings are exact; the drawing of the construction is a likeness (OA-17). Each setting reaches Cabinet Vision as an ORDX value or a UCS parameter (CV-3). |
 | Live 3D | Designer, drawn from the master copy (P6) | |
 | AI photorealistic render | Designer, display only | An AI picture can't be guaranteed exact, so it is labelled "illustration" and never used for checks or translation (P5, P6). |
 | Estimate, delivery date | `pricing` (from catalog + master copy), `client-messaging` deadlines | Formulas are data; the spreadsheet is needed (PR-1). |
@@ -161,6 +161,6 @@ These are also listed in `docs/DECISIONS.md`.
 - **SH-1 Two shape pickers.** The image selector asks for kitchen shape (Galley, L-Shape with Island, ...), and room setup asks for a room shape line drawing. Is the image-selector shape the same pick, so it should pre-select the room shape?
 - **CL-1 The Supabase project "closet-builder".** Is this tool going to live in that existing project (and reuse its tables), or should it get a fresh database inside that project? This ties to C-1 (reuse closet-builder code). We have not touched the database.
 - **CAL-1 Meetings on the home screen.** Which calendar do they come from (Google Calendar?), and are they per designer?
-- **PS-1 Section, shelf and drawer positions.** Dragging sections, shelves and drawer heights only helps if Cabinet Vision receives them exactly. Phase 0 must check whether ORDX carries them. Until it's known, these edits would be marked "manual work in Cabinet Vision" (spec 5.3).
+- ~~**PS-1**~~ Replaced by **CV-3** in `docs/DECISIONS.md` (OA-17): settings are sent as ORDX or UCS values; Phase 0 checks how UCS values get in.
 - **POP-1 "Most popular".** Room shapes, layouts and handles are sorted by popularity. Is that counted from our own jobs (we'd start with no history: then what order?), or from the supplier's list?
 - **RT-1 Room types.** What are the "standard room types" to start with? Is "Closet Builder" the name of the fine-tune screen, or the whole tool?

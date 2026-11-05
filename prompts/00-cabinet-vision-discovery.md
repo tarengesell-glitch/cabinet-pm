@@ -1,6 +1,6 @@
 # Phase 0b: Cabinet Vision discovery
 
-Read CLAUDE.md, docs/BUILD_SPEC.md (sections 5.8, 8 and 11), docs/ARCHITECTURE.md and everything in samples/cabinet-vision/.
+Read CLAUDE.md, docs/BUILD_SPEC.md (sections 5.8, 8 and 11, and OA-17), docs/ARCHITECTURE.md, everything in samples/cabinet-vision/, and the `cabinet-vision-ucs` repo's CLAUDE.md, `shop/custom-parameters.md` and `ucs/` folder (read-only).
 
 **Do not write app code.** Use small throwaway scripts in a scratch folder if they help you read the files, but don't commit them.
 
@@ -18,6 +18,7 @@ Write `docs/cabinet-vision/FORMAT_REFERENCE.md`, the ORDX format reference that 
    - width, height and depth;
    - options and selections (door style, finish, hardware, construction);
    - modifications (scribe, end panel…);
+   - **custom and UCS parameters** (OA-17): whether an imported ORDX can set our UCS parameters (the `MT_` settings in the `cabinet-vision-ucs` repo) on each cabinet, and exactly how they appear. Also whether section, shelf and drawer positions travel as built-in values. This answers DECISIONS CV-3;
    - fillers, panels and moldings.
 5. **Job-level data:** job and customer fields, and job-level defaults versus per-item overrides.
 6. **IDs:** which IDs are stable across exports, and whether a renamed item keeps its ID. Use the v1/v2 pair.

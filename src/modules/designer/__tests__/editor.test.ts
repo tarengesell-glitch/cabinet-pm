@@ -9,7 +9,9 @@ import {
   deleteWalls,
   setWallsThickness,
   loadJob,
+  moveCorner,
   moveOpening,
+  slideWall,
   nearestWall,
   placeOpening,
   redo,
@@ -238,6 +240,55 @@ describe('sureness tags', () => {
     expect(room(d).ceiling_height.provenance).toBe('verified');
     d = unwrap(setProvenance(d, env, target, 'measured'));
     expect(room(d).ceiling_height.provenance).toBe('measured');
+  });
+});
+
+describe('handles on a selected wall', () => {
+  it('dragging a corner moves it and the joined wall; changed walls go back to rough', () => {
+    const env = testEnv();
+    const d = rectangle(env);
+    const r = moveCorner(d, env, { x: 12 * FT, y: 0 }, { x: 13 * FT, y: 0 });
+    if (!r.ok) throw new Error(r.reason);
+    const walls = room(r.value.draft).walls;
+    expect(walls[0]!.end_point).toEqual({ x: 13 * FT, y: 0 });
+    expect(walls[1]!.start_point).toEqual({ x: 13 * FT, y: 0 });
+    expect(walls[0]!.length_provenance).toBe('rough');
+    expect(walls[1]!.length_provenance).toBe('rough');
+    expect(walls[2]!.length_provenance).toBe('measured'); // untouched
+    expect(r.value.notices).toHaveLength(2);
+  });
+
+  it('dragging the middle slides the wall; it keeps its length and tag, its neighbours stretch', () => {
+    const env = testEnv();
+    const d = rectangle(env);
+    const right = room(d).walls[1]!; // runs up the right side; its left is inside the room
+    const r = slideWall(d, env, right.wall_id, -2 * FT); // to its right: outward
+    if (!r.ok) throw new Error(r.reason);
+    const walls = room(r.value.draft).walls;
+    expect(walls[1]!.start_point).toEqual({ x: 14 * FT, y: 0 });
+    expect(walls[1]!.end_point).toEqual({ x: 14 * FT, y: 10 * FT });
+    expect(walls[1]!.length_provenance).toBe('measured');
+    expect(walls[0]!.end_point).toEqual({ x: 14 * FT, y: 0 });
+    expect(walls[2]!.start_point).toEqual({ x: 14 * FT, y: 10 * FT });
+    expect(walls[0]!.length_provenance).toBe('rough');
+    expect(runChecks(WALL_CHECKS, r.value.draft.job, {}).passed).toBe(true);
+  });
+
+  it('refuses moves that squash a wall or stack walls on top of each other', () => {
+    const env = testEnv();
+    const d = rectangle(env);
+    expect(moveCorner(d, env, { x: 12 * FT, y: 0 }, { x: 12 * FT, y: 10 * FT }).ok).toBe(false);
+    expect(moveCorner(d, env, { x: 5, y: 5 }, { x: 6, y: 6 }).ok).toBe(false);
+    expect(moveCorner(d, env, { x: 12 * FT, y: 0 }, { x: 12 * FT, y: 0 }).ok).toBe(false);
+  });
+
+  it('refuses drawing a wall back over the last one', () => {
+    const env = testEnv();
+    let d = newRoom(env);
+    d = unwrap(addWall(d, env, { x: 0, y: 0 }, { x: 4 * FT, y: 0 }));
+    const back = addWall(d, env, { x: 4 * FT, y: 0 }, { x: 1 * FT, y: 0 });
+    expect(back.ok).toBe(false);
+    if (!back.ok) expect(back.reason).toMatch(/run back over wall 1/);
   });
 });
 

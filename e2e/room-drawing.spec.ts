@@ -282,3 +282,62 @@ test('rough walls are a soft pastel red', async ({ page }) => {
   await expect.poll(() => fill('.wall-3')).toBe('#eeb8ba');
   expect(await fill('.wall-1')).not.toBe('#eeb8ba'); // typed, so measured
 });
+
+const centreOf = async (page: Page, selector: string) => {
+  const r = await konvaRect(page, selector);
+  if (!r) throw new Error(`${selector} is not on the plan`);
+  const box = (await page.getByTestId('plan').boundingBox())!;
+  return { x: box.x + r.x + r.width / 2, y: box.y + r.y + r.height / 2 };
+};
+
+async function dragFrom(page: Page, from: { x: number; y: number }, dx: number, dy: number) {
+  await page.mouse.move(from.x, from.y);
+  await page.mouse.down();
+  await page.mouse.move(from.x + dx, from.y + dy, { steps: 6 });
+  await page.mouse.up();
+}
+
+test('a selected wall has handles: slide it by the middle, move a corner by an end', async ({ page }) => {
+  await page.goto('/rooms/preview');
+  await page.getByRole('button', { name: /Example kitchen/ }).click();
+  await wallButtons(page).nth(1).click(); // wall 2, the right-hand wall
+  await expect(page.getByRole('heading', { name: /^Wall 2/ })).toBeVisible();
+
+  // Slide wall 2 outward: it keeps its length and tag, walls 1 and 3 stretch and go rough.
+  await dragFrom(page, await centreOf(page, '.handle-middle'), 40, 0);
+  await expect(page.getByText(/Wall 1 changed length/)).toBeVisible();
+  await expect(page.getByTestId('value-Length')).toHaveText(`10' 0"`);
+  await expect(page.getByRole('heading', { name: /^Wall 2/ })).toBeVisible(); // still selected
+
+  // One undo puts it back.
+  await page.getByRole('button', { name: 'Undo' }).click();
+  await page.getByRole('button', { name: '← Room' }).click();
+  await expect(page.getByRole('button', { name: /^Wall 1: 12' 0"/ })).toBeVisible();
+
+  // Move wall 2's top corner straight up: wall 2 gets longer.
+  await wallButtons(page).nth(1).click();
+  await dragFrom(page, await centreOf(page, '.handle-end'), 0, -40);
+  await expect(page.getByTestId('value-Length')).not.toHaveText(`10' 0"`);
+  await expect(page.locator('[data-provenance="rough"]').first()).toBeVisible();
+});
+
+test('a wall drawn back over the last one is refused', async ({ page }) => {
+  await startRoom(page);
+  await typeWall(page, `6'`, 'right');
+  await typeWall(page, `2'`, 'left');
+  await expect(page.getByText(/would run back over wall 1/)).toBeVisible();
+  await expect(wallButtons(page)).toHaveCount(1);
+});
+
+test('a problem wall gets a dashed outline, not a glow', async ({ page }) => {
+  await page.goto('/rooms/preview');
+  await page.getByRole('button', { name: /Example kitchen/ }).click();
+  await expect.poll(() => konvaRect(page, '.issue-outline')).toBeNull();
+  // Drag wall 3's far corner down past the bottom wall, so walls cross.
+  await wallButtons(page).nth(2).click();
+  const corner = await centreOf(page, '.handle-end');
+  const bottom = await centreOf(page, '.wall-1');
+  await dragFrom(page, corner, 40, bottom.y + 40 - corner.y);
+  await expect(page.getByRole('region', { name: 'Checks' }).getByText(/cross each other/)).toBeVisible();
+  await expect.poll(() => konvaRect(page, '.issue-outline')).not.toBeNull();
+});

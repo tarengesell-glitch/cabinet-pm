@@ -86,7 +86,10 @@ const ACCENT = '#176b70';
 const DANGER = '#be3d42';
 
 interface Props {
+  /** The room as drawn: during a handle drag, a preview of the move. */
   room: Room;
+  /** The room as last saved. Handle drags snap against this, never against their own preview. */
+  baseRoom: Room;
   tool: Tool;
   selection: Selection;
   issues: readonly Issue[];
@@ -97,6 +100,12 @@ interface Props {
   onPickWallForOpening: (wallId: string, centre: number) => void;
   /** An opening dragged along its wall to a new offset. */
   onMoveOpening: (openingId: string, offset: number) => void;
+  /** A corner handle dragged (done = released). The parent previews, then commits on release. */
+  onCornerDrag: (from: Point, to: Point, done: boolean) => void;
+  /** A wall's middle handle dragged sideways by `distance` (to the wall's left, room units). */
+  onWallSlide: (wallId: string, distance: number, done: boolean) => void;
+  /** A drag was abandoned (Escape, or the pointer left the plan). */
+  onDragCancel: () => void;
   /** Set when a chain of walls is being drawn; cleared by the parent to finish. */
   chainStart: Point | null;
   onChainStart: (p: Point | null) => void;
@@ -143,12 +152,15 @@ export function PlanCanvas(props: Props) {
 
   // Fit the room (plus a margin to draw into) on screen. While a chain of walls is
   // being drawn the view stays still, so each tap lands where the person aimed.
+  // The same goes for dragging a wall handle, whose preview changes the room's size.
+  const [dragging, setDragging] = useState(false);
+  const holdStill = chainStart !== null || dragging;
   const frozenView = useRef<View | null>(null);
   const fitted = useMemo(() => fitView(corners, size), [corners, size]);
-  if (chainStart === null || frozenView.current === null || frozenView.current.size !== size) frozenView.current = fitted;
+  if (!holdStill || frozenView.current === null || frozenView.current.size !== size) frozenView.current = fitted;
   // Once the person zooms or scrolls, their view stays until they press "Fit".
   const [manual, setManual] = useState<View | null>(null);
-  const view = manual ?? (chainStart === null ? fitted : frozenView.current);
+  const view = manual ?? (holdStill ? frozenView.current : fitted);
   const zoom = view.scale / fitted.scale;
 
   /** Zooms by `factor` keeping the room point under (px, py) still. */
@@ -208,6 +220,63 @@ export function PlanCanvas(props: Props) {
     if (!hit) return null;
     return { wall: hit.wall, centre: hit.offset, offset: standardOpeningOffset(hit.wall, tool, hit.offset) };
   };
+
+  // Handles on a single selected wall: drag a corner, or the middle to slide the wall.
+  type Drag = { kind: 'corner'; from: Point } | { kind: 'wall'; wallId: string; grabbed: Point };
+  const drag = useRef<Drag | null>(null);
+  const handleWall =
+    tool === 'select' && canEdit && selection?.kind === 'wall' ? room.walls.find((w) => w.wall_id === selection.id) ?? null : null;
+
+  /** Where a dragged corner goes: onto another corner if close, else lined up square with its walls, to the inch. */
+  const snapCorner = (from: Point, raw: Point): Point => {
+    const tolerance = Math.round(SNAP_PX / view.scale);
+    const base = props.baseRoom.walls;
+    const others = base.flatMap((w) => [w.start_point, w.end_point]).filter((c) => !samePoint(c, from));
+    const onCorner = snapToPoints(raw, others, tolerance);
+    if (onCorner.snapped) return onCorner.point;
+    const g = snapToGrid(raw, INCH);
+    let p = g.ok ? g.value : raw;
+    // Keep joined walls straight: line up with the far end of each wall at this corner.
+    for (const w of base) {
+      const far = samePoint(w.start_point, from) ? w.end_point : samePoint(w.end_point, from) ? w.start_point : null;
+      if (!far) continue;
+      if (Math.abs(raw.x - far.x) <= tolerance) p = { ...p, x: far.x };
+      if (Math.abs(raw.y - far.y) <= tolerance) p = { ...p, y: far.y };
+    }
+    return p;
+  };
+
+  const dragTo = (raw: Point, done: boolean) => {
+    const d = drag.current;
+    if (!d) return;
+    if (d.kind === 'corner') {
+      props.onCornerDrag(d.from, snapCorner(d.from, raw), done);
+    } else {
+      const wall = props.baseRoom.walls.find((w) => w.wall_id === d.wallId);
+      if (!wall) return;
+      const dx = wall.end_point.x - wall.start_point.x;
+      const dy = wall.end_point.y - wall.start_point.y;
+      const len = Math.hypot(dx, dy) || 1;
+      const along = ((raw.x - d.grabbed.x) * -dy + (raw.y - d.grabbed.y) * dx) / len;
+      props.onWallSlide(d.wallId, roundToInch(along), done);
+    }
+    if (done) {
+      drag.current = null;
+      setDragging(false);
+    }
+  };
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && drag.current) {
+        drag.current = null;
+        setDragging(false);
+        props.onDragCancel();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  });
 
   // Box selection: press on an empty part of the plan, drag, release.
   const [marquee, setMarquee] = useState<Box | null>(null);
@@ -300,16 +369,34 @@ export function PlanCanvas(props: Props) {
           setMarquee({ x0: pos.x, y0: pos.y, x1: pos.x, y1: pos.y });
         }}
         onPointerMove={(e) => {
-          setHover(pointer(e));
+          const at = pointer(e);
+          setHover(at);
+          if (drag.current && at) {
+            dragTo(at, false);
+            return;
+          }
           if (!marquee) return;
           const pos = e.target.getStage()?.getPointerPosition();
           if (!pos) return;
           if (Math.hypot(pos.x - marquee.x0, pos.y - marquee.y0) > DRAG_PX) dragged.current = true;
           setMarquee({ ...marquee, x1: pos.x, y1: pos.y });
         }}
-        onPointerUp={finishMarquee}
+        onPointerUp={(e) => {
+          if (drag.current) {
+            const at = pointer(e);
+            if (at) dragTo(at, true);
+            dragged.current = true; // the click that follows is not a deselect
+            return;
+          }
+          finishMarquee();
+        }}
         onPointerLeave={() => {
           setHover(null);
+          if (drag.current) {
+            drag.current = null;
+            setDragging(false);
+            props.onDragCancel();
+          }
           finishMarquee();
         }}
       >
@@ -334,6 +421,21 @@ export function PlanCanvas(props: Props) {
               onSelect={props.onSelect}
             />
           ))}
+          {handleWall && (
+            <WallHandles
+              wall={handleWall}
+              toScreen={toScreen}
+              onGrabCorner={(from) => {
+                drag.current = { kind: 'corner', from };
+                setDragging(true);
+              }}
+              onGrabMiddle={(at) => {
+                const grabbed = toRoom(at.x, at.y);
+                drag.current = { kind: 'wall', wallId: handleWall.wall_id, grabbed };
+                setDragging(true);
+              }}
+            />
+          )}
           {chainStart && (
             <Circle {...toScreen(chainStart)} radius={6} stroke={ACCENT} strokeWidth={2} listening={false} />
           )}
@@ -428,15 +530,17 @@ function outsideSign(walls: readonly Wall[]): 1 | -1 {
   return twiceArea < 0 ? -1 : 1;
 }
 
-/** For a wall, the other walls meeting it at its start and at its end (the first found). */
+/** For a wall, the one other wall meeting it at its start and at its end (null if none, or several). */
 function neighboursOf(walls: readonly Wall[], wall: Wall): { start: Point | null; end: Point | null } {
+  // Mitre a corner only when exactly two walls meet there; three or more get square ends.
   const otherEnd = (corner: Point): Point | null => {
+    const found: Point[] = [];
     for (const w of walls) {
       if (w.wall_id === wall.wall_id) continue;
-      if (samePoint(w.start_point, corner)) return w.end_point;
-      if (samePoint(w.end_point, corner)) return w.start_point;
+      if (samePoint(w.start_point, corner)) found.push(w.end_point);
+      else if (samePoint(w.end_point, corner)) found.push(w.start_point);
     }
-    return null;
+    return found.length === 1 ? (found[0] as Point) : null;
   };
   return { start: otherEnd(wall.start_point), end: otherEnd(wall.end_point) };
 }
@@ -522,7 +626,9 @@ function WallShape(props: WallShapeProps) {
 
   return (
     <Group>
-      {issueIds.has(wall.wall_id) && <Line points={outline} closed stroke={DANGER} strokeWidth={10} opacity={0.3} listening={false} />}
+      {issueIds.has(wall.wall_id) && (
+        <Line points={outline} closed stroke={DANGER} strokeWidth={2} dash={[6, 4]} listening={false} name="issue-outline" />
+      )}
       {selected && <Line points={outline} closed stroke={ACCENT} strokeWidth={8} opacity={0.4} listening={false} />}
       <Line
         points={outline}
@@ -712,6 +818,68 @@ function FloatingGhost({ kind, at, scale }: { kind: Opening['kind']; at: V; scal
     <Group listening={false} opacity={0.55} name="ghost-floating">
       <Rect x={at.x - w / 2} y={at.y - 4} width={w} height={8} stroke={MUTED} dash={[4, 3]} strokeWidth={1} />
       <Text x={at.x - 60} y={at.y + 10} width={120} align="center" text="Move onto a wall" fontSize={11} fill={MUTED} />
+    </Group>
+  );
+}
+
+/** Handles on the selected wall: a dot at each end (move that corner) and a bar in the middle (slide the wall). */
+function WallHandles({ wall, toScreen, onGrabCorner, onGrabMiddle }: {
+  wall: Wall;
+  toScreen: (p: Point) => Point;
+  onGrabCorner: (corner: Point) => void;
+  onGrabMiddle: (at: V) => void;
+}) {
+  const a = toScreen(wall.start_point);
+  const b = toScreen(wall.end_point);
+  const mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+  const angle = (Math.atan2(b.y - a.y, b.x - a.x) * 180) / Math.PI;
+  const cursor = (c: string) => (e: Konva.KonvaEventObject<MouseEvent>) => {
+    const box = e.target.getStage()?.container();
+    if (box) box.style.cursor = c;
+  };
+  const grab = (fn: () => void) => (e: Konva.KonvaEventObject<PointerEvent>) => {
+    e.cancelBubble = true;
+    fn();
+  };
+  return (
+    <Group name="wall-handles">
+      {[
+        { p: a, corner: wall.start_point, name: 'handle-start' },
+        { p: b, corner: wall.end_point, name: 'handle-end' },
+      ].map(({ p, corner, name }) => (
+        <Circle
+          key={name}
+          name={name}
+          x={p.x}
+          y={p.y}
+          radius={8}
+          fill="#ffffff"
+          stroke={ACCENT}
+          strokeWidth={2.5}
+          hitStrokeWidth={14}
+          onPointerDown={grab(() => onGrabCorner(corner))}
+          onMouseEnter={cursor('move')}
+          onMouseLeave={cursor('')}
+        />
+      ))}
+      <Rect
+        name="handle-middle"
+        x={mid.x}
+        y={mid.y}
+        width={26}
+        height={12}
+        offsetX={13}
+        offsetY={6}
+        cornerRadius={6}
+        rotation={angle}
+        fill={ACCENT}
+        stroke="#ffffff"
+        strokeWidth={2}
+        hitStrokeWidth={12}
+        onPointerDown={grab(() => onGrabMiddle(mid))}
+        onMouseEnter={cursor(Math.abs(Math.cos((angle * Math.PI) / 180)) > 0.7 ? 'ns-resize' : 'ew-resize')}
+        onMouseLeave={cursor('')}
+      />
     </Group>
   );
 }

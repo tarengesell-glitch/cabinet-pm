@@ -11,8 +11,10 @@ import {
   directionOf,
   distanceForDisplay,
   formatInches,
+  distanceSquared,
   pointFromLengthAndAngle,
   samePoint,
+  segmentsOverlap,
   type Job,
   type Length,
   type Measured,
@@ -134,6 +136,8 @@ export function renameRoom(draft: Draft, env: Env, name: string): Result<Change>
 export function addWall(draft: Draft, env: Env, start: Point, end: Point, enteredLength: Length | null = null): Result<Change> {
   if (samePoint(start, end)) return refuse('A wall needs two different corners.');
   const r = room(draft);
+  const over = r.walls.findIndex((w) => segmentsOverlap(w.start_point, w.end_point, start, end));
+  if (over >= 0) return refuse(`That wall would run back over wall ${over + 1}. Walls can't lie on top of each other.`);
   const wall: Wall = {
     wall_id: env.newId(),
     start_point: start,
@@ -151,6 +155,81 @@ export function addWall(draft: Draft, env: Env, start: Point, end: Point, entere
       ...r,
       walls: [...r.walls, wall],
     }),
+  );
+}
+
+/**
+ * Moves corners: every wall end at a `from` point goes to its `to` point, so joined walls
+ * stay joined. A wall whose length changes goes back to rough (its measurement no longer
+ * matches) and the person is told. Walls that keep their length keep their tag.
+ */
+function moveCorners(draft: Draft, env: Env, moves: readonly (readonly [Point, Point])[], summary: string): Result<Change> {
+  const r = room(draft);
+  const target = (p: Point): Point => moves.find(([from]) => samePoint(from, p))?.[1] ?? p;
+  const notices: string[] = [];
+  let touched = 0;
+  const walls: Wall[] = [];
+  for (const [i, w] of r.walls.entries()) {
+    const start = target(w.start_point);
+    const end = target(w.end_point);
+    if (samePoint(start, w.start_point) && samePoint(end, w.end_point)) {
+      walls.push(w);
+      continue;
+    }
+    touched += 1;
+    if (samePoint(start, end)) return refuse(`That would shrink wall ${i + 1} to nothing.`);
+    const sameLength = distanceSquared(start, end) === distanceSquared(w.start_point, w.end_point);
+    if (sameLength) {
+      walls.push({ ...w, start_point: start, end_point: end });
+      continue;
+    }
+    if (w.length_provenance !== 'rough' || w.entered_length !== null) {
+      notices.push(`Wall ${i + 1} changed length, so it's back to rough. Measure it again.`);
+    }
+    walls.push({ ...w, start_point: start, end_point: end, entered_length: null, length_source_mm: null, length_provenance: 'rough' });
+  }
+  if (touched === 0) return refuse('Nothing moved.');
+  for (const [i, a] of walls.entries()) {
+    for (const [j, b] of walls.entries()) {
+      if (j > i && segmentsOverlap(a.start_point, a.end_point, b.start_point, b.end_point)) {
+        return refuse(`That would put wall ${i + 1} on top of wall ${j + 1}.`);
+      }
+    }
+  }
+  return ok(withRoom(draft, env, summary, { ...r, walls }), notices);
+}
+
+/** Drags a corner to a new point. Every wall meeting at that corner follows. */
+export function moveCorner(draft: Draft, env: Env, from: Point, to: Point): Result<Change> {
+  if (samePoint(from, to)) return refuse('Nothing moved.');
+  if (!room(draft).walls.some((w) => samePoint(w.start_point, from) || samePoint(w.end_point, from))) {
+    return refuse('There is no corner there.');
+  }
+  return moveCorners(draft, env, [[from, to]], `Moved a corner to ${formatInches(to.x)}, ${formatInches(to.y)}`);
+}
+
+/**
+ * Slides a wall sideways (square to its own direction) by `distance` (positive = to its
+ * left, looking from its start). The wall keeps its length; walls joined to it stretch.
+ */
+export function slideWall(draft: Draft, env: Env, wallId: string, distance: number): Result<Change> {
+  const r = room(draft);
+  const wall = r.walls.find((w) => w.wall_id === wallId);
+  if (!wall) return refuse('That wall no longer exists.');
+  const dx = wall.end_point.x - wall.start_point.x;
+  const dy = wall.end_point.y - wall.start_point.y;
+  const len = Math.hypot(dx, dy);
+  const v = { x: Math.round((-dy / len) * distance), y: Math.round((dx / len) * distance) };
+  if (v.x === 0 && v.y === 0) return refuse('Nothing moved.');
+  const shift = (p: Point): Point => ({ x: p.x + v.x, y: p.y + v.y });
+  return moveCorners(
+    draft,
+    env,
+    [
+      [wall.start_point, shift(wall.start_point)],
+      [wall.end_point, shift(wall.end_point)],
+    ],
+    `Moved ${wallLabel(r, wallId)} ${formatInches(Math.round(Math.hypot(v.x, v.y)))}`,
   );
 }
 

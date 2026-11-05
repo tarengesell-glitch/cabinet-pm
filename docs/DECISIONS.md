@@ -74,6 +74,16 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
   - The scroll wheel zooms the plan, and a sideways scroll (or Shift + scroll) moves it left and right. Fit, + and − buttons sit on the plan.
   - Rough walls are drawn in a soft pastel red instead of a bright one. Labels stay a darker red so they can be read.
   - Doors, windows and passthroughs are placed the way other room planners do it (researched: IKEA's planner, Floorplanner, and an open-source editor's door tool). A ghost of the item follows the cursor and snaps onto the nearest wall, showing its distance to each end of the wall. The cursor changes, and a click places it exactly where the ghost was. Off a wall the cursor shows "not allowed" and a click does nothing.
+- **Room drawing feedback, round 3 (owner, 2026-11-05):**
+  - **Wall handles.** A selected wall shows a handle at each end and one in the middle, the way other planners do it (researched: Houzz Floor Planner, Coohom, Revit, ArchiCAD).
+    - Dragging an end moves that corner, and every wall joined there follows. The corner snaps to other corners, whole inches, and to line up square with its walls.
+    - Dragging the middle slides the wall sideways; it keeps its length and its joined walls stretch.
+    - The move shows live while dragging and is saved on release as one undo step. Escape cancels it.
+    - A wall whose length changes goes back to rough, with a notice.
+    - A move that would shrink a wall to nothing, or put walls on top of each other, is refused.
+  - **No walls on top of each other.** Drawing or typing a wall back over an existing one is refused with a reason. The owner's screenshot showed two walls doubled back on each other, which looked like odd shading.
+  - **Problem walls get a dashed red outline**, not a translucent red glow (the glow looked like shading). Corners are mitred only where exactly two walls meet; anywhere else they get square ends.
+  - **Notices float over the top of the plan** and can be dismissed. The plan no longer jumps down when one appears.
 - Room capture is pulled ahead of Phase 5 (BUILD_PLAN). Order: scaffold (1a), then Core walls and openings, then the Designer drawing screen.
 
 ### 2026-11-05: Where the work lives and deploys

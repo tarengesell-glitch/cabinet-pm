@@ -90,6 +90,18 @@ export function segmentsCross(a1: Point, a2: Point, b1: Point, b2: Point): boole
   return false;
 }
 
+/**
+ * Whether two segments lie along the same line and share a stretch of positive length
+ * (one wall running back over another). Touching end to end is not overlapping.
+ */
+export function segmentsOverlap(a1: Point, a2: Point, b1: Point, b2: Point): boolean {
+  if (orientation(a1, a2, b1) !== 0 || orientation(a1, a2, b2) !== 0) return false;
+  const useX = a1.x !== a2.x;
+  const key = (p: Point) => (useX ? p.x : p.y);
+  const overlap = Math.min(Math.max(key(a1), key(a2)), Math.max(key(b1), key(b2))) - Math.max(Math.min(key(a1), key(a2)), Math.min(key(b1), key(b2)));
+  return overlap > 0;
+}
+
 /** Round half away from zero. */
 const roundHalfAway = (v: number): number => (v < 0 ? -Math.round(-v) : Math.round(v));
 

@@ -3,6 +3,7 @@ import {
   compareToDistance,
   distanceForDisplay,
   isqrt,
+  segmentsOverlap,
   pointFromLengthAndAngle,
   segmentsCross,
   snapEndToAngle,
@@ -78,6 +79,19 @@ describe('crossing walls', () => {
   });
   it('ignores walls that miss each other', () => {
     expect(segmentsCross(p(0, 0), p(10, 0), p(0, 5), p(10, 5))).toBe(false);
+  });
+});
+
+describe('walls lying on top of each other', () => {
+  it('finds a wall running back over another', () => {
+    expect(segmentsOverlap(p(0, 0), p(10, 0), p(10, 0), p(4, 0))).toBe(true);
+    expect(segmentsOverlap(p(0, 0), p(0, 10), p(0, 12), p(0, 5))).toBe(true);
+    expect(segmentsOverlap(p(0, 0), p(10, 10), p(5, 5), p(20, 20))).toBe(true);
+  });
+  it('ignores walls that only touch, cross, or run side by side', () => {
+    expect(segmentsOverlap(p(0, 0), p(10, 0), p(10, 0), p(20, 0))).toBe(false);
+    expect(segmentsOverlap(p(0, 0), p(10, 10), p(0, 10), p(10, 0))).toBe(false);
+    expect(segmentsOverlap(p(0, 0), p(10, 0), p(0, 1), p(10, 1))).toBe(false);
   });
 });
 

@@ -18,7 +18,9 @@ import {
   setWallsThickness,
   findOpening,
   loadJob,
+  moveCorner,
   moveOpening,
+  slideWall,
   placeOpening,
   redo,
   renameRoom,
@@ -31,6 +33,7 @@ import {
   undo,
   upgradeStoredDraft,
   type Change,
+  type Draft,
   type Env,
   type Timeline,
 } from '../model/editor';
@@ -63,6 +66,8 @@ export function RoomCapture({ user }: { user: User }) {
   const [tool, setTool] = useState<Tool>('select');
   const [selection, setSelection] = useState<Selection>(null);
   const [chainStart, setChainStart] = useState<Point | null>(null);
+  /** While a wall handle is dragged: the room with the move applied, not yet saved. */
+  const [dragPreview, setDragPreview] = useState<Draft | null>(null);
   const [message, setMessage] = useState<{ kind: 'error' | 'notice'; text: string } | null>(null);
 
   // Load what was kept in this browser.
@@ -226,6 +231,20 @@ export function RoomCapture({ user }: { user: User }) {
     );
   }
 
+  /**
+   * A handle drag: show the move while dragging; save it (one undo step) on release.
+   * A move that is refused mid-drag keeps the last good preview; on release it is explained.
+   */
+  const handleDrag = (r: Result<Change>, done: boolean) => {
+    if (!done) {
+      if (r.ok) setDragPreview(r.value.draft);
+      return;
+    }
+    setDragPreview(null);
+    if (r.ok) apply(r);
+    else if (r.reason !== 'Nothing moved.') setMessage({ kind: 'error', text: r.reason });
+  };
+
   /** Drops a standard opening and selects it so it can be customized. */
   const dropOpening = (wallId: string, kind: Opening['kind'], centre: number | null) => {
     if (!draft) return;
@@ -265,15 +284,23 @@ export function RoomCapture({ user }: { user: User }) {
             )}
             <span className={s.hint}>{room ? TOOL_HINT[tool] : 'Start a room on the right.'}</span>
           </div>
-          {message && (
-            <p className={message.kind === 'error' ? s.error : s.notice} role="status" style={{ padding: '6px 12px' }}>
-              {message.text}
-            </p>
-          )}
           <div className={s.canvas}>
+            {message && (
+              // Floats over the top of the plan, so the plan never jumps when a notice appears.
+              <div className={message.kind === 'error' ? s.toastError : s.toast} role="status">
+                <span>{message.text}</span>
+                <button className={s.toastClose} aria-label="Dismiss" onClick={() => setMessage(null)}>
+                  ×
+                </button>
+              </div>
+            )}
             {room && (
               <PlanCanvas
-                room={room}
+                room={dragPreview ? roomOf(dragPreview) : room}
+                baseRoom={room}
+                onCornerDrag={(from, to, done) => handleDrag(moveCorner(draft!, env, from, to), done)}
+                onWallSlide={(wallId, distance, done) => handleDrag(slideWall(draft!, env, wallId, distance), done)}
+                onDragCancel={() => setDragPreview(null)}
                 tool={tool}
                 selection={selection}
                 issues={issues}

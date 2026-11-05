@@ -56,6 +56,11 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 - **Exact:** where each cabinet sits on its wall, its overall width, height and depth, and every setting the designer chooses.
 - **A likeness only:** how the box is drawn being built.
 
+### 2026-11-05: The interpreter knows our UCS rules (BUILD_SPEC OA-18)
+- The platform knows what each of our UCSs does. The editor shows the effect, the interpreter sends only the trigger setting, and the read-back checks the effect appeared.
+- Each UCS's effects are written in its header in the `cabinet-vision-ucs` repo. The platform reads them from there and never retypes them.
+- The storage is PROPOSED (ARCHITECTURE "Knowing what our UCSs do"): automatic effects in the catalog, linked to UCSs by the adapter.
+
 ### Still in force from the earlier plan (2026-10-24 and before)
 - Modular monolith with enforced module boundaries; one owner per table; data, not code.
 - Fail loudly: alerts persist until a person resolves them with a note. Never show false success.
@@ -109,6 +114,8 @@ Details and context for each: `docs/intake/design-workflow.md`.
   - **Route B:** the ORDX file can't carry them, so each UCS works the setting out from something ORDX does carry (for example the cabinet's catalog entry, its sizes or its material).
 
   Whichever works is proven with the before-and-after sample pair, and each setting's route is recorded in its mapping. Until then, nothing assumes either route (CLAUDE.md rule 9).
+- **UE-1 When a UCS sets something, can the designer still change it?** Example: the toe kick recess is set by the finished-end UCS. Proposed: the editor shows it as automatic and doesn't let the designer change it, because the UCS would overwrite their change anyway. If a designer needs a different value, that's a new setting and a UCS change. Is that right?
+- **UE-2 The first UCS export.** The toe kick example isn't in the UCS repo yet, because no UCSs have been exported from Cabinet Vision. The export (UCS repo README, "What's still needed") is now needed for the platform too.
 - **PR-1** Please share the pricing spreadsheet; it wasn't in the upload.
 - **H-1** Cabinet heights: 7', 8', 10', to the ceiling (image selector) or 84", 96", 108", custom (design software)?
 - **PV-1** The client sees no price until fine-tuning, but the "Maximum" drawers option shows a drawer cost. When is that shown?

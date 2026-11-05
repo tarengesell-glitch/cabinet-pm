@@ -36,6 +36,7 @@ Core owns no tables. It owns the master copy *format*: Job, Room, Wall, PlacedIt
 - **options**, **invalid_option_combinations**.
 - **catalog_versions**: a numbered snapshot per shop, so a job can be checked against the catalog as it was.
 - **shop_item_availability**: whether an item is available, excluded or "manual work required".
+- **automatic_effects** (OA-18, PROPOSED): the trigger (a setting value or a condition on the item, as structured data), what it changes (for example the toe kick recess), the value, a plain-language description, and whether it is shown in the editor. Versioned with the catalog. No vendor names.
 - **prices** (PROPOSED here, because "pricing reads from the catalog"; the price structure is an open question, DECISIONS E-3). The owner's estimate is an exact number from formulas (OA-16); the formulas are stored as data once the spreadsheet arrives (PR-1).
 
 ## shop-settings
@@ -55,6 +56,7 @@ Core owns no tables. It owns the master copy *format*: Job, Room, Wall, PlacedIt
 ## adapters/cabinet-vision
 
 - **mappings**: our catalog item plus option combination → the shop's Cabinet Vision entry and parameters, and any **UCS parameters** with their values and types (OA-17; each must exist in the `cabinet-vision-ucs` repo's parameter list, at a recorded commit, and the route by which the value reaches the UCS: set directly in ORDX, or worked out by the UCS from something ORDX carries; see DECISIONS CV-3), the Cabinet Vision catalog version it was verified against, status (current | stale | unverified), and who verified it.
+- **effect_links** (OA-18, PROPOSED): automatic effect → the UCS that does it (file and list name), the `cabinet-vision-ucs` commit it was verified against, the trigger's route (CV-3), its place in the UCS order if it overlaps another effect, status (current | stale | unverified), and who verified it.
 - **catalog_syncs**: the raw library export (in Storage), the diff found (added, removed, changed) and the mappings it flagged.
 - **translations**: master copy version, mapping snapshot, writer code version, file (in Storage), content hash.
 - **readbacks**: the source (decided in Phase 0), raw file reference, and the returned master copy version.

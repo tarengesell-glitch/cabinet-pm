@@ -18,7 +18,7 @@ Write `docs/cabinet-vision/FORMAT_REFERENCE.md`, the ORDX format reference that 
    - width, height and depth;
    - options and selections (door style, finish, hardware, construction);
    - modifications (scribe, end panel…);
-   - **custom and UCS parameters** (OA-17): whether an imported ORDX can set our UCS parameters (the `MT_` settings in the `cabinet-vision-ucs` repo) on each cabinet, and exactly how they appear. Also whether section, shelf and drawer positions travel as built-in values. For each setting, say whether route A (ORDX sets it directly) or route B (a UCS works it out from what ORDX carries) is possible. This answers DECISIONS CV-3;
+   - **custom and UCS parameters** (OA-17): whether an imported ORDX can set our UCS parameters (the `MT_` settings in the `cabinet-vision-ucs` repo) on each cabinet, and exactly how they appear. Also whether section, shelf and drawer positions travel as built-in values. For each setting, say whether route A (ORDX sets it directly) or route B (a UCS works it out from what ORDX carries) is possible. This answers DECISIONS CV-3. Also check, on the engineered output, that each UCS's recorded effect (`;EFFECTS:` line) shows up (OA-18);
    - fillers, panels and moldings.
 5. **Job-level data:** job and customer fields, and job-level defaults versus per-item overrides.
 6. **IDs:** which IDs are stable across exports, and whether a renamed item keeps its ID. Use the v1/v2 pair.

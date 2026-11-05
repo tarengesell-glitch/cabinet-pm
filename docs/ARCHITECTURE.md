@@ -161,6 +161,20 @@ The Cabinet Vision adapter turns each setting into either a built-in Cabinet Vis
 
 Read-back compares settings and overall sizes, not construction, because Cabinet Vision owns construction.
 
+## Knowing what our UCSs do (OA-18, PROPOSED)
+
+Our UCSs change cabinets after import. Example: when an applied finished end stands off the floor, a UCS recesses the toe kick 1½". The platform has to know these rules, for three reasons:
+- **the editor shows the result** (the recessed toe kick), so the picture matches what the shop will build;
+- **the interpreter sends the trigger, not the result** (it sends "finished end off the floor", and the UCS does the recess), so we never fight the UCS or apply a change twice;
+- **the read-back expects the result**, so if a UCS is changed, removed or doesn't fire, the comparison catches it.
+
+How it's split, so only the adapter knows the vendor (P2):
+- **The catalog holds "automatic effects"**, in our own words: "when *this setting or condition*, *this* changes, by *this much*". It has no vendor names. The editor and pricing read these. A setting an effect controls is shown as automatic in the editor ("set by the finished end rule"), not as something to type.
+- **The adapter links each automatic effect to the UCS that does it**, at a recorded commit of the `cabinet-vision-ucs` repo, and to the route the trigger takes (CV-3).
+- **The UCS repo is the source of what each UCS does.** Each UCS's header gets an `;EFFECTS:` line in a fixed, plain format. The adapter reads it; nobody retypes the numbers here (rule 6).
+- **Preflight blocks** if a job uses an effect with no linked UCS, or if the linked UCS has changed since the link was verified. **Effects may not be written from memory or general knowledge**: each one comes from a UCS file a person has tested in Cabinet Vision.
+- **UCS list order matters**: later UCSs can override earlier ones. If two effects touch the same thing, the link records which one wins, and the read-back proves it.
+
 ## Photorealistic viewing (OA-3)
 
 The spec put photorealistic rendering out of scope; the owner reversed that on 2026-10-27. What "photorealistic" has to mean (a realistic 3D view the client can turn in the browser, or rendered still images) is open question R-1. Either way, it draws only from the master copy (P6), and its materials come from the visual library.

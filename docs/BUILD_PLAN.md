@@ -55,9 +55,10 @@ Full Product Catalog with versions and the editor for it; **automatic** catalog 
 **Exit:** designers produce jobs that pass the gate and import cleanly.
 
 Before this phase: a UX session that turns `docs/ux/UX_BRIEF.md` into screen specs and design tokens (C-2 must be decided). Then:
-- room capture (rough dimensions first);
+- room setup from the libraries: room type, shape (pick or draw), wall lengths, cabinet positions, preset layouts (OA-13);
+- per-cabinet editing: depth, doors or drawers, sections, shelves, drawer heights, box materials (OA-15; what Cabinet Vision can receive depends on PS-1);
 - the visual editor, drawn only from the master copy, with **live pricing**;
-- **photorealistic viewing** (OA-3; its form depends on R-1);
+- **photorealistic viewing**: a live rotatable 3D view, plus an on-demand AI render labelled as an illustration (OA-3, OA-15);
 - live validation;
 - the ready-to-send gate screen with the four push conditions.
 
@@ -65,7 +66,7 @@ Before this phase: a UX session that turns `docs/ux/UX_BRIEF.md` into screen spe
 
 **Exit:** AI drafts pass validation and need only light designer edits on typical jobs.
 
-Design rules applied, draft generation from rough dimensions + rough appliance locations + intake answers (OA-3), decision explanations, and the review flow with AI-placed items marked.
+The room-by-room loop (OA-14): usage questions, must-haves, recommended features, then current vs recommended with a change list the client accepts or declines. Design rules applied, draft generation from rough dimensions + rough appliance locations + intake answers (OA-3), decision explanations, and the review flow with AI-placed items marked.
 
 ## Phase 7: Projects, intake and the road to the push (can run in parallel with 3–6)
 
@@ -75,8 +76,9 @@ One module per session, in this order (PROPOSED):
 
 | # | Module | Notes |
 |---|---|---|
-| 7a | `projects` | Customers, jobs, quotes priced from the catalog, payment status (PAY-1) |
-| 7b | `intake` | The image selector, seeded from `docs/intake/`. Needs real photos per option |
+| 7a | `projects` | Customers, jobs, the designer home screen (meetings for three days) and tasks (OA-11), quotes priced from the catalog with the owner's formulas (PR-1), payment status (PAY-1) |
+| 7b | `intake` | The image selector, seeded from `docs/intake/`. Needs real photos per option. The self-intake link (OA-12) |
+| 7b2 | `intake` | Plan upload and reading: blueprints and hand sketches into rough rooms, confirmed by the designer (OA-12) |
 | 7c | `appliances` | Rough, then confirmed specs |
 | 7d | `site-measure` | Verified measurements with provenance; tablet and phone (SM-1) |
 | 7e | `approvals` | Client sign-off on an exact version, with a frozen snapshot |

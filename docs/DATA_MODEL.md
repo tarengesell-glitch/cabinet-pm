@@ -35,10 +35,11 @@ Core owns no tables. It owns the master copy *format*: Job, Room, Wall, PlacedIt
 - **options**, **invalid_option_combinations**.
 - **catalog_versions**: a numbered snapshot per shop, so a job can be checked against the catalog as it was.
 - **shop_item_availability**: whether an item is available, excluded or "manual work required".
-- **prices** (PROPOSED here, because "pricing reads from the catalog"; the price structure is an open question, DECISIONS P-1).
+- **prices** (PROPOSED here, because "pricing reads from the catalog"; the price structure is an open question, DECISIONS E-3). The owner's estimate is an exact number from formulas (OA-16); the formulas are stored as data once the spreadsheet arrives (PR-1).
 
 ## shop-settings
 
+- **cabinet_layouts** (OA-13): the premade layouts for a run, per room shape and cabinet position, with a popularity count (POP-1). Fixed list: designers can't add to it.
 - **design_rules**: structured rule, plain-language description, default severity (warn), and the shop's promotion to block.
 - **default_selections**, **preferences**.
 
@@ -71,6 +72,8 @@ Core owns no tables. It owns the master copy *format*: Job, Room, Wall, PlacedIt
 ## projects
 
 - **customers**, **leads**, **jobs** (job_id shared with the master copy; status, owner, target delivery date), **quotes**, **quote_lines**, **milestones**, **schedule_entries**.
+- **tasks** (OA-11): client, title, details, due date (optional), assignee, status (open | done). Deleting is a soft delete.
+- **meetings** (OA-11): read from a calendar connector (CAL-1), shown per designer for the next three days. Labelled as mocked until the connector is real.
 - **payments**: amount, status and reference from the payment connector. "Paid" for the push gate is open (PAY-1).
 - Stores no design data. Quotes are priced from the catalog and a named master copy version. An issued quote freezes the prices it used (earlier decision, still in force).
 
@@ -78,7 +81,20 @@ Core owns no tables. It owns the master copy *format*: Job, Room, Wall, PlacedIt
 
 - **intake_questions**: room type, order, conditions (for example "if there's an island"), fidelity (line drawing | photorealistic).
 - **intake_options**: label, image asset, a link to a catalog option (if it is a real selection) or a style tag (if it is guidance).
+- **intake_sessions** (OA-12): job, who started it (designer | customer), the self-intake link (expiring, single-job), and status. The same form serves both.
 - **intake_answers**: job, room, question, option, status (selected, not sure, skipped, needs follow-up, confirmed), who, when. The option ID is the source of truth, not the label.
+
+## room-setup libraries (OA-13, PROPOSED owner: designer)
+
+- **room_types**: name, and whether it was added by a designer (who, when).
+- **room_shapes**: room type, the overhead line drawing (walls with 90° or 45° corners, doors and windows, **no measurements**), popularity count, added by.
+- **cabinet_positions**: room shape, which walls (and which parts of them) carry cabinet runs, popularity count, added by.
+- A designer's new type, shape or position is added for everyone. PROPOSED: it is shown to others only after an admin approves it, so a one-off doesn't clutter the list. (Owner to confirm.)
+
+## plan files (OA-12, owner: intake)
+
+- **plan_files**: job, the uploaded file (in Storage), kind (blueprint | hand sketch | photo), uploaded by.
+- **plan_readings**: file, what was read (rooms, labels, scale, wall lengths, fixtures), how (ai | manual), and the designer's confirmation. Each confirmed room links back to its file. Readings are `rough` until the site measure.
 
 ## appliances (OA-4, OA-5)
 

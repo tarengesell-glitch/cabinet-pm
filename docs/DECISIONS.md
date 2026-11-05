@@ -33,6 +33,18 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
   - automated client reminders with a deadline ticker;
   - automatic ordering of materials, doors, counters, handles and add-ons when a job goes into production.
 
+### 2026-11-05: The design software outline (BUILD_SPEC OA-11 to OA-16, `docs/intake/design-workflow.md`)
+- The designer's home screen shows the next three days of meetings, with "Add a client" and "Add a task". Tasks belong to clients.
+- Customer intake can be started by the designer and finished by the customer (self-intake link), or the other way round.
+- Uploaded plans and hand sketches are read into rooms, which the designer confirms. They are rough inputs; the site measure still confirms them.
+- Room types, room shapes and cabinet positions come from libraries that designers can add to. Cabinet layouts come from a fixed premade list.
+- The room-by-room loop is where the tool recommends a design; the client accepts or declines each change. No price is shown there.
+- A live 3D view from layout onwards; an AI-made photorealistic render on demand (answers part of R-1).
+- The estimate is exact, from formulas, and first appears in the fine-tune step.
+- Interior materials: white melamine (basic), woodgrain Prestige maple melamine (upgraded), melamine matching the exterior (premium). Answers IK-6.
+- Exterior materials come from Tafisa's melamine line; handles from Richelieu.
+- The database is the Supabase project "closet-builder" in the Gesell/Gray organization. How it is used is open (CL-1).
+
 ### Still in force from the earlier plan (2026-10-24 and before)
 - Modular monolith with enforced module boundaries; one owner per table; data, not code.
 - Fail loudly: alerts persist until a person resolves them with a note. Never show false success.
@@ -76,6 +88,21 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 - **PO-1 Automatic ordering.** Who places the orders (you or the colony), which suppliers, and how does each take orders (email, portal, API)? Do "materials" mean sheet goods sent to the colony?
 - **MSG-1 Channels.** Which email (Gmail?), which texting service, and which meeting tool's transcripts? Do reminders go by text, email or both?
 - **IK-1 to IK-7** Kitchen intake questions, in `docs/intake/kitchen.md`.
+
+### From the design software outline (2026-11-05)
+Details and context for each: `docs/intake/design-workflow.md`.
+- **PR-1** Please share the pricing spreadsheet; it wasn't in the upload.
+- **H-1** Cabinet heights: 7', 8', 10', to the ceiling (image selector) or 84", 96", 108", custom (design software)?
+- **PV-1** The client sees no price until fine-tuning, but the "Maximum" drawers option shows a drawer cost. When is that shown?
+- **FL-1** Is the overall journey intake → plans → room-by-room loop → fine-tune, with the shape and layout pickers used inside it?
+- **SH-1** Should the image selector's kitchen shape pre-select the room shape?
+- **CL-1** Does this tool live in the existing "closet-builder" Supabase project and reuse its tables, or get a fresh schema there? (Ties to C-1.)
+- **CAL-1** Which calendar feeds the home screen's meetings?
+- **PS-1** Can ORDX carry section, shelf and drawer positions? (Phase 0; until known, these edits are "manual work in Cabinet Vision".)
+- **POP-1** Where does "most popular" come from before we have job history?
+- **RT-1** The starting list of room types. Is "Closet Builder" the fine-tune screen or the whole tool?
+- **R-1** is now partly answered (OA-15): a live 3D view plus an on-demand AI render. Still open: is the AI render shown to clients as a likeness only? (We propose labelling it "illustration", since an AI picture can't be guaranteed exact.)
+- **IK-6** is answered: see the 2026-11-05 decisions.
 
 ### From the spec (section 11)
 - **S-1** Which Cabinet Vision versions do target shops run, and does ORDX behave the same across them?

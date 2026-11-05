@@ -4,14 +4,15 @@ You are working on a cabinet design and CAD handoff platform for a residential c
 
 It is used only for our own sales, never sold. The manufacturing partner (a "shop") is a Hutterite colony: there is one today, and the code must allow more.
 
-The spec's owner amendments (OA-1 to OA-10, at the top of `docs/BUILD_SPEC.md`) add:
+The spec's owner amendments (OA-1 to OA-16, at the top of `docs/BUILD_SPEC.md`) add:
 - the visual intake;
 - photorealistic viewing and live pricing;
 - a push gated on client sign-off, confirmed appliances, a site measure and payment;
 - automatic library sync and read-back;
 - a conversation tally;
 - client reminders;
-- automatic ordering.
+- automatic ordering;
+- the designer's home screen and tasks, plan reading, room setup from growing libraries, the room-by-room recommendation, per-cabinet editing, an AI render, and formula pricing (OA-11 to OA-16, `docs/intake/design-workflow.md`).
 
 Before any work, read:
 - `docs/BUILD_SPEC.md` (the owner's spec; authority);

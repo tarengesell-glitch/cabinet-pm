@@ -84,6 +84,10 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
   - **No walls on top of each other.** Drawing or typing a wall back over an existing one is refused with a reason. The owner's screenshot showed two walls doubled back on each other, which looked like odd shading.
   - **Problem walls get a dashed red outline**, not a translucent red glow (the glow looked like shading). Corners are mitred only where exactly two walls meet; anywhere else they get square ends.
   - **Notices float over the top of the plan** and can be dismissed. The plan no longer jumps down when one appears.
+- **Room drawing feedback, round 4 (owner, 2026-11-05):**
+  - **Less is more** (standing rule, recorded at the top of `docs/ux/UX_BRIEF.md`): always reduce clutter, and never add information "just in case". So the ?, ✎ and ✓ markers were removed from wall labels and status tags; the plan shows status by colour and the panel in words. No key or legend was added.
+  - **Lengths are shown in inches and fractions of an inch only**, for example `68 11/16"`, never feet. Approximate lengths (slanted walls) are rounded to the nearest 1/16" and marked ≈. Feet are still accepted when typing.
+  - **Changing a wall's length never changes the angle of the walls joined to it.** Dragging an end handle (or typing a length) moves that end along the wall's own line. The wall joined at that end moves across with it, keeping its angle and length, and the next wall stretches. Doors and windows stay where they are in the room, and a change that would cut through one is refused. Holding Option/Alt while dragging an end still moves the corner freely, to make an angled wall.
 - Room capture is pulled ahead of Phase 5 (BUILD_PLAN). Order: scaffold (1a), then Core walls and openings, then the Designer drawing screen.
 
 ### 2026-11-05: Where the work lives and deploys

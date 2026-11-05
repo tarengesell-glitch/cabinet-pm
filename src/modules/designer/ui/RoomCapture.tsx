@@ -20,6 +20,7 @@ import {
   loadJob,
   moveCorner,
   moveOpening,
+  resizeWall,
   slideWall,
   placeOpening,
   redo,
@@ -43,11 +44,11 @@ import { downloadText, readStored, writeStored } from './storage';
 import s from './RoomCapture.module.css';
 
 const TOOL_HINT: Record<Tool, string> = {
-  select: 'Tap a wall, door or window to edit it. Drag across the plan to select several walls (Shift-click adds one). Delete removes what is selected. Scroll to zoom; scroll sideways to move left and right.',
-  draw: 'Tap corner to corner. Snaps to corners, whole inches and 45°. Tap the first corner, or Finish, to stop.',
-  door: 'Move the door onto a wall (it shows the distance to each end), then click to place it. Drag it or type sizes after.',
-  window: 'Move the window onto a wall (it shows the distance to each end), then click to place it. Drag it or type sizes after.',
-  passthrough: 'Move the passthrough onto a wall (it shows the distance to each end), then click to place it. Drag it or type sizes after.',
+  select: 'Tap a wall, door or window to edit it.',
+  draw: 'Tap corner to corner. Tap the first corner, or Finish, to stop.',
+  door: 'Move onto a wall and click to place.',
+  window: 'Move onto a wall and click to place.',
+  passthrough: 'Move onto a wall and click to place.',
 };
 
 export function RoomCapture({ user }: { user: User }) {
@@ -300,6 +301,9 @@ export function RoomCapture({ user }: { user: User }) {
                 baseRoom={room}
                 onCornerDrag={(from, to, done) => handleDrag(moveCorner(draft!, env, from, to), done)}
                 onWallSlide={(wallId, distance, done) => handleDrag(slideWall(draft!, env, wallId, distance), done)}
+                onWallResize={(wallId, which, length, done) =>
+                  handleDrag(resizeWall(draft!, env, wallId, which, { value: length, source_mm: null }, 'dragged'), done)
+                }
                 onDragCancel={() => setDragPreview(null)}
                 tool={tool}
                 selection={selection}

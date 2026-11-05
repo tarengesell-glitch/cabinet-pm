@@ -57,9 +57,9 @@ test('drops a standard window, then the checks react to edits', async ({ page })
   // A standard window drops in with no typing.
   await wallButtons(page).first().click();
   await page.getByRole('button', { name: '+ Window' }).click();
-  await expect(page.getByTestId('value-Width')).toHaveText(`3' 0"`);
-  await expect(page.getByTestId('value-Height')).toHaveText(`4' 0"`);
-  await expect(page.getByTestId('value-Sill height')).toHaveText(`3' 0"`);
+  await expect(page.getByTestId('value-Width')).toHaveText(`36"`);
+  await expect(page.getByTestId('value-Height')).toHaveText(`48"`);
+  await expect(page.getByTestId('value-Sill height')).toHaveText(`36"`);
   await expect(checks(page).getByText('No problems found')).toBeVisible();
 
   // Make it too tall for the 8' ceiling.
@@ -96,20 +96,24 @@ test('drops a standard door by tapping a wall with the door tool', async ({ page
   });
   await page.mouse.click(box.x + point.x, box.y + point.y);
   await expect(page.getByRole('heading', { name: /^Door on/ })).toBeVisible();
-  await expect(page.getByTestId('value-Width')).toHaveText(`2' 8"`);
-  await expect(page.getByTestId('value-Height')).toHaveText(`6' 8"`);
-  await expect(page.getByTestId('value-From wall start')).toHaveText(`4' 8"`); // centred: 72" - 16"
+  await expect(page.getByTestId('value-Width')).toHaveText(`32"`);
+  await expect(page.getByTestId('value-Height')).toHaveText(`80"`);
+  await expect(page.getByTestId('value-From wall start')).toHaveText(`56"`); // centred: 72" - 16"
 });
 
-test('typing a wall length moves the joined wall, which goes back to rough', async ({ page }) => {
+test('typing a wall length moves the joined wall across without changing its angle', async ({ page }) => {
   await startRoom(page);
   await typeRectangle(page);
   await wallButtons(page).first().click();
   await page.getByRole('button', { name: 'Edit Length' }).click();
   await page.getByRole('textbox', { name: 'Length' }).fill(`13'`);
   await page.getByRole('button', { name: 'Save' }).click();
-  await expect(page.getByTestId('value-Length')).toHaveText(`13' 0"`);
-  await expect(page.getByText(/Wall 2 changed length because it shares that corner/)).toBeVisible();
+  await expect(page.getByTestId('value-Length')).toHaveText(`156"`);
+  // Wall 2 moved across, still 120"; wall 3 stretched to stay joined.
+  await expect(page.getByText(/Wall 3 changed length/)).toBeVisible();
+  await page.getByRole('button', { name: '← Room' }).click();
+  await expect(page.getByRole('button', { name: /^Wall 2: 120"/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /^Wall 3: 156"/ })).toBeVisible();
   await expect(checks(page).getByText('No problems found')).toBeVisible();
 });
 
@@ -142,7 +146,7 @@ test('loads the example rooms', async ({ page }) => {
   await page.goto('/rooms/preview');
   await page.getByRole('button', { name: /Example L-shaped room/ }).click();
   await expect(page.getByRole('heading', { name: 'Laundry', level: 1 })).toBeVisible();
-  await expect(page.getByRole('button', { name: /^Wall 3: ≈ 4' 0"/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /^Wall 3: ≈ 48"/ })).toBeVisible();
   await expect(checks(page).getByText('No problems found')).toBeVisible();
 });
 
@@ -242,7 +246,7 @@ test('a window ghost follows the cursor, snaps to a wall, and lands where it sho
 
   await page.mouse.click(x, y);
   await expect(page.getByRole('heading', { name: /^Window on/ })).toBeVisible();
-  await expect(page.getByTestId('value-Width')).toHaveText(`3' 0"`);
+  await expect(page.getByTestId('value-Width')).toHaveText(`36"`);
 });
 
 test('the scroll wheel zooms, a sideways scroll moves left and right, Fit resets', async ({ page }) => {
@@ -290,11 +294,13 @@ const centreOf = async (page: Page, selector: string) => {
   return { x: box.x + r.x + r.width / 2, y: box.y + r.y + r.height / 2 };
 };
 
-async function dragFrom(page: Page, from: { x: number; y: number }, dx: number, dy: number) {
+async function dragFrom(page: Page, from: { x: number; y: number }, dx: number, dy: number, holdAlt = false) {
   await page.mouse.move(from.x, from.y);
   await page.mouse.down();
+  if (holdAlt) await page.keyboard.down('Alt');
   await page.mouse.move(from.x + dx, from.y + dy, { steps: 6 });
   await page.mouse.up();
+  if (holdAlt) await page.keyboard.up('Alt');
 }
 
 test('a selected wall has handles: slide it by the middle, move a corner by an end', async ({ page }) => {
@@ -306,18 +312,21 @@ test('a selected wall has handles: slide it by the middle, move a corner by an e
   // Slide wall 2 outward: it keeps its length and tag, walls 1 and 3 stretch and go rough.
   await dragFrom(page, await centreOf(page, '.handle-middle'), 40, 0);
   await expect(page.getByText(/Wall 1 changed length/)).toBeVisible();
-  await expect(page.getByTestId('value-Length')).toHaveText(`10' 0"`);
+  await expect(page.getByTestId('value-Length')).toHaveText(`120"`);
   await expect(page.getByRole('heading', { name: /^Wall 2/ })).toBeVisible(); // still selected
 
   // One undo puts it back.
   await page.getByRole('button', { name: 'Undo' }).click();
   await page.getByRole('button', { name: '← Room' }).click();
-  await expect(page.getByRole('button', { name: /^Wall 1: 12' 0"/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /^Wall 1: 144"/ })).toBeVisible();
 
-  // Move wall 2's top corner straight up: wall 2 gets longer.
+  // Drag wall 2's top end up: wall 2 gets longer along its own line; nothing changes angle.
   await wallButtons(page).nth(1).click();
-  await dragFrom(page, await centreOf(page, '.handle-end'), 0, -40);
-  await expect(page.getByTestId('value-Length')).not.toHaveText(`10' 0"`);
+  await dragFrom(page, await centreOf(page, '.handle-end'), 25, -40); // sideways part is ignored
+  await expect(page.getByTestId('value-Length')).not.toHaveText(`120"`);
+  await page.getByRole('button', { name: '← Room' }).click();
+  await expect(page.getByRole('button', { name: /^Wall 3: 144"/ })).toBeVisible(); // top wall moved up, same length
+  await expect(page.getByRole('button', { name: /^Wall 4: / })).not.toHaveText(/^Wall 4: 120"/);
   await expect(page.locator('[data-provenance="rough"]').first()).toBeVisible();
 });
 
@@ -333,11 +342,11 @@ test('a problem wall gets a dashed outline, not a glow', async ({ page }) => {
   await page.goto('/rooms/preview');
   await page.getByRole('button', { name: /Example kitchen/ }).click();
   await expect.poll(() => konvaRect(page, '.issue-outline')).toBeNull();
-  // Drag wall 3's far corner down past the bottom wall, so walls cross.
+  // Option/Alt-drag wall 3's far corner (a free move) down past the bottom wall, so walls cross.
   await wallButtons(page).nth(2).click();
   const corner = await centreOf(page, '.handle-end');
   const bottom = await centreOf(page, '.wall-1');
-  await dragFrom(page, corner, 40, bottom.y + 40 - corner.y);
+  await dragFrom(page, corner, 40, bottom.y + 40 - corner.y, true);
   await expect(page.getByRole('region', { name: 'Checks' }).getByText(/cross each other/)).toBeVisible();
   await expect.poll(() => konvaRect(page, '.issue-outline')).not.toBeNull();
 });

@@ -11,7 +11,6 @@ export type Length = number;
 /** 1/64 inch per inch. The definition of the base unit, not a business value. */
 export const UNITS_PER_INCH = 64;
 const INCHES_PER_FOOT = 12;
-const UNITS_PER_FOOT = UNITS_PER_INCH * INCHES_PER_FOOT;
 
 export const isLength = (value: unknown): value is Length => typeof value === 'number' && Number.isSafeInteger(value);
 
@@ -124,12 +123,14 @@ function gcd(a: number, b: number): number {
   return b === 0 ? a : gcd(b, a % b);
 }
 
-/** A length for people to read: `10' 2 1/4"`, `2 1/4"`, `3/8"`, `-1 1/2"`. Exact. */
+/**
+ * A length for people to read, in inches and fractions of an inch only (owner, 2026-11-05):
+ * `68 11/16"`, `2 1/4"`, `3/8"`, `-1 1/2"`. Exact. Feet are never shown, but parseImperial
+ * still accepts them as input.
+ */
 export function formatInches(length: Length): string {
   const sign = length < 0 ? '-' : '';
-  const abs = Math.abs(length);
-  const feet = Math.floor(abs / UNITS_PER_FOOT);
-  const rem = abs - feet * UNITS_PER_FOOT;
+  const rem = Math.abs(length);
   const wholeInches = Math.floor(rem / UNITS_PER_INCH);
   const sixtyFourths = rem - wholeInches * UNITS_PER_INCH;
   let fraction = '';
@@ -139,5 +140,14 @@ export function formatInches(length: Length): string {
   }
   const inchPart =
     wholeInches === 0 && fraction !== '' ? `${fraction}"` : fraction === '' ? `${wholeInches}"` : `${wholeInches} ${fraction}"`;
-  return feet > 0 ? `${sign}${feet}' ${inchPart}` : `${sign}${inchPart}`;
+  return `${sign}${inchPart}`;
+}
+
+/**
+ * A length that is only approximate (for example a slanted wall's true length), rounded to
+ * the nearest 1/16" so it reads easily: `about 58 7/16"`. Display only, never stored.
+ */
+export function formatInchesApprox(length: Length): string {
+  const sixteenth = UNITS_PER_INCH / 16;
+  return `about ${formatInches(Math.round(length / sixteenth) * sixteenth)}`;
 }

@@ -13,6 +13,7 @@ import {
   moveOpening,
   slideWall,
   nearestWall,
+  resizeWall,
   placeOpening,
   redo,
   room,
@@ -99,16 +100,16 @@ describe('starting and drawing a room', () => {
     const d = rectangle(testEnv());
     expect(d.job.history.map((h) => h.summary)).toEqual([
       'Started room "Kitchen"',
-      `Added wall 1 (12' 0")`,
-      `Added wall 2 (10' 0")`,
-      `Added wall 3 (12' 0")`,
-      `Added wall 4 (10' 0")`,
+      `Added wall 1 (144")`,
+      `Added wall 2 (120")`,
+      `Added wall 3 (144")`,
+      `Added wall 4 (120")`,
     ]);
   });
 });
 
 describe('typing a wall length', () => {
-  it('moves the far corner and the next wall with it, which goes back to rough', () => {
+  it('moves the far end along the wall; the joined wall slides across keeping its angle', () => {
     const env = testEnv();
     let d = rectangle(env);
     const [w1, w2] = room(d).walls;
@@ -117,9 +118,33 @@ describe('typing a wall length', () => {
     if (!r.ok) throw new Error(r.reason);
     const walls = room(r.value.draft).walls;
     expect(walls[0]!.end_point).toEqual({ x: 13 * FT, y: 0 });
+    // Wall 2 moved across as a whole: still upright, still 10', still verified.
     expect(walls[1]!.start_point).toEqual({ x: 13 * FT, y: 0 });
-    expect(walls[1]!.length_provenance).toBe('rough');
-    expect(r.value.notices[0]).toMatch(/Wall 2 changed length/);
+    expect(walls[1]!.end_point).toEqual({ x: 13 * FT, y: 10 * FT });
+    expect(walls[1]!.length_provenance).toBe('verified');
+    // Wall 3 stretched to stay joined, so it goes back to rough and says so.
+    expect(walls[2]!.start_point).toEqual({ x: 13 * FT, y: 10 * FT });
+    expect(walls[2]!.length_provenance).toBe('rough');
+    expect(r.value.notices).toEqual([`Wall 3 changed length, so it's back to rough. Measure it again.`]);
+    expect(runChecks(WALL_CHECKS, r.value.draft.job, {}).passed).toBe(true);
+  });
+
+  it('dragging the start end keeps doors and windows where they are in the room', () => {
+    const env = testEnv();
+    let d = rectangle(env);
+    const w1 = room(d).walls[0]!;
+    d = unwrap(placeOpening(d, env, w1.wall_id, 'window', 60 * IN)); // offset 42"
+    const before = room(d).walls[0]!.openings[0]!.offset.value;
+    const r = resizeWall(d, env, w1.wall_id, 'start', size(14 * FT), 'dragged'); // 2' longer at the start
+    if (!r.ok) throw new Error(r.reason);
+    const wall = room(r.value.draft).walls[0]!;
+    expect(wall.start_point).toEqual({ x: -2 * FT, y: 0 });
+    expect(wall.openings[0]!.offset.value).toBe(before + 2 * FT); // same place in the room
+    expect(wall.length_provenance).toBe('rough'); // dragged, so approximate
+    // Shortening from the start through the window is refused.
+    const cut = resizeWall(d, env, w1.wall_id, 'start', size(7 * FT), 'dragged');
+    expect(cut.ok).toBe(false);
+    if (!cut.ok) expect(cut.reason).toBe('That would cut through the window on wall 1.');
   });
 
   it('is measured, never verified, when typed', () => {
@@ -179,7 +204,7 @@ describe('doors and windows', () => {
     const tall = unwrap(setSize(placed, env, { kind: 'opening', id, field: 'height', }, size(64 * IN)));
     const run = runChecks(WALL_CHECKS, tall.job, {});
     expect(run.passed).toBe(false);
-    expect(run.issues[0]!.message).toMatch(/but the ceiling is only 8' 0" high \(4" too tall\)/);
+    expect(run.issues[0]!.message).toMatch(/but the ceiling is only 96" high \(4" too tall\)/);
   });
 
   it('move along the wall when dragged, and the new position is rough', () => {

@@ -183,10 +183,28 @@ function moveCorners(draft: Draft, env: Env, moves: readonly (readonly [Point, P
       walls.push({ ...w, start_point: start, end_point: end });
       continue;
     }
+    // A wall that stays on the same line keeps its doors, windows and obstacles where they
+    // are in the room: their offsets (measured from the start corner) shift if the start moved.
+    let { openings, obstacles } = w;
+    const ox = w.end_point.x - w.start_point.x;
+    const oy = w.end_point.y - w.start_point.y;
+    const nx = end.x - start.x;
+    const ny = end.y - start.y;
+    const sameLine = BigInt(ox) * BigInt(ny) - BigInt(oy) * BigInt(nx) === 0n && ox * nx + oy * ny > 0;
+    if (sameLine && !samePoint(start, w.start_point)) {
+      const len = Math.hypot(ox, oy);
+      const shift = Math.round(((w.start_point.x - start.x) * ox + (w.start_point.y - start.y) * oy) / len);
+      const cut = [...w.openings.map((o) => ({ offset: o.offset.value, what: `the ${o.kind}` })), ...w.obstacles.map((o) => ({ offset: o.offset.value, what: `the ${o.kind}` }))].find(
+        (o) => o.offset + shift < 0,
+      );
+      if (cut) return refuse(`That would cut through ${cut.what} on wall ${i + 1}.`);
+      openings = w.openings.map((o) => ({ ...o, offset: { ...o.offset, value: o.offset.value + shift } }));
+      obstacles = w.obstacles.map((o) => ({ ...o, offset: { ...o.offset, value: o.offset.value + shift } }));
+    }
     if (w.length_provenance !== 'rough' || w.entered_length !== null) {
       notices.push(`Wall ${i + 1} changed length, so it's back to rough. Measure it again.`);
     }
-    walls.push({ ...w, start_point: start, end_point: end, entered_length: null, length_source_mm: null, length_provenance: 'rough' });
+    walls.push({ ...w, start_point: start, end_point: end, entered_length: null, length_source_mm: null, length_provenance: 'rough', openings, obstacles });
   }
   if (touched === 0) return refuse('Nothing moved.');
   for (const [i, a] of walls.entries()) {
@@ -199,7 +217,58 @@ function moveCorners(draft: Draft, env: Env, moves: readonly (readonly [Point, P
   return ok(withRoom(draft, env, summary, { ...r, walls }), notices);
 }
 
-/** Drags a corner to a new point. Every wall meeting at that corner follows. */
+/**
+ * Changes a wall's length along its own line, from one end (owner, 2026-11-05: a length
+ * change never changes the angle of the walls joined to it). The wall joined at that end
+ * moves across with it, keeping its angle and length; whatever is joined beyond that stretches.
+ * Doors and windows stay where they are in the room. Typed lengths are measured; dragged, rough.
+ */
+export function resizeWall(
+  draft: Draft,
+  env: Env,
+  wallId: string,
+  which: 'start' | 'end',
+  size: TypedSize,
+  how: 'typed' | 'dragged',
+): Result<Change> {
+  const r = room(draft);
+  const index = r.walls.findIndex((w) => w.wall_id === wallId);
+  const wall = r.walls[index];
+  if (!wall) return refuse('That wall no longer exists.');
+  if (size.value <= 0) return refuse('A wall needs a length greater than zero.');
+  const fixed = which === 'end' ? wall.start_point : wall.end_point;
+  const moving = which === 'end' ? wall.end_point : wall.start_point;
+  const placed = pointFromLengthAndAngle(fixed, size.value, directionOf(moving.x - fixed.x, moving.y - fixed.y));
+  if (!placed.ok) return refuse(placed.reason);
+  const next = placed.value.point;
+  const v = { x: next.x - moving.x, y: next.y - moving.y };
+  const moves: [Point, Point][] = [[moving, next]];
+  if (v.x !== 0 || v.y !== 0) {
+    for (const w of r.walls) {
+      if (w.wall_id === wallId) continue;
+      const far = samePoint(w.start_point, moving) ? w.end_point : samePoint(w.end_point, moving) ? w.start_point : null;
+      if (!far || samePoint(far, fixed) || moves.some(([from]) => samePoint(from, far))) continue;
+      moves.push([far, { x: far.x + v.x, y: far.y + v.y }]);
+    }
+  }
+  const entered = placed.value.entered_length ?? (size.source_mm !== null ? size.value : null);
+  const tagOnly = v.x === 0 && v.y === 0;
+  const moved = tagOnly
+    ? ok({ ...draft }, [])
+    : moveCorners(draft, env, moves, `Set ${wallLabel(r, wallId)} length to ${formatInches(size.value)}`);
+  if (!moved.ok) return moved;
+  const after = room(moved.value.draft);
+  const walls = after.walls.map((w) =>
+    w.wall_id === wallId
+      ? { ...w, entered_length: entered, length_source_mm: size.source_mm, length_provenance: how === 'typed' ? ('measured' as const) : ('rough' as const) }
+      : w,
+  );
+  const notices = moved.value.notices.filter((n) => !n.startsWith(`Wall ${index + 1} `));
+  const updated = { ...moved.value.draft, job: { ...moved.value.draft.job, rooms: [{ ...after, walls }] } };
+  return ok(tagOnly ? withRoom(updated, env, `Set ${wallLabel(r, wallId)} length to ${formatInches(size.value)}`, room(updated)) : updated, notices);
+}
+
+/** Drags a corner to a new point. Every wall meeting at that corner follows (changes their angles). */
 export function moveCorner(draft: Draft, env: Env, from: Point, to: Point): Result<Change> {
   if (samePoint(from, to)) return refuse('Nothing moved.');
   if (!room(draft).walls.some((w) => samePoint(w.start_point, from) || samePoint(w.end_point, from))) {
@@ -286,38 +355,9 @@ export function setWallsThickness(draft: Draft, env: Env, wallIds: readonly stri
   return ok(withRoom(draft, env, `Set ${wallIds.length} walls' thickness to ${formatInches(size.value)}`, { ...r, walls }));
 }
 
-/**
- * Sets a wall's length by moving its far corner along its current direction.
- * Any wall sharing that corner moves with it. A wall whose length changes that way
- * goes back to rough, because its measurement no longer matches (it says so).
- */
+/** A typed wall length: the far end moves along the wall's line (see resizeWall). */
 function setWallLength(draft: Draft, env: Env, wallId: string, size: TypedSize): Result<Change> {
-  const r = room(draft);
-  const wall = r.walls.find((w) => w.wall_id === wallId);
-  if (!wall) return refuse('That wall no longer exists.');
-  if (size.value <= 0) return refuse('A wall needs a length greater than zero.');
-  const dx = wall.end_point.x - wall.start_point.x;
-  const dy = wall.end_point.y - wall.start_point.y;
-  const placed = pointFromLengthAndAngle(wall.start_point, size.value, directionOf(dx, dy));
-  if (!placed.ok) return refuse(placed.reason);
-  const oldEnd = wall.end_point;
-  const newEnd = placed.value.point;
-  const entered = placed.value.entered_length ?? (size.source_mm !== null ? size.value : null);
-  const notices: string[] = [];
-  const walls = r.walls.map((w, i) => {
-    if (w.wall_id === wallId) {
-      return { ...w, end_point: newEnd, entered_length: entered, length_source_mm: size.source_mm, length_provenance: 'measured' as const };
-    }
-    const movesStart = samePoint(w.start_point, oldEnd);
-    const movesEnd = samePoint(w.end_point, oldEnd);
-    if (!movesStart && !movesEnd) return w;
-    const moved = { ...w, start_point: movesStart ? newEnd : w.start_point, end_point: movesEnd ? newEnd : w.end_point };
-    if (w.length_provenance !== 'rough' || w.entered_length !== null) {
-      notices.push(`Wall ${i + 1} changed length because it shares that corner, so it's back to rough. Measure it again.`);
-    }
-    return { ...moved, entered_length: null, length_source_mm: null, length_provenance: 'rough' as const };
-  });
-  return ok(withRoom(draft, env, `Set ${wallLabel(r, wallId)} length to ${formatInches(size.value)}`, { ...r, walls }), notices);
+  return resizeWall(draft, env, wallId, 'end', size, 'typed');
 }
 
 /** Sets any size the person typed. A typed value is "measured": typing never verifies. */

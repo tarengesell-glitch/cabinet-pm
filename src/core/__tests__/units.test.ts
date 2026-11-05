@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatInches, fromInches, fromMillimetres, parseImperial, UNITS_PER_INCH } from '../units';
+import { formatInches, formatInchesApprox, fromInches, fromMillimetres, parseImperial, UNITS_PER_INCH } from '../units';
 
 const value = (r: { ok: boolean; value?: unknown; reason?: string }) => {
   if (!r.ok) throw new Error(r.reason);
@@ -80,13 +80,19 @@ describe('millimetres (DECISIONS U-2): rounded to the nearest 1/64, original kep
 
 describe('formatInches', () => {
   it('writes lengths the way people read them', () => {
-    expect(formatInches((10 * 12 + 2) * 64 + 16)).toBe(`10' 2 1/4"`);
+    expect(formatInches((10 * 12 + 2) * 64 + 16)).toBe(`122 1/4"`);
+    expect(formatInches((5 * 12 + 8) * 64 + 44)).toBe(`68 11/16"`); // the owner's example
     expect(formatInches(144)).toBe('2 1/4"');
     expect(formatInches(24)).toBe('3/8"');
     expect(formatInches(0)).toBe('0"');
-    expect(formatInches(12 * 64)).toBe(`1' 0"`);
+    expect(formatInches(12 * 64)).toBe(`12"`);
     expect(formatInches(-96)).toBe('-1 1/2"');
     expect(formatInches(1)).toBe('1/64"');
+  });
+
+  it('rounds approximate lengths to the nearest 1/16"', () => {
+    expect(formatInchesApprox(58 * 64 + 27)).toBe('about 58 7/16"'); // 27/64 → 28/64 = 7/16
+    expect(formatInchesApprox(10 * 64 + 1)).toBe('about 10"');
   });
 
   it('round-trips with parseImperial', () => {

@@ -22,6 +22,7 @@ import {
   type Wall,
 } from '@/core/index';
 import { nearestWall, standardOpeningOffset } from '../model/editor';
+import { lengthText } from './format';
 import { STANDARD_SIZES } from '../model/standard-sizes';
 
 export type Tool = 'select' | 'draw' | Opening['kind'];
@@ -81,7 +82,6 @@ const MUTED = '#687582';
 const FILL: Record<Provenance, string> = { rough: '#eeb8ba', measured: '#ad751a', verified: '#16805d' };
 /** Label text by sureness tag: darker than the fill so it stays readable on white. */
 const TEXT: Record<Provenance, string> = { rough: '#b0575b', measured: '#8a5d12', verified: '#13704f' };
-const ICON: Record<Provenance, string> = { rough: '?', measured: '✎', verified: '✓' };
 const ACCENT = '#176b70';
 const DANGER = '#be3d42';
 
@@ -102,6 +102,8 @@ interface Props {
   onMoveOpening: (openingId: string, offset: number) => void;
   /** A corner handle dragged (done = released). The parent previews, then commits on release. */
   onCornerDrag: (from: Point, to: Point, done: boolean) => void;
+  /** An end handle dragged along the wall: the wall's new length from its other end. */
+  onWallResize: (wallId: string, which: 'start' | 'end', length: number, done: boolean) => void;
   /** A wall's middle handle dragged sideways by `distance` (to the wall's left, room units). */
   onWallSlide: (wallId: string, distance: number, done: boolean) => void;
   /** A drag was abandoned (Escape, or the pointer left the plan). */
@@ -222,7 +224,9 @@ export function PlanCanvas(props: Props) {
   };
 
   // Handles on a single selected wall: drag a corner, or the middle to slide the wall.
-  type Drag = { kind: 'corner'; from: Point } | { kind: 'wall'; wallId: string; grabbed: Point };
+  type Drag =
+    | { kind: 'corner'; wallId: string; which: 'start' | 'end'; from: Point }
+    | { kind: 'wall'; wallId: string; grabbed: Point };
   const drag = useRef<Drag | null>(null);
   const handleWall =
     tool === 'select' && canEdit && selection?.kind === 'wall' ? room.walls.find((w) => w.wall_id === selection.id) ?? null : null;
@@ -246,11 +250,26 @@ export function PlanCanvas(props: Props) {
     return p;
   };
 
-  const dragTo = (raw: Point, done: boolean) => {
+  /**
+   * An end handle changes the wall's length along its own line, so no wall changes angle
+   * (owner, 2026-11-05). Holding Option/Alt moves the corner freely instead.
+   */
+  const dragTo = (raw: Point, done: boolean, free = false) => {
     const d = drag.current;
     if (!d) return;
     if (d.kind === 'corner') {
-      props.onCornerDrag(d.from, snapCorner(d.from, raw), done);
+      const wall = props.baseRoom.walls.find((w) => w.wall_id === d.wallId);
+      if (!wall) return;
+      if (free) {
+        props.onCornerDrag(d.from, snapCorner(d.from, raw), done);
+      } else {
+        const fixed = d.which === 'end' ? wall.start_point : wall.end_point;
+        const dx = d.from.x - fixed.x;
+        const dy = d.from.y - fixed.y;
+        const len = Math.hypot(dx, dy) || 1;
+        const along = ((raw.x - fixed.x) * dx + (raw.y - fixed.y) * dy) / len;
+        props.onWallResize(d.wallId, d.which, Math.max(INCH, roundToInch(along)), done);
+      }
     } else {
       const wall = props.baseRoom.walls.find((w) => w.wall_id === d.wallId);
       if (!wall) return;
@@ -372,7 +391,7 @@ export function PlanCanvas(props: Props) {
           const at = pointer(e);
           setHover(at);
           if (drag.current && at) {
-            dragTo(at, false);
+            dragTo(at, false, e.evt.altKey);
             return;
           }
           if (!marquee) return;
@@ -384,7 +403,7 @@ export function PlanCanvas(props: Props) {
         onPointerUp={(e) => {
           if (drag.current) {
             const at = pointer(e);
-            if (at) dragTo(at, true);
+            if (at) dragTo(at, true, e.evt.altKey);
             dragged.current = true; // the click that follows is not a deselect
             return;
           }
@@ -425,8 +444,8 @@ export function PlanCanvas(props: Props) {
             <WallHandles
               wall={handleWall}
               toScreen={toScreen}
-              onGrabCorner={(from) => {
-                drag.current = { kind: 'corner', from };
+              onGrabCorner={(from, which) => {
+                drag.current = { kind: 'corner', wallId: handleWall.wall_id, which, from };
                 setDragging(true);
               }}
               onGrabMiddle={(at) => {
@@ -510,7 +529,7 @@ function PreviewWall({ start, end, toScreen }: { start: Point; end: Point; toScr
     <Group listening={false}>
       <Line points={[a.x, a.y, b.x, b.y]} stroke={ACCENT} strokeWidth={3} dash={[8, 6]} />
       <Circle x={b.x} y={b.y} radius={5} fill={ACCENT} />
-      <Text x={b.x + 10} y={b.y - 22} text={`${d.exact ? '' : '≈ '}${formatInches(d.value)}`} fontSize={13} fill={ACCENT} fontStyle="bold" />
+      <Text x={b.x + 10} y={b.y - 22} text={lengthText(d)} fontSize={13} fill={ACCENT} fontStyle="bold" />
     </Group>
   );
 }
@@ -611,7 +630,8 @@ function WallShape(props: WallShapeProps) {
 
   const fill = FILL[wall.length_provenance];
   const length = distanceForDisplay(wall.start_point, wall.end_point);
-  const label = `${ICON[wall.length_provenance]} ${index + 1}: ${length.exact ? '' : '≈ '}${formatInches(length.value)}`;
+  // Less is more (owner, 2026-11-05): the colour shows how sure we are; the panel says it in words.
+  const label = `${index + 1}: ${lengthText(length)}`;
   const mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
   const labelOffset = h + 14;
   const angleDeg = (Math.atan2(dy, dx) * 180) / Math.PI;
@@ -806,7 +826,7 @@ function GhostOpening(p: { kind: Opening['kind']; wall: Wall; offset: number; to
     <Group listening={false} opacity={0.9} name="ghost-opening">
       <OpeningSymbol kind={kind} s={s} e={e} n={n} h={h} wallWidth={wallWidth} widthPx={std.width * scale} swingAngle={(Math.atan2(u.y, u.x) * 180) / Math.PI} outside={outside} stroke={GHOST} thick />
       <Dimension a={a} b={s} off={inside} text={formatInches(offset)} />
-      <Dimension a={e} b={b} off={inside} text={`${wallLength.exact ? '' : '≈ '}${formatInches(Math.max(0, after))}`} />
+      <Dimension a={e} b={b} off={inside} text={lengthText({ value: Math.max(0, after), exact: wallLength.exact })} />
     </Group>
   );
 }
@@ -826,7 +846,7 @@ function FloatingGhost({ kind, at, scale }: { kind: Opening['kind']; at: V; scal
 function WallHandles({ wall, toScreen, onGrabCorner, onGrabMiddle }: {
   wall: Wall;
   toScreen: (p: Point) => Point;
-  onGrabCorner: (corner: Point) => void;
+  onGrabCorner: (corner: Point, which: 'start' | 'end') => void;
   onGrabMiddle: (at: V) => void;
 }) {
   const a = toScreen(wall.start_point);
@@ -844,9 +864,9 @@ function WallHandles({ wall, toScreen, onGrabCorner, onGrabMiddle }: {
   return (
     <Group name="wall-handles">
       {[
-        { p: a, corner: wall.start_point, name: 'handle-start' },
-        { p: b, corner: wall.end_point, name: 'handle-end' },
-      ].map(({ p, corner, name }) => (
+        { p: a, corner: wall.start_point, name: 'handle-start', which: 'start' as const },
+        { p: b, corner: wall.end_point, name: 'handle-end', which: 'end' as const },
+      ].map(({ p, corner, name, which }) => (
         <Circle
           key={name}
           name={name}
@@ -857,7 +877,7 @@ function WallHandles({ wall, toScreen, onGrabCorner, onGrabMiddle }: {
           stroke={ACCENT}
           strokeWidth={2.5}
           hitStrokeWidth={14}
-          onPointerDown={grab(() => onGrabCorner(corner))}
+          onPointerDown={grab(() => onGrabCorner(corner, which))}
           onMouseEnter={cursor('move')}
           onMouseLeave={cursor('')}
         />

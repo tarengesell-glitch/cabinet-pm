@@ -16,7 +16,8 @@
     "vendor-names": "node scripts/check-vendor-names.mjs",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "check": "npm run lint && npm run typecheck && npm run boundaries && npm run vendor-names && npm run test && npm run build && npm run test:e2e"
+    "check": "npm run lint && npm run typecheck && npm run boundaries && npm run vendor-names && npm run test && npm run build && npm run test:static && npm run test:e2e",
+    "test:static": "playwright test --config playwright.static.config.ts"
   },
   "dependencies": {
     "konva": "^10.9.1",

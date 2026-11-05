@@ -20,7 +20,8 @@ Stop `npm run dev` (Control + C) before `npm run check`: Next.js allows only one
 | `npm run boundaries` | dependency-cruiser: a second, independent check of the dependency table, contracts-only, core's allowed packages and no AI SDKs in core or adapters. |
 | `npm run vendor-names` | Fails if the CAD vendor's name or file format appears outside the allowed folders (CLAUDE.md rule 3). |
 | `npm run test` | Vitest unit and golden tests (`src/**/__tests__/*.test.ts`). |
-| `npm run build` | The production build, exactly as Netlify runs it. In the gate so a push never breaks the live site. |
+| `npm run build` | The production build, exactly as Netlify runs it: plain web pages in `out/`. In the gate so a push never breaks the live site. |
+| `npm run test:static` | Serves `out/` the way Netlify does (`scripts/serve-static.mjs`) and opens the pages in a browser (`e2e-static/`). Catches a build that would show "Page not found" on the live site. |
 | `npm run test:e2e` | Playwright UI tests (`e2e/`), on an iPad landscape viewport. Starts its own dev server on port 3100 (`E2E_PORT` changes it). |
 
 ## Where the rules live
@@ -56,6 +57,6 @@ Stop `npm run dev` (Control + C) before `npm run check`: Next.js allows only one
 Create `src/connectors/<name>/contract.ts`. Connectors may import core and platform only. A mocked connector must say it is mocked in code and in the UI.
 
 ## The live site (Netlify)
-- `netlify.toml` tells Netlify how to build: `npm run build` on Node 22. Netlify adds its Next.js support by itself.
+- `netlify.toml` tells Netlify how to build: `npm run build` on Node 22, then publish the `out/` folder as plain web pages. No Next.js server is involved.
 - Netlify deploys from `main`, so every merge into `main` updates the live site (see CLAUDE.md "Branches, pull requests and merging").
 - The site is public to anyone with its address. It holds no data: each visitor's room stays in their own browser.

@@ -1,8 +1,9 @@
-# Netlify builds the site from GitHub on every push (DECISIONS: hosting is Netlify).
-# Netlify recognises Next.js and adds its Next.js support automatically.
+# Netlify builds the site from GitHub on every merge into main (DECISIONS: hosting is Netlify).
+# The build makes plain web pages in `out/` (next.config.ts: output 'export'), which Netlify
+# serves as they are. No Next.js server runtime is involved.
 [build]
   command = "npm run build"
-  publish = ".next"
+  publish = "out"
 
 [build.environment]
   NODE_VERSION = "22"

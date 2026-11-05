@@ -57,5 +57,5 @@ Create `src/connectors/<name>/contract.ts`. Connectors may import core and platf
 
 ## The live site (Netlify)
 - `netlify.toml` tells Netlify how to build: `npm run build` on Node 22. Netlify adds its Next.js support by itself.
-- Netlify rebuilds the site on every push to the branch it watches. Set that branch in Netlify under **Site configuration → Build & deploy → Branches**. Until the work is merged into `main`, that branch is `claude/sharp-thompson-rxi4n1`.
+- Netlify deploys from `main`, so every merge into `main` updates the live site (see CLAUDE.md "Branches, pull requests and merging").
 - The site is public to anyone with its address. It holds no data: each visitor's room stays in their own browser.

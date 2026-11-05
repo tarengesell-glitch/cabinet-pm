@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { runChecks, type Check } from '../checks';
 import { JobSchema, type Job } from '../schema/master-copy';
 import { WALL_CHECKS, fitsAlongWall, fitsWallHeight, openingsOverlap, wallZeroLength, wallsCross } from '../layout/wall-checks';
-import { inch } from './fixtures/helpers';
-import { kitchen, lShapeWithAngledWall } from './fixtures/rooms';
+import { inch } from '../examples/helpers';
+import { kitchen, lShapeWithAngledWall } from '../examples/rooms';
 
 const room0 = (job: Job) => job.rooms[0]!;
 const ctx = {};

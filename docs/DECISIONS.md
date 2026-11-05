@@ -59,6 +59,7 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 - **A-1 answered: the angle convention.** Angles are whole numbers of hundredths of a degree (22.5° is 2250), counter-clockwise from the room's +X axis. Room coordinates have Y pointing up, as on paper, so 90° points up the plan. Stored angles run from 0 to 35999. Details are in `src/core/README.md`.
 - **Slanted walls: corners are rounded.** A wall typed as a length and an angle that isn't 0°, 90°, 180° or 270° rarely ends on a 1/64" mark. Its corner is rounded to the nearest 1/64", and the typed length is kept with the wall (`entered_length`), as with the mm rule. The stored wall stays within about 1/90" of the typed length. Walls at 0°, 90°, 180° and 270° are exact.
 - **Sureness tags (provenance) approved.** Every wall length, wall height and thickness, opening and obstacle dimension, and ceiling height records `rough` (from the client or intake), `measured` (entered on site) or `verified`. Entering a value never verifies it. This was PROPOSED in DATA_MODEL "core".
+- **The room preview keeps its draft in the browser** (`localStorage`) until the platform master copy store exists. The screen says "saved in this browser only", and any storage failure is shown in red. Owner asked for something to try (2026-11-05).
 - Room capture is pulled ahead of Phase 5 (BUILD_PLAN). Order: scaffold (1a), then Core walls and openings, then the Designer drawing screen.
 
 ### Replaced on 2026-10-27
@@ -81,6 +82,9 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
   - `visual-library` may import only `platform` and the catalog contract, exactly as the table says, so not `core`. "Item IDs only" is not checked by a tool; it is in the module's `CLAUDE.md`.
   - The vendor-name check also allows the root `CLAUDE.md`, `README.md` and `prompts/`, which are project documents like `docs/`. Lock-file integrity hashes are ignored, because random letters could spell the format name.
   - Only the parts of the stack that the scaffold uses are installed. Supabase, Drizzle, Tailwind, shadcn/ui and react-konva come with the first code that needs them.
+- **PROPOSED (room preview, 2026-11-05):**
+  - The starting permissions are `room.view` and `room.edit` for owner, admin and designer (`src/platform/permissions/roles.json`).
+  - A mocked preview user and preview shop stand in until sign-in and shops exist, and are labelled on screen.
 - **PROPOSED:**
   - the `core/` / `platform/` split, and the master copy stored as versioned JSON with the named writers (ARCHITECTURE);
   - appliance placements added to the master copy (DATA_MODEL "core"). Dimension provenance was approved on 2026-11-05.

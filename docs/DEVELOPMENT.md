@@ -5,6 +5,9 @@
 - `npm install`
 - Playwright needs a Chromium. Install it once with `npx playwright install chromium`, or set `PLAYWRIGHT_CHROMIUM_PATH` to an existing Chromium binary.
 
+## Trying the app
+`npm run dev`, then open http://localhost:3000/rooms/preview for the room drawing preview. See `src/modules/designer/README.md` for what it does.
+
 ## Everyday commands
 | Command | What it does |
 |---|---|

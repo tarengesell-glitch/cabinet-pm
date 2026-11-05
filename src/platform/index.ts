@@ -1,2 +1,3 @@
-// Public API of platform. Empty until the first shared service lands.
-export {};
+// Public API of platform.
+export { can, PREVIEW_USER, type Permission, type User } from './permissions/can';
+export { PREVIEW_SHOP } from './preview';

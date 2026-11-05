@@ -1,6 +1,7 @@
 // Hand-written example master copies (room shell). Both must pass every wall check.
-import { pointFromLengthAndAngle, type Point } from '../../geometry';
-import { JobSchema, SCHEMA_VERSION, type Job, type Wall } from '../../schema/master-copy';
+// Used by Core's tests and loadable in the room preview.
+import { pointFromLengthAndAngle, type Point } from '../geometry';
+import { JobSchema, SCHEMA_VERSION, type Job, type Wall } from '../schema/master-copy';
 import { ft, id, inch, measured } from './helpers';
 
 const WALL_HEIGHT = measured(ft(8));

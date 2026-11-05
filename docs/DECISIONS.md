@@ -67,15 +67,25 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 ### 2026-11-05: The design flow, first price, drawers, payment and re-measuring (BUILD_SPEC OA-19)
 - **The flow:**
   1. intake of the client's wishes and the designs they like (the image selector, `docs/intake/kitchen.md`, plus usage questions and must-haves);
-  2. the fixed appliance and fixture locations are marked;
-  3. the runs of cabinets are marked;
-  4. **the AI draws a first pass**: "here's what we recommend building";
-  5. the client and designer fine-tune it, cabinet by cabinet.
+  2. **the walls are drawn** (rough: from the uploaded plans or sketch, or drawn by hand). This comes after the designs they like, "so that they're excited";
+  3. the fixed appliance and fixture locations are marked;
+  4. the runs of cabinets are marked;
+  5. **the AI draws a first pass**: "here's what we recommend building";
+  6. the client and designer fine-tune it, cabinet by cabinet.
 - **Dropped:** the room shape picker, the cabinet-position presets and the preset layouts (OA-13), and the "grows as designers add to it" libraries. The old closet-builder step-by-step flow is no longer the model.
 - **The first price** appears with the AI's first pass, and stays live from then on.
 - **Drawers:** whatever drawer level the customer picked in the intake is the default the AI uses. Nothing defaults to Maximum.
 - **"Paid" for the push means paid in full.** The gate has one condition, "paid in full", set by a person (or later by a payment connector). Nothing else depends on how payment works, so deposits or a payment tool can be added later without changes elsewhere. Answers PAY-1.
-- **After the site measure:** if the price changes by **less than 5%**, the client pays the original signed price. Trivial design changes don't need a new sign-off. What counts as trivial is MC-1 (PROPOSED).
+- **After the site measure:** if the price changes by **less than 5%**, the client pays the original signed price. Trivial design changes don't need a new sign-off.
+- **Trivial (answers MC-1):** "just realigning and resizing existing cabinets without any change to the functionality." The platform compares the signed version with the measured version. No new sign-off, and the signed price stands, when all of these hold:
+  - the price changes by less than 5% (up or down);
+  - no item of any kind is added or removed, **fillers and end panels included**;
+  - nothing the client chose changes: door style, colours, materials, handles and their position, inserts, the drawer level, doors vs drawers, or the number of drawers in a cabinet;
+  - each cabinet's width changes by no more than 3", and its height and depth don't change.
+
+  Otherwise the client sees the changes and signs again (with the new price if it moved 5% or more). Either way the client gets a short "here's what changed after measuring" note. The 5%, the 3" and the list are data (`remeasure_rules`).
+- **Home screen and tasks stay, as a placeholder.** Low priority; built late.
+- **Everything else on the Design Software page stands** (answers WF-1): the client form, the self-intake link, plan reading, the 3D view, cabinet-by-cabinet editing after the AI pass, the AI render, formula pricing.
 
 ### Still in force from the earlier plan (2026-10-24 and before)
 - Modular monolith with enforced module boundaries; one owner per table; data, not code.
@@ -115,7 +125,7 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 
 ### From the owner's workflow (2026-10-27)
 - **CV-2 More than one colony.** Will each colony have its own Cabinet Vision library (so its own catalog mappings), or will all colonies share one library? And does each have its own prices?
-- ~~**SM-1**~~ Partly answered 2026-11-05 (OA-19): under 5% price change keeps the original price. The "trivial change" rule is MC-1.
+- ~~**SM-1**~~ Answered 2026-11-05 (OA-19): see the trivial-change rule in decisions.
 - ~~**PAY-1**~~ Answered 2026-11-05: paid in full, with no other dependencies.
 - **R-1 Photorealistic.** A realistic 3D view the client can turn in the browser, or rendered still images (slower, more realistic), or both? This is the most expensive part of the editor; the answer sets its cost.
 - **DL-1 Deadline ticker.** How is the "everything in by" date worked out? From the colony's production lead time (as data) and the promised delivery date? Who sets the delivery date?
@@ -133,15 +143,7 @@ Details and context for each: `docs/intake/design-workflow.md`.
   Whichever works is proven with the before-and-after sample pair, and each setting's route is recorded in its mapping. Until then, nothing assumes either route (CLAUDE.md rule 9).
 - ~~**UE-1**~~ Answered 2026-11-05 (see decisions).
 - **UE-2 The first UCS export: not needed yet.** We're designing the workflow and architecture now. The export is needed only when the adapter's effect links are built against real UCSs (Phase 1d at the earliest, if the proof slice uses any UCS; otherwise Phase 3).
-- **MC-1 What counts as a trivial change after measuring (PROPOSED, please confirm the numbers).** The platform compares the signed version with the measured version and lists every change. **No new sign-off is needed, and the signed price stands,** when all of these hold:
-  - the price changes by less than 5% (up or down);
-  - no cabinet is added or removed (fillers, scribes and end panels don't count);
-  - nothing the client chose changes: door style, colours, materials, handles and their position, inserts, the drawer level, doors vs drawers, or the number of drawers in a cabinet;
-  - each cabinet's width changes by no more than **3"**, and its height and depth don't change.
-
-  If any of these fails, the client sees the changes and signs again (with the new price if it moved 5% or more). Either way, the client gets a short "here's what changed after measuring" note, so nothing is hidden. The 5%, the 3" and the list are stored as data, so they can be changed without code.
-- **MD-1 Room walls without the shape picker.** The AI needs rough room dimensions (OA-3). With the shape picker gone, we assume they come from the uploaded plans or sketch (OA-12), or the designer draws the walls freehand with snapping, without a preset library. Is that right?
-- **WF-1 What else from the Design Software page still stands?** We assume these stay: the home screen and tasks, the client form, the self-intake link, plan reading, the 3D view, cabinet-by-cabinet editing after the AI pass, the AI render, and formula pricing. Is anything else there old closet-builder thinking we should drop?
+- ~~**MC-1**~~, ~~**MD-1**~~, ~~**WF-1**~~ Answered 2026-11-05 (see decisions).
 - **PR-1** Please share the pricing spreadsheet; it wasn't in the upload.
 - **H-1** Cabinet heights: 7', 8', 10', to the ceiling (image selector) or 84", 96", 108", custom (design software)?
 - ~~**PV-1**~~ Answered (OA-19): the first price comes with the AI's first pass. The drawer level picked in the intake is the default.

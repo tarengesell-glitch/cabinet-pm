@@ -55,7 +55,7 @@ Full Product Catalog with versions and the editor for it; **automatic** catalog 
 **Exit:** designers produce jobs that pass the gate and import cleanly.
 
 Before this phase: a UX session that turns `docs/ux/UX_BRIEF.md` into screen specs and design tokens (C-2 must be decided). Then:
-- marking the room: rough walls (from plans, or drawn), fixed appliances and fixtures, and the runs of cabinets (OA-19);
+- marking the room, after the intake (so the client is excited first): draw the rough walls (from plans, or by hand), then the fixed appliances and fixtures, then the runs of cabinets (OA-19);
 - per-cabinet editing: depth, doors or drawers, sections, shelves, drawer heights, box materials after the AI's first pass (OA-15, OA-19; how each setting reaches Cabinet Vision is CV-3);
 - the visual editor, drawn only from the master copy, with **live pricing from the AI's first pass onward**;
 - **photorealistic viewing**: a live rotatable 3D view, plus an on-demand AI render labelled as an illustration (OA-3, OA-15);
@@ -76,11 +76,12 @@ One module per session, in this order (PROPOSED):
 
 | # | Module | Notes |
 |---|---|---|
-| 7a | `projects` | Customers, jobs, the designer home screen (meetings for three days) and tasks (OA-11), quotes priced from the catalog with the owner's formulas (PR-1), payment status (PAY-1) |
+| 7a | `projects` | Customers, jobs, quotes priced from the catalog with the owner's formulas (PR-1), payment status (PAY-1) |
 | 7b | `intake` | The image selector, seeded from `docs/intake/`. Needs real photos per option. The self-intake link (OA-12) |
 | 7b2 | `intake` | Plan upload and reading: blueprints and hand sketches into rough rooms, confirmed by the designer (OA-12) |
 | 7c | `appliances` | Rough, then confirmed specs |
-| 7d | `site-measure` | Verified measurements with provenance; tablet and phone. Then the re-measure review: trivial changes and under 5% price change keep the signed price with no re-sign (OA-19, MC-1) |
+| 7g | `projects` | **Placeholder, built late:** the designer home screen (meetings for three days) and tasks (OA-11) |
+| 7d | `site-measure` | Verified measurements with provenance; tablet and phone. Then the re-measure review: resizing and realigning only (each width within 3", nothing added or removed, no selection changed) and under 5% price change keep the signed price with no re-sign (OA-19) |
 | 7e | `approvals` | Client sign-off on an exact version, with a frozen snapshot |
 | 7f | `client-messaging` + connectors | Reminders and the deadline ticker (DL-1, MSG-1) |
 

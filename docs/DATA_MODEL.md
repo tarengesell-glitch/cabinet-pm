@@ -74,7 +74,7 @@ Core owns no tables. It owns the master copy *format*: Job, Room, Wall, PlacedIt
 ## projects
 
 - **customers**, **leads**, **jobs** (job_id shared with the master copy; status, owner, target delivery date), **quotes**, **quote_lines**, **milestones**, **schedule_entries**.
-- **tasks** (OA-11): client, title, details, due date (optional), assignee, status (open | done). Deleting is a soft delete.
+- **tasks** (OA-11, placeholder, built late): client, title, details, due date (optional), assignee, status (open | done). Deleting is a soft delete.
 - **meetings** (OA-11): read from a calendar connector (CAL-1), shown per designer for the next three days. Labelled as mocked until the connector is real.
 - **payments**: amount, status and reference from the payment connector. The push gate needs "paid in full" (OA-19), set by a person or later by the connector. Nothing else depends on payment details.
 - Stores no design data. Quotes are priced from the catalog and a named master copy version. An issued quote freezes the prices it used (earlier decision, still in force).
@@ -111,7 +111,7 @@ Core owns no tables. It owns the master copy *format*: Job, Room, Wall, PlacedIt
 
 - **client_signoffs**: job, the exact master copy version, who signed, how, when, and a frozen snapshot of what they saw (design, selections, price).
 - **remeasure_reviews** (OA-19): the signed version, the measured version, the change list, the price change, the result (trivial: no re-sign, signed price stands | needs re-sign), and the note sent to the client.
-- **remeasure_rules** (config data, MC-1): the price threshold (5%), the per-cabinet width limit (3", PROPOSED), and which changes always need a re-sign.
+- **remeasure_rules** (config data, MC-1): the price threshold (5%), the per-cabinet width limit (3"), and which changes always need a re-sign (any item added or removed, fillers and end panels included; any client selection changed; any height or depth change).
 
 ## job-notes (OA-7)
 

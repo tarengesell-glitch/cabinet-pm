@@ -2,7 +2,7 @@
 
 From Taren, 2026-11-05: the Notion page "Design Software" (under "Software Setup"), exported and uploaded to the session. It is recorded below **as given**, grouped but not reworded. It is the source of BUILD_SPEC amendments OA-11 to OA-16.
 
-> **Changed the same day (OA-19).** The owner dropped the room shape picker, the cabinet-position presets and the preset layouts. The flow is now: intake wishes → appliances and fixtures → cabinet runs → AI first pass (with the first price) → fine-tune. Sections below marked **(dropped)** are kept only as a record.
+> **Changed the same day (OA-19).** The owner dropped the room shape picker, the cabinet-position presets and the preset layouts. The flow is now: intake wishes → draw the walls → appliances and fixtures → cabinet runs → AI first pass (with the first price) → fine-tune. Sections below marked **(dropped)** are kept only as a record.
 
 Like the kitchen intake (`kitchen.md`), every list in here (room types, room shapes, cabinet positions, layouts, heights, materials, handles, questions) is **data** (CLAUDE.md rule 6), seeded from this file and never written into code.
 

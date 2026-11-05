@@ -115,7 +115,7 @@ Core owns no tables. It owns the master copy *format*: Job, Room, Wall, PlacedIt
 
 - **client_signoffs**: job, the exact master copy version, who signed, how, when, and a frozen snapshot of what they saw (design, selections, price).
 - **remeasure_reviews** (OA-19): the signed version, the measured version, the change list, the price change, the result (trivial: no re-sign, signed price stands | needs re-sign), and the note sent to the client.
-- **remeasure_rules** (config data, MC-1): the price threshold (5%), the per-cabinet width limit (3"), and which changes always need a re-sign (any item added or removed, fillers and end panels included; any client selection changed; any height or depth change).
+- **remeasure_rules** (config data, MC-1): the price threshold (5%), the per-cabinet width limit (3"), the "to the ceiling" shortening limit (3"; taller is limited only by the 5% price rule), and which changes always need a re-sign (any item added or removed, fillers and end panels included; any client selection changed; any depth change; any height change other than a "to the ceiling" height following the measured ceiling).
 
 ## job-notes (OA-7)
 

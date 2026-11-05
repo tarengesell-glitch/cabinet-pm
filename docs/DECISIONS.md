@@ -81,7 +81,7 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
   - the price changes by less than 5% (up or down);
   - no item of any kind is added or removed, **fillers and end panels included**;
   - nothing the client chose changes: door style, colours, materials, handles and their position, inserts, the drawer level, doors vs drawers, or the number of drawers in a cabinet;
-  - each cabinet's width changes by no more than 3", and its height and depth don't change.
+  - each cabinet's width changes by no more than 3", and its height and depth don't change, **except** a "to the ceiling" height that only follows the measured ceiling: that is trivial as long as the cabinets get no more than 3" shorter (answers H-3, 2026-11-05).
 
   Otherwise the client sees the changes and signs again (with the new price if it moved 5% or more). Either way the client gets a short "here's what changed after measuring" note. The 5%, the 3" and the list are data (`remeasure_rules`).
 - **Home screen and tasks stay, as a placeholder.** Low priority; built late.
@@ -158,7 +158,7 @@ Details and context for each: `docs/intake/design-workflow.md`.
 - ~~**MC-1**~~, ~~**MD-1**~~, ~~**WF-1**~~ Answered 2026-11-05 (see decisions).
 - ~~**PR-1**~~, ~~**H-1**~~, ~~**CL-1**~~ Answered 2026-11-05 (OA-20).
 - ~~**H-2**~~ Answered 2026-11-05 (see decisions).
-- **H-3 "To the ceiling" after measuring.** These cabinets follow the real ceiling, so the site measure can change their height. The trivial-change rule says any height change needs a new sign-off. Should a "to the ceiling" height that only follows the measured ceiling count as trivial (within the 5% price rule)? We propose yes.
+- ~~**H-3**~~ Answered 2026-11-05: a "to the ceiling" height that only follows the measured ceiling is trivial if the price moves less than 5% and the cabinets get no more than 3" shorter.
 
 ### From the old pricing spreadsheet (2026-11-05)
 Details: `docs/pricing/legacy-pricing-logic.md`.

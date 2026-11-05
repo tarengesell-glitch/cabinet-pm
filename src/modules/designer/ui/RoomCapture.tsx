@@ -40,11 +40,11 @@ import { downloadText, readStored, writeStored } from './storage';
 import s from './RoomCapture.module.css';
 
 const TOOL_HINT: Record<Tool, string> = {
-  select: 'Tap a wall, door or window to edit it. Drag across the plan to select several walls (Shift-click adds one). Delete removes what is selected.',
+  select: 'Tap a wall, door or window to edit it. Drag across the plan to select several walls (Shift-click adds one). Delete removes what is selected. Scroll to zoom; scroll sideways to move left and right.',
   draw: 'Tap corner to corner. Snaps to corners, whole inches and 45°. Tap the first corner, or Finish, to stop.',
-  door: 'Tap a wall to drop a standard door there. Drag it or type sizes after.',
-  window: 'Tap a wall to drop a standard window there. Drag it or type sizes after.',
-  passthrough: 'Tap a wall to drop a standard passthrough there. Drag it or type sizes after.',
+  door: 'Move the door onto a wall (it shows the distance to each end), then click to place it. Drag it or type sizes after.',
+  window: 'Move the window onto a wall (it shows the distance to each end), then click to place it. Drag it or type sizes after.',
+  passthrough: 'Move the passthrough onto a wall (it shows the distance to each end), then click to place it. Drag it or type sizes after.',
 };
 
 export function RoomCapture({ user }: { user: User }) {

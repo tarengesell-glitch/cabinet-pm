@@ -18,6 +18,7 @@ import {
   type Opening,
   type Point,
   type Provenance,
+  type Result,
   type Room,
   type Swing,
   type Wall,
@@ -103,6 +104,8 @@ interface Props {
   /** A wall typed while drawing: length (parsed) in a direction, from the current corner. Returns the new corner, or null if refused. */
   onAddWallTyped: (from: Point, length: TypedSize, angle: number) => Point | null;
   onDrawError: (reason: string) => void;
+  /** A length typed on the plan for a wall (its far end moves). Returns a reason if refused. */
+  onWallLengthTyped: (wallId: string, length: TypedSize) => Result<unknown>;
   /** The tap position along the wall (centre of the new opening). */
   onPickWallForOpening: (wallId: string, centre: number) => void;
   /** A door/window dragged: to `offset` along wall `wallId` (its own or another). Preview until done. */
@@ -161,6 +164,17 @@ export function PlanCanvas(props: Props) {
 
   const corners = useMemo(() => room.walls.flatMap((w) => [w.start_point, w.end_point]), [room.walls]);
 
+  // Typing a new length straight onto a wall's length label.
+  const [editingLength, setEditingLength] = useState<{ wallId: string; at: V; text: string; error: string | null } | null>(null);
+  const commitLength = () => {
+    if (!editingLength) return;
+    const size = parseSize(editingLength.text);
+    if (!size.ok) return setEditingLength({ ...editingLength, error: size.reason });
+    const r = props.onWallLengthTyped(editingLength.wallId, size.value);
+    if (!r.ok) return setEditingLength({ ...editingLength, error: r.reason });
+    setEditingLength(null);
+  };
+
   // Typing a length while drawing (kitchen CAD tools and AutoCAD dynamic input; see docs/ux/INDUSTRY_REVIEW.md): point the
   // way the wall should go, type its length, press Enter.
   const [typed, setTyped] = useState('');
@@ -201,6 +215,7 @@ export function PlanCanvas(props: Props) {
    */
   const onWheel = (e: Konva.KonvaEventObject<WheelEvent>) => {
     e.evt.preventDefault();
+    setEditingLength(null); // the box would no longer sit on its wall
     const { deltaX, deltaY, deltaMode, shiftKey, ctrlKey, metaKey } = e.evt;
     const pos = e.target.getStage()?.getPointerPosition() ?? { x: size.width / 2, y: size.height / 2 };
     if (ctrlKey || metaKey) {
@@ -638,6 +653,12 @@ export function PlanCanvas(props: Props) {
               onWallTap={onWallTap}
               selectedOpening={selection?.kind === 'opening' ? selection.id : null}
               issueIds={issueIds}
+              onEditLength={(wallId, at) => {
+                const w = room.walls.find((x) => x.wall_id === wallId);
+                if (!w) return;
+                props.onSelect({ kind: 'wall', id: wallId });
+                setEditingLength({ wallId, at, text: formatInches(distanceForDisplay(w.start_point, w.end_point).value), error: null });
+              }}
               selectable={tool === 'select'}
               onSelect={props.onSelect}
             />
@@ -693,6 +714,40 @@ export function PlanCanvas(props: Props) {
           )}
         </Layer>
       </Stage>
+      {editingLength && (
+        <div style={{ position: 'absolute', left: editingLength.at.x - 55, top: editingLength.at.y - 16, width: 110, zIndex: 3 }}>
+          <input
+            aria-label="Wall length"
+            autoFocus
+            onFocus={(e) => e.target.select()}
+            value={editingLength.text}
+            onChange={(e) => setEditingLength({ ...editingLength, text: e.target.value, error: null })}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') commitLength();
+              if (e.key === 'Escape') setEditingLength(null);
+            }}
+            onBlur={() => setEditingLength(null)}
+            style={{
+              width: '100%',
+              boxSizing: 'border-box',
+              font: 'inherit',
+              fontSize: 13,
+              fontWeight: 600,
+              textAlign: 'center',
+              padding: '4px 6px',
+              borderRadius: 6,
+              border: `1.5px solid ${editingLength.error ? DANGER : ACCENT}`,
+              color: '#17212b',
+              background: '#fff',
+            }}
+          />
+          {editingLength.error && (
+            <div role="alert" style={{ marginTop: 4, fontSize: 11, color: DANGER, background: '#fff', padding: '2px 4px', borderRadius: 4, width: 220 }}>
+              {editingLength.error}
+            </div>
+          )}
+        </div>
+      )}
       <div style={{ position: 'absolute', right: 10, bottom: 10, display: 'flex', gap: 6, alignItems: 'center' }}>
         <span style={{ fontSize: 12, color: MUTED, background: 'rgba(255,255,255,0.85)', padding: '2px 6px', borderRadius: 6 }} data-testid="zoom-level">
           {Math.round(zoom * 100)}%
@@ -827,6 +882,8 @@ interface WallShapeProps {
   canEdit: boolean;
   onSelect: (selection: Selection) => void;
   onWallTap: (wallId: string, additive: boolean) => void;
+  /** The wall's length label was clicked: edit it there (screen point of the label). */
+  onEditLength: (wallId: string, at: V) => void;
   /** Pressing on a door/window: may become a drag (screen point where it was pressed). */
   onGrabOpening: (openingId: string, at: V) => void;
 }
@@ -903,7 +960,22 @@ function WallShape(props: WallShapeProps) {
         rotation={upright}
         offsetX={label.length * 3.2}
         offsetY={6}
-        listening={false}
+        name={`wall-length-${index + 1}`}
+        listening={selectable && canEdit}
+        hitStrokeWidth={0}
+        onClick={(e) => {
+          // Click the length to type a new one, as in Revit and Chief Architect.
+          e.cancelBubble = true;
+          props.onEditLength(wall.wall_id, { x: mid.x + nx * labelOffset, y: mid.y + ny * labelOffset });
+        }}
+        onMouseEnter={(e) => {
+          const box = e.target.getStage()?.container();
+          if (box) box.style.cursor = 'text';
+        }}
+        onMouseLeave={(e) => {
+          const box = e.target.getStage()?.container();
+          if (box) box.style.cursor = '';
+        }}
       />
       <Group x={mid.x - nx * (h + 16)} y={mid.y - ny * (h + 16)} listening={false} name={`wall-tag-${letter}`}>
         <Circle radius={10} fill="#ffffff" stroke={TEXT[wall.length_provenance]} strokeWidth={1.5} />

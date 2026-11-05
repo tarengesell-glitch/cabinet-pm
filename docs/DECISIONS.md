@@ -102,6 +102,9 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
     - The standard for a new door (hinged at its start side, swinging into the room) is PROPOSED in `standard-sizes.json`; the owner has not chosen it.
     - Doors saved earlier keep the swing they were drawn with.
   - **Doors and windows can be dragged along a wall or onto another wall**, and resized from end handles. A dragged position or size becomes rough.
+- **Room drawing, round 6 (owner, 2026-11-05):**
+  - **Wall status colours stay** (pastel red / amber / green). The owner calls them a helpful "fail loudly" signal. Drawings for clients will use standard grey walls (drafting convention) when that view is built.
+  - **Click a wall's length on the plan to type a new one** (Revit, Chief Architect). It works like typing it in the side panel: the far end moves along the wall, and joined walls keep their angles.
 - Room capture is pulled ahead of Phase 5 (BUILD_PLAN). Order: scaffold (1a), then Core walls and openings, then the Designer drawing screen.
 
 ### 2026-11-05: Where the work lives and deploys

@@ -21,6 +21,7 @@ Open it at `/rooms/preview` (`npm run dev`, then http://localhost:3000/rooms/pre
   - Drag the middle to slide the wall sideways; it keeps its length and its neighbours stretch.
   - The move is saved on release as one undo step, and Escape cancels it. Walls whose length changes go back to rough.
 - **No walls on top of each other:** drawing or moving a wall back over another is refused with a reason.
+- **Typing a length on the plan:** click a wall's length, type the new one, and press Enter (Esc cancels).
 - **Edit a wall:** its length and thickness. Typing a length moves the far end along the wall's line, as dragging an end handle does.
 - **Moving around the plan** (see `docs/ux/INDUSTRY_REVIEW.md`):
   - the mouse wheel zooms at the cursor;

@@ -54,7 +54,7 @@ Core owns no tables. It owns the master copy *format*: Job, Room, Wall, PlacedIt
 
 ## adapters/cabinet-vision
 
-- **mappings**: our catalog item plus option combination → the shop's Cabinet Vision entry and parameters, and any **UCS parameters** with their values and types (OA-17; each must exist in the `cabinet-vision-ucs` repo's parameter list, at a recorded commit), the Cabinet Vision catalog version it was verified against, status (current | stale | unverified), and who verified it.
+- **mappings**: our catalog item plus option combination → the shop's Cabinet Vision entry and parameters, and any **UCS parameters** with their values and types (OA-17; each must exist in the `cabinet-vision-ucs` repo's parameter list, at a recorded commit, and the route by which the value reaches the UCS: set directly in ORDX, or worked out by the UCS from something ORDX carries; see DECISIONS CV-3), the Cabinet Vision catalog version it was verified against, status (current | stale | unverified), and who verified it.
 - **catalog_syncs**: the raw library export (in Storage), the diff found (added, removed, changed) and the mappings it flagged.
 - **translations**: master copy version, mapping snapshot, writer code version, file (in Storage), content hash.
 - **readbacks**: the source (decided in Phase 0), raw file reference, and the returned master copy version.

@@ -154,10 +154,10 @@ That almost certainly needs a small helper app on the computer running Cabinet V
 ## Exact settings, approximate picture (OA-17)
 
 The editor is not a construction tool. It saves **exact settings** into the master copy and draws a **likeness** of how each cabinet is built.
-- Exact (EX-1, PROPOSED): cabinet positions, overall sizes, and every setting the designer changes (doors or drawers, sections, shelves, drawer heights, materials, handles).
+- Exact (EX-1, decided 2026-11-05): cabinet positions, overall sizes, and every setting the designer changes (doors or drawers, sections, shelves, drawer heights, materials, handles).
 - Approximate: part thicknesses, joinery, reveals, gaps, interior details in the drawing.
 
-The Cabinet Vision adapter turns each setting into either a built-in Cabinet Vision value in the ORDX, or a **UCS parameter value** that one of our UCSs reads. The UCS library is the `cabinet-vision-ucs` repository; the adapter reads it (read-only) to know which UCS parameters exist, their types and what they change. A mapping can point to a UCS parameter only if that parameter is recorded there (`shop/custom-parameters.md`). An editor setting with no Cabinet Vision parameter and no UCS behind it blocks at preflight, with a plain-language reason. How UCS values get into Cabinet Vision on import is open (CV-3).
+The Cabinet Vision adapter turns each setting into either a built-in Cabinet Vision value in the ORDX, or a **UCS parameter value** that one of our UCSs reads. The UCS library is the `cabinet-vision-ucs` repository; the adapter reads it (read-only) to know which UCS parameters exist, their types and what they change. A mapping can point to a UCS parameter only if that parameter is recorded there (`shop/custom-parameters.md`). An editor setting with no Cabinet Vision parameter and no UCS behind it blocks at preflight, with a plain-language reason. UCSs run on every rebuild, so they apply to an imported job automatically. What is open is the link (CV-3): either ORDX sets our `MT_` settings directly (route A), or each UCS works the setting out from something ORDX does carry (route B). Each mapping records which route it uses, once Phase 0 has proven it.
 
 Read-back compares settings and overall sizes, not construction, because Cabinet Vision owns construction.
 

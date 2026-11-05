@@ -52,6 +52,10 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 - So the master copy holds **exact settings**, and those are what get translated and compared on read-back. The picture is a likeness drawn from them (P6 still holds: the picture draws only from the master copy).
 - Our UCS library (`cabinet-vision-ucs` repo) becomes part of the translation: each editor setting that Cabinet Vision has no built-in parameter for needs a UCS that reads it.
 
+### 2026-11-05: What stays exact (answers EX-1)
+- **Exact:** where each cabinet sits on its wall, its overall width, height and depth, and every setting the designer chooses.
+- **A likeness only:** how the box is drawn being built.
+
 ### Still in force from the earlier plan (2026-10-24 and before)
 - Modular monolith with enforced module boundaries; one owner per table; data, not code.
 - Fail loudly: alerts persist until a person resolves them with a note. Never show false success.
@@ -99,12 +103,12 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 
 ### From the design software outline (2026-11-05)
 Details and context for each: `docs/intake/design-workflow.md`.
-- **EX-1 What must stay exact (PROPOSED, please confirm).** Our reading of OA-17:
-  - **exact:** where each cabinet sits on its wall, its overall width, height and depth, and every setting (door or drawer, number of sections and shelves and where they go, drawer heights, materials, handles);
-  - **a likeness only:** how the box is drawn being built.
+- ~~**EX-1**~~ Answered 2026-11-05 (see decisions).
+- **CV-3 How UCS values get into Cabinet Vision (owner's expectation recorded, to be proven in Phase 0).** UCSs run on every rebuild, so they will apply automatically to an imported job (this is documented in the `cabinet-vision-ucs` repo). The owner expects the imported cabinet settings to trigger the UCS rules "as long as there's some sort of relation". Phase 0 finds out which relation works:
+  - **Route A:** the ORDX file sets our `MT_` settings directly on each cabinet, and the UCSs read them;
+  - **Route B:** the ORDX file can't carry them, so each UCS works the setting out from something ORDX does carry (for example the cabinet's catalog entry, its sizes or its material).
 
-  Overall sizes and positions have to stay exact, because Cabinet Vision places the cabinets from them and the read-back compares them. Is that right?
-- **CV-3 How UCS values get into Cabinet Vision.** Can an ORDX file set our UCS parameters (the `MT_` settings) on each cabinet when it's imported? If not, what's the route: a UCS that reads something ORDX can carry, or a step on the Cabinet Vision computer? Phase 0 answers this from samples; nobody guesses it (CLAUDE.md rule 9). This replaces PS-1.
+  Whichever works is proven with the before-and-after sample pair, and each setting's route is recorded in its mapping. Until then, nothing assumes either route (CLAUDE.md rule 9).
 - **PR-1** Please share the pricing spreadsheet; it wasn't in the upload.
 - **H-1** Cabinet heights: 7', 8', 10', to the ceiling (image selector) or 84", 96", 108", custom (design software)?
 - **PV-1** The client sees no price until fine-tuning, but the "Maximum" drawers option shows a drawer cost. When is that shown?

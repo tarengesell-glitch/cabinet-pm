@@ -74,6 +74,7 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 
 ### 2026-11-05: Where the work lives and deploys
 - `main` is the main branch. Netlify deploys the live site from it, so every merge is a deploy.
+- **The site is built as plain web pages** (Next.js `output: 'export'` into `out/`), which Netlify serves directly. The first deploy (PR #4) showed Netlify's "Page not found" on `/rooms/preview`. Most likely Netlify's Next.js support didn't handle this Next.js version. Every page today runs in the browser, so no server is needed. `npm run check` now serves `out/` like a static host and opens the pages (`npm run test:static`). Revisit when the first server-side feature arrives (database, sign-in, API): it will need Netlify's Next.js support or another approach.
 - **Owner direction (not yet final):** the UCS library and the import-file (adapter) work will almost certainly be brought into this repo instead of living in `cabinet-vision-ucs`. So the earlier proposal to keep the UCS library in its own read-only repo (branch `claude/admiring-bardeen-593xx5`) was **not** merged. Until the move is decided and planned, `cabinet-vision-ucs` stays where it is. Before the move, decide which folder it goes in; the vendor-name check (rule 3) must allow that folder.
 
 ### Replaced on 2026-10-27

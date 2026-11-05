@@ -132,7 +132,7 @@ The writer is a pure function: (master copy version + mapping snapshot) → file
 
 ## Stack (proposed 2026-10-24, confirmed by the owner 2026-11-05)
 
-- TypeScript (strict), Next.js (App Router), hosted on Netlify.
+- TypeScript (strict), Next.js (App Router), hosted on Netlify. For now it is built as plain web pages (`output: 'export'`); see DECISIONS 2026-11-05.
 - Supabase in the Canada region: Postgres, Auth, Storage (samples, exports, returned files), Realtime presence for locks.
 - Drizzle ORM and migrations; Zod for every schema, contract and file format.
 - Tailwind, shadcn/ui and Lucide.

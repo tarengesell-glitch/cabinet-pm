@@ -47,7 +47,10 @@ interface Props {
   canEdit: boolean;
   onSelect: (selection: Selection) => void;
   onAddWall: (start: Point, end: Point) => void;
-  onPickWallForOpening: (wallId: string, offset: number) => void;
+  /** The tap position along the wall (centre of the new opening). */
+  onPickWallForOpening: (wallId: string, centre: number) => void;
+  /** An opening dragged along its wall to a new offset. */
+  onMoveOpening: (openingId: string, offset: number) => void;
   /** Set when a chain of walls is being drawn; cleared by the parent to finish. */
   chainStart: Point | null;
   onChainStart: (p: Point | null) => void;
@@ -149,9 +152,11 @@ export function PlanCanvas(props: Props) {
       return;
     }
     const hit = nearestWall(room, p, PICK_PX / view.scale);
-    if (hit) props.onPickWallForOpening(hit.wall.wall_id, roundToInch(hit.offset));
+    if (hit) props.onPickWallForOpening(hit.wall.wall_id, hit.offset);
   };
 
+  // Which side of the walls is outside depends on which way the room was drawn.
+  const outside = useMemo(() => outsideSign(room.walls), [room.walls]);
   const issueIds = useMemo(() => new Set(issues.filter((i) => i.severity === 'block').map((i) => i.ref.id)), [issues]);
   const preview = tool === 'draw' && chainStart && hover ? snapNext(hover) : null;
 
@@ -187,6 +192,10 @@ export function PlanCanvas(props: Props) {
               key={wall.wall_id}
               wall={wall}
               index={i}
+              neighbours={neighboursOf(room.walls, wall)}
+              outside={outside}
+              canEdit={canEdit}
+              onMoveOpening={props.onMoveOpening}
               toScreen={toScreen}
               scale={view.scale}
               selected={selection?.kind === 'wall' && selection.id === wall.wall_id}
@@ -196,10 +205,6 @@ export function PlanCanvas(props: Props) {
               onSelect={props.onSelect}
             />
           ))}
-          {corners.map((p, i) => {
-            const s = toScreen(p);
-            return <Circle key={`c${i}`} x={s.x} y={s.y} radius={3} fill="#17212b" listening={false} />;
-          })}
           {chainStart && (
             <Circle {...toScreen(chainStart)} radius={6} stroke={ACCENT} strokeWidth={2} listening={false} />
           )}
@@ -223,19 +228,79 @@ function PreviewWall({ start, end, toScreen }: { start: Point; end: Point; toScr
   );
 }
 
+/**
+ * +1 when the walls run counter-clockwise (in room coordinates, Y up), -1 when clockwise,
+ * worked out from the area the corners enclose (shoelace). Labels go on the outside and
+ * doors swing to the inside. Display only.
+ */
+function outsideSign(walls: readonly Wall[]): 1 | -1 {
+  let twiceArea = 0;
+  for (const w of walls) twiceArea += w.start_point.x * w.end_point.y - w.end_point.x * w.start_point.y;
+  // An open chain: close it from the last corner back to the first.
+  const first = walls[0];
+  const last = walls[walls.length - 1];
+  if (first && last) twiceArea += last.end_point.x * first.start_point.y - first.start_point.x * last.end_point.y;
+  return twiceArea < 0 ? -1 : 1;
+}
+
+/** For a wall, the other walls meeting it at its start and at its end (the first found). */
+function neighboursOf(walls: readonly Wall[], wall: Wall): { start: Point | null; end: Point | null } {
+  const otherEnd = (corner: Point): Point | null => {
+    for (const w of walls) {
+      if (w.wall_id === wall.wall_id) continue;
+      if (samePoint(w.start_point, corner)) return w.end_point;
+      if (samePoint(w.end_point, corner)) return w.start_point;
+    }
+    return null;
+  };
+  return { start: otherEnd(wall.start_point), end: otherEnd(wall.end_point) };
+}
+
+const samePoint = (a: Point, b: Point) => a.x === b.x && a.y === b.y;
+type V = { x: number; y: number };
+const unit = (v: V): V => {
+  const l = Math.hypot(v.x, v.y) || 1;
+  return { x: v.x / l, y: v.y / l };
+};
+
+/**
+ * The two outline points of a wall at one corner (screen space, display only).
+ * With a neighbour, the outline is mitred so the corner is solid; otherwise square.
+ * `away` points from the corner along this wall; `n` is this wall's normal.
+ */
+function cornerPoints(c: V, away: V, neighbourAway: V | null, n: V, h: number): { plus: V; minus: V } {
+  const square = { plus: { x: c.x + n.x * h, y: c.y + n.y * h }, minus: { x: c.x - n.x * h, y: c.y - n.y * h } };
+  if (!neighbourAway) return square;
+  const dot = away.x * neighbourAway.x + away.y * neighbourAway.y;
+  const sinHalf = Math.sqrt(Math.max(0, (1 - dot) / 2));
+  // Walls in a straight line, or folding back sharply (which would make a long spike): square ends.
+  if (dot < -0.999 || sinHalf < 0.25) return square;
+  const u = unit({ x: away.x + neighbourAway.x, y: away.y + neighbourAway.y });
+  const d = h / sinHalf;
+  const inner = { x: c.x + u.x * d, y: c.y + u.y * d };
+  const outer = { x: c.x - u.x * d, y: c.y - u.y * d };
+  return (inner.x - c.x) * n.x + (inner.y - c.y) * n.y > 0 ? { plus: inner, minus: outer } : { plus: outer, minus: inner };
+}
+
 interface WallShapeProps {
   wall: Wall;
   index: number;
+  neighbours: { start: Point | null; end: Point | null };
+  /** +1 or -1: flips which side counts as outside (see outsideSign). */
+  outside: 1 | -1;
   toScreen: (p: Point) => Point;
   scale: number;
   selected: boolean;
   selectedOpening: string | null;
   issueIds: Set<string>;
   selectable: boolean;
+  canEdit: boolean;
   onSelect: (selection: Selection) => void;
+  onMoveOpening: (openingId: string, offset: number) => void;
 }
 
-function WallShape({ wall, index, toScreen, scale, selected, selectedOpening, issueIds, selectable, onSelect }: WallShapeProps) {
+function WallShape(props: WallShapeProps) {
+  const { wall, index, neighbours, outside, toScreen, scale, selected, selectedOpening, issueIds, selectable, canEdit, onSelect } = props;
   const a = toScreen(wall.start_point);
   const b = toScreen(wall.end_point);
   const dx = b.x - a.x;
@@ -243,16 +308,22 @@ function WallShape({ wall, index, toScreen, scale, selected, selectedOpening, is
   const len = Math.hypot(dx, dy) || 1;
   const ux = dx / len;
   const uy = dy / len;
-  // Normal pointing to the right of the direction of travel on screen: outside of a
-  // room drawn counter-clockwise (Y flipped), where the length label goes.
-  const nx = -uy;
-  const ny = ux;
+  // Normal pointing outside the room, where the length label goes. On screen (Y flipped)
+  // the right of the direction of travel is outside for a counter-clockwise room.
+  const nx = -uy * outside;
+  const ny = ux * outside;
+  const n = { x: nx, y: ny };
   const width = Math.max(5, wall.thickness.value * scale);
+  const h = width / 2;
+  const startC = cornerPoints(a, { x: ux, y: uy }, neighbours.start ? unit(sub(toScreen(neighbours.start), a)) : null, n, h);
+  const endC = cornerPoints(b, { x: -ux, y: -uy }, neighbours.end ? unit(sub(toScreen(neighbours.end), b)) : null, n, h);
+  const outline = [startC.plus, endC.plus, endC.minus, startC.minus].flatMap((p) => [p.x, p.y]);
+
   const colour = COLOUR[wall.length_provenance];
   const length = distanceForDisplay(wall.start_point, wall.end_point);
   const label = `${ICON[wall.length_provenance]} ${index + 1}: ${length.exact ? '' : '≈ '}${formatInches(length.value)}`;
   const mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
-  const labelOffset = width / 2 + 14;
+  const labelOffset = h + 14;
   const angleDeg = (Math.atan2(dy, dx) * 180) / Math.PI;
   const upright = angleDeg > 90 || angleDeg < -90 ? angleDeg + 180 : angleDeg;
   const select = (sel: Selection) => (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
@@ -261,18 +332,19 @@ function WallShape({ wall, index, toScreen, scale, selected, selectedOpening, is
     onSelect(sel);
   };
   const along = (offset: number) => ({ x: a.x + ux * offset * scale, y: a.y + uy * offset * scale });
+  const wallLength = length.value;
 
   return (
     <Group>
-      {issueIds.has(wall.wall_id) && (
-        <Line points={[a.x, a.y, b.x, b.y]} stroke={DANGER} strokeWidth={width + 10} opacity={0.25} listening={false} />
-      )}
-      {selected && <Line points={[a.x, a.y, b.x, b.y]} stroke={ACCENT} strokeWidth={width + 8} opacity={0.35} listening={false} />}
+      {issueIds.has(wall.wall_id) && <Line points={outline} closed stroke={DANGER} strokeWidth={10} opacity={0.3} listening={false} />}
+      {selected && <Line points={outline} closed stroke={ACCENT} strokeWidth={8} opacity={0.4} listening={false} />}
       <Line
-        points={[a.x, a.y, b.x, b.y]}
+        points={outline}
+        closed
+        fill={colour}
         stroke={colour}
-        strokeWidth={width}
-        hitStrokeWidth={Math.max(width, 22)}
+        strokeWidth={0.5}
+        hitStrokeWidth={Math.max(0, 22 - width)}
         onClick={select({ kind: 'wall', id: wall.wall_id })}
         onTap={select({ kind: 'wall', id: wall.wall_id })}
         name={`wall-${index + 1}`}
@@ -298,24 +370,46 @@ function WallShape({ wall, index, toScreen, scale, selected, selectedOpening, is
         const sel = select({ kind: 'opening', id: o.opening_id });
         const w = o.width.value * scale;
         const swingAngle = (Math.atan2(uy, ux) * 180) / Math.PI;
+        const draggable = selectable && canEdit;
         return (
-          <Group key={o.opening_id} onClick={sel} onTap={sel}>
+          <Group
+            key={o.opening_id}
+            name={`opening-${o.kind}`}
+            onClick={sel}
+            onTap={sel}
+            draggable={draggable}
+            // Only along the wall.
+            dragBoundFunc={function (this: Konva.Node, pos) {
+              const parent = this.getParent()?.getAbsolutePosition() ?? { x: 0, y: 0 };
+              const t = (pos.x - parent.x) * ux + (pos.y - parent.y) * uy;
+              return { x: parent.x + ux * t, y: parent.y + uy * t };
+            }}
+            onDragStart={() => onSelect({ kind: 'opening', id: o.opening_id })}
+            onDragEnd={(ev) => {
+              const node = ev.target;
+              const moved = (node.x() * ux + node.y() * uy) / scale;
+              node.position({ x: 0, y: 0 });
+              const max = Math.max(0, wallLength - o.width.value);
+              const next = Math.min(Math.max(0, Math.round((o.offset.value + moved) / INCH) * INCH), Math.floor(max / INCH) * INCH);
+              if (next !== o.offset.value) props.onMoveOpening(o.opening_id, next);
+            }}
+          >
             <Line points={[s.x, s.y, e.x, e.y]} stroke="#ffffff" strokeWidth={width + 1} hitStrokeWidth={Math.max(width, 22)} />
             {o.kind === 'window' && (
               <>
-                <Line points={[s.x + nx * (width / 4), s.y + ny * (width / 4), e.x + nx * (width / 4), e.y + ny * (width / 4)]} stroke={stroke} strokeWidth={1.5} />
-                <Line points={[s.x - nx * (width / 4), s.y - ny * (width / 4), e.x - nx * (width / 4), e.y - ny * (width / 4)]} stroke={stroke} strokeWidth={1.5} />
+                <Line points={[s.x + nx * (h / 2), s.y + ny * (h / 2), e.x + nx * (h / 2), e.y + ny * (h / 2)]} stroke={stroke} strokeWidth={1.5} />
+                <Line points={[s.x - nx * (h / 2), s.y - ny * (h / 2), e.x - nx * (h / 2), e.y - ny * (h / 2)]} stroke={stroke} strokeWidth={1.5} />
               </>
             )}
             {o.kind === 'door' && (
               <>
                 <Line points={[s.x, s.y, s.x - nx * w, s.y - ny * w]} stroke={stroke} strokeWidth={2} />
-                <Arc x={s.x} y={s.y} innerRadius={w} outerRadius={w} angle={90} rotation={swingAngle - 90} stroke={stroke} strokeWidth={1} dash={[4, 4]} />
+                <Arc x={s.x} y={s.y} innerRadius={w} outerRadius={w} angle={90} rotation={outside === 1 ? swingAngle - 90 : swingAngle} stroke={stroke} strokeWidth={1} dash={[4, 4]} />
               </>
             )}
             {o.kind === 'passthrough' && <Line points={[s.x, s.y, e.x, e.y]} stroke={stroke} strokeWidth={1.5} dash={[6, 4]} />}
             {[s, e].map((p, k) => (
-              <Line key={k} points={[p.x + nx * (width / 2), p.y + ny * (width / 2), p.x - nx * (width / 2), p.y - ny * (width / 2)]} stroke={stroke} strokeWidth={isSel || bad ? 3 : 1.5} />
+              <Line key={k} points={[p.x + nx * h, p.y + ny * h, p.x - nx * h, p.y - ny * h]} stroke={stroke} strokeWidth={isSel || bad ? 3 : 1.5} />
             ))}
           </Group>
         );
@@ -333,3 +427,5 @@ function WallShape({ wall, index, toScreen, scale, selected, selectedOpening, is
     </Group>
   );
 }
+
+const sub = (p: V, q: V): V => ({ x: p.x - q.x, y: p.y - q.y });

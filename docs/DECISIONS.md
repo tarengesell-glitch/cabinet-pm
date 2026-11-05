@@ -58,8 +58,18 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 - **The stack in ARCHITECTURE "Stack" is confirmed** (the owner said "proceed" after being told the scaffold locks it in). Each part is installed only when the first code needs it.
 - **A-1 answered: the angle convention.** Angles are whole numbers of hundredths of a degree (22.5° is 2250), counter-clockwise from the room's +X axis. Room coordinates have Y pointing up, as on paper, so 90° points up the plan. Stored angles run from 0 to 35999. Details are in `src/core/README.md`.
 - **Slanted walls: corners are rounded.** A wall typed as a length and an angle that isn't 0°, 90°, 180° or 270° rarely ends on a 1/64" mark. Its corner is rounded to the nearest 1/64", and the typed length is kept with the wall (`entered_length`), as with the mm rule. The stored wall stays within about 1/90" of the typed length. Walls at 0°, 90°, 180° and 270° are exact.
-- **Sureness tags (provenance) approved.** Every wall length, wall height and thickness, opening and obstacle dimension, and ceiling height records `rough` (from the client or intake), `measured` (entered on site) or `verified`. Entering a value never verifies it. This was PROPOSED in DATA_MODEL "core".
+- **Sureness tags (provenance) approved.** Every wall length, wall thickness, opening and obstacle dimension, and ceiling height records `rough` (from the client or intake), `measured` (entered on site) or `verified`. Entering a value never verifies it. This was PROPOSED in DATA_MODEL "core".
 - **The room preview keeps its draft in the browser** (`localStorage`) until the platform master copy store exists. The screen says "saved in this browser only", and any storage failure is shown in red. Owner asked for something to try (2026-11-05).
+- **Room drawing feedback (owner, 2026-11-05; BUILD_SPEC OA-11):**
+  - Walls have no height of their own; the ceiling height is used. The "too tall" check now compares against the ceiling.
+  - Standard sizes, recorded as data in `src/modules/designer/data/standard-sizes.json` (to move to Shop Settings when it exists):
+    - wall thickness 5 1/2";
+    - door 32" × 80";
+    - window 36" wide × 48" high, sill 36";
+    - passthrough 32" × 80".
+  - A new room asks only for its name and ceiling height.
+  - Doors, windows and passthroughs drop in at the standard size with one tap, centred roughly where tapped. They are then dragged or typed to size. This replaces "every size must be typed before it is created".
+  - Standard sizes and the starting ceiling height are **rough**. A typed size becomes **measured**. A dragged position goes back to **rough**. Verifying is still a separate button.
 - Room capture is pulled ahead of Phase 5 (BUILD_PLAN). Order: scaffold (1a), then Core walls and openings, then the Designer drawing screen.
 
 ### Replaced on 2026-10-27

@@ -23,6 +23,7 @@ import {
   type Room,
   type Wall,
 } from '@/core/index';
+import { STANDARD_SIZES } from './standard-sizes';
 
 export interface Env {
   newId(): string;
@@ -32,9 +33,11 @@ export interface Env {
 }
 
 export interface WallDefaults {
-  readonly height: Measured;
   readonly thickness: Measured;
 }
+
+/** A standard size from data/standard-sizes.json: always rough until someone measures it. */
+const rough = (value: Length): Measured => ({ value, provenance: 'rough', source_mm: null });
 
 /** What the editor keeps: the master copy plus the sizes new walls start with. */
 export interface Draft {
@@ -48,12 +51,12 @@ export interface Change {
   readonly notices: readonly string[];
 }
 
-export type WallField = 'length' | 'height' | 'thickness';
+export type WallField = 'length' | 'thickness';
 export type OpeningField = 'offset' | 'width' | 'height' | 'sill_height';
 
 export type SizeTarget =
   | { readonly kind: 'room'; readonly field: 'ceiling_height' }
-  | { readonly kind: 'wall-defaults'; readonly field: 'height' | 'thickness' }
+  | { readonly kind: 'wall-defaults'; readonly field: 'thickness' }
   | { readonly kind: 'wall'; readonly id: string; readonly field: WallField }
   | { readonly kind: 'opening'; readonly id: string; readonly field: OpeningField };
 
@@ -89,11 +92,11 @@ export function findOpening(r: Room, openingId: string): { wall: Wall; opening: 
   return null;
 }
 
-/** Starts a new room. Every size is typed by the person: nothing is guessed. */
-export function startRoom(
-  env: Env,
-  input: { name: string; shopId: string; ceiling: TypedSize; wallHeight: TypedSize; thickness: TypedSize },
-): Result<Change> {
+/**
+ * Starts a new room from its name and ceiling height (rough until measured).
+ * New walls start at the standard thickness, also rough (owner, 2026-11-05).
+ */
+export function startRoom(env: Env, input: { name: string; shopId: string; ceiling: TypedSize }): Result<Change> {
   const name = input.name.trim();
   if (name === '') return refuse('The room needs a name.');
   const job: Job = {
@@ -102,10 +105,10 @@ export function startRoom(
     shop_id: input.shopId,
     catalog_version: null,
     status: 'draft',
-    rooms: [{ room_id: env.newId(), name, ceiling_height: typed(input.ceiling), walls: [] }],
+    rooms: [{ room_id: env.newId(), name, ceiling_height: { ...typed(input.ceiling), provenance: 'rough' }, walls: [] }],
     history: [{ at: env.now(), by: env.userId, origin: 'designer', summary: `Started room "${name}"` }],
   };
-  return ok({ job, wallDefaults: { height: typed(input.wallHeight), thickness: typed(input.thickness) } });
+  return ok({ job, wallDefaults: { thickness: rough(STANDARD_SIZES.wall_thickness) } });
 }
 
 /** Loads a whole master copy (an example or a downloaded file). This preview edits one room. */
@@ -118,12 +121,7 @@ export function loadJob(raw: unknown, wallDefaults: WallDefaults | null): Result
   if (job.rooms.length !== 1) {
     return refuse(`This preview edits one room at a time, and that file has ${job.rooms.length}.`);
   }
-  const firstWall = (job.rooms[0] as Room).walls[0];
-  const defaults = wallDefaults ?? (firstWall ? { height: firstWall.height, thickness: firstWall.thickness } : null);
-  if (!defaults) {
-    return refuse('That room has no walls, so there is no wall height or thickness to start new walls with.');
-  }
-  return ok({ job, wallDefaults: defaults });
+  return ok({ job, wallDefaults: wallDefaults ?? { thickness: rough(STANDARD_SIZES.wall_thickness) } });
 }
 
 export function renameRoom(draft: Draft, env: Env, name: string): Result<Change> {
@@ -143,7 +141,6 @@ export function addWall(draft: Draft, env: Env, start: Point, end: Point, entere
     entered_length: enteredLength,
     length_source_mm: null,
     length_provenance: 'rough',
-    height: draft.wallDefaults.height,
     thickness: draft.wallDefaults.thickness,
     openings: [],
     obstacles: [],
@@ -288,40 +285,74 @@ export function setProvenance(draft: Draft, env: Env, target: SizeTarget, proven
   }
 }
 
-export interface NewOpening {
-  readonly kind: Opening['kind'];
-  readonly offset: TypedSize | null;
-  readonly width: TypedSize | null;
-  readonly height: TypedSize | null;
-  readonly sill_height: TypedSize | null;
-}
-
-const FIELD_NAMES: Record<OpeningField, string> = {
-  offset: 'distance from the wall start',
-  width: 'width',
-  height: 'height',
-  sill_height: 'sill height',
-};
-
-/** Adds a door, window or passthrough. Every size must be typed: none is guessed. */
-export function addOpening(draft: Draft, env: Env, wallId: string, input: NewOpening): Result<Change> {
+/**
+ * Drops a standard door, window or passthrough on a wall (owner, 2026-11-05): sizes
+ * come from data/standard-sizes.json and start rough. It is centred where the wall
+ * was tapped (or the middle of the wall), kept inside the wall where it fits, and
+ * placed to the nearest inch. Customize it afterwards.
+ */
+export function placeOpening(
+  draft: Draft,
+  env: Env,
+  wallId: string,
+  kind: Opening['kind'],
+  centre: Length | null,
+): Result<Change> {
   const r = room(draft);
   const wall = r.walls.find((w) => w.wall_id === wallId);
   if (!wall) return refuse('That wall no longer exists.');
-  const missing = (['offset', 'width', 'height', 'sill_height'] as const).filter((f) => input[f] === null);
-  if (missing.length > 0) return refuse(`Fill in the ${missing.map((f) => FIELD_NAMES[f]).join(', ')} first.`);
-  const size = (f: OpeningField) => input[f] as TypedSize;
-  if (size('width').value === 0 || size('height').value === 0) return refuse('Width and height must be greater than zero.');
+  const std = STANDARD_SIZES.openings[kind];
+  const wallLength = distanceForDisplay(wall.start_point, wall.end_point).value;
+  const middle = centre ?? Math.floor(wallLength / 2);
+  const room_for_it = Math.max(0, wallLength - std.width);
+  const inch = 64;
+  const offset = Math.min(Math.max(0, Math.round((middle - std.width / 2) / inch) * inch), Math.floor(room_for_it / inch) * inch);
   const opening: Opening = {
     opening_id: env.newId(),
-    kind: input.kind,
-    offset: typed(size('offset')),
-    width: typed(size('width')),
-    height: typed(size('height')),
-    sill_height: typed(size('sill_height')),
+    kind,
+    offset: rough(offset),
+    width: rough(std.width),
+    height: rough(std.height),
+    sill_height: rough(std.sill_height),
   };
   const walls = r.walls.map((w) => (w.wall_id === wallId ? { ...w, openings: [...w.openings, opening] } : w));
-  return ok(withRoom(draft, env, `Added a ${input.kind} to ${wallLabel(r, wallId)}`, { ...r, walls }));
+  return ok(withRoom(draft, env, `Added a ${kind} to ${wallLabel(r, wallId)}`, { ...r, walls }));
+}
+
+/** Moves an opening along its wall (dragged on the plan): an approximate position, so rough. */
+export function moveOpening(draft: Draft, env: Env, openingId: string, offset: Length): Result<Change> {
+  const r = room(draft);
+  const found = findOpening(r, openingId);
+  if (!found) return refuse('That opening no longer exists.');
+  if (offset < 0) return refuse('An opening cannot start before the beginning of its wall.');
+  const walls = r.walls.map((w) =>
+    w.wall_id !== found.wall.wall_id
+      ? w
+      : { ...w, openings: w.openings.map((o) => (o.opening_id === openingId ? { ...o, offset: rough(offset) } : o)) },
+  );
+  return ok(withRoom(draft, env, `Moved a ${found.opening.kind} to ${formatInches(offset)} from the start of ${wallLabel(r, found.wall.wall_id)}`, { ...r, walls }));
+}
+
+/**
+ * Brings a draft saved by an older version of this preview up to date, saying what
+ * changed. Today: walls no longer have their own height (owner, 2026-11-05).
+ */
+export function upgradeStoredDraft(data: unknown): { job: unknown; wallDefaults: WallDefaults | null; notes: string[] } {
+  const notes: string[] = [];
+  const d = (data ?? {}) as { job?: { rooms?: { walls?: Record<string, unknown>[] }[] }; wallDefaults?: { thickness?: Measured } };
+  const job = structuredClone(d.job);
+  let dropped = 0;
+  for (const room of job?.rooms ?? []) {
+    for (const wall of room.walls ?? []) {
+      if ('height' in wall) {
+        delete wall.height;
+        dropped += 1;
+      }
+    }
+  }
+  if (dropped > 0) notes.push(`Your saved room was updated: walls no longer have their own height (${dropped} removed); the ceiling height is used instead.`);
+  const thickness = d.wallDefaults?.thickness;
+  return { job, wallDefaults: thickness ? { thickness } : null, notes };
 }
 
 export function setOpeningKind(draft: Draft, env: Env, openingId: string, kind: Opening['kind']): Result<Change> {

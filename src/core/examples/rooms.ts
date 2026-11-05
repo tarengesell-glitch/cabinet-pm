@@ -4,7 +4,6 @@ import { pointFromLengthAndAngle, type Point } from '../geometry';
 import { JobSchema, SCHEMA_VERSION, type Job, type Wall } from '../schema/master-copy';
 import { ft, id, inch, measured } from './helpers';
 
-const WALL_HEIGHT = measured(ft(8));
 const THICKNESS = measured(inch(4, 1, 2));
 
 function wall(n: number, start: Point, end: Point, extra: Partial<Wall> = {}): Wall {
@@ -15,7 +14,6 @@ function wall(n: number, start: Point, end: Point, extra: Partial<Wall> = {}): W
     entered_length: null,
     length_source_mm: null,
     length_provenance: 'measured',
-    height: WALL_HEIGHT,
     thickness: THICKNESS,
     openings: [],
     obstacles: [],

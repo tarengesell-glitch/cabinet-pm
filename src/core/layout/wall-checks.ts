@@ -76,26 +76,27 @@ export const fitsAlongWall: Check = {
   },
 };
 
-export const fitsWallHeight: Check = {
-  id: 'layout.fits-wall-height',
+export const fitsUnderCeiling: Check = {
+  id: 'layout.fits-under-ceiling',
   layer: 'layout',
-  description: 'Openings and obstacles are no taller than their wall',
+  description: 'Openings and obstacles stay below the ceiling',
   run(job) {
     const issues: Issue[] = [];
     eachWall(job, (room, wall, w) => {
+      const ceiling = room.ceiling_height.value;
       const parts = [
         ...wall.openings.map((o, i) => ({ name: openingName(o, i, room, w), bottom: o.sill_height.value, height: o.height.value, ref: { kind: 'opening' as const, id: o.opening_id } })),
         ...wall.obstacles.map((o, i) => ({ name: obstacleName(o, i, room, w), bottom: o.elevation.value, height: o.height.value, ref: { kind: 'obstacle' as const, id: o.obstacle_id } })),
       ];
       for (const part of parts) {
         const top = part.bottom + part.height;
-        if (top > wall.height.value) {
+        if (top > ceiling) {
           issues.push({
             check_id: this.id,
             severity: 'block',
             message:
-              `${part.name} reaches ${formatInches(top)} from the floor, but the wall is only ` +
-              `${formatInches(wall.height.value)} high (${formatInches(top - wall.height.value)} too tall).`,
+              `${part.name} reaches ${formatInches(top)} from the floor, but the ceiling is only ` +
+              `${formatInches(ceiling)} high (${formatInches(top - ceiling)} too tall).`,
             ref: part.ref,
           });
         }
@@ -159,7 +160,7 @@ export const wallsCross: Check = {
 };
 
 /** Every wall layout check, in the order they run. */
-export const WALL_CHECKS: readonly Check[] = [wallZeroLength, fitsAlongWall, fitsWallHeight, openingsOverlap, wallsCross];
+export const WALL_CHECKS: readonly Check[] = [wallZeroLength, fitsAlongWall, fitsUnderCeiling, openingsOverlap, wallsCross];
 
 function capital(text: string): string {
   return text.charAt(0).toUpperCase() + text.slice(1);

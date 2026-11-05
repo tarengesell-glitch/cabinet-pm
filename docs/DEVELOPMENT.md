@@ -8,6 +8,8 @@
 ## Trying the app
 `npm run dev`, then open http://localhost:3000/rooms/preview for the room drawing preview. See `src/modules/designer/README.md` for what it does.
 
+Stop `npm run dev` (Control + C) before `npm run check`: Next.js allows only one dev server per project folder, and the browser tests start their own.
+
 ## Everyday commands
 | Command | What it does |
 |---|---|

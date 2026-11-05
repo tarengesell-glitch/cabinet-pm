@@ -12,7 +12,7 @@ import {
   type Room,
   type Wall,
 } from '@/core/index';
-import type { NewOpening, OpeningField, TypedSize, WallDefaults } from '../model/editor';
+import type { OpeningField, TypedSize, WallDefaults } from '../model/editor';
 import { parseSize } from './parseSize';
 import { ProvenanceChip, SizeField } from './SizeField';
 import type { Selection } from './PlanCanvas';
@@ -60,24 +60,24 @@ function BackToRoom({ onSelect }: { onSelect: (sel: Selection) => void }) {
 
 export function StartRoomForm({ canEdit, onStart, onExample }: {
   canEdit: boolean;
-  onStart: (input: { name: string; ceiling: TypedSize; wallHeight: TypedSize; thickness: TypedSize }) => Result<unknown>;
+  onStart: (input: { name: string; ceiling: TypedSize }) => Result<unknown>;
   onExample: (which: 'kitchen' | 'lshape') => void;
 }) {
   const [name, setName] = useState('');
-  const [texts, setTexts] = useState({ ceiling: '', wallHeight: '', thickness: '' });
+  const [texts, setTexts] = useState({ ceiling: '' });
   const [errors, setErrors] = useState<Partial<Record<keyof typeof texts | 'name' | 'form', string>>>({});
   const submit = () => {
-    const { values, errors: e } = readSizes(texts, ['ceiling', 'wallHeight', 'thickness']);
+    const { values, errors: e } = readSizes(texts, ['ceiling']);
     const nameError = name.trim() === '' ? 'Required.' : undefined;
     if (Object.keys(e).length > 0 || nameError) return setErrors({ ...e, ...(nameError ? { name: nameError } : {}) });
-    const r = onStart({ name, ceiling: values.ceiling!, wallHeight: values.wallHeight!, thickness: values.thickness! });
+    const r = onStart({ name, ceiling: values.ceiling! });
     setErrors(r.ok ? {} : { form: r.reason });
   };
   return (
     <>
       <section className={s.card}>
         <h2 className={s.cardTitle}>Start a room</h2>
-        <p className={s.muted}>Every size is typed by you: nothing is guessed. Use feet and inches (10&apos; 2 1/4&quot;, 122.25) or millimetres (2440 mm).</p>
+        <p className={s.muted}>Use feet and inches (8&apos;, 10&apos; 2 1/4&quot;, 122.25) or millimetres (2440 mm). Walls start at the standard thickness; change it any time.</p>
         <div className={s.formGrid}>
           <label>
             Room name
@@ -85,8 +85,6 @@ export function StartRoomForm({ canEdit, onStart, onExample }: {
             {errors.name && <span className={s.error}>{errors.name}</span>}
           </label>
           <SizeInput label="Ceiling height" value={texts.ceiling} onChange={(v) => setTexts({ ...texts, ceiling: v })} error={errors.ceiling ?? null} />
-          <SizeInput label="Wall height" value={texts.wallHeight} onChange={(v) => setTexts({ ...texts, wallHeight: v })} error={errors.wallHeight ?? null} />
-          <SizeInput label="Wall thickness" value={texts.thickness} onChange={(v) => setTexts({ ...texts, thickness: v })} error={errors.thickness ?? null} />
         </div>
         {errors.form && <p className={s.error} role="alert">{errors.form}</p>}
         <div className={s.row}>
@@ -183,7 +181,7 @@ export function RoomPanel({ room, wallDefaults, canEdit, onRename, onCeiling, on
   canEdit: boolean;
   onRename: (name: string) => Result<unknown>;
   onCeiling: { set: (v: TypedSize) => Result<unknown>; provenance: (p: Measured['provenance']) => Result<unknown> };
-  onDefaults: (field: 'height' | 'thickness', v: TypedSize) => Result<unknown>;
+  onDefaults: (field: 'thickness', v: TypedSize) => Result<unknown>;
   onSelect: (sel: Selection) => void;
   onNewRoom: () => void;
 }) {
@@ -200,7 +198,6 @@ export function RoomPanel({ room, wallDefaults, canEdit, onRename, onCeiling, on
       </div>
       {nameError && <p className={s.error}>{nameError}</p>}
       <SizeField label="Ceiling height" measured={room.ceiling_height} canEdit={canEdit} onSet={onCeiling.set} onProvenance={onCeiling.provenance} />
-      <SizeField label="New walls: height" measured={wallDefaults.height} canEdit={canEdit} onSet={(v) => onDefaults('height', v)} />
       <SizeField label="New walls: thickness" measured={wallDefaults.thickness} canEdit={canEdit} onSet={(v) => onDefaults('thickness', v)} />
       <div>
         <p className={s.muted}>Walls ({room.walls.length})</p>
@@ -235,8 +232,8 @@ export function WallPanel({ room, wall, canEdit, onSize, onProvenance, onDelete,
   room: Room;
   wall: Wall;
   canEdit: boolean;
-  onSize: (field: 'length' | 'height' | 'thickness', v: TypedSize) => Result<unknown>;
-  onProvenance: (field: 'length' | 'height' | 'thickness', p: Measured['provenance']) => Result<unknown>;
+  onSize: (field: 'length' | 'thickness', v: TypedSize) => Result<unknown>;
+  onProvenance: (field: 'length' | 'thickness', p: Measured['provenance']) => Result<unknown>;
   onDelete: () => void;
   onSelect: (sel: Selection) => void;
   onAddOpening: (kind: Opening['kind']) => void;
@@ -263,8 +260,7 @@ export function WallPanel({ room, wall, canEdit, onSize, onProvenance, onDelete,
         onSet={(v) => onSize('length', v)}
         onProvenance={(p) => onProvenance('length', p)}
       />
-      <p className={s.muted}>Typing a length moves this wall&apos;s far corner, and the wall joined to it.</p>
-      <SizeField label="Height" measured={wall.height} canEdit={canEdit} onSet={(v) => onSize('height', v)} onProvenance={(p) => onProvenance('height', p)} />
+      <p className={s.muted}>Typing a length moves this wall&apos;s far corner, and the wall joined to it. Walls are as high as the ceiling.</p>
       <SizeField label="Thickness" measured={wall.thickness} canEdit={canEdit} onSet={(v) => onSize('thickness', v)} onProvenance={(p) => onProvenance('thickness', p)} />
       <div>
         <p className={s.muted}>Doors and windows on this wall</p>
@@ -335,59 +331,13 @@ export function OpeningPanel({ room, wall, opening, canEdit, onKind, onSize, onP
           </button>
         ))}
       </div>
+      <p className={s.muted}>Drag it along the wall on the plan, or type exact sizes here.</p>
       {OPENING_FIELDS.map(({ field, label }) => (
         <SizeField key={field} label={label} measured={opening[field]} canEdit={canEdit} onSet={(v) => onSize(field, v)} onProvenance={(p) => onProvenance(field, p)} />
       ))}
       <div className={s.row}>
         <button className={s.buttonDanger} disabled={!canEdit} onClick={onDelete}>
           Delete {KIND_LABEL[opening.kind].toLowerCase()}
-        </button>
-      </div>
-    </section>
-  );
-}
-
-/** A new door or window: every size typed before it is created. */
-export function NewOpeningPanel({ room, wallId, kind, offsetHint, onCreate, onCancel }: {
-  room: Room;
-  wallId: string;
-  kind: Opening['kind'];
-  offsetHint: number | null;
-  onCreate: (input: NewOpening) => Result<unknown>;
-  onCancel: () => void;
-}) {
-  const [texts, setTexts] = useState<Record<OpeningField, string>>({
-    offset: offsetHint === null ? '' : formatInches(offsetHint),
-    width: '',
-    height: '',
-    sill_height: '',
-  });
-  const [errors, setErrors] = useState<Partial<Record<OpeningField | 'form', string>>>({});
-  const wallIndex = room.walls.findIndex((w) => w.wall_id === wallId);
-  const create = () => {
-    const { values, errors: e } = readSizes(texts, ['offset', 'width', 'height', 'sill_height']);
-    if (Object.keys(e).length > 0) return setErrors(e);
-    const r = onCreate({ kind, offset: values.offset ?? null, width: values.width ?? null, height: values.height ?? null, sill_height: values.sill_height ?? null });
-    setErrors(r.ok ? {} : { form: r.reason });
-  };
-  return (
-    <section className={s.card}>
-      <h2 className={s.cardTitle}>
-        New {KIND_LABEL[kind].toLowerCase()} on wall {wallIndex + 1}
-      </h2>
-      <p className={s.muted}>Fill in every size. Nothing is assumed{kind !== 'window' ? ' (a door that starts at the floor has a sill height of 0)' : ''}.</p>
-      <div className={s.formGrid}>
-        {OPENING_FIELDS.map(({ field, label }) => (
-          <SizeInput key={field} label={label} value={texts[field]} onChange={(v) => setTexts({ ...texts, [field]: v })} error={errors[field] ?? null} />
-        ))}
-      </div>
-      {errors.form && <p className={s.error} role="alert">{errors.form}</p>}
-      <div className={s.row}>
-        <button className={s.buttonPrimary} onClick={create}>
-          Add {KIND_LABEL[kind].toLowerCase()}
-        </button>
-        <button className={s.button} onClick={onCancel}>
-          Cancel
         </button>
       </div>
     </section>

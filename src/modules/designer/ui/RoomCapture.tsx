@@ -8,7 +8,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { JobSchema, WALL_CHECKS, examples, runChecks, type Opening, type Point, type Result } from '@/core/index';
 import { can, PREVIEW_SHOP, type User } from '@/platform/index';
 import {
-  addOpening,
   addWall,
   addWallByLength,
   closeRoom,
@@ -17,6 +16,8 @@ import {
   deleteWall,
   findOpening,
   loadJob,
+  moveOpening,
+  placeOpening,
   redo,
   renameRoom,
   room as roomOf,
@@ -26,23 +27,22 @@ import {
   startRoom,
   startTimeline,
   undo,
+  upgradeStoredDraft,
   type Change,
   type Env,
   type Timeline,
 } from '../model/editor';
-import { AddWallForm, ChecksPanel, MasterCopyPanel, NewOpeningPanel, OpeningPanel, RoomPanel, StartRoomForm, WallPanel, KIND_LABEL } from './Panels';
+import { AddWallForm, ChecksPanel, MasterCopyPanel, OpeningPanel, RoomPanel, StartRoomForm, WallPanel, KIND_LABEL } from './Panels';
 import { PlanCanvas, type Selection, type Tool } from './PlanCanvas';
 import { downloadText, readStored, writeStored } from './storage';
 import s from './RoomCapture.module.css';
 
-type Pending = { wallId: string; kind: Opening['kind']; offset: number | null } | null;
-
 const TOOL_HINT: Record<Tool, string> = {
   select: 'Tap a wall, door or window to edit it.',
   draw: 'Tap corner to corner. Snaps to corners, whole inches and 45°. Tap the first corner, or Finish, to stop.',
-  door: 'Tap a wall where the door goes.',
-  window: 'Tap a wall where the window goes.',
-  passthrough: 'Tap a wall where the passthrough goes.',
+  door: 'Tap a wall to drop a standard door there. Drag it or type sizes after.',
+  window: 'Tap a wall to drop a standard window there. Drag it or type sizes after.',
+  passthrough: 'Tap a wall to drop a standard passthrough there. Drag it or type sizes after.',
 };
 
 export function RoomCapture({ user }: { user: User }) {
@@ -60,7 +60,6 @@ export function RoomCapture({ user }: { user: User }) {
   const [unreadable, setUnreadable] = useState<{ raw: string; reason: string } | null>(null);
   const [tool, setTool] = useState<Tool>('select');
   const [selection, setSelection] = useState<Selection>(null);
-  const [pending, setPending] = useState<Pending>(null);
   const [chainStart, setChainStart] = useState<Point | null>(null);
   const [message, setMessage] = useState<{ kind: 'error' | 'notice'; text: string } | null>(null);
 
@@ -70,10 +69,12 @@ export function RoomCapture({ user }: { user: User }) {
     if (stored.kind === 'unavailable') setStorageProblem(`This browser won't keep your work (${stored.reason}).`);
     else if (stored.kind === 'unreadable') setUnreadable({ raw: stored.raw, reason: stored.reason });
     else if (stored.kind === 'found') {
-      const data = stored.data as { job?: unknown; wallDefaults?: unknown };
-      const r = loadJob(data?.job, (data?.wallDefaults as never) ?? null);
-      if (r.ok) setTimeline(startTimeline(r.value.draft));
-      else setUnreadable({ raw: stored.raw, reason: r.reason });
+      const upgraded = upgradeStoredDraft(stored.data);
+      const r = loadJob(upgraded.job, upgraded.wallDefaults);
+      if (r.ok) {
+        setTimeline(startTimeline(r.value.draft));
+        if (upgraded.notes.length) setMessage({ kind: 'notice', text: upgraded.notes.join(' ') });
+      } else setUnreadable({ raw: stored.raw, reason: r.reason });
     }
     setLoaded(true);
   }, []);
@@ -113,10 +114,7 @@ export function RoomCapture({ user }: { user: User }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const typing = e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement;
-      if (e.key === 'Escape') {
-        setChainStart(null);
-        setPending(null);
-      }
+      if (e.key === 'Escape') setChainStart(null);
       if (typing || !canEdit) return;
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z') {
         e.preventDefault();
@@ -149,7 +147,6 @@ export function RoomCapture({ user }: { user: User }) {
   const chooseTool = (t: Tool) => {
     setTool(t);
     setChainStart(null);
-    setPending(null);
     if (t !== 'select') setSelection(null);
   };
 
@@ -204,6 +201,17 @@ export function RoomCapture({ user }: { user: User }) {
     );
   }
 
+  /** Drops a standard opening and selects it so it can be customized. */
+  const dropOpening = (wallId: string, kind: Opening['kind'], centre: number | null) => {
+    if (!draft) return;
+    const r = apply(placeOpening(draft, env, wallId, kind, centre));
+    if (!r.ok) return setMessage({ kind: 'error', text: r.reason });
+    const wall = roomOf(r.value.draft).walls.find((w) => w.wall_id === wallId);
+    const added = wall?.openings[wall.openings.length - 1];
+    setTool('select');
+    if (added) setSelection({ kind: 'opening', id: added.opening_id });
+  };
+
   const selectedWall = room && selection?.kind === 'wall' ? room.walls.find((w) => w.wall_id === selection.id) ?? null : null;
   const selectedOpening = room && selection?.kind === 'opening' ? findOpening(room, selection.id) : null;
 
@@ -244,19 +252,20 @@ export function RoomCapture({ user }: { user: User }) {
                 selection={selection}
                 issues={issues}
                 canEdit={canEdit}
-                onSelect={(sel) => {
-                  setSelection(sel);
-                  setPending(null);
-                }}
+                onSelect={setSelection}
                 onAddWall={(a, b) => {
                   if (!draft) return;
                   const r = apply(addWall(draft, env, a, b));
                   if (!r.ok) setMessage({ kind: 'error', text: r.reason });
                 }}
-                onPickWallForOpening={(wallId, offset) => {
-                  if (tool === 'select' || tool === 'draw') return;
-                  setPending({ wallId, kind: tool, offset });
-                  setSelection(null);
+                onPickWallForOpening={(wallId, centre) => {
+                  if (!draft || tool === 'select' || tool === 'draw') return;
+                  dropOpening(wallId, tool, centre);
+                }}
+                onMoveOpening={(openingId, offset) => {
+                  if (!draft) return;
+                  const r = apply(moveOpening(draft, env, openingId, offset));
+                  if (!r.ok) setMessage({ kind: 'error', text: r.reason });
                 }}
                 chainStart={chainStart}
                 onChainStart={setChainStart}
@@ -270,35 +279,17 @@ export function RoomCapture({ user }: { user: User }) {
             <StartRoomForm
               canEdit={canEdit}
               onExample={loadExample}
-              onStart={(input) => apply(startRoom(env, { ...input, shopId: PREVIEW_SHOP.id }))}
+              onStart={(input) => {
+                const r = apply(startRoom(env, { ...input, shopId: PREVIEW_SHOP.id }));
+                if (r.ok) setTool('draw');
+                return r;
+              }}
             />
           ) : (
             <>
-              <ChecksPanel formatErrors={formatErrors} issues={issues} onSelect={(sel) => (setSelection(sel), setPending(null), setTool('select'))} />
+              <ChecksPanel formatErrors={formatErrors} issues={issues} onSelect={(sel) => (setSelection(sel), setTool('select'))} />
 
-              {pending && (
-                <NewOpeningPanel
-                  key={`${pending.wallId}-${pending.kind}-${pending.offset}`}
-                  room={room}
-                  wallId={pending.wallId}
-                  kind={pending.kind}
-                  offsetHint={pending.offset}
-                  onCancel={() => setPending(null)}
-                  onCreate={(input) => {
-                    const r = apply(addOpening(draft, env, pending.wallId, input));
-                    if (r.ok) {
-                      const wall = roomOf(r.value.draft).walls.find((w) => w.wall_id === pending.wallId);
-                      const added = wall?.openings[wall.openings.length - 1];
-                      setPending(null);
-                      setTool('select');
-                      if (added) setSelection({ kind: 'opening', id: added.opening_id });
-                    }
-                    return r;
-                  }}
-                />
-              )}
-
-              {!pending && selectedWall && (
+              {selectedWall && (
                 <WallPanel
                   key={selectedWall.wall_id}
                   room={room}
@@ -307,7 +298,7 @@ export function RoomCapture({ user }: { user: User }) {
                   onSelect={setSelection}
                   onSize={(field, v) => apply(setSize(draft, env, { kind: 'wall', id: selectedWall.wall_id, field }, v))}
                   onProvenance={(field, p) => apply(setProvenance(draft, env, { kind: 'wall', id: selectedWall.wall_id, field }, p))}
-                  onAddOpening={(kind) => setPending({ wallId: selectedWall.wall_id, kind, offset: null })}
+                  onAddOpening={(kind) => dropOpening(selectedWall.wall_id, kind, null)}
                   onDelete={() => {
                     const r = apply(deleteWall(draft, env, selectedWall.wall_id));
                     if (r.ok) setSelection(null);
@@ -315,7 +306,7 @@ export function RoomCapture({ user }: { user: User }) {
                 />
               )}
 
-              {!pending && selectedOpening && (
+              {selectedOpening && (
                 <OpeningPanel
                   key={selectedOpening.opening.opening_id}
                   room={room}
@@ -333,7 +324,7 @@ export function RoomCapture({ user }: { user: User }) {
                 />
               )}
 
-              {!pending && !selectedWall && !selectedOpening && (
+              {!selectedWall && !selectedOpening && (
                 <>
                   <AddWallForm
                     canEdit={canEdit}

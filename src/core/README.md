@@ -39,7 +39,7 @@ Room shell only for now: Job, Room, Wall, Opening (window, door or passthrough) 
 - A wall is two corner points, plus:
   - `entered_length` and `length_source_mm` when the corners were rounded (see above);
   - `length_provenance`;
-  - a `Measured` height and thickness;
+  - a `Measured` thickness (no height of its own: walls are as high as the ceiling, owner 2026-11-05);
   - its openings and obstacles, placed by `offset` along the wall from its start corner.
 - IDs are UUIDs, passed in by the caller, and must be unique within the job.
 
@@ -53,7 +53,7 @@ Room shell only for now: Job, Room, Wall, Opening (window, door or passthrough) 
 |---|---|
 | `layout.wall-zero-length` | A wall starts and ends at the same point |
 | `layout.fits-along-wall` | An opening or obstacle runs past the end of its wall |
-| `layout.fits-wall-height` | An opening or obstacle reaches higher than its wall |
+| `layout.fits-under-ceiling` | An opening or obstacle reaches above the room's ceiling |
 | `layout.openings-overlap` | Two openings on one wall overlap (touching is fine) |
 | `layout.walls-cross` | Two walls in a room cross or run over each other |
 

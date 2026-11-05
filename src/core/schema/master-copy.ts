@@ -76,7 +76,7 @@ export const WallSchema = z.strictObject({
   length_source_mm: SourceMmSchema.nullable(),
   /** How sure we are of the wall's length. */
   length_provenance: ProvenanceSchema,
-  height: MeasuredSchema,
+  // No wall height: walls are as high as the room's ceiling (owner, 2026-11-05).
   thickness: MeasuredSchema,
   openings: z.array(OpeningSchema),
   obstacles: z.array(ObstacleSchema),

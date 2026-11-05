@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { runChecks, type Check } from '../checks';
 import { JobSchema, type Job } from '../schema/master-copy';
-import { WALL_CHECKS, fitsAlongWall, fitsWallHeight, openingsOverlap, wallZeroLength, wallsCross } from '../layout/wall-checks';
+import { WALL_CHECKS, fitsAlongWall, fitsUnderCeiling, openingsOverlap, wallZeroLength, wallsCross } from '../layout/wall-checks';
 import { inch } from '../examples/helpers';
 import { kitchen, lShapeWithAngledWall } from '../examples/rooms';
 
@@ -67,14 +67,14 @@ describe('each check fails on a copy broken for it', () => {
     expect(issues[0]!.message).toMatch(/the wall is about 4' 0" long/);
   });
 
-  it('a window taller than its wall', () => {
+  it('a window reaching above the ceiling', () => {
     const job = kitchen();
     const window = room0(job).walls[0]!.openings[0]!;
     window.height = { ...window.height, value: inch(60) }; // 42 + 60 > 96
-    const issues = issuesFrom(fitsWallHeight, job);
+    const issues = issuesFrom(fitsUnderCeiling, job);
     expect(issues).toHaveLength(1);
     expect(issues[0]!.message).toBe(
-      `Window 1 on wall 1 in "Kitchen" reaches 8' 6" from the floor, but the wall is only 8' 0" high (6" too tall).`,
+      `Window 1 on wall 1 in "Kitchen" reaches 8' 6" from the floor, but the ceiling is only 8' 0" high (6" too tall).`,
     );
   });
 

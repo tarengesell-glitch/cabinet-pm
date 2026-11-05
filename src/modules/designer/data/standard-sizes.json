@@ -1,0 +1,9 @@
+{
+  "source": "Owner (Taren), 2026-11-05, in the Claude Code session that built the room preview. Belongs in Shop Settings once that module exists.",
+  "wall_thickness": "5 1/2",
+  "openings": {
+    "door": { "width": "32", "height": "80", "sill_height": "0" },
+    "window": { "width": "36", "height": "48", "sill_height": "36" },
+    "passthrough": { "width": "32", "height": "80", "sill_height": "0" }
+  }
+}

@@ -16,7 +16,8 @@ Open it at `/rooms/preview` (`npm run dev`, then http://localhost:3000/rooms/pre
   - Or draw them on the plan: tap corner to corner. Corners snap to existing corners, whole inches and 45°, and the view stays still while drawing.
   - Corners are drawn joined (mitred). Labels go outside and doors swing inside, whichever way the room was drawn.
 - **Edit a wall:** its length and thickness. Typing a length moves the far corner and the wall joined to it. That joined wall goes back to rough, and the screen says so.
-- **Doors, windows and passthroughs:** tap a wall with the tool, or use "+ Door" on a wall.
+- **Moving around the plan:** the scroll wheel zooms in and out around the cursor. A sideways scroll (or Shift + scroll) moves left and right. Fit, + and − buttons sit at the bottom right.
+- **Doors, windows and passthroughs:** choose the tool and move the cursor. A ghost of the item follows it and snaps onto the nearest wall, showing its distance to each end of the wall; click to place it exactly there. Off a wall the cursor shows "not allowed" and clicking does nothing. Or use "+ Door" on a selected wall.
   - A standard one drops in at once, rough, centred where you tapped.
   - Drag it along the wall, or type exact sizes.
   - The standard sizes are in `data/standard-sizes.json` (owner, 2026-11-05).
@@ -28,6 +29,7 @@ Open it at `/rooms/preview` (`npm run dev`, then http://localhost:3000/rooms/pre
 - **Sizes:**
   - Feet and inches are exact. Anything not on a 1/64" mark is refused with Core's reason.
   - "mm" sizes are rounded (U-2), and the mm value is kept.
+- **Colours:** rough walls are a soft pastel red, measured amber, verified green.
 - **Sureness tags:** each size shows Rough (red, ?), Measured (amber, ✎) or Verified (green, ✓). Typing makes it Measured. Verify is a separate button.
 - **Live checks:** Core's master copy format check and wall checks run after every change. Tap a problem to select it.
 - **Also:**

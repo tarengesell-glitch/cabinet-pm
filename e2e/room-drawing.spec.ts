@@ -210,3 +210,75 @@ test('Delete does nothing while typing in a box', async ({ page }) => {
   await page.getByRole('button', { name: '← Room' }).click();
   await expect(wallButtons(page)).toHaveCount(4);
 });
+
+const konvaRect = (page: Page, selector: string) =>
+  page.evaluate((sel) => {
+    const w = window as unknown as { Konva: { stages: { findOne: (s: string) => { getClientRect: () => { x: number; y: number; width: number; height: number } } | undefined }[] } };
+    const node = w.Konva.stages[0]!.findOne(sel);
+    return node ? node.getClientRect() : null;
+  }, selector);
+
+test('a window ghost follows the cursor, snaps to a wall, and lands where it showed', async ({ page }) => {
+  await startRoom(page);
+  await typeRectangle(page);
+  await page.getByRole('button', { name: 'Add window' }).click();
+  const plan = page.getByTestId('plan');
+  const box = (await plan.boundingBox())!;
+
+  // Off any wall: a faint ghost, a no-entry cursor, and a click does nothing.
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await expect.poll(() => konvaRect(page, '.ghost-floating')).not.toBeNull();
+  await expect(plan).toHaveCSS('cursor', 'not-allowed');
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  await expect(page.getByRole('heading', { name: /^Window on/ })).toHaveCount(0);
+
+  // Near wall 3: the ghost snaps on, with distances to both ends of the wall.
+  const wall = (await konvaRect(page, '.wall-3'))!;
+  const x = box.x + wall.x + wall.width * 0.35;
+  const y = box.y + wall.y + wall.height / 2 + 15;
+  await page.mouse.move(x, y);
+  await expect.poll(() => konvaRect(page, '.ghost-opening')).not.toBeNull();
+  await expect(plan).toHaveCSS('cursor', 'copy');
+
+  await page.mouse.click(x, y);
+  await expect(page.getByRole('heading', { name: /^Window on/ })).toBeVisible();
+  await expect(page.getByTestId('value-Width')).toHaveText(`3' 0"`);
+});
+
+test('the scroll wheel zooms, a sideways scroll moves left and right, Fit resets', async ({ page }) => {
+  await page.goto('/rooms/preview');
+  await page.getByRole('button', { name: /Example kitchen/ }).click();
+  const box = (await page.getByTestId('plan').boundingBox())!;
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await expect(page.getByTestId('zoom-level')).toHaveText('100%');
+
+  await page.mouse.wheel(0, -400); // wheel up: zoom in
+  await expect(page.getByTestId('zoom-level')).not.toHaveText('100%');
+  const zoomedIn = Number((await page.getByTestId('zoom-level').textContent())!.replace('%', ''));
+  expect(zoomedIn).toBeGreaterThan(100);
+
+  const before = (await konvaRect(page, '.wall-1'))!;
+  await page.mouse.wheel(200, 0); // sideways wheel: move left/right, no zoom
+  await expect.poll(async () => (await konvaRect(page, '.wall-1'))!.x).toBeLessThan(before.x - 50);
+  await expect(page.getByTestId('zoom-level')).toHaveText(`${zoomedIn}%`);
+
+  await page.mouse.wheel(0, 800); // wheel down: zoom out
+  await expect.poll(async () => Number((await page.getByTestId('zoom-level').textContent())!.replace('%', ''))).toBeLessThan(zoomedIn);
+
+  await page.getByRole('button', { name: 'Fit the room on screen' }).click();
+  await expect(page.getByTestId('zoom-level')).toHaveText('100%');
+});
+
+test('rough walls are a soft pastel red', async ({ page }) => {
+  await startRoom(page);
+  await typeWall(page, `12'`, 'right');
+  await typeWall(page, `10'`, 'up');
+  await page.getByRole('button', { name: 'Close the room' }).click(); // the closing wall is rough
+  const fill = (name: string) =>
+    page.evaluate((n) => {
+      const w = window as unknown as { Konva: { stages: { findOne: (s: string) => { fill: () => string } }[] } };
+      return w.Konva.stages[0]!.findOne(n).fill();
+    }, name);
+  await expect.poll(() => fill('.wall-3')).toBe('#eeb8ba');
+  expect(await fill('.wall-1')).not.toBe('#eeb8ba'); // typed, so measured
+});

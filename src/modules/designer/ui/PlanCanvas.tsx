@@ -21,7 +21,8 @@ import {
   type Room,
   type Wall,
 } from '@/core/index';
-import { nearestWall } from '../model/editor';
+import { nearestWall, standardOpeningOffset } from '../model/editor';
+import { STANDARD_SIZES } from '../model/standard-sizes';
 
 export type Tool = 'select' | 'draw' | Opening['kind'];
 export type Selection =
@@ -67,10 +68,19 @@ const INCH = 64;
 const FOOT = 12 * INCH;
 const ANGLE_STEP = 4500;
 const SNAP_PX = 14;
-const PICK_PX = 18;
 const PAD_PX = 56;
+/** A door or window ghost snaps to a wall within this many pixels of the cursor. */
+const GHOST_PX = 40;
+/** How far you can zoom out from / in to the fitted view. */
+const MIN_ZOOM = 0.25;
+const MAX_ZOOM = 12;
+const GHOST = '#176b70';
+const MUTED = '#687582';
 
-const COLOUR: Record<Provenance, string> = { rough: '#be3d42', measured: '#ad751a', verified: '#16805d' };
+/** Wall fill by sureness tag. Rough is a soft pastel red (owner, 2026-11-05), not alarm red. */
+const FILL: Record<Provenance, string> = { rough: '#eeb8ba', measured: '#ad751a', verified: '#16805d' };
+/** Label text by sureness tag: darker than the fill so it stays readable on white. */
+const TEXT: Record<Provenance, string> = { rough: '#b0575b', measured: '#8a5d12', verified: '#13704f' };
 const ICON: Record<Provenance, string> = { rough: '?', measured: '✎', verified: '✓' };
 const ACCENT = '#176b70';
 const DANGER = '#be3d42';
@@ -133,10 +143,35 @@ export function PlanCanvas(props: Props) {
 
   // Fit the room (plus a margin to draw into) on screen. While a chain of walls is
   // being drawn the view stays still, so each tap lands where the person aimed.
-  const frozenView = useRef<ReturnType<typeof fitView> | null>(null);
+  const frozenView = useRef<View | null>(null);
   const fitted = useMemo(() => fitView(corners, size), [corners, size]);
   if (chainStart === null || frozenView.current === null || frozenView.current.size !== size) frozenView.current = fitted;
-  const view = chainStart === null ? fitted : frozenView.current;
+  // Once the person zooms or scrolls, their view stays until they press "Fit".
+  const [manual, setManual] = useState<View | null>(null);
+  const view = manual ?? (chainStart === null ? fitted : frozenView.current);
+  const zoom = view.scale / fitted.scale;
+
+  /** Zooms by `factor` keeping the room point under (px, py) still. */
+  const zoomAt = (factor: number, px: number, py: number) => {
+    const scale = Math.min(Math.max(view.scale * factor, fitted.scale * MIN_ZOOM), fitted.scale * MAX_ZOOM);
+    const rx = view.minX + (px - view.ox) / view.scale;
+    const ry = view.maxY - (py - view.oy) / view.scale;
+    setManual({ ...view, scale, ox: px - (rx - view.minX) * scale, oy: py - (view.maxY - ry) * scale });
+  };
+
+  /** Mouse wheel zooms; a sideways wheel (or Shift + wheel) scrolls left and right. */
+  const onWheel = (e: Konva.KonvaEventObject<WheelEvent>) => {
+    e.evt.preventDefault();
+    const { deltaX, deltaY, shiftKey } = e.evt;
+    const sideways = Math.abs(deltaX) > Math.abs(deltaY) || (shiftKey && deltaY !== 0);
+    if (sideways) {
+      const amount = Math.abs(deltaX) > Math.abs(deltaY) ? deltaX : deltaY;
+      setManual({ ...view, ox: view.ox - amount });
+      return;
+    }
+    const pos = e.target.getStage()?.getPointerPosition() ?? { x: size.width / 2, y: size.height / 2 };
+    zoomAt(Math.exp(-deltaY * 0.0015), pos.x, pos.y);
+  };
 
   const toScreen = (p: Point) => ({ x: view.ox + (p.x - view.minX) * view.scale, y: view.oy + (view.maxY - p.y) * view.scale });
   const toRoom = (sx: number, sy: number): Point => ({
@@ -164,6 +199,14 @@ export function PlanCanvas(props: Props) {
   const pointer = (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>): Point | null => {
     const pos = e.target.getStage()?.getPointerPosition();
     return pos ? toRoom(pos.x, pos.y) : null;
+  };
+
+  /** For the door / window / passthrough tools: the wall the ghost snaps to, and where it would land. */
+  const openingTarget = (p: Point) => {
+    if (tool === 'select' || tool === 'draw') return null;
+    const hit = nearestWall(room, p, GHOST_PX / view.scale);
+    if (!hit) return null;
+    return { wall: hit.wall, centre: hit.offset, offset: standardOpeningOffset(hit.wall, tool, hit.offset) };
   };
 
   // Box selection: press on an empty part of the plan, drag, release.
@@ -210,8 +253,8 @@ export function PlanCanvas(props: Props) {
       props.onChainStart(first && first.x === next.x && first.y === next.y ? null : next);
       return;
     }
-    const hit = nearestWall(room, p, PICK_PX / view.scale);
-    if (hit) props.onPickWallForOpening(hit.wall.wall_id, hit.offset);
+    const target = openingTarget(p);
+    if (target) props.onPickWallForOpening(target.wall.wall_id, target.centre);
   };
 
   // Which side of the walls is outside depends on which way the room was drawn.
@@ -219,20 +262,27 @@ export function PlanCanvas(props: Props) {
   const issueIds = useMemo(() => new Set(issues.filter((i) => i.severity === 'block').map((i) => i.ref.id)), [issues]);
   const preview = tool === 'draw' && chainStart && hover ? snapNext(hover) : null;
 
-  // Grid every foot.
+  // Grid every foot, over whatever part of the room is on screen.
   const gridLines = [];
-  for (let x = Math.ceil(view.minX / FOOT) * FOOT; x <= view.maxX; x += FOOT) {
-    const a = toScreen({ x, y: view.minY });
-    const b = toScreen({ x, y: view.maxY });
+  const visMinX = view.minX + (0 - view.ox) / view.scale;
+  const visMaxX = view.minX + (size.width - view.ox) / view.scale;
+  const visMaxY = view.maxY - (0 - view.oy) / view.scale;
+  const visMinY = view.maxY - (size.height - view.oy) / view.scale;
+  for (let x = Math.ceil(visMinX / FOOT) * FOOT; x <= visMaxX; x += FOOT) {
+    const a = toScreen({ x, y: visMinY });
+    const b = toScreen({ x, y: visMaxY });
     gridLines.push(<Line key={`gx${x}`} points={[a.x, a.y, b.x, b.y]} stroke="#eef1f3" strokeWidth={1} listening={false} />);
   }
-  for (let y = Math.ceil(view.minY / FOOT) * FOOT; y <= view.maxY; y += FOOT) {
-    const a = toScreen({ x: view.minX, y });
-    const b = toScreen({ x: view.maxX, y });
+  for (let y = Math.ceil(visMinY / FOOT) * FOOT; y <= visMaxY; y += FOOT) {
+    const a = toScreen({ x: visMinX, y });
+    const b = toScreen({ x: visMaxX, y });
     gridLines.push(<Line key={`gy${y}`} points={[a.x, a.y, b.x, b.y]} stroke="#eef1f3" strokeWidth={1} listening={false} />);
   }
 
-  const cursor = tool === 'select' ? 'default' : 'crosshair';
+  // Door / window / passthrough tools: a ghost follows the cursor and snaps onto walls.
+  const placing = tool !== 'select' && tool !== 'draw' ? tool : null;
+  const ghost = placing && hover ? openingTarget(hover) : null;
+  const cursor = tool === 'select' ? 'default' : placing ? (ghost ? 'copy' : hover ? 'not-allowed' : 'default') : 'crosshair';
 
   return (
     <div ref={box} style={{ position: 'absolute', inset: 0, cursor }} data-testid="plan">
@@ -241,6 +291,7 @@ export function PlanCanvas(props: Props) {
         height={size.height}
         onClick={onStageClick}
         onTap={onStageClick}
+        onWheel={onWheel}
         onPointerDown={(e) => {
           if (tool !== 'select' || e.target !== e.target.getStage()) return;
           const pos = e.target.getStage()?.getPointerPosition();
@@ -287,6 +338,10 @@ export function PlanCanvas(props: Props) {
             <Circle {...toScreen(chainStart)} radius={6} stroke={ACCENT} strokeWidth={2} listening={false} />
           )}
           {preview && chainStart && <PreviewWall start={chainStart} end={preview} toScreen={toScreen} />}
+          {placing && ghost && (
+            <GhostOpening kind={placing} wall={ghost.wall} offset={ghost.offset} toScreen={toScreen} scale={view.scale} outside={outside} />
+          )}
+          {placing && hover && !ghost && <FloatingGhost kind={placing} at={toScreen(hover)} scale={view.scale} />}
           {marquee && dragged.current && (
             <Rect
               x={Math.min(marquee.x0, marquee.x1)}
@@ -302,7 +357,46 @@ export function PlanCanvas(props: Props) {
           )}
         </Layer>
       </Stage>
+      <div style={{ position: 'absolute', right: 10, bottom: 10, display: 'flex', gap: 6, alignItems: 'center' }}>
+        <span style={{ fontSize: 12, color: MUTED, background: 'rgba(255,255,255,0.85)', padding: '2px 6px', borderRadius: 6 }} data-testid="zoom-level">
+          {Math.round(zoom * 100)}%
+        </span>
+        <ZoomButton label="Zoom out" onClick={() => zoomAt(1 / 1.25, size.width / 2, size.height / 2)}>
+          −
+        </ZoomButton>
+        <ZoomButton label="Zoom in" onClick={() => zoomAt(1.25, size.width / 2, size.height / 2)}>
+          +
+        </ZoomButton>
+        <ZoomButton label="Fit the room on screen" onClick={() => setManual(null)}>
+          Fit
+        </ZoomButton>
+      </div>
     </div>
+  );
+}
+
+type View = ReturnType<typeof fitView>;
+
+function ZoomButton({ label, onClick, children }: { label: string; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      aria-label={label}
+      title={label}
+      onClick={onClick}
+      style={{
+        font: 'inherit',
+        fontSize: 14,
+        minWidth: 34,
+        height: 34,
+        borderRadius: 7,
+        border: '1px solid #e2e7eb',
+        background: '#fff',
+        color: '#17212b',
+        cursor: 'pointer',
+      }}
+    >
+      {children}
+    </button>
   );
 }
 
@@ -411,7 +505,7 @@ function WallShape(props: WallShapeProps) {
   const endC = cornerPoints(b, { x: -ux, y: -uy }, neighbours.end ? unit(sub(toScreen(neighbours.end), b)) : null, n, h);
   const outline = [startC.plus, endC.plus, endC.minus, startC.minus].flatMap((p) => [p.x, p.y]);
 
-  const colour = COLOUR[wall.length_provenance];
+  const fill = FILL[wall.length_provenance];
   const length = distanceForDisplay(wall.start_point, wall.end_point);
   const label = `${ICON[wall.length_provenance]} ${index + 1}: ${length.exact ? '' : '≈ '}${formatInches(length.value)}`;
   const mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
@@ -433,8 +527,8 @@ function WallShape(props: WallShapeProps) {
       <Line
         points={outline}
         closed
-        fill={colour}
-        stroke={colour}
+        fill={fill}
+        stroke={fill}
         strokeWidth={0.5}
         hitStrokeWidth={Math.max(0, 22 - width)}
         onClick={(e) => {
@@ -454,7 +548,7 @@ function WallShape(props: WallShapeProps) {
         y={mid.y + ny * labelOffset}
         text={label}
         fontSize={12}
-        fill={colour}
+        fill={TEXT[wall.length_provenance]}
         fontStyle="bold"
         rotation={upright}
         offsetX={label.length * 3.2}
@@ -494,23 +588,7 @@ function WallShape(props: WallShapeProps) {
               if (next !== o.offset.value) props.onMoveOpening(o.opening_id, next);
             }}
           >
-            <Line points={[s.x, s.y, e.x, e.y]} stroke="#ffffff" strokeWidth={width + 1} hitStrokeWidth={Math.max(width, 22)} />
-            {o.kind === 'window' && (
-              <>
-                <Line points={[s.x + nx * (h / 2), s.y + ny * (h / 2), e.x + nx * (h / 2), e.y + ny * (h / 2)]} stroke={stroke} strokeWidth={1.5} />
-                <Line points={[s.x - nx * (h / 2), s.y - ny * (h / 2), e.x - nx * (h / 2), e.y - ny * (h / 2)]} stroke={stroke} strokeWidth={1.5} />
-              </>
-            )}
-            {o.kind === 'door' && (
-              <>
-                <Line points={[s.x, s.y, s.x - nx * w, s.y - ny * w]} stroke={stroke} strokeWidth={2} />
-                <Arc x={s.x} y={s.y} innerRadius={w} outerRadius={w} angle={90} rotation={outside === 1 ? swingAngle - 90 : swingAngle} stroke={stroke} strokeWidth={1} dash={[4, 4]} />
-              </>
-            )}
-            {o.kind === 'passthrough' && <Line points={[s.x, s.y, e.x, e.y]} stroke={stroke} strokeWidth={1.5} dash={[6, 4]} />}
-            {[s, e].map((p, k) => (
-              <Line key={k} points={[p.x + nx * h, p.y + ny * h, p.x - nx * h, p.y - ny * h]} stroke={stroke} strokeWidth={isSel || bad ? 3 : 1.5} />
-            ))}
+            <OpeningSymbol kind={o.kind} s={s} e={e} n={n} h={h} wallWidth={width} widthPx={w} swingAngle={swingAngle} outside={outside} stroke={stroke} thick={isSel || bad} />
           </Group>
         );
       })}
@@ -529,3 +607,111 @@ function WallShape(props: WallShapeProps) {
 }
 
 const sub = (p: V, q: V): V => ({ x: p.x - q.x, y: p.y - q.y });
+
+/** The plan symbol of a door, window or passthrough between screen points s and e on a wall. */
+function OpeningSymbol(p: {
+  kind: Opening['kind'];
+  s: V;
+  e: V;
+  n: V;
+  h: number;
+  wallWidth: number;
+  widthPx: number;
+  swingAngle: number;
+  outside: 1 | -1;
+  stroke: string;
+  thick?: boolean;
+}) {
+  const { kind, s, e, n, h, wallWidth, widthPx: w, swingAngle, outside, stroke } = p;
+  return (
+    <>
+      <Line points={[s.x, s.y, e.x, e.y]} stroke="#ffffff" strokeWidth={wallWidth + 1} hitStrokeWidth={Math.max(wallWidth, 22)} />
+      {kind === 'window' && (
+        <>
+          <Line points={[s.x + n.x * (h / 2), s.y + n.y * (h / 2), e.x + n.x * (h / 2), e.y + n.y * (h / 2)]} stroke={stroke} strokeWidth={1.5} />
+          <Line points={[s.x - n.x * (h / 2), s.y - n.y * (h / 2), e.x - n.x * (h / 2), e.y - n.y * (h / 2)]} stroke={stroke} strokeWidth={1.5} />
+        </>
+      )}
+      {kind === 'door' && (
+        <>
+          <Line points={[s.x, s.y, s.x - n.x * w, s.y - n.y * w]} stroke={stroke} strokeWidth={2} />
+          <Arc x={s.x} y={s.y} innerRadius={w} outerRadius={w} angle={90} rotation={outside === 1 ? swingAngle - 90 : swingAngle} stroke={stroke} strokeWidth={1} dash={[4, 4]} />
+        </>
+      )}
+      {kind === 'passthrough' && <Line points={[s.x, s.y, e.x, e.y]} stroke={stroke} strokeWidth={1.5} dash={[6, 4]} />}
+      {[s, e].map((q, k) => (
+        <Line key={k} points={[q.x + n.x * h, q.y + n.y * h, q.x - n.x * h, q.y - n.y * h]} stroke={stroke} strokeWidth={p.thick ? 3 : 1.5} />
+      ))}
+    </>
+  );
+}
+
+/** A dimension line (screen space) from a to b, set off by `off`, with end ticks and a centred label. */
+function Dimension({ a, b, off, text }: { a: V; b: V; off: V; text: string }) {
+  const p = { x: a.x + off.x, y: a.y + off.y };
+  const q = { x: b.x + off.x, y: b.y + off.y };
+  const len = Math.hypot(q.x - p.x, q.y - p.y);
+  if (len < 2) return null;
+  const angle = (Math.atan2(q.y - p.y, q.x - p.x) * 180) / Math.PI;
+  const upright = angle > 90 || angle < -90 ? angle + 180 : angle;
+  const tick = unit(off);
+  const mid = { x: (p.x + q.x) / 2, y: (p.y + q.y) / 2 };
+  return (
+    <Group listening={false}>
+      <Line points={[p.x, p.y, q.x, q.y]} stroke={GHOST} strokeWidth={1} />
+      {[p, q].map((t, k) => (
+        <Line key={k} points={[t.x - tick.x * 5, t.y - tick.y * 5, t.x + tick.x * 5, t.y + tick.y * 5]} stroke={GHOST} strokeWidth={1} />
+      ))}
+      <Text
+        x={mid.x + tick.x * 10}
+        y={mid.y + tick.y * 10}
+        text={text}
+        fontSize={12}
+        fontStyle="bold"
+        fill={GHOST}
+        rotation={upright}
+        offsetX={text.length * 3.2}
+        offsetY={6}
+      />
+    </Group>
+  );
+}
+
+/**
+ * The door / window / passthrough that will be placed, snapped onto a wall under the
+ * cursor, with its distance to each end of the wall. Clicking places exactly this.
+ */
+function GhostOpening(p: { kind: Opening['kind']; wall: Wall; offset: number; toScreen: (q: Point) => Point; scale: number; outside: 1 | -1 }) {
+  const { kind, wall, offset, toScreen, scale, outside } = p;
+  const a = toScreen(wall.start_point);
+  const b = toScreen(wall.end_point);
+  const u = unit(sub(b, a));
+  const n = { x: -u.y * outside, y: u.x * outside };
+  const wallWidth = Math.max(5, wall.thickness.value * scale);
+  const h = wallWidth / 2;
+  const std = STANDARD_SIZES.openings[kind];
+  const at = (d: number) => ({ x: a.x + u.x * d * scale, y: a.y + u.y * d * scale });
+  const s = at(offset);
+  const e = at(offset + std.width);
+  const wallLength = distanceForDisplay(wall.start_point, wall.end_point);
+  const after = wallLength.value - offset - std.width;
+  const inside = { x: -n.x * (h + 22), y: -n.y * (h + 22) };
+  return (
+    <Group listening={false} opacity={0.9} name="ghost-opening">
+      <OpeningSymbol kind={kind} s={s} e={e} n={n} h={h} wallWidth={wallWidth} widthPx={std.width * scale} swingAngle={(Math.atan2(u.y, u.x) * 180) / Math.PI} outside={outside} stroke={GHOST} thick />
+      <Dimension a={a} b={s} off={inside} text={formatInches(offset)} />
+      <Dimension a={e} b={b} off={inside} text={`${wallLength.exact ? '' : '≈ '}${formatInches(Math.max(0, after))}`} />
+    </Group>
+  );
+}
+
+/** Off any wall: a faint ghost at the cursor saying where it needs to go. */
+function FloatingGhost({ kind, at, scale }: { kind: Opening['kind']; at: V; scale: number }) {
+  const w = STANDARD_SIZES.openings[kind].width * scale;
+  return (
+    <Group listening={false} opacity={0.55} name="ghost-floating">
+      <Rect x={at.x - w / 2} y={at.y - 4} width={w} height={8} stroke={MUTED} dash={[4, 3]} strokeWidth={1} />
+      <Text x={at.x - 60} y={at.y + 10} width={120} align="center" text="Move onto a wall" fontSize={11} fill={MUTED} />
+    </Group>
+  );
+}

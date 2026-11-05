@@ -309,6 +309,20 @@ export function setProvenance(draft: Draft, env: Env, target: SizeTarget, proven
  * was tapped (or the middle of the wall), kept inside the wall where it fits, and
  * placed to the nearest inch. Customize it afterwards.
  */
+/**
+ * Where a standard opening dropped at `centre` along a wall starts (its offset):
+ * centred there (or the middle of the wall), to the nearest inch, kept inside the wall
+ * where it fits. The plan's ghost preview uses this too, so what you see is what lands.
+ */
+export function standardOpeningOffset(wall: Wall, kind: Opening['kind'], centre: Length | null): Length {
+  const std = STANDARD_SIZES.openings[kind];
+  const wallLength = distanceForDisplay(wall.start_point, wall.end_point).value;
+  const middle = centre ?? Math.floor(wallLength / 2);
+  const roomForIt = Math.max(0, wallLength - std.width);
+  const inch = 64;
+  return Math.min(Math.max(0, Math.round((middle - std.width / 2) / inch) * inch), Math.floor(roomForIt / inch) * inch);
+}
+
 export function placeOpening(
   draft: Draft,
   env: Env,
@@ -320,11 +334,7 @@ export function placeOpening(
   const wall = r.walls.find((w) => w.wall_id === wallId);
   if (!wall) return refuse('That wall no longer exists.');
   const std = STANDARD_SIZES.openings[kind];
-  const wallLength = distanceForDisplay(wall.start_point, wall.end_point).value;
-  const middle = centre ?? Math.floor(wallLength / 2);
-  const room_for_it = Math.max(0, wallLength - std.width);
-  const inch = 64;
-  const offset = Math.min(Math.max(0, Math.round((middle - std.width / 2) / inch) * inch), Math.floor(room_for_it / inch) * inch);
+  const offset = standardOpeningOffset(wall, kind, centre);
   const opening: Opening = {
     opening_id: env.newId(),
     kind,

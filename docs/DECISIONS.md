@@ -70,6 +70,10 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
   - A new room asks only for its name and ceiling height.
   - Doors, windows and passthroughs drop in at the standard size with one tap, centred roughly where tapped. They are then dragged or typed to size. This replaces "every size must be typed before it is created".
   - Standard sizes and the starting ceiling height are **rough**. A typed size becomes **measured**. A dragged position goes back to **rough**. Verifying is still a separate button.
+- **Room drawing feedback, round 2 (owner, 2026-11-05):**
+  - The scroll wheel zooms the plan, and a sideways scroll (or Shift + scroll) moves it left and right. Fit, + and − buttons sit on the plan.
+  - Rough walls are drawn in a soft pastel red instead of a bright one. Labels stay a darker red so they can be read.
+  - Doors, windows and passthroughs are placed the way other room planners do it (researched: IKEA's planner, Floorplanner, and an open-source editor's door tool). A ghost of the item follows the cursor and snaps onto the nearest wall, showing its distance to each end of the wall. The cursor changes, and a click places it exactly where the ghost was. Off a wall the cursor shows "not allowed" and a click does nothing.
 - Room capture is pulled ahead of Phase 5 (BUILD_PLAN). Order: scaffold (1a), then Core walls and openings, then the Designer drawing screen.
 
 ### 2026-11-05: Where the work lives and deploys

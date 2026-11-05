@@ -64,6 +64,19 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 ### 2026-11-05: Designers can't change values a UCS sets (answers UE-1)
 - A value set by one of our UCSs is shown in the editor as automatic and can't be edited. A different value needs a new setting and a UCS change.
 
+### 2026-11-05: The design flow, first price, drawers, payment and re-measuring (BUILD_SPEC OA-19)
+- **The flow:**
+  1. intake of the client's wishes and the designs they like (the image selector, `docs/intake/kitchen.md`, plus usage questions and must-haves);
+  2. the fixed appliance and fixture locations are marked;
+  3. the runs of cabinets are marked;
+  4. **the AI draws a first pass**: "here's what we recommend building";
+  5. the client and designer fine-tune it, cabinet by cabinet.
+- **Dropped:** the room shape picker, the cabinet-position presets and the preset layouts (OA-13), and the "grows as designers add to it" libraries. The old closet-builder step-by-step flow is no longer the model.
+- **The first price** appears with the AI's first pass, and stays live from then on.
+- **Drawers:** whatever drawer level the customer picked in the intake is the default the AI uses. Nothing defaults to Maximum.
+- **"Paid" for the push means paid in full.** The gate has one condition, "paid in full", set by a person (or later by a payment connector). Nothing else depends on how payment works, so deposits or a payment tool can be added later without changes elsewhere. Answers PAY-1.
+- **After the site measure:** if the price changes by **less than 5%**, the client pays the original signed price. Trivial design changes don't need a new sign-off. What counts as trivial is MC-1 (PROPOSED).
+
 ### Still in force from the earlier plan (2026-10-24 and before)
 - Modular monolith with enforced module boundaries; one owner per table; data, not code.
 - Fail loudly: alerts persist until a person resolves them with a note. Never show false success.
@@ -82,6 +95,7 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 - ~~Mozaik data captured from the SketchUp export and job files; manual upload, then a Windows desktop uploader; upload matches confirmed by a person.~~ Dropped. A Mozaik reader may come back in Phase 8, from its SQLite export.
 - ~~Guided Mozaik drawing.~~ Replaced by the AI draft and the visual editor.
 - ~~Build starts with the quick quote, after the foundation.~~ Build starts with Phase 0 discovery and the Phase 1 proof slice.
+- ~~(OA-13, 2026-11-05) Room setup from room shape, cabinet-position and preset-layout libraries that grow as designers add to them.~~ Replaced the same day by OA-19: intake → appliances and fixtures → cabinet runs → AI first pass.
 - ~~(2026-10-24) closet-builder is kept for reference only; no code is carried over.~~ Reopened as C-1, because a visual editor and room capture are back in scope.
 
 ## Open questions
@@ -101,8 +115,8 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 
 ### From the owner's workflow (2026-10-27)
 - **CV-2 More than one colony.** Will each colony have its own Cabinet Vision library (so its own catalog mappings), or will all colonies share one library? And does each have its own prices?
-- **SM-1 Measuring after sign-off.** The client signs off on a design drawn from rough dimensions; the site measure may then change sizes. The earlier plan (2026-10-24) said small within-tolerance differences are absorbed without client re-approval or repricing. Does that still hold? If so, what tolerance? Above it, does the client re-sign?
-- **PAY-1 "Paid".** Does "paid" mean paid in full, or a deposit? closet-builder had a deposit to commit and the balance before production. Which payment tool?
+- ~~**SM-1**~~ Partly answered 2026-11-05 (OA-19): under 5% price change keeps the original price. The "trivial change" rule is MC-1.
+- ~~**PAY-1**~~ Answered 2026-11-05: paid in full, with no other dependencies.
 - **R-1 Photorealistic.** A realistic 3D view the client can turn in the browser, or rendered still images (slower, more realistic), or both? This is the most expensive part of the editor; the answer sets its cost.
 - **DL-1 Deadline ticker.** How is the "everything in by" date worked out? From the colony's production lead time (as data) and the promised delivery date? Who sets the delivery date?
 - **PO-1 Automatic ordering.** Who places the orders (you or the colony), which suppliers, and how does each take orders (email, portal, API)? Do "materials" mean sheet goods sent to the colony?
@@ -119,15 +133,24 @@ Details and context for each: `docs/intake/design-workflow.md`.
   Whichever works is proven with the before-and-after sample pair, and each setting's route is recorded in its mapping. Until then, nothing assumes either route (CLAUDE.md rule 9).
 - ~~**UE-1**~~ Answered 2026-11-05 (see decisions).
 - **UE-2 The first UCS export: not needed yet.** We're designing the workflow and architecture now. The export is needed only when the adapter's effect links are built against real UCSs (Phase 1d at the earliest, if the proof slice uses any UCS; otherwise Phase 3).
+- **MC-1 What counts as a trivial change after measuring (PROPOSED, please confirm the numbers).** The platform compares the signed version with the measured version and lists every change. **No new sign-off is needed, and the signed price stands,** when all of these hold:
+  - the price changes by less than 5% (up or down);
+  - no cabinet is added or removed (fillers, scribes and end panels don't count);
+  - nothing the client chose changes: door style, colours, materials, handles and their position, inserts, the drawer level, doors vs drawers, or the number of drawers in a cabinet;
+  - each cabinet's width changes by no more than **3"**, and its height and depth don't change.
+
+  If any of these fails, the client sees the changes and signs again (with the new price if it moved 5% or more). Either way, the client gets a short "here's what changed after measuring" note, so nothing is hidden. The 5%, the 3" and the list are stored as data, so they can be changed without code.
+- **MD-1 Room walls without the shape picker.** The AI needs rough room dimensions (OA-3). With the shape picker gone, we assume they come from the uploaded plans or sketch (OA-12), or the designer draws the walls freehand with snapping, without a preset library. Is that right?
+- **WF-1 What else from the Design Software page still stands?** We assume these stay: the home screen and tasks, the client form, the self-intake link, plan reading, the 3D view, cabinet-by-cabinet editing after the AI pass, the AI render, and formula pricing. Is anything else there old closet-builder thinking we should drop?
 - **PR-1** Please share the pricing spreadsheet; it wasn't in the upload.
 - **H-1** Cabinet heights: 7', 8', 10', to the ceiling (image selector) or 84", 96", 108", custom (design software)?
-- **PV-1** The client sees no price until fine-tuning, but the "Maximum" drawers option shows a drawer cost. When is that shown?
-- **FL-1** Is the overall journey intake → plans → room-by-room loop → fine-tune, with the shape and layout pickers used inside it?
-- **SH-1** Should the image selector's kitchen shape pre-select the room shape?
+- ~~**PV-1**~~ Answered (OA-19): the first price comes with the AI's first pass. The drawer level picked in the intake is the default.
+- ~~**FL-1**~~ Answered (OA-19): intake → appliances and fixtures → cabinet runs → AI first pass → fine-tune.
+- ~~**SH-1**~~ Moot: the room shape picker is dropped. The image selector's kitchen shape becomes a hint for the AI.
 - **CL-1** Does this tool live in the existing "closet-builder" Supabase project and reuse its tables, or get a fresh schema there? (Ties to C-1.)
 - **CAL-1** Which calendar feeds the home screen's meetings?
 - ~~**PS-1**~~ Replaced by CV-3: section, shelf and drawer positions are settings sent as ORDX or UCS values (OA-17).
-- **POP-1** Where does "most popular" come from before we have job history?
+- **POP-1** Mostly moot (the shape and layout lists are dropped). Still open for handles: is "most popular" Richelieu's order, or ours once we have job history?
 - **RT-1** The starting list of room types. Is "Closet Builder" the fine-tune screen or the whole tool?
 - **R-1** is now partly answered (OA-15): a live 3D view plus an on-demand AI render. Still open: is the AI render shown to clients as a likeness only? (We propose labelling it "illustration", since an AI picture can't be guaranteed exact.)
 - **IK-6** is answered: see the 2026-11-05 decisions.

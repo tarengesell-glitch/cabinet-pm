@@ -2,6 +2,8 @@
 
 From Taren, 2026-11-05: the Notion page "Design Software" (under "Software Setup"), exported and uploaded to the session. It is recorded below **as given**, grouped but not reworded. It is the source of BUILD_SPEC amendments OA-11 to OA-16.
 
+> **Changed the same day (OA-19).** The owner dropped the room shape picker, the cabinet-position presets and the preset layouts. The flow is now: intake wishes → appliances and fixtures → cabinet runs → AI first pass (with the first price) → fine-tune. Sections below marked **(dropped)** are kept only as a record.
+
 Like the kitchen intake (`kitchen.md`), every list in here (room types, room shapes, cabinet positions, layouts, heights, materials, handles, questions) is **data** (CLAUDE.md rule 6), seeded from this file and never written into code.
 
 The same upload also held the "Software Setup" overview, the build spec and the "Image selector workflow". Those were already recorded on 2026-10-27 (OA-1 to OA-10, `kitchen.md`), and nothing in them has changed.
@@ -38,17 +40,17 @@ The same upload also held the "Software Setup" overview, the build spec and the 
 ### Step 2: add rooms
 
 - **Room type:** a dropdown of all the standard room types, plus an option to add a new room type. A new room type is stored in the database as a new room type.
-- **Room shape:** a line drawing of the wall shapes from an overhead view, sorted from most to least used for that type of room.
+- **(dropped, OA-19) Room shape:** a line drawing of the wall shapes from an overhead view, sorted from most to least used for that type of room.
   - If the exact shape isn't there, the user adds one by drawing it: a tool that auto-snaps and connects straight walls with 90° or 45° corners, and adds doors and windows. Just the shape at this point, no measurements.
   - A new room shape is added to the database of preset room shapes.
   - Forget about ceiling shape for now.
 - **Room measurements:**
   - The length of each wall, entered individually. Every wall must be entered to move forward.
   - Wall height: one height for the whole room by default, with the option of different heights.
-- **Cabinet positioning in the room:** preset options for where along the walls the cabinets run, for that room shape.
+- **(dropped, OA-19) Cabinet positioning in the room:** preset options for where along the walls the cabinets run, for that room shape.
   - If none fits, the user draws where the cabinet runs are.
   - A new positioning is added to the database of presets for that room shape.
-- **Cabinet layout:** for each run of cabinets, the designer and customer pick the closest layout from a premade list.
+- **(dropped, OA-19) Cabinet layout:** for each run of cabinets, the designer and customer pick the closest layout from a premade list.
   - Suggestions are shown from most to least popular for that room shape and cabinet positioning.
   - No need to be able to add a new layout.
 

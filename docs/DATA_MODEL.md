@@ -41,7 +41,6 @@ Core owns no tables. It owns the master copy *format*: Job, Room, Wall, PlacedIt
 
 ## shop-settings
 
-- **cabinet_layouts** (OA-13): the premade layouts for a run, per room shape and cabinet position, with a popularity count (POP-1). Fixed list: designers can't add to it.
 - **design_rules**: structured rule, plain-language description, default severity (warn), and the shop's promotion to block.
 - **default_selections**, **preferences**.
 
@@ -77,7 +76,7 @@ Core owns no tables. It owns the master copy *format*: Job, Room, Wall, PlacedIt
 - **customers**, **leads**, **jobs** (job_id shared with the master copy; status, owner, target delivery date), **quotes**, **quote_lines**, **milestones**, **schedule_entries**.
 - **tasks** (OA-11): client, title, details, due date (optional), assignee, status (open | done). Deleting is a soft delete.
 - **meetings** (OA-11): read from a calendar connector (CAL-1), shown per designer for the next three days. Labelled as mocked until the connector is real.
-- **payments**: amount, status and reference from the payment connector. "Paid" for the push gate is open (PAY-1).
+- **payments**: amount, status and reference from the payment connector. The push gate needs "paid in full" (OA-19), set by a person or later by the connector. Nothing else depends on payment details.
 - Stores no design data. Quotes are priced from the catalog and a named master copy version. An issued quote freezes the prices it used (earlier decision, still in force).
 
 ## intake (OA-3, OA-10)
@@ -87,12 +86,10 @@ Core owns no tables. It owns the master copy *format*: Job, Room, Wall, PlacedIt
 - **intake_sessions** (OA-12): job, who started it (designer | customer), the self-intake link (expiring, single-job), and status. The same form serves both.
 - **intake_answers**: job, room, question, option, status (selected, not sure, skipped, needs follow-up, confirmed), who, when. The option ID is the source of truth, not the label.
 
-## room-setup libraries (OA-13, PROPOSED owner: designer)
+## room setup (OA-19)
 
-- **room_types**: name, and whether it was added by a designer (who, when).
-- **room_shapes**: room type, the overhead line drawing (walls with 90° or 45° corners, doors and windows, **no measurements**), popularity count, added by.
-- **cabinet_positions**: room shape, which walls (and which parts of them) carry cabinet runs, popularity count, added by.
-- A designer's new type, shape or position is added for everyone. PROPOSED: it is shown to others only after an admin approves it, so a one-off doesn't clutter the list. (Owner to confirm.)
+- **room_types**: the starting list (RT-1). The shape, cabinet-position and preset-layout libraries were dropped on 2026-11-05 (OA-19).
+- In the master copy (PROPOSED, `core`): **cabinet runs** marked on walls (which wall, from where to where, base / upper / tall / island) and **fixtures** (sink, window, plumbing…) alongside the appliance placements. These are the AI's inputs, with the intake answers.
 
 ## plan files (OA-12, owner: intake)
 
@@ -113,6 +110,8 @@ Core owns no tables. It owns the master copy *format*: Job, Room, Wall, PlacedIt
 ## approvals (OA-5)
 
 - **client_signoffs**: job, the exact master copy version, who signed, how, when, and a frozen snapshot of what they saw (design, selections, price).
+- **remeasure_reviews** (OA-19): the signed version, the measured version, the change list, the price change, the result (trivial: no re-sign, signed price stands | needs re-sign), and the note sent to the client.
+- **remeasure_rules** (config data, MC-1): the price threshold (5%), the per-cabinet width limit (3", PROPOSED), and which changes always need a re-sign.
 
 ## job-notes (OA-7)
 

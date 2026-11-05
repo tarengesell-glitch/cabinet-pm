@@ -55,8 +55,9 @@ When docs disagree, `docs/BUILD_SPEC.md` wins. Then the "Decided" list in `docs/
 ## Branches, pull requests and merging
 
 - **`main` is the main branch.** It always holds the latest accepted work. Every change ends up there.
+- **Merging into `main` deploys the live site** (Netlify builds from `main`). Run `npm run build` as well as `npm run check` before merging anything that touches the app.
 - Start each piece of work on a new branch made from the latest `main`. You may create branches yourself.
-- When the work is done, run the checks (`npm run check` once the scaffold exists; until then, check every changed doc and link by hand). Then open a pull request into `main`, and merge it yourself **only if the checks passed**. Never merge on a failing or skipped check, and never push straight to `main`.
+- When the work is done, run the checks (`npm run check`; for a docs-only change, also check every changed doc and link by hand). Then open a pull request into `main`, and merge it yourself **only if the checks passed**. Never merge on a failing or skipped check, and never push straight to `main`.
 - After merging, delete the work branch. If the branch you were given was already merged, start it again from the latest `main`.
 - In the report, say which checks ran, and give the pull request link.
 - For every new check or rule, break it on purpose, show that it fails, restore it, and say so in the report.

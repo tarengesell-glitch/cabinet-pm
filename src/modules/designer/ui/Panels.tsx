@@ -1,7 +1,6 @@
 'use client';
 import { useState } from 'react';
 import {
-  angleFromDegrees,
   distanceForDisplay,
   formatInches,
   type Issue,
@@ -107,73 +106,6 @@ export function StartRoomForm({ canEdit, onStart, onExample }: {
         </div>
       </section>
     </>
-  );
-}
-
-const DIRECTIONS: { label: string; name: string; angle: number }[] = [
-  { label: '→', name: 'right', angle: 0 },
-  { label: '↑', name: 'up', angle: 9000 },
-  { label: '←', name: 'left', angle: 18000 },
-  { label: '↓', name: 'down', angle: 27000 },
-  { label: '↗', name: 'up-right', angle: 4500 },
-  { label: '↖', name: 'up-left', angle: 13500 },
-  { label: '↙', name: 'down-left', angle: 22500 },
-  { label: '↘', name: 'down-right', angle: 31500 },
-];
-
-/** Type the next wall: its length and which way it goes from the last corner. */
-export function AddWallForm({ canEdit, hasWalls, onAdd, onClose }: {
-  canEdit: boolean;
-  hasWalls: boolean;
-  onAdd: (length: TypedSize, angle: number) => Result<unknown>;
-  onClose: () => Result<unknown>;
-}) {
-  const [length, setLength] = useState('');
-  const [degrees, setDegrees] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const add = (angle: number | null) => {
-    const l = parseSize(length);
-    if (!l.ok) return setError(length.trim() === '' ? 'Type the wall length first.' : l.reason);
-    let a = angle;
-    if (a === null) {
-      const parsed = angleFromDegrees(degrees);
-      if (!parsed.ok) return setError(parsed.reason);
-      a = parsed.value;
-    }
-    const r = onAdd(l.value, a);
-    if (!r.ok) return setError(r.reason);
-    setError(null);
-    setLength('');
-  };
-  return (
-    <section className={s.card}>
-      <h2 className={s.cardTitle}>Type the next wall</h2>
-      <p className={s.muted}>
-        {hasWalls ? 'Starts at the end of the last wall.' : 'The first wall starts at the origin.'} Or draw walls on the plan with “Draw walls”.
-      </p>
-      <label className={s.muted}>
-        Length
-        <input className={error ? s.inputError : s.input} aria-label="Next wall length" value={length} onChange={(e) => setLength(e.target.value)} placeholder={`e.g. 12' or 3660 mm`} />
-      </label>
-      <div className={s.directionGrid}>
-        {DIRECTIONS.map((d) => (
-          <button key={d.name} className={s.button} disabled={!canEdit} aria-label={`Add wall going ${d.name}`} onClick={() => add(d.angle)}>
-            {d.label}
-          </button>
-        ))}
-      </div>
-      <div className={s.row}>
-        <input className={s.input} style={{ width: 110 }} aria-label="Wall angle in degrees" value={degrees} onChange={(e) => setDegrees(e.target.value)} placeholder="Angle °" />
-        <button className={s.button} disabled={!canEdit} onClick={() => add(null)}>
-          Add at angle
-        </button>
-        <button className={s.button} disabled={!canEdit} onClick={() => { const r = onClose(); setError(r.ok ? null : r.reason); }}>
-          Close the room
-        </button>
-      </div>
-      <p className={s.muted}>Angles go counter-clockwise from → (so ↑ is 90°).</p>
-      {error && <p className={s.error} role="alert">{error}</p>}
-    </section>
   );
 }
 

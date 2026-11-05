@@ -95,7 +95,7 @@ Links: help.typeform.com picture-choice article; pro.houzz.com selections help; 
 | danger | #BE3D42 | blocked, error |
 | focus | #2563EB | keyboard focus |
 
-Status never relies on colour alone; always icon and/or text. *Exception (owner, 2026-11-05):* on the room plan, a wall's colour alone shows how sure we are of it, because markers there were clutter. The panel for a selected wall says it in words. Provide dark-mode values later; structure tokens to allow it.
+Status never relies on colour alone; always icon and/or text. *Exception (owner, 2026-11-05):* on the room plan, a wall's colour alone shows its state, because markers there were clutter: pastel red = unmeasured, black = confirmed, as in CAD programs. The panel for a selected wall says it in words. Two states only; typing a size never confirms it. Provide dark-mode values later; structure tokens to allow it.
 
 **Type.** Inter or Geist. Page title 24–28, screen question 26–32, section 18–20, body 14–16, metadata 12–13, client selection labels 16–18. Semibold for emphasis.
 

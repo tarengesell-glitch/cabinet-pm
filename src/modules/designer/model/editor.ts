@@ -64,8 +64,8 @@ function standardSwing(r: Room): Swing {
   return { hinge: std.hinge, opens: std.opens === 'inside' ? inside : otherSide(inside) };
 }
 
-/** A standard size from data/standard-sizes.json: always rough until someone measures it. */
-const rough = (value: Length): Measured => ({ value, provenance: 'rough', source_mm: null });
+/** A standard, dragged or typed size: unmeasured until a person confirms it. */
+const rough = (value: Length): Measured => ({ value, provenance: 'unmeasured', source_mm: null });
 
 /** What the editor keeps: the master copy plus the sizes new walls start with. */
 export interface Draft {
@@ -97,7 +97,8 @@ export interface TypedSize {
 const ok = (draft: Draft, notices: string[] = []): Result<Change> => ({ ok: true, value: { draft, notices } });
 const refuse = (reason: string): Result<Change> => ({ ok: false, reason });
 
-export const typed = (size: TypedSize): Measured => ({ value: size.value, provenance: 'measured', source_mm: size.source_mm });
+/** A typed size. Typing never confirms a size (owner, 2026-11-05): it stays unmeasured until confirmed. */
+export const typed = (size: TypedSize): Measured => ({ value: size.value, provenance: 'unmeasured', source_mm: size.source_mm });
 
 export const room = (draft: Draft): Room => draft.job.rooms[0] as Room;
 
@@ -133,7 +134,7 @@ export function startRoom(env: Env, input: { name: string; shopId: string; ceili
     shop_id: input.shopId,
     catalog_version: null,
     status: 'draft',
-    rooms: [{ room_id: env.newId(), name, ceiling_height: { ...typed(input.ceiling), provenance: 'rough' }, walls: [] }],
+    rooms: [{ room_id: env.newId(), name, ceiling_height: typed(input.ceiling), walls: [] }],
     history: [{ at: env.now(), by: env.userId, origin: 'designer', summary: `Started room "${name}"` }],
   };
   return ok({ job, wallDefaults: { thickness: rough(STANDARD_SIZES.wall_thickness) } });
@@ -170,7 +171,7 @@ export function addWall(draft: Draft, env: Env, start: Point, end: Point, entere
     end_point: end,
     entered_length: enteredLength,
     length_source_mm: null,
-    length_provenance: 'rough',
+    length_provenance: 'unmeasured',
     thickness: draft.wallDefaults.thickness,
     openings: [],
     obstacles: [],
@@ -227,10 +228,10 @@ function moveCorners(draft: Draft, env: Env, moves: readonly (readonly [Point, P
       openings = w.openings.map((o) => ({ ...o, offset: { ...o.offset, value: o.offset.value + shift } }));
       obstacles = w.obstacles.map((o) => ({ ...o, offset: { ...o.offset, value: o.offset.value + shift } }));
     }
-    if (w.length_provenance !== 'rough' || w.entered_length !== null) {
-      notices.push(`Wall ${wallLetter(i)} changed length, so it's back to rough. Measure it again.`);
+    if (w.length_provenance === 'confirmed') {
+      notices.push(`Wall ${wallLetter(i)} changed length, so it's no longer confirmed. Measure it again.`);
     }
-    walls.push({ ...w, start_point: start, end_point: end, entered_length: null, length_source_mm: null, length_provenance: 'rough', openings, obstacles });
+    walls.push({ ...w, start_point: start, end_point: end, entered_length: null, length_source_mm: null, length_provenance: 'unmeasured', openings, obstacles });
   }
   if (touched === 0) return refuse('Nothing moved.');
   for (const [i, a] of walls.entries()) {
@@ -247,7 +248,7 @@ function moveCorners(draft: Draft, env: Env, moves: readonly (readonly [Point, P
  * Changes a wall's length along its own line, from one end (owner, 2026-11-05: a length
  * change never changes the angle of the walls joined to it). The wall joined at that end
  * moves across with it, keeping its angle and length; whatever is joined beyond that stretches.
- * Doors and windows stay where they are in the room. Typed lengths are measured; dragged, rough.
+ * Doors and windows stay where they are in the room. The new length is unmeasured until confirmed.
  */
 export function resizeWall(
   draft: Draft,
@@ -255,7 +256,6 @@ export function resizeWall(
   wallId: string,
   which: 'start' | 'end',
   size: TypedSize,
-  how: 'typed' | 'dragged',
 ): Result<Change> {
   const r = room(draft);
   const index = r.walls.findIndex((w) => w.wall_id === wallId);
@@ -286,7 +286,7 @@ export function resizeWall(
   const after = room(moved.value.draft);
   const walls = after.walls.map((w) =>
     w.wall_id === wallId
-      ? { ...w, entered_length: entered, length_source_mm: size.source_mm, length_provenance: how === 'typed' ? ('measured' as const) : ('rough' as const) }
+      ? { ...w, entered_length: entered, length_source_mm: size.source_mm, length_provenance: 'unmeasured' as const }
       : w,
   );
   const notices = moved.value.notices.filter((n) => !n.startsWith(`Wall ${wallLetter(index)} `));
@@ -341,7 +341,7 @@ export function addWallByLength(draft: Draft, env: Env, length: TypedSize, angle
   // A typed length counts as measured (entered, not verified).
   const next = room(added.value.draft);
   const walls = next.walls.map((w, i) =>
-    i === next.walls.length - 1 ? { ...w, length_provenance: 'measured' as const, length_source_mm: length.source_mm } : w,
+    i === next.walls.length - 1 ? { ...w, length_source_mm: length.source_mm } : w,
   );
   return ok({ ...added.value.draft, job: { ...added.value.draft.job, rooms: [{ ...next, walls }] } });
 }
@@ -383,7 +383,7 @@ export function setWallsThickness(draft: Draft, env: Env, wallIds: readonly stri
 
 /** A typed wall length: the far end moves along the wall's line (see resizeWall). */
 function setWallLength(draft: Draft, env: Env, wallId: string, size: TypedSize): Result<Change> {
-  return resizeWall(draft, env, wallId, 'end', size, 'typed');
+  return resizeWall(draft, env, wallId, 'end', size);
 }
 
 /** Sets any size the person typed. A typed value is "measured": typing never verifies. */
@@ -550,6 +550,26 @@ export function upgradeStoredDraft(data: unknown): { job: unknown; wallDefaults:
     }
   }
   if (dropped > 0) notes.push(`Your saved room was updated: walls no longer have their own height (${dropped} removed); the ceiling height is used instead.`);
+  // Sizes saved with the old three tags (rough / measured / verified) become two (owner,
+  // 2026-11-05): only "verified" was ever a deliberate confirmation.
+  let retagged = 0;
+  const retag = (node: unknown): void => {
+    if (Array.isArray(node)) return node.forEach(retag);
+    if (!node || typeof node !== 'object') return;
+    const o = node as Record<string, unknown>;
+    for (const key of ['provenance', 'length_provenance']) {
+      const v = o[key];
+      if (v === 'rough' || v === 'measured' || v === 'verified') {
+        o[key] = v === 'verified' ? 'confirmed' : 'unmeasured';
+        retagged += 1;
+      }
+    }
+    Object.values(o).forEach(retag);
+  };
+  retag(job);
+  const oldThickness = d.wallDefaults?.thickness as unknown;
+  retag(oldThickness);
+  if (retagged > 0) notes.push('Your saved room was updated: sizes are now either unmeasured (red) or confirmed (black).');
   // Doors saved before swings could be chosen keep the swing they were drawn with:
   // hinged at the start side, opening into the room.
   for (const room of job?.rooms ?? []) {

@@ -11,7 +11,7 @@ export function inch(whole: number, numerator = 0, denominator = 1): Length {
 
 export const ft = (feet: number, inches = 0): Length => inch(feet * 12 + inches);
 
-export const measured = (value: Length, provenance: Provenance = 'measured'): Measured => ({
+export const measured = (value: Length, provenance: Provenance = 'confirmed'): Measured => ({
   value,
   provenance,
   source_mm: null,

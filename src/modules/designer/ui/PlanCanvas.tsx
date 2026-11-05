@@ -81,12 +81,17 @@ const GHOST_PX = 40;
 const MIN_ZOOM = 0.25;
 const MAX_ZOOM = 12;
 const GHOST = '#176b70';
+/** Dimension lines: thin and quieter than walls, as in drafting. */
+const DIM = '#5b6670';
 const MUTED = '#687582';
 
-/** Wall fill by sureness tag. Rough is a soft pastel red (owner, 2026-11-05), not alarm red. */
-const FILL: Record<Provenance, string> = { rough: '#eeb8ba', measured: '#ad751a', verified: '#16805d' };
-/** Label text by sureness tag: darker than the fill so it stays readable on white. */
-const TEXT: Record<Provenance, string> = { rough: '#b0575b', measured: '#8a5d12', verified: '#13704f' };
+/**
+ * Two wall states (owner, 2026-11-05): unmeasured walls are a soft pastel red, a "fail loudly"
+ * signal; confirmed walls are black, as in every CAD program.
+ */
+const FILL: Record<Provenance, string> = { unmeasured: '#eeb8ba', confirmed: '#2b2f33' };
+/** Label text: darker than the fill so it stays readable on white. */
+const TEXT: Record<Provenance, string> = { unmeasured: '#b0575b', confirmed: '#2b2f33' };
 const ACCENT = '#176b70';
 const DANGER = '#be3d42';
 
@@ -691,7 +696,7 @@ export function PlanCanvas(props: Props) {
             />
           )}
           {chainStart && (
-            <Circle {...toScreen(chainStart)} radius={6} stroke={ACCENT} strokeWidth={2} listening={false} />
+            <Circle {...toScreen(chainStart)} radius={6} stroke={ACCENT} strokeWidth={2} listening={false} name="chain-start" />
           )}
           {preview && chainStart && <PreviewWall start={chainStart} end={preview} toScreen={toScreen} typed={typed} />}
           {placing && ghost && (
@@ -915,7 +920,14 @@ function WallShape(props: WallShapeProps) {
   const label = lengthText(length);
   const letter = wallLetter(index);
   const mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
-  const labelOffset = h + 14;
+  // A wall with doors or windows gets a chain of measurements next to it (corner → opening edge,
+  // opening width, … → corner), as cabinet planning guides and NKBA plans show; the overall
+  // length then sits on a second line further out. Walls without openings show only the overall.
+  const breaks = [...new Set([0, ...wall.openings.flatMap((o) => [o.offset.value, o.offset.value + o.width.value]), length.value])]
+    .filter((v) => v >= 0 && v <= length.value)
+    .sort((p, q) => p - q);
+  const chain = wall.openings.length > 0 ? breaks.slice(1).map((end, i) => ({ start: breaks[i] as number, end })) : [];
+  const labelOffset = chain.length > 0 ? h + 40 : h + 14;
   const angleDeg = (Math.atan2(dy, dx) * 180) / Math.PI;
   const upright = angleDeg > 90 || angleDeg < -90 ? angleDeg + 180 : angleDeg;
   const select = (sel: Selection) => (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
@@ -977,6 +989,17 @@ function WallShape(props: WallShapeProps) {
           if (box) box.style.cursor = '';
         }}
       />
+      {chain.map(({ start, end }, k) => (
+        <Dimension
+          key={k}
+          name={`wall-${index + 1}-segment-${k + 1}`}
+          a={along(start)}
+          b={along(end)}
+          off={{ x: nx * (h + 10), y: ny * (h + 10) }}
+          text={lengthText({ value: end - start, exact: length.exact || end !== length.value })}
+          colour={DIM}
+        />
+      ))}
       <Group x={mid.x - nx * (h + 16)} y={mid.y - ny * (h + 16)} listening={false} name={`wall-tag-${letter}`}>
         <Circle radius={10} fill="#ffffff" stroke={TEXT[wall.length_provenance]} strokeWidth={1.5} />
         <Text text={letter} fontSize={11} fontStyle="bold" fill={TEXT[wall.length_provenance]} width={20} height={20} offsetX={10} offsetY={10} align="center" verticalAlign="middle" />
@@ -1082,7 +1105,7 @@ function doorGeometry(s: V, e: V, w: number, swing: Swing) {
 }
 
 /** A dimension line (screen space) from a to b, set off by `off`, with end ticks and a centred label. */
-function Dimension({ a, b, off, text }: { a: V; b: V; off: V; text: string }) {
+function Dimension({ a, b, off, text, colour = GHOST, name }: { a: V; b: V; off: V; text: string; colour?: string; name?: string }) {
   const p = { x: a.x + off.x, y: a.y + off.y };
   const q = { x: b.x + off.x, y: b.y + off.y };
   const len = Math.hypot(q.x - p.x, q.y - p.y);
@@ -1092,21 +1115,22 @@ function Dimension({ a, b, off, text }: { a: V; b: V; off: V; text: string }) {
   const tick = unit(off);
   const mid = { x: (p.x + q.x) / 2, y: (p.y + q.y) / 2 };
   return (
-    <Group listening={false}>
-      <Line points={[p.x, p.y, q.x, q.y]} stroke={GHOST} strokeWidth={1} />
+    <Group listening={false} {...(name ? { name } : {})}>
+      <Line points={[p.x, p.y, q.x, q.y]} stroke={colour} strokeWidth={1} />
       {[p, q].map((t, k) => (
-        <Line key={k} points={[t.x - tick.x * 5, t.y - tick.y * 5, t.x + tick.x * 5, t.y + tick.y * 5]} stroke={GHOST} strokeWidth={1} />
+        <Line key={k} points={[t.x - tick.x * 5, t.y - tick.y * 5, t.x + tick.x * 5, t.y + tick.y * 5]} stroke={colour} strokeWidth={1} />
       ))}
       <Text
         x={mid.x + tick.x * 10}
         y={mid.y + tick.y * 10}
         text={text}
-        fontSize={12}
+        fontSize={11}
         fontStyle="bold"
-        fill={GHOST}
+        fill={colour}
         rotation={upright}
-        offsetX={text.length * 3.2}
+        offsetX={text.length * 3}
         offsetY={6}
+        {...(name ? { name: `${name}-text` } : {})}
       />
     </Group>
   );

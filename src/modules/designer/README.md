@@ -10,16 +10,15 @@ See `CLAUDE.md` in this folder for the rules.
 ## What exists: the room drawing preview (2026-11-05)
 Open it at `/rooms/preview` (`npm run dev`, then http://localhost:3000/rooms/preview).
 
-- **Start a room:** a name and the ceiling height (rough). Walls are as high as the ceiling and start at the standard 5 1/2" thickness (rough), which can be changed.
+- **Start a room:** a name and the ceiling height. Walls are as high as the ceiling and start at the standard 5 1/2" thickness, which can be changed.
 - **Walls:**
-  - Type the next wall: a length plus a direction (8 arrows or any angle), and "Close the room".
-  - Or draw them on the plan: tap corner to corner. Corners snap to existing corners, whole inches and 45°, and the view stays still while drawing.
+  - Draw them on the plan: tap corner to corner, or point the way, type a length and press Enter. Corners snap to existing corners, whole inches and 45°, and the view stays still while drawing.
   - Corners are drawn joined (mitred). Labels go outside and doors swing inside, whichever way the room was drawn.
 - **Wall handles:** select a wall to see a handle at each end and one in the middle.
   - Drag an end to change the wall's length along its own line. The wall joined at that end moves across with it, keeping its angle and length, and the next wall stretches. Doors and windows stay where they are in the room.
   - Hold Option/Alt while dragging an end to move the corner freely (for angled walls).
   - Drag the middle to slide the wall sideways; it keeps its length and its neighbours stretch.
-  - The move is saved on release as one undo step, and Escape cancels it. Walls whose length changes go back to rough.
+  - The move is saved on release as one undo step, and Escape cancels it. Walls whose length changes become unmeasured.
 - **No walls on top of each other:** drawing or moving a wall back over another is refused with a reason.
 - **Typing a length on the plan:** click a wall's length, type the new one, and press Enter (Esc cancels).
 - **Edit a wall:** its length and thickness. Typing a length moves the far end along the wall's line, as dragging an end handle does.
@@ -42,9 +41,9 @@ Open it at `/rooms/preview` (`npm run dev`, then http://localhost:3000/rooms/pre
 - **Sizes:**
   - Feet and inches are exact. Anything not on a 1/64" mark is refused with Core's reason.
   - "mm" sizes are rounded (U-2), and the mm value is kept.
-- **Colours:** rough walls are a soft pastel red, measured amber, verified green. The plan shows status by colour only (less is more); the panel says it in words.
+- **Two states:** unmeasured walls are pastel red, confirmed walls black. Typing or dragging never confirms a size; the Confirm button does. The plan shows the state by colour only (less is more); the panel says it in words.
+- **Measurements:** a wall with doors or windows shows a chain (corner → opening edge, opening width, … → corner) and the overall length further out. Other walls show only the overall.
 - **Lengths** are shown in inches only (`68 11/16"`). Approximate ones (slanted walls) are rounded to 1/16" and marked ≈.
-- **Sureness tags:** each size shows Rough (red, ?), Measured (amber, ✎) or Verified (green, ✓). Typing makes it Measured. Verify is a separate button.
 - **Live checks:** Core's master copy format check and wall checks run after every change. Tap a problem to select it.
 - **Also:**
   - undo and redo;

@@ -105,6 +105,10 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 - **Room drawing, round 6 (owner, 2026-11-05):**
   - **Wall status colours stay** (pastel red / amber / green). The owner calls them a helpful "fail loudly" signal. Drawings for clients will use standard grey walls (drafting convention) when that view is built.
   - **Click a wall's length on the plan to type a new one** (Revit, Chief Architect). It works like typing it in the side panel: the far end moves along the wall, and joined walls keep their angles.
+- **Room drawing, round 7 (owner, 2026-11-05):**
+  - **Two states for sizes: unmeasured (pastel red) and confirmed (black, as in CAD programs).** These replace rough / measured / verified. Typing or dragging a size never confirms it; only the Confirm button does. A confirmed wall whose length changes goes back to unmeasured, with a notice. Rooms saved with the old states convert: verified becomes confirmed, everything else becomes unmeasured.
+  - **The "Type the next wall" card is removed.** It was added without the owner asking. Walls are drawn on the plan, with lengths typed while drawing or on the plan.
+  - **Measurement chains on walls with doors or windows:** corner → opening edge, opening width, … → corner, with the overall length on a second line. Researched in cabinet makers' planning guides; see `docs/ux/INDUSTRY_REVIEW.md`.
 - Room capture is pulled ahead of Phase 5 (BUILD_PLAN). Order: scaffold (1a), then Core walls and openings, then the Designer drawing screen.
 
 ### 2026-11-05: Where the work lives and deploys

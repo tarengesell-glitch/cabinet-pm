@@ -1,0 +1,8 @@
+# Netlify builds the site from GitHub on every push (DECISIONS: hosting is Netlify).
+# Netlify recognises Next.js and adds its Next.js support automatically.
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"

@@ -23,10 +23,13 @@
 
 Core owns no tables. It owns the master copy *format*: Job, Room, Wall, PlacedItem (spec section 6), plus selection resolution (item, then room, then job) and the check interface.
 
-**Proposed additions to the master copy format** (needed for OA-3 to OA-5, not in spec section 6):
-- **Dimension provenance.** Every wall length, opening and ceiling height records whether it is `rough` (from the customer or intake), `measured` (entered on site) or `verified`. The push gate needs every value the design depends on to be `verified`.
-- **Appliances in the room.** An appliance placement has a reference to the job's appliance record, its position, its size, and a status (`rough` or `confirmed`). Cabinets fit around it. Its specs live in `appliances`; the master copy keeps a copy of the confirmed size it was designed to.
-- **Price shown live** is calculated from the catalog and is never stored in the master copy. Quotes freeze it (`projects`).
+**Additions to the master copy format** (needed for OA-3 to OA-5, not in spec section 6):
+- **Dimension provenance (decided 2026-11-05).** Every wall length, wall thickness, opening and obstacle dimension, and ceiling height records whether it is `rough` (from the customer or intake), `measured` (entered on site) or `verified`. The push gate needs every value the design depends on to be `verified`. A size is stored as `{ value, provenance, source_mm }`. `source_mm` is the millimetre text it was rounded from, or null (U-2).
+- **No wall height (owner, 2026-11-05, BUILD_SPEC OA-11).** Walls are as high as the room's `ceiling_height`.
+- **Typed wall length (decided 2026-11-05).** A wall keeps `entered_length` (and `length_source_mm`) when its corners had to be rounded to 1/64", which happens on a slanted wall or a length typed in mm. Otherwise both are null, and the corners are the length.
+- **PROPOSED:**
+  - **Appliances in the room.** An appliance placement has a reference to the job's appliance record, its position, its size, and a status (`rough` or `confirmed`). Cabinets fit around it. Its specs live in `appliances`; the master copy keeps a copy of the confirmed size it was designed to.
+  - **Price shown live** is calculated from the catalog and is never stored in the master copy. Quotes freeze it (`projects`).
 
 ## catalog
 

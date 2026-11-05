@@ -28,6 +28,7 @@ From Taren, 2026-10-27, in their own words where quoted.
 | OA-8 | **Client reminders and deadline ticker.** Automated messages remind the client of outstanding items, so the project manager doesn't chase them. A deadline ticker makes the customer aware, e.g. "Get all this information to us and pay for the job by November 2nd at 4pm to have your cabinetry delivered by December 2nd." | New module. |
 | OA-9 | **Automatic ordering.** "Once a job goes into production the system should automatically order all the required materials, doors, counters, handles, and add ons." | New module. Previously not in this spec. |
 | OA-10 | **The kitchen intake** (incomplete) is recorded in `docs/intake/kitchen.md`. | Intake content is data. |
+| OA-11 | **Room drawing feedback (2026-11-05).** "Remove wall height, ceiling height is enough." New walls start at a standard 5 1/2" thickness that can be changed, and need not be entered up front. Doors and windows drop in at a standard size, placed roughly, then customized. Heights and thicknesses start as rough. | **Section 6, Wall: no `height`;** walls are as high as the room's `ceiling_height`. Standard sizes are data (DECISIONS 2026-11-05). |
 
 ---
 

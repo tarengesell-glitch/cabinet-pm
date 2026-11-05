@@ -5,6 +5,11 @@
 - `npm install`
 - Playwright needs a Chromium. Install it once with `npx playwright install chromium`, or set `PLAYWRIGHT_CHROMIUM_PATH` to an existing Chromium binary.
 
+## Trying the app
+`npm run dev`, then open http://localhost:3000/rooms/preview for the room drawing preview. See `src/modules/designer/README.md` for what it does.
+
+Stop `npm run dev` (Control + C) before `npm run check`: Next.js allows only one dev server per project folder, and the browser tests start their own.
+
 ## Everyday commands
 | Command | What it does |
 |---|---|
@@ -15,6 +20,7 @@
 | `npm run boundaries` | dependency-cruiser: a second, independent check of the dependency table, contracts-only, core's allowed packages and no AI SDKs in core or adapters. |
 | `npm run vendor-names` | Fails if the CAD vendor's name or file format appears outside the allowed folders (CLAUDE.md rule 3). |
 | `npm run test` | Vitest unit and golden tests (`src/**/__tests__/*.test.ts`). |
+| `npm run build` | The production build, exactly as Netlify runs it. In the gate so a push never breaks the live site. |
 | `npm run test:e2e` | Playwright UI tests (`e2e/`), on an iPad landscape viewport. Starts its own dev server on port 3100 (`E2E_PORT` changes it). |
 
 ## Where the rules live
@@ -48,3 +54,8 @@
 
 ## Adding a connector
 Create `src/connectors/<name>/contract.ts`. Connectors may import core and platform only. A mocked connector must say it is mocked in code and in the UI.
+
+## The live site (Netlify)
+- `netlify.toml` tells Netlify how to build: `npm run build` on Node 22. Netlify adds its Next.js support by itself.
+- Netlify deploys from `main`, so every merge into `main` updates the live site (see CLAUDE.md "Branches, pull requests and merging").
+- The site is public to anyone with its address. It holds no data: each visitor's room stays in their own browser.

@@ -16,12 +16,14 @@
     "vendor-names": "node scripts/check-vendor-names.mjs",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "check": "npm run lint && npm run typecheck && npm run boundaries && npm run vendor-names && npm run test && npm run test:e2e"
+    "check": "npm run lint && npm run typecheck && npm run boundaries && npm run vendor-names && npm run test && npm run build && npm run test:e2e"
   },
   "dependencies": {
+    "konva": "^10.9.1",
     "next": "^16.4.5",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
+    "react-konva": "^19.3.2",
     "zod": "^4.6.7"
   },
   "devDependencies": {

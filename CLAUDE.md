@@ -51,6 +51,14 @@ When docs disagree, `docs/BUILD_SPEC.md` wins. Then the "Decided" list in `docs/
 
 - Small, focused changes. One module per session where possible.
 - Run `npm run check` before saying a task is done (once the scaffold exists). There is no CI, so this is the gate before every push. Report what was actually run.
+
+## Branches, pull requests and merging
+
+- **`main` is the main branch.** It always holds the latest accepted work. Every change ends up there.
+- Start each piece of work on a new branch made from the latest `main`. You may create branches yourself.
+- When the work is done, run the checks (`npm run check` once the scaffold exists; until then, check every changed doc and link by hand). Then open a pull request into `main`, and merge it yourself **only if the checks passed**. Never merge on a failing or skipped check, and never push straight to `main`.
+- After merging, delete the work branch. If the branch you were given was already merged, start it again from the latest `main`.
+- In the report, say which checks ran, and give the pull request link.
 - For every new check or rule, break it on purpose, show that it fails, restore it, and say so in the report.
 - Update the module's `README.md` and `docs/DECISIONS.md` when behaviour or decisions change.
 - The owner, Taren, is not a programmer. Write reports and questions in plain English, short, with only the questions that matter.

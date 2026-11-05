@@ -12,16 +12,39 @@ async function startRoom(page: Page) {
   await page.getByRole('button', { name: 'Select' }).click();
 }
 
-async function typeWall(page: Page, length: string, direction: string) {
-  await page.getByRole('textbox', { name: 'Next wall length' }).fill(length);
-  await page.getByRole('button', { name: `Add wall going ${direction}`, exact: true }).click();
+const DIRECTION = { right: [1, 0], left: [-1, 0], up: [0, -1], down: [0, 1] } as const;
+
+/**
+ * Draws one wall the way a person does: with "Draw walls" on, point the mouse the way the
+ * wall goes from the current corner, type its length, press Enter. Starts a new run of
+ * walls (by clicking the plan) if none is in progress.
+ */
+async function typeWall(page: Page, length: string, direction: keyof typeof DIRECTION) {
+  const draw = page.getByRole('button', { name: 'Draw walls' });
+  if ((await draw.getAttribute('aria-pressed')) !== 'true') await draw.click();
+  const box = (await page.getByTestId('plan').boundingBox())!;
+  let corner = await konvaRect(page, '.chain-start');
+  if (!corner) {
+    await page.mouse.click(box.x + 200, box.y + 380);
+    await expect.poll(() => konvaRect(page, '.chain-start')).not.toBeNull();
+    corner = (await konvaRect(page, '.chain-start'))!;
+  }
+  const [dx, dy] = DIRECTION[direction];
+  const cx = box.x + corner.x + corner.width / 2;
+  const cy = box.y + corner.y + corner.height / 2;
+  await page.mouse.move(cx + dx * 60, cy + dy * 60);
+  await page.keyboard.type(length);
+  await page.keyboard.press('Enter');
 }
 
+/** A 12' x 10' room drawn counter-clockwise; the fourth wall closes it and ends the run. */
 async function typeRectangle(page: Page) {
   await typeWall(page, `12'`, 'right');
   await typeWall(page, `10'`, 'up');
   await typeWall(page, `12'`, 'left');
-  await page.getByRole('button', { name: 'Close the room' }).click();
+  await typeWall(page, `10'`, 'down');
+  await expect.poll(() => konvaRect(page, '.chain-start')).toBeNull();
+  await page.getByRole('button', { name: 'Select' }).click();
 }
 
 test('shows that it is a preview with a mocked user', async ({ page }) => {
@@ -40,12 +63,12 @@ test('asks only for a name and ceiling height, and refuses sizes that are not ex
   await expect(page.getByText(`"1/3" isn't on a 1/64 inch mark.`, { exact: false })).toBeVisible();
 });
 
-test('new walls start at the standard 5 1/2" thickness, rough', async ({ page }) => {
+test('new walls start at the standard 5 1/2" thickness, unmeasured', async ({ page }) => {
   await startRoom(page);
   await typeWall(page, `12'`, 'right');
   await wallButtons(page).first().click();
   await expect(page.getByTestId('value-Thickness')).toHaveText('5 1/2"');
-  await expect(page.locator('[data-provenance="rough"]').last()).toBeVisible();
+  await expect(page.locator('[data-provenance="unmeasured"]').last()).toBeVisible();
 });
 
 test('drops a standard window, then the checks react to edits', async ({ page }) => {
@@ -74,9 +97,9 @@ test('drops a standard window, then the checks react to edits', async ({ page })
   await page.getByRole('button', { name: 'Save' }).click();
   await expect(checks(page).getByText('No problems found')).toBeVisible();
 
-  // Verifying is a separate step.
-  await page.getByRole('button', { name: 'Verify Height', exact: true }).click();
-  await expect(page.locator('[data-provenance="verified"]')).toHaveCount(1);
+  // Confirming is a separate step.
+  await page.getByRole('button', { name: 'Confirm Height', exact: true }).click();
+  await expect(page.locator('[data-provenance="confirmed"]')).toHaveCount(1);
 });
 
 test('drops a standard door by tapping a wall with the door tool', async ({ page }) => {
@@ -110,7 +133,6 @@ test('typing a wall length moves the joined wall across without changing its ang
   await page.getByRole('button', { name: 'Save' }).click();
   await expect(page.getByTestId('value-Length')).toHaveText(`156"`);
   // Wall B moved across, still 120"; wall C stretched to stay joined.
-  await expect(page.getByText(/Wall C changed length/)).toBeVisible();
   await page.getByRole('button', { name: '← Room' }).click();
   await expect(page.getByRole('button', { name: /^Wall B: 120"/ })).toBeVisible();
   await expect(page.getByRole('button', { name: /^Wall C: 156"/ })).toBeVisible();
@@ -286,18 +308,27 @@ test('the scroll wheel zooms, a sideways scroll moves left and right, Fit resets
   await expect(page.getByTestId('zoom-level')).toHaveText('100%');
 });
 
-test('rough walls are a soft pastel red', async ({ page }) => {
+test('walls are pastel red until confirmed, then black; typing a length never confirms', async ({ page }) => {
   await startRoom(page);
-  await typeWall(page, `12'`, 'right');
-  await typeWall(page, `10'`, 'up');
-  await page.getByRole('button', { name: 'Close the room' }).click(); // the closing wall is rough
+  await typeRectangle(page);
   const fill = (name: string) =>
     page.evaluate((n) => {
       const w = window as unknown as { Konva: { stages: { findOne: (s: string) => { fill: () => string } }[] } };
       return w.Konva.stages[0]!.findOne(n).fill();
     }, name);
-  await expect.poll(() => fill('.wall-3')).toBe('#eeb8ba');
-  expect(await fill('.wall-1')).not.toBe('#eeb8ba'); // typed, so measured
+  // Every wall was typed, and typing never confirms: all unmeasured, pastel red.
+  await expect.poll(() => fill('.wall-1')).toBe('#eeb8ba');
+  await expect(page.locator('[data-provenance="confirmed"]')).toHaveCount(0);
+  // Confirm wall A: it turns black.
+  await wallButtons(page).first().click();
+  await page.getByRole('button', { name: 'Confirm Length', exact: true }).click();
+  await expect.poll(() => fill('.wall-1')).toBe('#2b2f33');
+  expect(await fill('.wall-2')).toBe('#eeb8ba');
+  // Typing a new length on a confirmed wall makes it unmeasured again.
+  await page.getByRole('button', { name: 'Edit Length' }).click();
+  await page.getByRole('textbox', { name: 'Length' }).fill('140');
+  await page.getByRole('button', { name: 'Save' }).click();
+  await expect.poll(() => fill('.wall-1')).toBe('#eeb8ba');
 });
 
 const centreOf = async (page: Page, selector: string) => {
@@ -340,7 +371,7 @@ test('a selected wall has handles: slide it by the middle, move a corner by an e
   await page.getByRole('button', { name: '← Room' }).click();
   await expect(page.getByRole('button', { name: /^Wall C: 144"/ })).toBeVisible(); // top wall moved up, same length
   await expect(page.getByRole('button', { name: /^Wall D: / })).not.toHaveText(/^Wall D: 120"/);
-  await expect(page.locator('[data-provenance="rough"]').first()).toBeVisible();
+  await expect(page.locator('[data-provenance="unmeasured"]').first()).toBeVisible();
 });
 
 test('a wall drawn back over the last one is refused', async ({ page }) => {
@@ -483,4 +514,21 @@ test('click a wall length on the plan and type a new one', async ({ page }) => {
   await page.getByRole('textbox', { name: 'Wall length' }).press('Escape');
   await page.getByRole('button', { name: '← Room' }).click();
   await expect(page.getByRole('button', { name: /^Wall A: 150"/ })).toBeVisible();
+});
+
+test('a wall with a window shows the measurements to and across it, plus the overall', async ({ page }) => {
+  await page.goto('/rooms/preview');
+  await page.getByRole('button', { name: /Example kitchen/ }).click();
+  const text = (name: string) =>
+    page.evaluate((n) => {
+      const w = window as unknown as { Konva: { stages: { findOne: (s: string) => { text: () => string } | undefined }[] } };
+      return w.Konva.stages[0]!.findOne(n)?.text() ?? null;
+    }, name);
+  // Wall A is 144" with a 36" window starting 48" from its start: 48" | 36" | 60".
+  await expect.poll(() => text('.wall-1-segment-1-text')).toBe('48"');
+  expect(await text('.wall-1-segment-2-text')).toBe('36"');
+  expect(await text('.wall-1-segment-3-text')).toBe('60"');
+  expect(await text('.wall-length-1')).toBe('144"');
+  // A wall with no openings shows only its overall length.
+  expect(await text('.wall-2-segment-1-text')).toBeNull();
 });

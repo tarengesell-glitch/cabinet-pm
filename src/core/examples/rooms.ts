@@ -13,7 +13,7 @@ function wall(n: number, start: Point, end: Point, extra: Partial<Wall> = {}): W
     end_point: end,
     entered_length: null,
     length_source_mm: null,
-    length_provenance: 'measured',
+    length_provenance: 'confirmed',
     thickness: THICKNESS,
     openings: [],
     obstacles: [],
@@ -104,7 +104,7 @@ export function lShapeWithAngledWall(): Job {
     {
       room_id: id(400),
       name: 'Laundry',
-      ceiling_height: measured(ft(8), 'rough'),
+      ceiling_height: measured(ft(8), 'unmeasured'),
       walls: [
         wall(401, a, b, {
           openings: [

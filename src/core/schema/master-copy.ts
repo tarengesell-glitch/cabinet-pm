@@ -20,11 +20,11 @@ export const SizeSchema = LengthSchema.refine((v) => v >= 0, 'cannot be negative
 export const IdSchema = z.uuid();
 
 /**
- * How sure we are of a value (owner decision, 2026-11-05):
- * rough = from the client or the intake; measured = entered on site; verified = checked.
- * Entering a value never verifies it.
+ * Whether a size is confirmed (owner decision, 2026-11-05, replacing rough/measured/verified):
+ * unmeasured = anything not yet confirmed, including sizes typed in; confirmed = checked and
+ * confirmed by a person, on purpose. Typing or dragging a size never confirms it.
  */
-export const ProvenanceSchema = z.enum(['rough', 'measured', 'verified']);
+export const ProvenanceSchema = z.enum(['unmeasured', 'confirmed']);
 
 /** A millimetre value as it was typed (DECISIONS U-2), kept when a value was rounded from it. */
 export const SourceMmSchema = z.string().regex(/^\d+(?:\.\d+)?$/, 'must be a millimetre number such as 595.5');

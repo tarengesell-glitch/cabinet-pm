@@ -10,7 +10,6 @@ import { can, PREVIEW_SHOP, type User } from '@/platform/index';
 import {
   addWall,
   addWallByLength,
-  closeRoom,
   commit,
   deleteOpening,
   deleteWall,
@@ -41,7 +40,7 @@ import {
   type Env,
   type Timeline,
 } from '../model/editor';
-import { AddWallForm, ChecksPanel, MasterCopyPanel, OpeningPanel, RoomPanel, StartRoomForm, WallPanel, WallsPanel, KIND_LABEL } from './Panels';
+import { ChecksPanel, MasterCopyPanel, OpeningPanel, RoomPanel, StartRoomForm, WallPanel, WallsPanel, KIND_LABEL } from './Panels';
 import { PlanCanvas, selectedWallIds, wallSelection, type Selection, type Tool } from './PlanCanvas';
 import { downloadText, readStored, writeStored } from './storage';
 import s from './RoomCapture.module.css';
@@ -305,7 +304,7 @@ export function RoomCapture({ user }: { user: User }) {
                 onCornerDrag={(from, to, done) => handleDrag(moveCorner(draft!, env, from, to), done)}
                 onWallSlide={(wallId, distance, done) => handleDrag(slideWall(draft!, env, wallId, distance), done)}
                 onWallResize={(wallId, which, length, done) =>
-                  handleDrag(resizeWall(draft!, env, wallId, which, { value: length, source_mm: null }, 'dragged'), done)
+                  handleDrag(resizeWall(draft!, env, wallId, which, { value: length, source_mm: null }), done)
                 }
                 onDragCancel={() => setDragPreview(null)}
                 tool={tool}
@@ -408,12 +407,6 @@ export function RoomCapture({ user }: { user: User }) {
 
               {!selectedWall && !selectedOpening && multiWalls.length < 2 && (
                 <>
-                  <AddWallForm
-                    canEdit={canEdit}
-                    hasWalls={room.walls.length > 0}
-                    onAdd={(length, angle) => apply(addWallByLength(draft, env, length, angle))}
-                    onClose={() => apply(closeRoom(draft, env))}
-                  />
                   <RoomPanel
                     key={room.room_id}
                     room={room}

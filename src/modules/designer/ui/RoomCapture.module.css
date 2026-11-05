@@ -257,15 +257,7 @@
   color: var(--danger);
 }
 
-.chipMeasured {
-  composes: chip;
-  color: var(--warning);
-}
 
-.chipVerified {
-  composes: chip;
-  color: var(--success);
-}
 
 .list {
   list-style: none;
@@ -379,4 +371,9 @@
   color: inherit;
   cursor: pointer;
   padding: 0 2px;
+}
+
+.chipConfirmed {
+  composes: chip;
+  color: #2b2f33;
 }

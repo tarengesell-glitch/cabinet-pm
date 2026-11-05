@@ -15,7 +15,7 @@ The owner asked for every drawing and navigation decision to be checked against 
 | 6 | Walls drawn by clicking corners; exact lengths typed in a side panel with arrow buttons | Cabinet Vision and Mozaik: point the direction, type the length, press Enter; Esc or right-click finishes | **Changed**: type-while-drawing added, plus right-click to finish. The side panel's "Type the next wall" card is now redundant (see question 1) |
 | 7 | Walls numbered 1, 2, 3 | Kitchen drawings and measuring guides letter walls (Wall A, B, C …, often starting at the sink wall, clockwise). Blueprints use circled tags and elevation markers | **Changed**: letters in circles (A, B, C) in drawing order, inside the room |
 | 8 | Lengths in inches only | NKBA (kitchen industry standard) uses inches and fractions, not feet-inches | **Kept** (confirmed) |
-| 9 | One length label per wall, centred outside it | NKBA plans use *dimension strings*: wall space to openings, centrelines of fixtures, then the overall wall. Thin lines, ticks, text above the line | **Recommend later**: proper dimension strings once cabinets are placed. Not added now (less is more) |
+| 9 | One length label per wall, centred outside it | NKBA plans use *dimension strings*: wall space to openings, centrelines of fixtures, then the overall wall. Thin lines, ticks, text above the line | **Changed (owner asked)**: walls with doors or windows now show a chain (corner → opening edge, opening width, … → corner) with the overall on a second line. Cabinet makers' planning guides (Medallion, Schuler, Yorktowne) measure the same way. Walls without openings show only the overall. Centrelines of fixtures come with cabinets |
 | 10 | Walls filled by colour (pastel red / amber / green = rough / measured / verified) | Drafting draws walls as the heaviest lines with a grey or black fill, and doesn't use colour on printed plans. Unverified sizes are marked "VIF" (verify in field) | **Answered (owner)**: keep the colours; they fail loudly on unmeasured walls. Drawings for clients will use standard grey walls when that view is built |
 | 11 | Door: leaf at 90° plus a quarter-circle swing arc | Same everywhere | **Kept** |
 | 12 | Door hinge side and swing: always the same, no control | Revit and Chief Architect: two flip controls, hand (left/right) and facing (in/out). US handing: LH/RH judged from outside, "reverse" when it swings towards you | **Changed**: Left hand / Right hand and Swings in / out on a selected door, judged from outside as in the US convention |
@@ -29,6 +29,6 @@ The owner asked for every drawing and navigation decision to be checked against 
 | 20 | Snapping to whole inches, 45° and corners while drawing | AutoCAD's polar tracking and object snaps work the same way | **Kept** |
 
 ## Questions for the owner
-1. **The "Type the next wall" card** (arrow buttons and an angle box) is ours, not something the common apps have. Now that you can type lengths while drawing, should it go? It would reduce clutter.
+1. ~~**The "Type the next wall" card.**~~ Answered: removed. It was added without being asked for.
 2. ~~**Wall colours.**~~ Answered: keep them while measuring; grey walls on drawings for clients.
 3. ~~**Typing a length on the plan.**~~ Answered: yes, added.

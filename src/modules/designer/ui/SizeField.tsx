@@ -6,9 +6,8 @@ import { parseSize } from './parseSize';
 import s from './RoomCapture.module.css';
 
 const CHIP: Record<Provenance, { className: string; text: string }> = {
-  rough: { className: s.chipRough as string, text: 'Rough' },
-  measured: { className: s.chipMeasured as string, text: 'Measured' },
-  verified: { className: s.chipVerified as string, text: 'Verified' },
+  unmeasured: { className: s.chipRough as string, text: 'Unmeasured' },
+  confirmed: { className: s.chipConfirmed as string, text: 'Confirmed' },
 };
 
 export function ProvenanceChip({ provenance }: { provenance: Provenance }) {
@@ -101,14 +100,14 @@ export function SizeField({ label, measured, display, detail, canEdit, onSet, on
             >
               Edit
             </button>
-            {measured && onProvenance && measured.provenance === 'measured' && (
-              <button className={s.button} disabled={!canEdit} aria-label={`Verify ${label}`} onClick={() => provenance('verified')}>
-                ✓ Verify
+            {measured && onProvenance && measured.provenance === 'unmeasured' && (
+              <button className={s.button} disabled={!canEdit} aria-label={`Confirm ${label}`} onClick={() => provenance('confirmed')}>
+                Confirm
               </button>
             )}
-            {measured && onProvenance && measured.provenance === 'verified' && (
-              <button className={s.button} disabled={!canEdit} aria-label={`Unverify ${label}`} onClick={() => provenance('measured')}>
-                Undo verify
+            {measured && onProvenance && measured.provenance === 'confirmed' && (
+              <button className={s.button} disabled={!canEdit} aria-label={`Unconfirm ${label}`} onClick={() => provenance('unmeasured')}>
+                Unconfirm
               </button>
             )}
           </div>

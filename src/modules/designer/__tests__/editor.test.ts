@@ -69,12 +69,12 @@ function rectangle(env: Env): Draft {
 }
 
 describe('starting and drawing a room', () => {
-  it('needs a name; the ceiling height and the standard wall thickness start rough', () => {
+  it('needs a name; the ceiling height and the standard wall thickness start unmeasured', () => {
     const env = testEnv();
     expect(startRoom(env, { name: '  ', shopId: SHOP, ceiling: size(1) }).ok).toBe(false);
     const d = newRoom(env);
-    expect(room(d).ceiling_height).toEqual({ value: 8 * FT, provenance: 'rough', source_mm: null });
-    expect(d.wallDefaults.thickness).toEqual({ value: 5 * IN + 32, provenance: 'rough', source_mm: null });
+    expect(room(d).ceiling_height).toEqual({ value: 8 * FT, provenance: 'unmeasured', source_mm: null });
+    expect(d.wallDefaults.thickness).toEqual({ value: 5 * IN + 32, provenance: 'unmeasured', source_mm: null });
     expect(JobSchema.safeParse(d.job).success).toBe(true);
   });
 
@@ -83,8 +83,8 @@ describe('starting and drawing a room', () => {
     const walls = room(d).walls;
     expect(walls).toHaveLength(4);
     expect(walls[3]!.end_point).toEqual(walls[0]!.start_point);
-    expect(walls.slice(0, 3).every((w) => w.length_provenance === 'measured')).toBe(true);
-    expect(walls[3]!.length_provenance).toBe('rough'); // drawn by closing, not typed
+    expect(walls.slice(0, 3).every((w) => w.length_provenance === 'unmeasured')).toBe(true);
+    expect(walls[3]!.length_provenance).toBe('unmeasured'); // drawn by closing, not typed
     expect(JobSchema.safeParse(d.job).success).toBe(true);
     expect(runChecks(WALL_CHECKS, d.job, {}).passed).toBe(true);
     expect(closeRoom(d, testEnv()).ok).toBe(false);
@@ -118,19 +118,22 @@ describe('typing a wall length', () => {
     const env = testEnv();
     let d = rectangle(env);
     const [w1, w2] = room(d).walls;
-    d = unwrap(setProvenance(d, env, { kind: 'wall', id: w2!.wall_id, field: 'length' }, 'verified'));
+    d = unwrap(setProvenance(d, env, { kind: 'wall', id: w2!.wall_id, field: 'length' }, 'confirmed'));
+    d = unwrap(setProvenance(d, env, { kind: 'wall', id: room(d).walls[2]!.wall_id, field: 'length' }, 'confirmed'));
     const r = setSize(d, env, { kind: 'wall', id: w1!.wall_id, field: 'length' }, size(13 * FT));
     if (!r.ok) throw new Error(r.reason);
     const walls = room(r.value.draft).walls;
     expect(walls[0]!.end_point).toEqual({ x: 13 * FT, y: 0 });
-    // Wall B moved across as a whole: still upright, still 10', still verified.
+    // Wall B moved across as a whole: still upright, still 10', still confirmed.
     expect(walls[1]!.start_point).toEqual({ x: 13 * FT, y: 0 });
     expect(walls[1]!.end_point).toEqual({ x: 13 * FT, y: 10 * FT });
-    expect(walls[1]!.length_provenance).toBe('verified');
-    // Wall C stretched to stay joined, so it goes back to rough and says so.
+    expect(walls[1]!.length_provenance).toBe('confirmed');
+    // Wall C stretched to stay joined, so it is no longer confirmed, and says so.
     expect(walls[2]!.start_point).toEqual({ x: 13 * FT, y: 10 * FT });
-    expect(walls[2]!.length_provenance).toBe('rough');
-    expect(r.value.notices).toEqual([`Wall C changed length, so it's back to rough. Measure it again.`]);
+    expect(walls[2]!.length_provenance).toBe('unmeasured');
+    expect(r.value.notices).toEqual([`Wall C changed length, so it's no longer confirmed. Measure it again.`]);
+    // Typing a length never confirms it (owner, 2026-11-05).
+    expect(walls[0]!.length_provenance).toBe('unmeasured');
     expect(runChecks(WALL_CHECKS, r.value.draft.job, {}).passed).toBe(true);
   });
 
@@ -140,14 +143,14 @@ describe('typing a wall length', () => {
     const w1 = room(d).walls[0]!;
     d = unwrap(placeOpening(d, env, w1.wall_id, 'window', 60 * IN)); // offset 42"
     const before = room(d).walls[0]!.openings[0]!.offset.value;
-    const r = resizeWall(d, env, w1.wall_id, 'start', size(14 * FT), 'dragged'); // 2' longer at the start
+    const r = resizeWall(d, env, w1.wall_id, 'start', size(14 * FT)); // 2' longer at the start
     if (!r.ok) throw new Error(r.reason);
     const wall = room(r.value.draft).walls[0]!;
     expect(wall.start_point).toEqual({ x: -2 * FT, y: 0 });
     expect(wall.openings[0]!.offset.value).toBe(before + 2 * FT); // same place in the room
-    expect(wall.length_provenance).toBe('rough'); // dragged, so approximate
+    expect(wall.length_provenance).toBe('unmeasured'); // dragged, so approximate
     // Shortening from the start through the window is refused.
-    const cut = resizeWall(d, env, w1.wall_id, 'start', size(7 * FT), 'dragged');
+    const cut = resizeWall(d, env, w1.wall_id, 'start', size(7 * FT));
     expect(cut.ok).toBe(false);
     if (!cut.ok) expect(cut.reason).toBe('That would cut through the window on wall A.');
   });
@@ -157,7 +160,7 @@ describe('typing a wall length', () => {
     let d = rectangle(env);
     const w4 = room(d).walls[3]!;
     d = unwrap(setSize(d, env, { kind: 'wall', id: w4.wall_id, field: 'length' }, size(10 * FT)));
-    expect(room(d).walls[3]!.length_provenance).toBe('measured');
+    expect(room(d).walls[3]!.length_provenance).toBe('unmeasured');
   });
 
   it('refuses a zero length and leaves the room unchanged', () => {
@@ -169,14 +172,14 @@ describe('typing a wall length', () => {
 });
 
 describe('doors and windows', () => {
-  it('drop in at the standard size, rough, centred where the wall was tapped', () => {
+  it('drop in at the standard size, unmeasured, centred where the wall was tapped', () => {
     const env = testEnv();
     const d = rectangle(env);
     const wallId = room(d).walls[0]!.wall_id;
     const placed = unwrap(placeOpening(d, env, wallId, 'door', 60 * IN));
     const door = room(placed).walls[0]!.openings[0]!;
     expect(door.kind).toBe('door');
-    expect(door.width).toEqual({ value: 32 * IN, provenance: 'rough', source_mm: null });
+    expect(door.width).toEqual({ value: 32 * IN, provenance: 'unmeasured', source_mm: null });
     expect(door.height.value).toBe(80 * IN);
     expect(door.sill_height.value).toBe(0);
     expect(door.offset.value).toBe(44 * IN); // 60 - 32/2
@@ -212,15 +215,15 @@ describe('doors and windows', () => {
     expect(run.issues[0]!.message).toMatch(/but the ceiling is only 96" high \(4" too tall\)/);
   });
 
-  it('move along the wall when dragged, and the new position is rough', () => {
+  it('move along the wall when dragged, and the new position is unmeasured', () => {
     const env = testEnv();
     let d = rectangle(env);
     d = unwrap(placeOpening(d, env, room(d).walls[0]!.wall_id, 'door', null));
     const id = room(d).walls[0]!.openings[0]!.opening_id;
     d = unwrap(setSize(d, env, { kind: 'opening', id, field: 'offset' }, size(10 * IN)));
-    expect(room(d).walls[0]!.openings[0]!.offset.provenance).toBe('measured');
+    expect(room(d).walls[0]!.openings[0]!.offset.provenance).toBe('unmeasured');
     d = unwrap(moveOpening(d, env, id, 20 * IN));
-    expect(room(d).walls[0]!.openings[0]!.offset).toEqual({ value: 20 * IN, provenance: 'rough', source_mm: null });
+    expect(room(d).walls[0]!.openings[0]!.offset).toEqual({ value: 20 * IN, provenance: 'unmeasured', source_mm: null });
     expect(moveOpening(d, env, id, -1).ok).toBe(false);
   });
 
@@ -294,16 +297,16 @@ describe('moving and resizing doors and windows', () => {
     expect(room(d).walls[1]!.openings[0]!.offset.value).toBe(24 * IN);
   });
 
-  it('resizes from an end; changed sizes become rough', () => {
+  it('resizes from an end; changed sizes become unmeasured', () => {
     const env = testEnv();
     let d = rectangle(env);
     d = unwrap(placeOpening(d, env, room(d).walls[0]!.wall_id, 'window', null));
     const id = room(d).walls[0]!.openings[0]!.opening_id;
     d = unwrap(setSize(d, env, { kind: 'opening', id, field: 'width' }, size(36 * IN)));
-    expect(room(d).walls[0]!.openings[0]!.width.provenance).toBe('measured');
+    expect(room(d).walls[0]!.openings[0]!.width.provenance).toBe('unmeasured');
     d = unwrap(resizeOpening(d, env, id, 50 * IN, 40 * IN));
     const o = room(d).walls[0]!.openings[0]!;
-    expect([o.offset.value, o.width.value, o.width.provenance]).toEqual([50 * IN, 40 * IN, 'rough']);
+    expect([o.offset.value, o.width.value, o.width.provenance]).toEqual([50 * IN, 40 * IN, 'unmeasured']);
     expect(resizeOpening(d, env, id, 50 * IN, 0).ok).toBe(false);
   });
 });
@@ -331,6 +334,33 @@ describe('standard sizes (data/standard-sizes.json)', () => {
   });
 });
 
+describe('two states: unmeasured and confirmed', () => {
+  it('typing a size never confirms it; only Confirm does', () => {
+    const env = testEnv();
+    let d = rectangle(env);
+    const id = room(d).walls[0]!.wall_id;
+    d = unwrap(setProvenance(d, env, { kind: 'wall', id, field: 'thickness' }, 'confirmed'));
+    d = unwrap(setSize(d, env, { kind: 'wall', id, field: 'thickness' }, size(6 * IN)));
+    expect(room(d).walls[0]!.thickness.provenance).toBe('unmeasured');
+    d = unwrap(setProvenance(d, env, { kind: 'wall', id, field: 'thickness' }, 'confirmed'));
+    expect(room(d).walls[0]!.thickness.provenance).toBe('confirmed');
+  });
+
+  it('rooms saved with the old three tags convert: only "verified" was a confirmation', () => {
+    const job = structuredClone(examples.kitchen()) as unknown as Record<string, unknown>;
+    const text = JSON.stringify(job).replaceAll('"confirmed"', '"measured"');
+    const old = JSON.parse(text.replace('"length_provenance":"measured"', '"length_provenance":"verified"'));
+    const up = upgradeStoredDraft({ job: old, wallDefaults: { thickness: { value: 352, provenance: 'rough', source_mm: null } } });
+    expect(up.notes.some((n) => /unmeasured \(red\) or confirmed \(black\)/.test(n))).toBe(true);
+    const loaded = loadJob(up.job, up.wallDefaults);
+    if (!loaded.ok) throw new Error(loaded.reason);
+    const walls = room(loaded.value.draft).walls;
+    expect(walls[0]!.length_provenance).toBe('confirmed');
+    expect(walls[1]!.length_provenance).toBe('unmeasured');
+    expect(loaded.value.draft.wallDefaults.thickness.provenance).toBe('unmeasured');
+  });
+});
+
 describe('older saved drafts', () => {
   it('give doors saved before swings existed the swing they were drawn with', () => {
     const job = structuredClone(examples.kitchen()) as unknown as { rooms: { walls: { openings: Record<string, unknown>[] }[] }[] };
@@ -344,8 +374,8 @@ describe('older saved drafts', () => {
 
   it('drop the old wall height and say so', () => {
     const job = structuredClone(examples.kitchen()) as unknown as { rooms: { walls: Record<string, unknown>[] }[] };
-    for (const w of job.rooms[0]!.walls) w.height = { value: 6144, provenance: 'measured', source_mm: null };
-    const up = upgradeStoredDraft({ job, wallDefaults: { height: {}, thickness: { value: 288, provenance: 'measured', source_mm: null } } });
+    for (const w of job.rooms[0]!.walls) w.height = { value: 6144, provenance: 'unmeasured', source_mm: null };
+    const up = upgradeStoredDraft({ job, wallDefaults: { height: {}, thickness: { value: 288, provenance: 'unmeasured', source_mm: null } } });
     expect(up.notes[0]).toMatch(/4 removed/);
     expect(loadJob(up.job, up.wallDefaults).ok).toBe(true);
   });
@@ -356,25 +386,26 @@ describe('sureness tags', () => {
     const env = testEnv();
     let d = rectangle(env);
     const target = { kind: 'room', field: 'ceiling_height' } as const;
-    d = unwrap(setProvenance(d, env, target, 'verified'));
-    expect(room(d).ceiling_height.provenance).toBe('verified');
-    d = unwrap(setProvenance(d, env, target, 'measured'));
-    expect(room(d).ceiling_height.provenance).toBe('measured');
+    d = unwrap(setProvenance(d, env, target, 'confirmed'));
+    expect(room(d).ceiling_height.provenance).toBe('confirmed');
+    d = unwrap(setProvenance(d, env, target, 'unmeasured'));
+    expect(room(d).ceiling_height.provenance).toBe('unmeasured');
   });
 });
 
 describe('handles on a selected wall', () => {
-  it('dragging a corner moves it and the joined wall; changed walls go back to rough', () => {
+  it('dragging a corner moves it and the joined wall; changed confirmed walls lose it, with a notice', () => {
     const env = testEnv();
-    const d = rectangle(env);
+    let d = rectangle(env);
+    for (const w of room(d).walls) d = unwrap(setProvenance(d, env, { kind: 'wall', id: w.wall_id, field: 'length' }, 'confirmed'));
     const r = moveCorner(d, env, { x: 12 * FT, y: 0 }, { x: 13 * FT, y: 0 });
     if (!r.ok) throw new Error(r.reason);
     const walls = room(r.value.draft).walls;
     expect(walls[0]!.end_point).toEqual({ x: 13 * FT, y: 0 });
     expect(walls[1]!.start_point).toEqual({ x: 13 * FT, y: 0 });
-    expect(walls[0]!.length_provenance).toBe('rough');
-    expect(walls[1]!.length_provenance).toBe('rough');
-    expect(walls[2]!.length_provenance).toBe('measured'); // untouched
+    expect(walls[0]!.length_provenance).toBe('unmeasured');
+    expect(walls[1]!.length_provenance).toBe('unmeasured');
+    expect(walls[2]!.length_provenance).toBe('confirmed'); // untouched
     expect(r.value.notices).toHaveLength(2);
   });
 
@@ -387,10 +418,10 @@ describe('handles on a selected wall', () => {
     const walls = room(r.value.draft).walls;
     expect(walls[1]!.start_point).toEqual({ x: 14 * FT, y: 0 });
     expect(walls[1]!.end_point).toEqual({ x: 14 * FT, y: 10 * FT });
-    expect(walls[1]!.length_provenance).toBe('measured');
+    expect(walls[1]!.length_provenance).toBe('unmeasured');
     expect(walls[0]!.end_point).toEqual({ x: 14 * FT, y: 0 });
     expect(walls[2]!.start_point).toEqual({ x: 14 * FT, y: 10 * FT });
-    expect(walls[0]!.length_provenance).toBe('rough');
+    expect(walls[0]!.length_provenance).toBe('unmeasured');
     expect(runChecks(WALL_CHECKS, r.value.draft.job, {}).passed).toBe(true);
   });
 
@@ -430,7 +461,7 @@ describe('several walls at once', () => {
     const ids = room(d).walls.slice(1, 3).map((w) => w.wall_id);
     const next = unwrap(setWallsThickness(d, env, ids, size(4 * IN)));
     expect(room(next).walls.map((w) => w.thickness.value)).toEqual([5 * IN + 32, 4 * IN, 4 * IN, 5 * IN + 32]);
-    expect(room(next).walls[1]!.thickness.provenance).toBe('measured');
+    expect(room(next).walls[1]!.thickness.provenance).toBe('unmeasured');
     expect(setWallsThickness(d, env, ids, size(0)).ok).toBe(false);
   });
 });

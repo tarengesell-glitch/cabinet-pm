@@ -11,8 +11,9 @@ import {
   type Result,
   type Room,
   type Wall,
+  wallLetter,
 } from '@/core/index';
-import type { OpeningField, TypedSize, WallDefaults } from '../model/editor';
+import { doorHanding, type OpeningField, type TypedSize, type WallDefaults } from '../model/editor';
 import { lengthText } from './format';
 import { parseSize } from './parseSize';
 import { ProvenanceChip, SizeField } from './SizeField';
@@ -209,7 +210,7 @@ export function RoomPanel({ room, wallDefaults, canEdit, onRename, onCeiling, on
               <li key={w.wall_id}>
                 <button className={s.listButton} onClick={() => onSelect({ kind: 'wall', id: w.wall_id })}>
                   <span>
-                    Wall {i + 1}: {lengthText(d)}
+                    Wall {wallLetter(i)}: {lengthText(d)}
                     {w.openings.length > 0 && ` · ${w.openings.map((o) => KIND_LABEL[o.kind].toLowerCase()).join(', ')}`}
                   </span>
                   <ProvenanceChip provenance={w.length_provenance} />
@@ -249,7 +250,7 @@ export function WallPanel({ room, wall, canEdit, onSize, onProvenance, onDelete,
     <section className={s.card}>
       <BackToRoom onSelect={onSelect} />
       <h2 className={s.cardTitle}>
-        Wall {index + 1} <ProvenanceChip provenance={wall.length_provenance} />
+        Wall {wallLetter(index)} <ProvenanceChip provenance={wall.length_provenance} />
       </h2>
       <SizeField
         label="Length"
@@ -312,7 +313,7 @@ export function WallsPanel({ room, walls, canEdit, onSelect, onThickness, onDele
     <section className={s.card}>
       <BackToRoom onSelect={onSelect} />
       <h2 className={s.cardTitle}>{walls.length} walls selected</h2>
-      <p className={s.muted}>Walls {numbers.join(', ')}. Shift-click a wall on the plan to add or remove it.</p>
+      <p className={s.muted}>Walls {numbers.map((n) => wallLetter(n - 1)).join(', ')}. Shift-click a wall on the plan to add or remove it.</p>
       <ul className={s.list}>
         {walls.map((w, i) => {
           const d = distanceForDisplay(w.start_point, w.end_point);
@@ -320,7 +321,7 @@ export function WallsPanel({ room, walls, canEdit, onSelect, onThickness, onDele
             <li key={w.wall_id}>
               <button className={s.listButton} onClick={() => onSelect({ kind: 'wall', id: w.wall_id })}>
                 <span>
-                  Wall {numbers[i]}: {lengthText(d)}
+                  Wall {wallLetter((numbers[i] as number) - 1)}: {lengthText(d)}
                 </span>
                 <ProvenanceChip provenance={w.length_provenance} />
               </button>
@@ -352,7 +353,7 @@ const OPENING_FIELDS: { field: OpeningField; label: string }[] = [
   { field: 'sill_height', label: 'Sill height' },
 ];
 
-export function OpeningPanel({ room, wall, opening, canEdit, onKind, onSize, onProvenance, onDelete, onSelect }: {
+export function OpeningPanel({ room, wall, opening, canEdit, onKind, onSize, onProvenance, onDelete, onSelect, onHanding }: {
   room: Room;
   wall: Wall;
   opening: Opening;
@@ -362,15 +363,18 @@ export function OpeningPanel({ room, wall, opening, canEdit, onKind, onSize, onP
   onProvenance: (field: OpeningField, p: Measured['provenance']) => Result<unknown>;
   onDelete: () => void;
   onSelect: (sel: Selection) => void;
+  /** Doors only: set left/right hand and in/out (judged from outside the door). */
+  onHanding: (hand: 'left' | 'right', swings: 'in' | 'out') => Result<unknown>;
 }) {
   const wallIndex = room.walls.findIndex((w) => w.wall_id === wall.wall_id);
+  const handing = opening.swing ? doorHanding(room, opening.swing) : null;
   return (
     <section className={s.card}>
       <BackToRoom onSelect={onSelect} />
       <h2 className={s.cardTitle}>
         {KIND_LABEL[opening.kind]} on{' '}
         <button className={s.button} onClick={() => onSelect({ kind: 'wall', id: wall.wall_id })}>
-          wall {wallIndex + 1}
+          wall {wallLetter(wallIndex)}
         </button>
       </h2>
       <div className={s.row}>
@@ -380,6 +384,37 @@ export function OpeningPanel({ room, wall, opening, canEdit, onKind, onSize, onP
           </button>
         ))}
       </div>
+      {handing && (
+        <>
+          <div className={s.row} role="group" aria-label="Hinge side">
+            {(['left', 'right'] as const).map((hand) => (
+              <button
+                key={hand}
+                className={hand === handing.hand ? s.buttonActive : s.button}
+                aria-pressed={hand === handing.hand}
+                disabled={!canEdit}
+                title="As seen from outside the door"
+                onClick={() => hand !== handing.hand && onHanding(hand, handing.swings)}
+              >
+                {hand === 'left' ? 'Left hand' : 'Right hand'}
+              </button>
+            ))}
+          </div>
+          <div className={s.row} role="group" aria-label="Swing">
+            {(['in', 'out'] as const).map((swings) => (
+              <button
+                key={swings}
+                className={swings === handing.swings ? s.buttonActive : s.button}
+                aria-pressed={swings === handing.swings}
+                disabled={!canEdit}
+                onClick={() => swings !== handing.swings && onHanding(handing.hand, swings)}
+              >
+                Swings {swings}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
       {OPENING_FIELDS.map(({ field, label }) => (
         <SizeField key={field} label={label} measured={opening[field]} canEdit={canEdit} onSet={(v) => onSize(field, v)} onProvenance={(p) => onProvenance(field, p)} />
       ))}

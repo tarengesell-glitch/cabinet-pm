@@ -32,7 +32,7 @@ describe('each check fails on a copy broken for it', () => {
     room0(job).walls[1] = { ...w, end_point: w.start_point };
     const issues = issuesFrom(wallZeroLength, job);
     expect(issues).toHaveLength(1);
-    expect(issues[0]!.message).toBe('Wall 2 in "Kitchen" starts and ends at the same point, so it has no length.');
+    expect(issues[0]!.message).toBe('Wall B in "Kitchen" starts and ends at the same point, so it has no length.');
   });
 
   it('a window running past the end of its wall', () => {
@@ -42,7 +42,7 @@ describe('each check fails on a copy broken for it', () => {
     const issues = issuesFrom(fitsAlongWall, job);
     expect(issues).toHaveLength(1);
     expect(issues[0]!.message).toBe(
-      `Window 1 on wall 1 in "Kitchen" runs past the end of the wall: its far edge is 156" from the start, but the wall is 144" long (12" too far).`,
+      `Window 1 on wall A in "Kitchen" runs past the end of the wall: its far edge is 156" from the start, but the wall is 144" long (12" too far).`,
     );
     expect(issues[0]!.ref).toEqual({ kind: 'opening', id: window.opening_id });
   });
@@ -74,7 +74,7 @@ describe('each check fails on a copy broken for it', () => {
     const issues = issuesFrom(fitsUnderCeiling, job);
     expect(issues).toHaveLength(1);
     expect(issues[0]!.message).toBe(
-      `Window 1 on wall 1 in "Kitchen" reaches 102" from the floor, but the ceiling is only 96" high (6" too tall).`,
+      `Window 1 on wall A in "Kitchen" reaches 102" from the floor, but the ceiling is only 96" high (6" too tall).`,
     );
   });
 
@@ -85,7 +85,7 @@ describe('each check fails on a copy broken for it', () => {
     wall.openings.push({ ...window, opening_id: '00000000-0000-4000-8000-000000000299', offset: { ...window.offset, value: inch(80) } });
     const issues = issuesFrom(openingsOverlap, job);
     expect(issues).toHaveLength(1);
-    expect(issues[0]!.message).toBe('Window 1 on wall 1 in "Kitchen" and Window 2 overlap by 4".');
+    expect(issues[0]!.message).toBe('Window 1 on wall A in "Kitchen" and Window 2 overlap by 4".');
   });
 
   it('openings that only touch do not overlap', () => {
@@ -102,7 +102,7 @@ describe('each check fails on a copy broken for it', () => {
     room0(job).walls[2] = { ...w, end_point: { x: w.end_point.x, y: -inch(12) } };
     const issues = issuesFrom(wallsCross, job);
     expect(issues.length).toBeGreaterThan(0);
-    expect(issues[0]!.message).toMatch(/^Wall 1 and wall 3 in "Kitchen" cross each other\.$/);
+    expect(issues[0]!.message).toMatch(/^Wall A and wall C in "Kitchen" cross each other\.$/);
   });
 });
 
@@ -139,6 +139,17 @@ describe('runChecks fails closed', () => {
 });
 
 describe('the master copy format is strict', () => {
+  it('needs a swing on every door, and none on windows', () => {
+    const job = kitchen();
+    const door = room0(job).walls[3]!.openings[0]!;
+    expect(JobSchema.safeParse(job).success).toBe(true);
+    door.swing = null;
+    expect(JobSchema.safeParse(job).success).toBe(false);
+    const job2 = kitchen();
+    room0(job2).walls[0]!.openings[0]!.swing = { hinge: 'start', opens: 'left' };
+    expect(JobSchema.safeParse(job2).success).toBe(false);
+  });
+
   it('refuses an unknown field', () => {
     const job = kitchen() as Record<string, unknown>;
     expect(JobSchema.safeParse({ ...job, extra: 1 }).success).toBe(false);
@@ -165,6 +176,6 @@ describe('the master copy format is strict', () => {
     room0(job).walls[1]!.wall_id = room0(job).walls[0]!.wall_id;
     const r = JobSchema.safeParse(job);
     expect(r.success).toBe(false);
-    expect(r.error?.issues[0]?.message).toMatch(/used twice: by wall 1 in "Kitchen" and by wall 2/);
+    expect(r.error?.issues[0]?.message).toMatch(/used twice: by wall A in "Kitchen" and by wall B/);
   });
 });

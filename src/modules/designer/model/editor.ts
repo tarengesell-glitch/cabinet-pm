@@ -11,6 +11,7 @@ import {
   directionOf,
   distanceForDisplay,
   formatInches,
+  formatInchesApprox,
   distanceSquared,
   pointFromLengthAndAngle,
   samePoint,
@@ -23,7 +24,9 @@ import {
   type Provenance,
   type Result,
   type Room,
+  type Swing,
   type Wall,
+  wallLetter,
 } from '@/core/index';
 import { STANDARD_SIZES } from './standard-sizes';
 
@@ -36,6 +39,29 @@ export interface Env {
 
 export interface WallDefaults {
   readonly thickness: Measured;
+}
+
+/**
+ * Which side of the walls is inside the room, looking along each wall from start to end:
+ * left for a room drawn counter-clockwise (room Y up), right for clockwise. From the
+ * area the corners enclose; an open chain is closed from its last corner to its first.
+ */
+export function insideSide(r: Room): 'left' | 'right' {
+  let twice = 0;
+  for (const w of r.walls) twice += w.start_point.x * w.end_point.y - w.end_point.x * w.start_point.y;
+  const first = r.walls[0];
+  const last = r.walls[r.walls.length - 1];
+  if (first && last) twice += last.end_point.x * first.start_point.y - first.start_point.x * last.end_point.y;
+  return twice < 0 ? 'right' : 'left';
+}
+
+const otherSide = (side: 'left' | 'right'): 'left' | 'right' => (side === 'left' ? 'right' : 'left');
+
+/** The standard swing for a new door in this room (data/standard-sizes.json). */
+function standardSwing(r: Room): Swing {
+  const std = STANDARD_SIZES.door_swing;
+  const inside = insideSide(r);
+  return { hinge: std.hinge, opens: std.opens === 'inside' ? inside : otherSide(inside) };
 }
 
 /** A standard size from data/standard-sizes.json: always rough until someone measures it. */
@@ -84,7 +110,7 @@ const withRoom = (draft: Draft, env: Env, summary: string, next: Room): Draft =>
   },
 });
 
-export const wallLabel = (r: Room, wallId: string): string => `wall ${r.walls.findIndex((w) => w.wall_id === wallId) + 1}`;
+export const wallLabel = (r: Room, wallId: string): string => `wall ${wallLetter(r.walls.findIndex((w) => w.wall_id === wallId))}`;
 
 export function findOpening(r: Room, openingId: string): { wall: Wall; opening: Opening; index: number } | null {
   for (const wall of r.walls) {
@@ -137,7 +163,7 @@ export function addWall(draft: Draft, env: Env, start: Point, end: Point, entere
   if (samePoint(start, end)) return refuse('A wall needs two different corners.');
   const r = room(draft);
   const over = r.walls.findIndex((w) => segmentsOverlap(w.start_point, w.end_point, start, end));
-  if (over >= 0) return refuse(`That wall would run back over wall ${over + 1}. Walls can't lie on top of each other.`);
+  if (over >= 0) return refuse(`That wall would run back over wall ${wallLetter(over)}. Walls can't lie on top of each other.`);
   const wall: Wall = {
     wall_id: env.newId(),
     start_point: start,
@@ -151,7 +177,7 @@ export function addWall(draft: Draft, env: Env, start: Point, end: Point, entere
   };
   const length = distanceForDisplay(start, end);
   return ok(
-    withRoom(draft, env, `Added wall ${r.walls.length + 1} (${length.exact ? '' : 'about '}${formatInches(length.value)})`, {
+    withRoom(draft, env, `Added wall ${wallLetter(r.walls.length)} (${length.exact ? formatInches(length.value) : formatInchesApprox(length.value)})`, {
       ...r,
       walls: [...r.walls, wall],
     }),
@@ -177,7 +203,7 @@ function moveCorners(draft: Draft, env: Env, moves: readonly (readonly [Point, P
       continue;
     }
     touched += 1;
-    if (samePoint(start, end)) return refuse(`That would shrink wall ${i + 1} to nothing.`);
+    if (samePoint(start, end)) return refuse(`That would shrink wall ${wallLetter(i)} to nothing.`);
     const sameLength = distanceSquared(start, end) === distanceSquared(w.start_point, w.end_point);
     if (sameLength) {
       walls.push({ ...w, start_point: start, end_point: end });
@@ -197,12 +223,12 @@ function moveCorners(draft: Draft, env: Env, moves: readonly (readonly [Point, P
       const cut = [...w.openings.map((o) => ({ offset: o.offset.value, what: `the ${o.kind}` })), ...w.obstacles.map((o) => ({ offset: o.offset.value, what: `the ${o.kind}` }))].find(
         (o) => o.offset + shift < 0,
       );
-      if (cut) return refuse(`That would cut through ${cut.what} on wall ${i + 1}.`);
+      if (cut) return refuse(`That would cut through ${cut.what} on wall ${wallLetter(i)}.`);
       openings = w.openings.map((o) => ({ ...o, offset: { ...o.offset, value: o.offset.value + shift } }));
       obstacles = w.obstacles.map((o) => ({ ...o, offset: { ...o.offset, value: o.offset.value + shift } }));
     }
     if (w.length_provenance !== 'rough' || w.entered_length !== null) {
-      notices.push(`Wall ${i + 1} changed length, so it's back to rough. Measure it again.`);
+      notices.push(`Wall ${wallLetter(i)} changed length, so it's back to rough. Measure it again.`);
     }
     walls.push({ ...w, start_point: start, end_point: end, entered_length: null, length_source_mm: null, length_provenance: 'rough', openings, obstacles });
   }
@@ -210,7 +236,7 @@ function moveCorners(draft: Draft, env: Env, moves: readonly (readonly [Point, P
   for (const [i, a] of walls.entries()) {
     for (const [j, b] of walls.entries()) {
       if (j > i && segmentsOverlap(a.start_point, a.end_point, b.start_point, b.end_point)) {
-        return refuse(`That would put wall ${i + 1} on top of wall ${j + 1}.`);
+        return refuse(`That would put wall ${wallLetter(i)} on top of wall ${wallLetter(j)}.`);
       }
     }
   }
@@ -263,7 +289,7 @@ export function resizeWall(
       ? { ...w, entered_length: entered, length_source_mm: size.source_mm, length_provenance: how === 'typed' ? ('measured' as const) : ('rough' as const) }
       : w,
   );
-  const notices = moved.value.notices.filter((n) => !n.startsWith(`Wall ${index + 1} `));
+  const notices = moved.value.notices.filter((n) => !n.startsWith(`Wall ${wallLetter(index)} `));
   const updated = { ...moved.value.draft, job: { ...moved.value.draft.job, rooms: [{ ...after, walls }] } };
   return ok(tagOnly ? withRoom(updated, env, `Set ${wallLabel(r, wallId)} length to ${formatInches(size.value)}`, room(updated)) : updated, notices);
 }
@@ -302,11 +328,11 @@ export function slideWall(draft: Draft, env: Env, wallId: string, distance: numb
   );
 }
 
-/** Adds a wall from the last wall's end (or the origin), by typed length and direction. */
-export function addWallByLength(draft: Draft, env: Env, length: TypedSize, angle: number): Result<Change> {
+/** Adds a wall by typed length and direction, from `from` (or the last wall's end, or the origin). */
+export function addWallByLength(draft: Draft, env: Env, length: TypedSize, angle: number, from?: Point): Result<Change> {
   const r = room(draft);
   const last = r.walls[r.walls.length - 1];
-  const start = last ? last.end_point : { x: 0, y: 0 };
+  const start = from ?? (last ? last.end_point : { x: 0, y: 0 });
   const placed = pointFromLengthAndAngle(start, length.value, angle);
   if (!placed.ok) return refuse(placed.reason);
   const entered = placed.value.entered_length ?? (length.source_mm !== null ? length.value : null);
@@ -461,23 +487,49 @@ export function placeOpening(
     width: rough(std.width),
     height: rough(std.height),
     sill_height: rough(std.sill_height),
+    swing: kind === 'door' ? standardSwing(r) : null,
   };
   const walls = r.walls.map((w) => (w.wall_id === wallId ? { ...w, openings: [...w.openings, opening] } : w));
   return ok(withRoom(draft, env, `Added a ${kind} to ${wallLabel(r, wallId)}`, { ...r, walls }));
 }
 
 /** Moves an opening along its wall (dragged on the plan): an approximate position, so rough. */
-export function moveOpening(draft: Draft, env: Env, openingId: string, offset: Length): Result<Change> {
+export function moveOpening(draft: Draft, env: Env, openingId: string, offset: Length, toWallId?: string): Result<Change> {
   const r = room(draft);
   const found = findOpening(r, openingId);
   if (!found) return refuse('That opening no longer exists.');
   if (offset < 0) return refuse('An opening cannot start before the beginning of its wall.');
+  const target = toWallId ?? found.wall.wall_id;
+  if (!r.walls.some((w) => w.wall_id === target)) return refuse('That wall no longer exists.');
+  const moved = { ...found.opening, offset: rough(offset) };
+  const walls = r.walls.map((w) => {
+    const without = w.wall_id === found.wall.wall_id ? w.openings.filter((o) => o.opening_id !== openingId) : w.openings;
+    return w.wall_id === target ? { ...w, openings: [...without, moved] } : without === w.openings ? w : { ...w, openings: without };
+  });
+  const where = target === found.wall.wall_id ? wallLabel(r, target) : `${wallLabel(r, target)} (from ${wallLabel(r, found.wall.wall_id)})`;
+  return ok(withRoom(draft, env, `Moved a ${found.opening.kind} to ${formatInches(offset)} from the start of ${where}`, { ...r, walls }));
+}
+
+/** Resizes an opening by dragging one of its ends: new start offset and width, both approximate (rough). */
+export function resizeOpening(draft: Draft, env: Env, openingId: string, offset: Length, width: Length): Result<Change> {
+  const r = room(draft);
+  const found = findOpening(r, openingId);
+  if (!found) return refuse('That opening no longer exists.');
+  if (offset < 0) return refuse('An opening cannot start before the beginning of its wall.');
+  if (width <= 0) return refuse(`A ${found.opening.kind} needs a width greater than zero.`);
   const walls = r.walls.map((w) =>
     w.wall_id !== found.wall.wall_id
       ? w
-      : { ...w, openings: w.openings.map((o) => (o.opening_id === openingId ? { ...o, offset: rough(offset) } : o)) },
+      : {
+          ...w,
+          openings: w.openings.map((o) =>
+            o.opening_id === openingId
+              ? { ...o, offset: o.offset.value === offset ? o.offset : rough(offset), width: o.width.value === width ? o.width : rough(width) }
+              : o,
+          ),
+        },
   );
-  return ok(withRoom(draft, env, `Moved a ${found.opening.kind} to ${formatInches(offset)} from the start of ${wallLabel(r, found.wall.wall_id)}`, { ...r, walls }));
+  return ok(withRoom(draft, env, `Resized a ${found.opening.kind} to ${formatInches(width)} wide`, { ...r, walls }));
 }
 
 /**
@@ -498,6 +550,17 @@ export function upgradeStoredDraft(data: unknown): { job: unknown; wallDefaults:
     }
   }
   if (dropped > 0) notes.push(`Your saved room was updated: walls no longer have their own height (${dropped} removed); the ceiling height is used instead.`);
+  // Doors saved before swings could be chosen keep the swing they were drawn with:
+  // hinged at the start side, opening into the room.
+  for (const room of job?.rooms ?? []) {
+    const walls = (room.walls ?? []) as unknown as Wall[];
+    const inside = insideSide({ room_id: '', name: '', ceiling_height: rough(0), walls });
+    for (const wall of walls) {
+      for (const o of (wall.openings ?? []) as unknown as Record<string, unknown>[]) {
+        if (!('swing' in o)) o.swing = o.kind === 'door' ? { hinge: 'start', opens: inside } : null;
+      }
+    }
+  }
   const thickness = d.wallDefaults?.thickness;
   return { job, wallDefaults: thickness ? { thickness } : null, notes };
 }
@@ -507,9 +570,51 @@ export function setOpeningKind(draft: Draft, env: Env, openingId: string, kind: 
   const found = findOpening(r, openingId);
   if (!found) return refuse('That opening no longer exists.');
   const walls = r.walls.map((w) =>
-    w.wall_id !== found.wall.wall_id ? w : { ...w, openings: w.openings.map((o) => (o.opening_id === openingId ? { ...o, kind } : o)) },
+    w.wall_id !== found.wall.wall_id
+      ? w
+      : {
+          ...w,
+          openings: w.openings.map((o) =>
+            o.opening_id === openingId ? { ...o, kind, swing: kind === 'door' ? (o.swing ?? standardSwing(r)) : null } : o,
+          ),
+        },
   );
   return ok(withRoom(draft, env, `Changed a ${found.opening.kind} to a ${kind}`, { ...r, walls }));
+}
+
+/**
+ * Door handing in the usual US terms (owner, 2026-11-05; researched: archtoolbox, Allegion):
+ * stand outside the door, facing it. Hinges on your left = left hand, on your right = right
+ * hand. "Out" = swings towards you (out of the room), which the trade calls "reverse".
+ * The saved swing is relative to the wall (see Core's SwingSchema); this converts both ways.
+ */
+export function doorHanding(r: Room, swing: Swing): { hand: 'left' | 'right'; swings: 'in' | 'out' } {
+  const inside = insideSide(r);
+  // Facing the door from outside, your left points to the wall's start when the inside is
+  // the wall's left, and to its end when the inside is the wall's right.
+  const hand = (inside === 'left') === (swing.hinge === 'start') ? 'left' : 'right';
+  return { hand, swings: swing.opens === inside ? 'in' : 'out' };
+}
+
+export function swingFromHanding(r: Room, hand: 'left' | 'right', swings: 'in' | 'out'): Swing {
+  const inside = insideSide(r);
+  const hingeAtStart = (hand === 'left') === (inside === 'left');
+  return { hinge: hingeAtStart ? 'start' : 'end', opens: swings === 'in' ? inside : otherSide(inside) };
+}
+
+/** Sets which end a door is hinged at, and which way it swings. */
+export function setDoorSwing(draft: Draft, env: Env, openingId: string, swing: Swing): Result<Change> {
+  const r = room(draft);
+  const found = findOpening(r, openingId);
+  if (!found) return refuse('That opening no longer exists.');
+  if (found.opening.kind !== 'door') return refuse('Only doors swing.');
+  const inside = insideSide(r);
+  const walls = r.walls.map((w) =>
+    w.wall_id !== found.wall.wall_id ? w : { ...w, openings: w.openings.map((o) => (o.opening_id === openingId ? { ...o, swing } : o)) },
+  );
+  return ok(
+    withRoom(draft, env, `Set a door to swing ${swing.opens === inside ? 'in' : 'out'}, hinged at its ${swing.hinge === 'start' ? 'start' : 'end'} side`, { ...r, walls }),
+  );
 }
 
 export function deleteOpening(draft: Draft, env: Env, openingId: string): Result<Change> {

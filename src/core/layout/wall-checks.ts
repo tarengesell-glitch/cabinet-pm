@@ -5,6 +5,7 @@
 import type { Check, Issue } from '../checks';
 import { compareToDistance, describeDistance, distanceForDisplay, samePoint, segmentsCross } from '../geometry';
 import type { Job, Obstacle, Opening, Room, Wall } from '../schema/master-copy';
+import { wallLetter } from '../labels';
 import { formatInches } from '../units';
 
 const KIND_LABEL: Record<Opening['kind'], string> = {
@@ -13,7 +14,7 @@ const KIND_LABEL: Record<Opening['kind'], string> = {
   passthrough: 'Passthrough',
 };
 
-const wallName = (room: Room, w: number) => `wall ${w + 1} in "${room.name}"`;
+const wallName = (room: Room, w: number) => `wall ${wallLetter(w)} in "${room.name}"`;
 const openingName = (o: Opening, i: number, room: Room, w: number) =>
   `${KIND_LABEL[o.kind]} ${i + 1} on ${wallName(room, w)}`;
 const obstacleName = (o: Obstacle, i: number, room: Room, w: number) =>
@@ -148,7 +149,7 @@ export const wallsCross: Check = {
             issues.push({
               check_id: this.id,
               severity: 'block',
-              message: `Wall ${i + 1} and wall ${j + 1} in "${room.name}" cross each other.`,
+              message: `Wall ${wallLetter(i)} and wall ${wallLetter(j)} in "${room.name}" cross each other.`,
               ref: { kind: 'wall', id: b.wall_id },
             });
           }

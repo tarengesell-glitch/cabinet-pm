@@ -20,6 +20,7 @@ import {
   loadJob,
   moveCorner,
   moveOpening,
+  resizeOpening,
   resizeWall,
   slideWall,
   placeOpening,
@@ -27,6 +28,8 @@ import {
   renameRoom,
   room as roomOf,
   setOpeningKind,
+  setDoorSwing,
+  swingFromHanding,
   setProvenance,
   setSize,
   startRoom,
@@ -310,7 +313,18 @@ export function RoomCapture({ user }: { user: User }) {
                 issues={issues}
                 canEdit={canEdit}
                 onSelect={setSelection}
-                onAddWall={(a, b) => {
+                onAddWallTyped={(from, length, angle) => {
+                  if (!draft) return null;
+                  const r = apply(addWallByLength(draft, env, length, angle, from));
+                  if (!r.ok) {
+                    setMessage({ kind: 'error', text: r.reason });
+                    return null;
+                  }
+                  const walls = roomOf(r.value.draft).walls;
+                  return walls[walls.length - 1]?.end_point ?? null;
+                }}
+                onDrawError={(reason) => setMessage({ kind: 'error', text: reason })}
+                                onAddWall={(a, b) => {
                   if (!draft) return;
                   const r = apply(addWall(draft, env, a, b));
                   if (!r.ok) setMessage({ kind: 'error', text: r.reason });
@@ -319,11 +333,8 @@ export function RoomCapture({ user }: { user: User }) {
                   if (!draft || tool === 'select' || tool === 'draw') return;
                   dropOpening(wallId, tool, centre);
                 }}
-                onMoveOpening={(openingId, offset) => {
-                  if (!draft) return;
-                  const r = apply(moveOpening(draft, env, openingId, offset));
-                  if (!r.ok) setMessage({ kind: 'error', text: r.reason });
-                }}
+                onOpeningMove={(openingId, wallId, offset, done) => handleDrag(moveOpening(draft!, env, openingId, offset, wallId), done)}
+                onOpeningResize={(openingId, offset, width, done) => handleDrag(resizeOpening(draft!, env, openingId, offset, width), done)}
                 chainStart={chainStart}
                 onChainStart={setChainStart}
               />
@@ -372,6 +383,7 @@ export function RoomCapture({ user }: { user: User }) {
                   canEdit={canEdit}
                   onSelect={setSelection}
                   onKind={(k) => apply(setOpeningKind(draft, env, selectedOpening.opening.opening_id, k))}
+                  onHanding={(hand, swings) => apply(setDoorSwing(draft, env, selectedOpening.opening.opening_id, swingFromHanding(room, hand, swings)))}
                   onSize={(field, v) => apply(setSize(draft, env, { kind: 'opening', id: selectedOpening.opening.opening_id, field }, v))}
                   onProvenance={(field, p) => apply(setProvenance(draft, env, { kind: 'opening', id: selectedOpening.opening.opening_id, field }, p))}
                   onDelete={() => {

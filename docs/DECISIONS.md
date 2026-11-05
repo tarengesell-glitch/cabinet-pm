@@ -88,6 +88,20 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
   - **Less is more** (standing rule, recorded at the top of `docs/ux/UX_BRIEF.md`): always reduce clutter, and never add information "just in case". So the ?, ✎ and ✓ markers were removed from wall labels and status tags; the plan shows status by colour and the panel in words. No key or legend was added.
   - **Lengths are shown in inches and fractions of an inch only**, for example `68 11/16"`, never feet. Approximate lengths (slanted walls) are rounded to the nearest 1/16" and marked ≈. Feet are still accepted when typing.
   - **Changing a wall's length never changes the angle of the walls joined to it.** Dragging an end handle (or typing a length) moves that end along the wall's own line. The wall joined at that end moves across with it, keeping its angle and length, and the next wall stretches. Doors and windows stay where they are in the room, and a change that would cut through one is refused. Holding Option/Alt while dragging an end still moves the corner freely, to make an angled wall.
+- **Room drawing feedback, round 5 (owner, 2026-11-05), checked against industry practice.** The review is in `docs/ux/INDUSTRY_REVIEW.md`, with its own owner questions. Standing rule: research the common apps before building any drawing or navigation behaviour.
+  - **Navigation:**
+    - The mouse wheel zooms at the cursor.
+    - On a trackpad, two fingers move the plan and pinch zooms.
+    - Ctrl/Cmd + scroll zooms.
+    - Middle-button drag and Space + drag pan.
+    - Fit: double-click the middle button, Shift+1, or the Fit button.
+  - **Box select works like AutoCAD:** dragging left to right picks only walls fully inside the box; right to left picks anything it touches.
+  - **Drawing walls:** while drawing, type a length and press Enter (Cabinet Vision, Mozaik). Right-click or Esc finishes.
+  - **Walls are lettered A, B, C … in circles**, in drawing order. This is the kitchen-drawing convention, and it replaces the numbers everywhere, including check messages.
+  - **Doors record their hinge end and swing side** (Core `SwingSchema`). They are shown and set as Left hand / Right hand and Swings in / out, judged from outside the door per the US handing convention.
+    - The standard for a new door (hinged at its start side, swinging into the room) is PROPOSED in `standard-sizes.json`; the owner has not chosen it.
+    - Doors saved earlier keep the swing they were drawn with.
+  - **Doors and windows can be dragged along a wall or onto another wall**, and resized from end handles. A dragged position or size becomes rough.
 - Room capture is pulled ahead of Phase 5 (BUILD_PLAN). Order: scaffold (1a), then Core walls and openings, then the Designer drawing screen.
 
 ### 2026-11-05: Where the work lives and deploys

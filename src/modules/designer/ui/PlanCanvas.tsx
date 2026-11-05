@@ -77,6 +77,9 @@ const FOOT = 12 * INCH;
 const ANGLE_STEP = 4500;
 const SNAP_PX = 14;
 const PAD_PX = 56;
+/** Edge scrolling: within this many pixels of the plan's edge, scroll up to this many pixels a frame. */
+const EDGE_PX = 40;
+const EDGE_SPEED = 12;
 /** A door or window ghost snaps to a wall within this many pixels of the cursor. */
 const GHOST_PX = 40;
 /** How far you can zoom out from / in to the fitted view. */
@@ -280,6 +283,39 @@ export function PlanCanvas(props: Props) {
   const [panning, setPanning] = useState<V | null>(null);
   const viewRef = useRef(view);
   viewRef.current = view;
+
+  // Edge scrolling (AutoCAD, SketchUp, Figma): while drawing walls or dragging a handle, a
+  // cursor near the plan's edge scrolls the plan that way; faster the closer it is.
+  const lastPointer = useRef<V | null>(null);
+  const autoPanTick = useRef<() => void>(() => undefined);
+  autoPanTick.current = () => {
+    const p = lastPointer.current;
+    if (!p) return;
+    const speed = (pos: number, extent: number) =>
+      pos < EDGE_PX ? -((EDGE_PX - pos) / EDGE_PX) * EDGE_SPEED : pos > extent - EDGE_PX ? ((pos - (extent - EDGE_PX)) / EDGE_PX) * EDGE_SPEED : 0;
+    const sx = speed(p.x, size.width);
+    const sy = speed(p.y, size.height);
+    if (sx === 0 && sy === 0) return;
+    const v = viewRef.current;
+    const next = { ...v, ox: v.ox - sx, oy: v.oy - sy };
+    viewRef.current = next;
+    setManual(next);
+    // The room point under the (still) cursor has changed: keep the preview or drag on it.
+    const at = { x: Math.round(next.minX + (p.x - next.ox) / next.scale), y: Math.round(next.maxY - (p.y - next.oy) / next.scale) };
+    setHover(at);
+    if (drag.current?.moved) dragToRef.current(at, false);
+  };
+  const edgeScrolling = chainStart !== null || dragging;
+  useEffect(() => {
+    if (!edgeScrolling) return;
+    let frame = 0;
+    const loop = () => {
+      autoPanTick.current();
+      frame = requestAnimationFrame(loop);
+    };
+    frame = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(frame);
+  }, [edgeScrolling]);
   useEffect(() => {
     const typing = (t: EventTarget | null) => t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement;
     const down = (e: KeyboardEvent) => {
@@ -469,6 +505,9 @@ export function PlanCanvas(props: Props) {
       setDragging(false);
     }
   };
+  /** For edge scrolling, which runs between renders: always the latest dragTo. */
+  const dragToRef = useRef(dragTo);
+  dragToRef.current = dragTo;
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -623,6 +662,7 @@ export function PlanCanvas(props: Props) {
         onPointerMove={(e) => {
           const at = pointer(e);
           setHover(at);
+          lastPointer.current = e.target.getStage()?.getPointerPosition() ?? null;
           if (drag.current && at) {
             const pos = e.target.getStage()?.getPointerPosition();
             if (!drag.current.moved && pos && Math.hypot(pos.x - drag.current.at.x, pos.y - drag.current.at.y) <= DRAG_PX) return;
@@ -653,6 +693,7 @@ export function PlanCanvas(props: Props) {
         }}
         onPointerLeave={() => {
           setHover(null);
+          lastPointer.current = null;
           if (drag.current) {
             drag.current = null;
             setDragging(false);

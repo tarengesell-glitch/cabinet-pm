@@ -27,6 +27,7 @@ The owner asked for every drawing and navigation decision to be checked against 
 | 18 | Doors and windows move along their wall only | Mozaik and IKEA: move to another wall | **Changed**: drag onto any wall, plus end handles to resize |
 | 19 | Undo/Redo (Cmd+Z / Shift+Cmd+Z), Delete, Esc | Standard | **Kept** |
 | 20 | Snapping to whole inches, 45° and corners while drawing | AutoCAD's polar tracking and object snaps work the same way | **Kept**, and extended (2026-11-05): new walls also snap onto any point along an existing wall, like AutoCAD's "nearest" snap |
+| 22 | Drawing or dragging to the edge of the view | CAD and design apps scroll the view when the cursor nears the edge during a draw or drag (AutoCAD, SketchUp, Figma) | **Added** (owner asked): edge scrolling while drawing walls or dragging handles |
 | 21 | Islands and peninsulas | Cabinet Vision uses a "peninsula wall": an invisible wall that works as a wall but is drawn as a line (via closet-builder A-21) | **Added**: the "Floating wall" tool, drawn as a dashed line |
 
 ## Questions for the owner

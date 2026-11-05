@@ -583,3 +583,38 @@ test('a floating wall for an island or peninsula: a line, no thickness, no doors
   await page.getByRole('group', { name: 'Wall kind' }).getByRole('button', { name: 'Floating wall' }).click();
   await expect(page.getByText(/Move or delete the doors and windows on wall A first/)).toBeVisible();
 });
+
+test('drawing near the edge scrolls the plan that way', async ({ page }) => {
+  await page.goto('/rooms/preview');
+  await page.getByRole('button', { name: /Example kitchen/ }).click();
+  const box = (await page.getByTestId('plan').boundingBox())!;
+  await page.getByRole('button', { name: 'Draw walls' }).click();
+  const b = await centreOf(page, '.wall-2'); // the right wall
+  await page.mouse.click(b.x, b.y); // start on wall B
+  const before = (await konvaRect(page, '.wall-2'))!.x;
+  // Park the cursor near the right edge of the plan: the plan scrolls left, showing more to the right.
+  await page.mouse.move(box.x + box.width - 8, b.y, { steps: 5 });
+  await expect.poll(async () => (await konvaRect(page, '.wall-2'))!.x, { timeout: 3000 }).toBeLessThan(before - 80);
+  // Move back in: it stops.
+  await page.mouse.move(box.x + box.width / 2, b.y);
+  const stopped = (await konvaRect(page, '.wall-2'))!.x;
+  await page.waitForTimeout(300);
+  expect(Math.abs((await konvaRect(page, '.wall-2'))!.x - stopped)).toBeLessThan(2);
+  await page.keyboard.press('Escape');
+});
+
+test('dragging a wall handle near the edge keeps going as the plan scrolls', async ({ page }) => {
+  await page.goto('/rooms/preview');
+  await page.getByRole('button', { name: /Example kitchen/ }).click();
+  const box = (await page.getByTestId('plan').boundingBox())!;
+  await wallButtons(page).first().click(); // wall A, 144"
+  const end = await centreOf(page, '.handle-end');
+  await page.mouse.move(end.x, end.y);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width - 6, end.y, { steps: 6 });
+  await page.waitForTimeout(800); // held at the edge
+  await page.mouse.up();
+  const length = await page.getByTestId('value-Length').textContent();
+  // Without scrolling, reaching the edge would give about 220"; held there, it keeps growing.
+  expect(Number(length!.replace(/[^0-9]/g, ''))).toBeGreaterThan(260);
+});

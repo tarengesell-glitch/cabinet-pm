@@ -8,6 +8,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Arc, Circle, Group, Layer, Line, Rect, Stage, Text } from 'react-konva';
 import type Konva from 'konva';
 import {
+  directionOf,
   distanceForDisplay,
   formatInches,
   pointFromLengthAndAngle,
@@ -30,7 +31,8 @@ import { parseSize } from './parseSize';
 import type { TypedSize } from '../model/editor';
 import { STANDARD_SIZES } from '../model/standard-sizes';
 
-export type Tool = 'select' | 'draw' | Opening['kind'];
+/** 'floating' draws a floating wall (island / peninsula), one segment at a time. */
+export type Tool = 'select' | 'draw' | 'floating' | Opening['kind'];
 export type Selection =
   | { kind: 'wall'; id: string }
   | { kind: 'walls'; ids: readonly string[] }
@@ -83,6 +85,8 @@ const MAX_ZOOM = 12;
 const GHOST = '#176b70';
 /** Dimension lines: thin and quieter than walls, as in drafting. */
 const DIM = '#5b6670';
+/** A floating wall (island / peninsula): a thin dashed line, no thickness, no status colour. */
+const FLOATING = '#5b6670';
 const MUTED = '#687582';
 
 /**
@@ -196,7 +200,10 @@ export function PlanCanvas(props: Props) {
   const holdStill = chainStart !== null || dragging;
   const frozenView = useRef<View | null>(null);
   const fitted = useMemo(() => fitView(corners, size), [corners, size]);
-  if (!holdStill || frozenView.current === null || frozenView.current.size !== size) frozenView.current = fitted;
+  // If the plan's area changes size mid-drawing, keep the drawing where it is (only the
+  // size changes); re-fitting would move every corner under the cursor.
+  if (!holdStill || frozenView.current === null) frozenView.current = fitted;
+  else if (frozenView.current.size !== size) frozenView.current = { ...frozenView.current, size };
   // Once the person zooms or scrolls, their view stays until they press "Fit".
   const [manual, setManual] = useState<View | null>(null);
   const view = manual ?? (holdStill ? frozenView.current : fitted);
@@ -240,7 +247,7 @@ export function PlanCanvas(props: Props) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const { typed: t, chainStart: start, hover: at, tool: tl } = typedRef.current;
-      if (tl !== 'draw' || !start) return;
+      if ((tl !== 'draw' && tl !== 'floating') || !start) return;
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || e.metaKey || e.ctrlKey) return;
       if (/^[0-9'"./ \-m]$/i.test(e.key) && !(e.key === ' ' && t === '')) {
         e.preventDefault();
@@ -260,7 +267,7 @@ export function PlanCanvas(props: Props) {
         if (corner) {
           setTyped('');
           const first = firstOfChain.current;
-          props.onChainStart(first && samePoint(first, corner) ? null : corner);
+          props.onChainStart(tl === 'floating' || (first && samePoint(first, corner)) ? null : corner);
         }
       }
     };
@@ -318,10 +325,29 @@ export function PlanCanvas(props: Props) {
   });
 
   /** Where the next corner would go: 45° steps and whole inches, unless an existing corner is close. */
+  /** The point on an existing wall nearest `p`, to the inch along it, if within `tolerance`. */
+  const onAWall = (p: Point, tolerance: number): Point | null => {
+    const hit = nearestWall(room, p, tolerance);
+    if (!hit) return null;
+    const w = hit.wall;
+    const len = distanceForDisplay(w.start_point, w.end_point).value;
+    const along = Math.min(len, Math.max(0, roundToInch(hit.offset)));
+    if (along === 0) return w.start_point;
+    const placed = pointFromLengthAndAngle(w.start_point, along, directionOf(w.end_point.x - w.start_point.x, w.end_point.y - w.start_point.y));
+    return placed.ok ? placed.value.point : null;
+  };
+
+  /**
+   * Where the next corner would go, like CAD object snaps: an existing corner if close; else a
+   * point on an existing wall if close (so a wall can start or end anywhere along another);
+   * else 45° steps and whole inches.
+   */
   const snapNext = (raw: Point): Point => {
     const tolerance = Math.round(SNAP_PX / view.scale);
     const corner = snapToPoints(raw, corners, tolerance);
     if (corner.snapped) return corner.point;
+    const wallPoint = onAWall(raw, tolerance);
+    if (wallPoint && !(chainStart && samePoint(wallPoint, chainStart))) return wallPoint;
     if (!chainStart) {
       const g = snapToGrid(raw, INCH);
       return g.ok ? g.value : raw;
@@ -341,8 +367,9 @@ export function PlanCanvas(props: Props) {
 
   /** For the door / window / passthrough tools: the wall the ghost snaps to, and where it would land. */
   const openingTarget = (p: Point) => {
-    if (tool === 'select' || tool === 'draw') return null;
-    const hit = nearestWall(room, p, GHOST_PX / view.scale);
+    if (tool === 'select' || tool === 'draw' || tool === 'floating') return null;
+    // Doors and windows go only on room walls, never on floating ones.
+    const hit = nearestWall({ ...room, walls: room.walls.filter((w) => w.kind === 'room') }, p, GHOST_PX / view.scale);
     if (!hit) return null;
     return { wall: hit.wall, centre: hit.offset, offset: standardOpeningOffset(hit.wall, tool, hit.offset) };
   };
@@ -497,7 +524,7 @@ export function PlanCanvas(props: Props) {
       return;
     }
     if (!canEdit) return;
-    if (tool === 'draw') {
+    if (tool === 'draw' || tool === 'floating') {
       const next = snapNext(p);
       if (!chainStart) {
         firstOfChain.current = next;
@@ -507,7 +534,8 @@ export function PlanCanvas(props: Props) {
       if (next.x === chainStart.x && next.y === chainStart.y) return;
       props.onAddWall(chainStart, next);
       const first = firstOfChain.current;
-      props.onChainStart(first && first.x === next.x && first.y === next.y ? null : next);
+      // A floating wall is one line: it ends after one segment.
+      props.onChainStart(tool === 'floating' || (first && first.x === next.x && first.y === next.y) ? null : next);
       return;
     }
     const target = openingTarget(p);
@@ -517,7 +545,7 @@ export function PlanCanvas(props: Props) {
   // Which side of the walls is outside depends on which way the room was drawn.
   const outside = useMemo(() => outsideSign(room.walls), [room.walls]);
   const issueIds = useMemo(() => new Set(issues.filter((i) => i.severity === 'block').map((i) => i.ref.id)), [issues]);
-  const preview = tool === 'draw' && chainStart && hover ? snapNext(hover) : null;
+  const preview = (tool === 'draw' || tool === 'floating') && chainStart && hover ? snapNext(hover) : null;
 
   // Grid every foot, over whatever part of the room is on screen.
   const gridLines = [];
@@ -537,7 +565,7 @@ export function PlanCanvas(props: Props) {
   }
 
   // Door / window / passthrough tools: a ghost follows the cursor and snaps onto walls.
-  const placing = tool !== 'select' && tool !== 'draw' ? tool : null;
+  const placing = tool !== 'select' && tool !== 'draw' && tool !== 'floating' ? tool : null;
   const ghost = placing && hover ? openingTarget(hover) : null;
   const cursor = panning
     ? 'grabbing'
@@ -821,7 +849,8 @@ function PreviewWall({ start, end, toScreen, typed }: { start: Point; end: Point
  * worked out from the area the corners enclose (shoelace). Labels go on the outside and
  * doors swing to the inside. Display only.
  */
-function outsideSign(walls: readonly Wall[]): 1 | -1 {
+function outsideSign(all: readonly Wall[]): 1 | -1 {
+  const walls = all.filter((w) => w.kind !== 'floating'); // islands and peninsulas aren't the outline
   let twiceArea = 0;
   for (const w of walls) twiceArea += w.start_point.x * w.end_point.y - w.end_point.x * w.start_point.y;
   // An open chain: close it from the last corner back to the first.
@@ -833,11 +862,13 @@ function outsideSign(walls: readonly Wall[]): 1 | -1 {
 
 /** For a wall, the one other wall meeting it at its start and at its end (null if none, or several). */
 function neighboursOf(walls: readonly Wall[], wall: Wall): { start: Point | null; end: Point | null } {
-  // Mitre a corner only when exactly two walls meet there; three or more get square ends.
+  // Mitre a corner only when exactly two room walls meet there; three or more get square ends.
+  // Floating walls are lines, never mitred, and don't count.
+  if (wall.kind === 'floating') return { start: null, end: null };
   const otherEnd = (corner: Point): Point | null => {
     const found: Point[] = [];
     for (const w of walls) {
-      if (w.wall_id === wall.wall_id) continue;
+      if (w.wall_id === wall.wall_id || w.kind === 'floating') continue;
       if (samePoint(w.start_point, corner)) found.push(w.end_point);
       else if (samePoint(w.end_point, corner)) found.push(w.start_point);
     }
@@ -907,11 +938,16 @@ function WallShape(props: WallShapeProps) {
   const nx = -uy * outside;
   const ny = ux * outside;
   const n = { x: nx, y: ny };
-  const width = Math.max(5, wall.thickness.value * scale);
+  // A floating wall is a line with no thickness (owner, closet-builder A-21).
+  const floating = wall.kind === 'floating';
+  const width = floating ? 0 : Math.max(5, (wall.thickness?.value ?? 0) * scale);
   const h = width / 2;
   const startC = cornerPoints(a, { x: ux, y: uy }, neighbours.start ? unit(sub(toScreen(neighbours.start), a)) : null, n, h);
   const endC = cornerPoints(b, { x: -ux, y: -uy }, neighbours.end ? unit(sub(toScreen(neighbours.end), b)) : null, n, h);
   const outline = [startC.plus, endC.plus, endC.minus, startC.minus].flatMap((p) => [p.x, p.y]);
+  const line = [a.x, a.y, b.x, b.y];
+  // Labels: the wall's state colour; a floating wall has no state, so it stays neutral.
+  const ink = floating ? FLOATING : TEXT[wall.length_provenance];
 
   const fill = FILL[wall.length_provenance];
   const length = distanceForDisplay(wall.start_point, wall.end_point);
@@ -940,16 +976,15 @@ function WallShape(props: WallShapeProps) {
   return (
     <Group>
       {issueIds.has(wall.wall_id) && (
-        <Line points={outline} closed stroke={DANGER} strokeWidth={2} dash={[6, 4]} listening={false} name="issue-outline" />
+        <Line points={floating ? line : outline} closed={!floating} stroke={DANGER} strokeWidth={floating ? 6 : 2} opacity={floating ? 0.5 : 1} dash={[6, 4]} listening={false} name="issue-outline" />
       )}
-      {selected && <Line points={outline} closed stroke={ACCENT} strokeWidth={8} opacity={0.4} listening={false} />}
+      {selected && <Line points={floating ? line : outline} closed={!floating} stroke={ACCENT} strokeWidth={8} opacity={0.4} listening={false} />}
       <Line
-        points={outline}
-        closed
-        fill={fill}
-        stroke={fill}
-        strokeWidth={0.5}
-        hitStrokeWidth={Math.max(0, 22 - width)}
+        points={floating ? line : outline}
+        closed={!floating}
+        {...(floating
+          ? { stroke: FLOATING, strokeWidth: 2, dash: [8, 5], hitStrokeWidth: 18 }
+          : { fill, stroke: fill, strokeWidth: 0.5, hitStrokeWidth: Math.max(0, 22 - width) })}
         onClick={(e) => {
           if (!selectable) return;
           e.cancelBubble = true;
@@ -967,7 +1002,7 @@ function WallShape(props: WallShapeProps) {
         y={mid.y + ny * labelOffset}
         text={label}
         fontSize={12}
-        fill={TEXT[wall.length_provenance]}
+        fill={ink}
         fontStyle="bold"
         rotation={upright}
         offsetX={label.length * 3.2}
@@ -1001,8 +1036,8 @@ function WallShape(props: WallShapeProps) {
         />
       ))}
       <Group x={mid.x - nx * (h + 16)} y={mid.y - ny * (h + 16)} listening={false} name={`wall-tag-${letter}`}>
-        <Circle radius={10} fill="#ffffff" stroke={TEXT[wall.length_provenance]} strokeWidth={1.5} />
-        <Text text={letter} fontSize={11} fontStyle="bold" fill={TEXT[wall.length_provenance]} width={20} height={20} offsetX={10} offsetY={10} align="center" verticalAlign="middle" />
+        <Circle radius={10} fill="#ffffff" stroke={ink} strokeWidth={1.5} />
+        <Text text={letter} fontSize={11} fontStyle="bold" fill={ink} width={20} height={20} offsetX={10} offsetY={10} align="center" verticalAlign="middle" />
       </Group>
       {wall.openings.map((o) => {
         const s = along(o.offset.value);
@@ -1146,7 +1181,7 @@ function GhostOpening(p: { kind: Opening['kind']; wall: Wall; offset: number; to
   const b = toScreen(wall.end_point);
   const u = unit(sub(b, a));
   const n = { x: -u.y * outside, y: u.x * outside };
-  const wallWidth = Math.max(5, wall.thickness.value * scale);
+  const wallWidth = Math.max(5, (wall.thickness?.value ?? 0) * scale);
   const h = wallWidth / 2;
   const std = STANDARD_SIZES.openings[kind];
   const at = (d: number) => ({ x: a.x + u.x * d * scale, y: a.y + u.y * d * scale });

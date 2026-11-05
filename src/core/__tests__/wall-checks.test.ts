@@ -139,6 +139,18 @@ describe('runChecks fails closed', () => {
 });
 
 describe('the master copy format is strict', () => {
+  it('a floating wall has no thickness and no openings; a room wall needs a thickness', () => {
+    const job = kitchen();
+    const w = room0(job).walls[1]!;
+    room0(job).walls[1] = { ...w, kind: 'floating', thickness: null };
+    expect(JobSchema.safeParse(job).success).toBe(true);
+    room0(job).walls[1] = { ...w, kind: 'room', thickness: null };
+    expect(JobSchema.safeParse(job).success).toBe(false);
+    const job2 = kitchen();
+    room0(job2).walls[0] = { ...room0(job2).walls[0]!, kind: 'floating', thickness: null }; // has a window
+    expect(JobSchema.safeParse(job2).success).toBe(false);
+  });
+
   it('needs a swing on every door, and none on windows', () => {
     const job = kitchen();
     const door = room0(job).walls[3]!.openings[0]!;

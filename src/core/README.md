@@ -36,7 +36,7 @@ Core never throws for bad input. Anything that can be refused returns `{ ok: tru
 Room shell only for now: Job, Room, Wall, Opening (window, door or passthrough) and Obstacle. PlacedItem and selections come in step 1b-items, which raises `SCHEMA_VERSION`. Version 0 is a draft and is not saved anywhere yet.
 - Every object is strict. An unknown or missing field is an error, never a default. "Not known" is an explicit `null`.
 - Each size is `Measured`: `{ value, provenance: 'unmeasured' | 'confirmed', source_mm }`. Two states (owner, 2026-11-05); typing a size never confirms it.
-- A wall is two corner points, plus:
+- A wall is a `room` wall or a `floating` wall (an invisible wall for an island or peninsula: no thickness, no openings; closet-builder A-21). It is two corner points, plus:
   - `entered_length` and `length_source_mm` when the corners were rounded (see above);
   - `length_provenance`;
   - a `Measured` thickness (no height of its own: walls are as high as the ceiling, owner 2026-11-05);

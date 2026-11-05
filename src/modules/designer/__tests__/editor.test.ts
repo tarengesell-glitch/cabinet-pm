@@ -8,6 +8,8 @@ import {
   deleteWall,
   deleteWalls,
   setWallsThickness,
+  setWallKind,
+  insideSide,
   loadJob,
   moveCorner,
   moveOpening,
@@ -334,6 +336,45 @@ describe('standard sizes (data/standard-sizes.json)', () => {
   });
 });
 
+describe('floating walls (islands and peninsulas)', () => {
+  it('are lines with no thickness, and do not change which side of the room is inside', () => {
+    const env = testEnv();
+    let d = rectangle(env);
+    const inside = insideSide(room(d));
+    // A peninsula sticking into the room from wall A, and a free-standing island line.
+    d = unwrap(addWall(d, env, { x: 6 * FT, y: 0 }, { x: 6 * FT, y: 4 * FT }, null, 'floating'));
+    d = unwrap(addWall(d, env, { x: 3 * FT, y: 6 * FT }, { x: 9 * FT, y: 6 * FT }, null, 'floating'));
+    const [peninsula, island] = room(d).walls.slice(4);
+    expect([peninsula!.kind, peninsula!.thickness, island!.thickness]).toEqual(['floating', null, null]);
+    expect(insideSide(room(d))).toBe(inside);
+    expect(JobSchema.safeParse(d.job).success).toBe(true);
+    expect(runChecks(WALL_CHECKS, d.job, {}).passed).toBe(true);
+  });
+
+  it('cannot hold doors or windows, or take a thickness', () => {
+    const env = testEnv();
+    let d = rectangle(env);
+    d = unwrap(addWall(d, env, { x: 3 * FT, y: 6 * FT }, { x: 9 * FT, y: 6 * FT }, null, 'floating'));
+    const island = room(d).walls[4]!.wall_id;
+    expect(placeOpening(d, env, island, 'window', null).ok).toBe(false);
+    expect(setSize(d, env, { kind: 'wall', id: island, field: 'thickness' }, size(4 * IN)).ok).toBe(false);
+  });
+
+  it('a wall can be switched between room and floating; not with doors or windows on it', () => {
+    const env = testEnv();
+    let d = rectangle(env);
+    const wallB = room(d).walls[1]!.wall_id;
+    d = unwrap(setWallKind(d, env, wallB, 'floating'));
+    expect(room(d).walls[1]!.thickness).toBeNull();
+    d = unwrap(setWallKind(d, env, wallB, 'room'));
+    expect(room(d).walls[1]!.thickness).toEqual(d.wallDefaults.thickness);
+    d = unwrap(placeOpening(d, env, wallB, 'window', null));
+    const r = setWallKind(d, env, wallB, 'floating');
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.reason).toMatch(/Move or delete the doors and windows on wall B first/);
+  });
+});
+
 describe('two states: unmeasured and confirmed', () => {
   it('typing a size never confirms it; only Confirm does', () => {
     const env = testEnv();
@@ -341,9 +382,9 @@ describe('two states: unmeasured and confirmed', () => {
     const id = room(d).walls[0]!.wall_id;
     d = unwrap(setProvenance(d, env, { kind: 'wall', id, field: 'thickness' }, 'confirmed'));
     d = unwrap(setSize(d, env, { kind: 'wall', id, field: 'thickness' }, size(6 * IN)));
-    expect(room(d).walls[0]!.thickness.provenance).toBe('unmeasured');
+    expect(room(d).walls[0]!.thickness!.provenance).toBe('unmeasured');
     d = unwrap(setProvenance(d, env, { kind: 'wall', id, field: 'thickness' }, 'confirmed'));
-    expect(room(d).walls[0]!.thickness.provenance).toBe('confirmed');
+    expect(room(d).walls[0]!.thickness!.provenance).toBe('confirmed');
   });
 
   it('rooms saved with the old three tags convert: only "verified" was a confirmation', () => {
@@ -460,8 +501,8 @@ describe('several walls at once', () => {
     const d = rectangle(env);
     const ids = room(d).walls.slice(1, 3).map((w) => w.wall_id);
     const next = unwrap(setWallsThickness(d, env, ids, size(4 * IN)));
-    expect(room(next).walls.map((w) => w.thickness.value)).toEqual([5 * IN + 32, 4 * IN, 4 * IN, 5 * IN + 32]);
-    expect(room(next).walls[1]!.thickness.provenance).toBe('unmeasured');
+    expect(room(next).walls.map((w) => w.thickness!.value)).toEqual([5 * IN + 32, 4 * IN, 4 * IN, 5 * IN + 32]);
+    expect(room(next).walls[1]!.thickness!.provenance).toBe('unmeasured');
     expect(setWallsThickness(d, env, ids, size(0)).ok).toBe(false);
   });
 });

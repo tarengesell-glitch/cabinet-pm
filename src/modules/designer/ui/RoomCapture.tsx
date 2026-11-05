@@ -15,6 +15,7 @@ import {
   deleteWall,
   deleteWalls,
   setWallsThickness,
+  setWallKind,
   findOpening,
   loadJob,
   moveCorner,
@@ -48,6 +49,7 @@ import s from './RoomCapture.module.css';
 const TOOL_HINT: Record<Tool, string> = {
   select: 'Tap a wall, door or window to edit it.',
   draw: 'Tap corner to corner. Tap the first corner, or Finish, to stop.',
+  floating: 'Click where the island or peninsula wall starts, then where it ends.',
   door: 'Move onto a wall and click to place.',
   window: 'Move onto a wall and click to place.',
   passthrough: 'Move onto a wall and click to place.',
@@ -269,7 +271,7 @@ export function RoomCapture({ user }: { user: User }) {
       <div className={s.body}>
         <div className={s.planColumn}>
           <div className={s.toolbar} role="toolbar" aria-label="Tools">
-            {(['select', 'draw', 'door', 'window', 'passthrough'] as const).map((t) => (
+            {(['select', 'draw', 'floating', 'door', 'window', 'passthrough'] as const).map((t) => (
               <button
                 key={t}
                 className={tool === t ? s.buttonActive : s.button}
@@ -277,7 +279,7 @@ export function RoomCapture({ user }: { user: User }) {
                 aria-pressed={tool === t}
                 onClick={() => chooseTool(t)}
               >
-                {t === 'select' ? 'Select' : t === 'draw' ? 'Draw walls' : `Add ${KIND_LABEL[t].toLowerCase()}`}
+                {t === 'select' ? 'Select' : t === 'draw' ? 'Draw walls' : t === 'floating' ? 'Floating wall' : `Add ${KIND_LABEL[t].toLowerCase()}`}
               </button>
             ))}
             {chainStart && (
@@ -314,7 +316,7 @@ export function RoomCapture({ user }: { user: User }) {
                 onSelect={setSelection}
                 onAddWallTyped={(from, length, angle) => {
                   if (!draft) return null;
-                  const r = apply(addWallByLength(draft, env, length, angle, from));
+                  const r = apply(addWallByLength(draft, env, length, angle, from, tool === 'floating' ? 'floating' : 'room'));
                   if (!r.ok) {
                     setMessage({ kind: 'error', text: r.reason });
                     return null;
@@ -326,11 +328,11 @@ export function RoomCapture({ user }: { user: User }) {
                 onWallLengthTyped={(wallId, length) => apply(setSize(draft!, env, { kind: 'wall', id: wallId, field: 'length' }, length))}
                                 onAddWall={(a, b) => {
                   if (!draft) return;
-                  const r = apply(addWall(draft, env, a, b));
+                  const r = apply(addWall(draft, env, a, b, null, tool === 'floating' ? 'floating' : 'room'));
                   if (!r.ok) setMessage({ kind: 'error', text: r.reason });
                 }}
                 onPickWallForOpening={(wallId, centre) => {
-                  if (!draft || tool === 'select' || tool === 'draw') return;
+                  if (!draft || tool === 'select' || tool === 'draw' || tool === 'floating') return;
                   dropOpening(wallId, tool, centre);
                 }}
                 onOpeningMove={(openingId, wallId, offset, done) => handleDrag(moveOpening(draft!, env, openingId, offset, wallId), done)}
@@ -367,6 +369,7 @@ export function RoomCapture({ user }: { user: User }) {
                   onSize={(field, v) => apply(setSize(draft, env, { kind: 'wall', id: selectedWall.wall_id, field }, v))}
                   onProvenance={(field, p) => apply(setProvenance(draft, env, { kind: 'wall', id: selectedWall.wall_id, field }, p))}
                   onAddOpening={(kind) => dropOpening(selectedWall.wall_id, kind, null)}
+                  onKind={(kind) => apply(setWallKind(draft, env, selectedWall.wall_id, kind))}
                   onDelete={() => {
                     const r = apply(deleteWall(draft, env, selectedWall.wall_id));
                     if (r.ok) setSelection(null);

@@ -14,6 +14,8 @@ Open it at `/rooms/preview` (`npm run dev`, then http://localhost:3000/rooms/pre
 - **Walls:**
   - Draw them on the plan: tap corner to corner, or point the way, type a length and press Enter. Corners snap to existing corners, whole inches and 45°, and the view stays still while drawing.
   - Corners are drawn joined (mitred). Labels go outside and doors swing inside, whichever way the room was drawn.
+- **Floating walls (islands and peninsulas):** the "Floating wall" tool draws one line (click start, then end, or type a length). It is shown dashed, with no thickness, no doors or windows, and no unmeasured/confirmed colour. A selected wall can be switched between Room wall and Floating wall.
+- **Snapping while drawing:** onto an existing corner, else onto any point along an existing wall, else 45° and whole inches.
 - **Wall handles:** select a wall to see a handle at each end and one in the middle.
   - Drag an end to change the wall's length along its own line. The wall joined at that end moves across with it, keeping its angle and length, and the next wall stretches. Doors and windows stay where they are in the room.
   - Hold Option/Alt while dragging an end to move the corner freely (for angled walls).

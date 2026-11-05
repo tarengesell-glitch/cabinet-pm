@@ -459,3 +459,28 @@ test('while drawing walls, type a length and press Enter', async ({ page }) => {
   await page.getByRole('button', { name: 'Select' }).click();
   await expect(page.getByRole('button', { name: /^Wall A: 100 1\/2"/ })).toBeVisible();
 });
+
+test('click a wall length on the plan and type a new one', async ({ page }) => {
+  await page.goto('/rooms/preview');
+  await page.getByRole('button', { name: /Example kitchen/ }).click();
+  await page.mouse.click(...Object.values(await centreOf(page, '.wall-length-1')) as [number, number]);
+  const box = page.getByRole('textbox', { name: 'Wall length' });
+  await expect(box).toHaveValue('144"');
+  // Not exact: refused, with the reason, and nothing changes.
+  await box.fill('1/3');
+  await box.press('Enter');
+  await expect(page.getByRole('alert').filter({ hasText: /1\/64/ })).toBeVisible();
+  // A good length: wall A becomes 150"; wall B moves across, keeping its angle.
+  await box.fill('150');
+  await box.press('Enter');
+  await expect(box).toHaveCount(0);
+  await expect(page.getByTestId('value-Length')).toHaveText('150"');
+  await page.getByRole('button', { name: '← Room' }).click();
+  await expect(page.getByRole('button', { name: /^Wall B: 120"/ })).toBeVisible();
+  // Escape leaves the length as it was.
+  await page.mouse.click(...Object.values(await centreOf(page, '.wall-length-1')) as [number, number]);
+  await page.getByRole('textbox', { name: 'Wall length' }).fill('99');
+  await page.getByRole('textbox', { name: 'Wall length' }).press('Escape');
+  await page.getByRole('button', { name: '← Room' }).click();
+  await expect(page.getByRole('button', { name: /^Wall A: 150"/ })).toBeVisible();
+});

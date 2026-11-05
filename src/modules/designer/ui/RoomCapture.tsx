@@ -324,6 +324,7 @@ export function RoomCapture({ user }: { user: User }) {
                   return walls[walls.length - 1]?.end_point ?? null;
                 }}
                 onDrawError={(reason) => setMessage({ kind: 'error', text: reason })}
+                onWallLengthTyped={(wallId, length) => apply(setSize(draft!, env, { kind: 'wall', id: wallId, field: 'length' }, length))}
                                 onAddWall={(a, b) => {
                   if (!draft) return;
                   const r = apply(addWall(draft, env, a, b));

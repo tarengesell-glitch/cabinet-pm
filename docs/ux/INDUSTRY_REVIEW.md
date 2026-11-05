@@ -26,7 +26,8 @@ The owner asked for every drawing and navigation decision to be checked against 
 | 17 | Doors and windows: pick the tool, a ghost snaps to walls, click to place | 2020 Fusion, Cyncly, Sweet Home 3D, IKEA: drag from a catalogue onto a wall. Cyncly also lets you type the offset from the wall's left, centre or right | **Close enough**: click-to-place keeps the screen uncluttered. Measuring from left, centre or right is a possible later addition |
 | 18 | Doors and windows move along their wall only | Mozaik and IKEA: move to another wall | **Changed**: drag onto any wall, plus end handles to resize |
 | 19 | Undo/Redo (Cmd+Z / Shift+Cmd+Z), Delete, Esc | Standard | **Kept** |
-| 20 | Snapping to whole inches, 45° and corners while drawing | AutoCAD's polar tracking and object snaps work the same way | **Kept** |
+| 20 | Snapping to whole inches, 45° and corners while drawing | AutoCAD's polar tracking and object snaps work the same way | **Kept**, and extended (2026-11-05): new walls also snap onto any point along an existing wall, like AutoCAD's "nearest" snap |
+| 21 | Islands and peninsulas | Cabinet Vision uses a "peninsula wall": an invisible wall that works as a wall but is drawn as a line (via closet-builder A-21) | **Added**: the "Floating wall" tool, drawn as a dashed line |
 
 ## Questions for the owner
 1. ~~**The "Type the next wall" card.**~~ Answered: removed. It was added without being asked for.

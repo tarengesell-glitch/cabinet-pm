@@ -532,3 +532,54 @@ test('a wall with a window shows the measurements to and across it, plus the ove
   // A wall with no openings shows only its overall length.
   expect(await text('.wall-2-segment-1-text')).toBeNull();
 });
+
+test('drawing more walls later: the plan holds still and walls start where you click', async ({ page }) => {
+  await page.goto('/rooms/preview');
+  await page.getByRole('button', { name: /Example kitchen/ }).click();
+  await page.getByRole('button', { name: 'Draw walls' }).click();
+  const before = (await page.getByTestId('plan').boundingBox())!;
+  const c = await centreOf(page, '.wall-3'); // the top wall
+  await page.mouse.click(c.x + 40, c.y + 60); // inside the room, away from walls
+  const after = (await page.getByTestId('plan').boundingBox())!;
+  expect(after.y).toBe(before.y); // the toolbar didn't grow and push the plan down
+  const start = await centreOf(page, '.chain-start');
+  expect(Math.abs(start.y - (c.y + 60))).toBeLessThanOrEqual(3); // within an inch of the click
+  expect(Math.abs(start.x - (c.x + 40))).toBeLessThanOrEqual(3);
+});
+
+test('a new wall snaps onto the middle of an existing wall', async ({ page }) => {
+  await page.goto('/rooms/preview');
+  await page.getByRole('button', { name: /Example kitchen/ }).click();
+  await page.getByRole('button', { name: 'Draw walls' }).click();
+  const c = await centreOf(page, '.wall-3');
+  await page.mouse.click(c.x + 40, c.y + 8); // 8 px off wall C
+  const start = await centreOf(page, '.chain-start');
+  expect(Math.abs(start.y - c.y)).toBeLessThanOrEqual(1); // on the wall
+  await page.mouse.click(c.x + 40, c.y + 150);
+  await page.keyboard.press('Escape');
+  await page.getByRole('button', { name: 'Select' }).click();
+  await expect(wallButtons(page)).toHaveCount(5);
+  await expect(checks(page).getByText('No problems found')).toBeVisible(); // a stub wall, not a crossing
+});
+
+test('a floating wall for an island or peninsula: a line, no thickness, no doors', async ({ page }) => {
+  await page.goto('/rooms/preview');
+  await page.getByRole('button', { name: /Example kitchen/ }).click();
+  await page.getByRole('button', { name: 'Floating wall' }).click();
+  const c = await centreOf(page, '.wall-3');
+  await page.mouse.click(c.x - 80, c.y + 120);
+  await page.mouse.click(c.x + 80, c.y + 120);
+  // One line drawn; the tool stops after it.
+  await expect.poll(() => konvaRect(page, '.chain-start')).toBeNull();
+  await page.getByRole('button', { name: 'Select' }).click();
+  await wallButtons(page).nth(4).click();
+  await expect(page.getByRole('group', { name: 'Wall kind' }).getByRole('button', { name: 'Floating wall' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByTestId('value-Thickness')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '+ Window' })).toHaveCount(0);
+  await expect(checks(page).getByText('No problems found')).toBeVisible();
+  // A room wall with a window can't become floating.
+  await page.getByRole('button', { name: '← Room' }).click();
+  await wallButtons(page).first().click();
+  await page.getByRole('group', { name: 'Wall kind' }).getByRole('button', { name: 'Floating wall' }).click();
+  await expect(page.getByText(/Move or delete the doors and windows on wall A first/)).toBeVisible();
+});

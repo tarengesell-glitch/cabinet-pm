@@ -87,14 +87,26 @@
   padding: 8px 12px;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
-  flex-wrap: wrap;
+  /* One line, always: if the toolbar grew a second line when drawing starts, the plan below
+     would move under the cursor between clicks. */
+  flex-wrap: nowrap;
   align-items: center;
+  min-width: 0;
+}
+
+.toolbar > button {
+  flex: none;
 }
 
 .hint {
   font-size: 12px;
   color: var(--text-secondary);
   margin-left: 6px;
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .canvas {

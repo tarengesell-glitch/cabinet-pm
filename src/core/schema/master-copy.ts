@@ -82,8 +82,18 @@ export const ObstacleSchema = z.strictObject({
   height: MeasuredSchema,
 });
 
-export const WallSchema = z.strictObject({
+/**
+ * A room wall is a real wall of the room. A floating wall (owner, 2026-10-09, closet-builder
+ * A-21; carried over 2026-11-05) is an invisible wall for an island or peninsula: a line with
+ * a position and direction, no thickness, not part of the room's outline, which cabinets can
+ * stand against on both faces. One kind serves both islands and peninsulas.
+ */
+export const WallKindSchema = z.enum(['room', 'floating']);
+
+export const WallSchema = z
+  .strictObject({
   wall_id: IdSchema,
+  kind: WallKindSchema,
   start_point: PointSchema,
   end_point: PointSchema,
   /**
@@ -96,10 +106,17 @@ export const WallSchema = z.strictObject({
   /** How sure we are of the wall's length. */
   length_provenance: ProvenanceSchema,
   // No wall height: walls are as high as the room's ceiling (owner, 2026-11-05).
-  thickness: MeasuredSchema,
+  /** A room wall's thickness; null for a floating wall, which has none. */
+  thickness: MeasuredSchema.nullable(),
   openings: z.array(OpeningSchema),
   obstacles: z.array(ObstacleSchema),
-});
+  })
+  .refine((w) => (w.kind === 'room') === (w.thickness !== null), {
+    message: 'A room wall needs a thickness; a floating wall has none.',
+  })
+  .refine((w) => w.kind === 'room' || (w.openings.length === 0 && w.obstacles.length === 0), {
+    message: 'A floating wall cannot have doors, windows or obstacles.',
+  });
 
 export const RoomSchema = z.strictObject({
   room_id: IdSchema,
@@ -169,6 +186,7 @@ export type Opening = z.infer<typeof OpeningSchema>;
 export type Swing = z.infer<typeof SwingSchema>;
 export type Obstacle = z.infer<typeof ObstacleSchema>;
 export type Wall = z.infer<typeof WallSchema>;
+export type WallKind = z.infer<typeof WallKindSchema>;
 export type Room = z.infer<typeof RoomSchema>;
 export type JobStatus = z.infer<typeof JobStatusSchema>;
 export type Job = z.infer<typeof JobSchema>;

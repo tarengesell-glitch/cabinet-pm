@@ -47,10 +47,12 @@ export interface WallDefaults {
  * area the corners enclose; an open chain is closed from its last corner to its first.
  */
 export function insideSide(r: Room): 'left' | 'right' {
+  // Floating walls (islands, peninsulas) are not part of the room's outline.
+  const outline = r.walls.filter((w) => w.kind !== 'floating');
   let twice = 0;
-  for (const w of r.walls) twice += w.start_point.x * w.end_point.y - w.end_point.x * w.start_point.y;
-  const first = r.walls[0];
-  const last = r.walls[r.walls.length - 1];
+  for (const w of outline) twice += w.start_point.x * w.end_point.y - w.end_point.x * w.start_point.y;
+  const first = outline[0];
+  const last = outline[outline.length - 1];
   if (first && last) twice += last.end_point.x * first.start_point.y - first.start_point.x * last.end_point.y;
   return twice < 0 ? 'right' : 'left';
 }
@@ -160,19 +162,27 @@ export function renameRoom(draft: Draft, env: Env, name: string): Result<Change>
 }
 
 /** Adds a wall with the room's wall defaults. Its length is rough until typed or verified. */
-export function addWall(draft: Draft, env: Env, start: Point, end: Point, enteredLength: Length | null = null): Result<Change> {
+export function addWall(
+  draft: Draft,
+  env: Env,
+  start: Point,
+  end: Point,
+  enteredLength: Length | null = null,
+  kind: Wall['kind'] = 'room',
+): Result<Change> {
   if (samePoint(start, end)) return refuse('A wall needs two different corners.');
   const r = room(draft);
   const over = r.walls.findIndex((w) => segmentsOverlap(w.start_point, w.end_point, start, end));
   if (over >= 0) return refuse(`That wall would run back over wall ${wallLetter(over)}. Walls can't lie on top of each other.`);
   const wall: Wall = {
     wall_id: env.newId(),
+    kind,
     start_point: start,
     end_point: end,
     entered_length: enteredLength,
     length_source_mm: null,
     length_provenance: 'unmeasured',
-    thickness: draft.wallDefaults.thickness,
+    thickness: kind === 'room' ? draft.wallDefaults.thickness : null,
     openings: [],
     obstacles: [],
   };
@@ -329,14 +339,21 @@ export function slideWall(draft: Draft, env: Env, wallId: string, distance: numb
 }
 
 /** Adds a wall by typed length and direction, from `from` (or the last wall's end, or the origin). */
-export function addWallByLength(draft: Draft, env: Env, length: TypedSize, angle: number, from?: Point): Result<Change> {
+export function addWallByLength(
+  draft: Draft,
+  env: Env,
+  length: TypedSize,
+  angle: number,
+  from?: Point,
+  kind: Wall['kind'] = 'room',
+): Result<Change> {
   const r = room(draft);
   const last = r.walls[r.walls.length - 1];
   const start = from ?? (last ? last.end_point : { x: 0, y: 0 });
   const placed = pointFromLengthAndAngle(start, length.value, angle);
   if (!placed.ok) return refuse(placed.reason);
   const entered = placed.value.entered_length ?? (length.source_mm !== null ? length.value : null);
-  const added = addWall(draft, env, start, placed.value.point, entered);
+  const added = addWall(draft, env, start, placed.value.point, entered, kind);
   if (!added.ok) return added;
   // A typed length counts as measured (entered, not verified).
   const next = room(added.value.draft);
@@ -360,6 +377,24 @@ export function deleteWall(draft: Draft, env: Env, wallId: string): Result<Chang
   return deleteWalls(draft, env, [wallId]);
 }
 
+/**
+ * Makes a wall a room wall or a floating wall (island / peninsula). A floating wall has no
+ * thickness and no doors or windows; a room wall gets the standard thickness for new walls.
+ */
+export function setWallKind(draft: Draft, env: Env, wallId: string, kind: Wall['kind']): Result<Change> {
+  const r = room(draft);
+  const wall = r.walls.find((w) => w.wall_id === wallId);
+  if (!wall) return refuse('That wall no longer exists.');
+  if (wall.kind === kind) return refuse('Nothing changed.');
+  if (kind === 'floating' && (wall.openings.length > 0 || wall.obstacles.length > 0)) {
+    return refuse(`Move or delete the doors and windows on ${wallLabel(r, wallId)} first: a floating wall can't have them.`);
+  }
+  const walls = r.walls.map((w) =>
+    w.wall_id !== wallId ? w : { ...w, kind, thickness: kind === 'room' ? draft.wallDefaults.thickness : null },
+  );
+  return ok(withRoom(draft, env, `Made ${wallLabel(r, wallId)} a ${kind === 'floating' ? 'floating' : 'room'} wall`, { ...r, walls }));
+}
+
 /** Deletes one or more walls (with their doors and windows) as one step, so one undo brings them back. */
 export function deleteWalls(draft: Draft, env: Env, wallIds: readonly string[]): Result<Change> {
   const r = room(draft);
@@ -377,7 +412,7 @@ export function setWallsThickness(draft: Draft, env: Env, wallIds: readonly stri
   if (wallIds.length === 0) return refuse('No walls are selected.');
   if (size.value <= 0) return refuse('A wall needs a thickness greater than zero.');
   if (wallIds.some((id) => !r.walls.some((w) => w.wall_id === id))) return refuse('Some of those walls no longer exist.');
-  const walls = r.walls.map((w) => (wallIds.includes(w.wall_id) ? { ...w, thickness: typed(size) } : w));
+  const walls = r.walls.map((w) => (wallIds.includes(w.wall_id) && w.kind === 'room' ? { ...w, thickness: typed(size) } : w));
   return ok(withRoom(draft, env, `Set ${wallIds.length} walls' thickness to ${formatInches(size.value)}`, { ...r, walls }));
 }
 
@@ -399,6 +434,7 @@ export function setSize(draft: Draft, env: Env, target: SizeTarget, size: TypedS
       if (target.field === 'length') return setWallLength(draft, env, target.id, size);
       const wall = r.walls.find((w) => w.wall_id === target.id);
       if (!wall) return refuse('That wall no longer exists.');
+      if (wall.kind === 'floating') return refuse('A floating wall has no thickness.');
       const walls = r.walls.map((w) => (w.wall_id === target.id ? { ...w, [target.field]: m } : w));
       return ok(withRoom(draft, env, `Set ${wallLabel(r, target.id)} ${target.field} to ${formatInches(size.value)}`, { ...r, walls }));
     }
@@ -431,8 +467,12 @@ export function setProvenance(draft: Draft, env: Env, target: SizeTarget, proven
       if (!r.walls.some((w) => w.wall_id === target.id)) return refuse('That wall no longer exists.');
       const walls = r.walls.map((w) => {
         if (w.wall_id !== target.id) return w;
-        return target.field === 'length' ? { ...w, length_provenance: provenance } : { ...w, [target.field]: set(w[target.field]) };
+        if (target.field === 'length') return { ...w, length_provenance: provenance };
+        return w.thickness ? { ...w, thickness: set(w.thickness) } : w;
       });
+      if (target.field === 'thickness' && r.walls.find((w) => w.wall_id === target.id)?.kind === 'floating') {
+        return refuse('A floating wall has no thickness.');
+      }
       return ok(withRoom(draft, env, `Marked ${wallLabel(r, target.id)} ${target.field} ${provenance}`, { ...r, walls }));
     }
     case 'opening': {
@@ -478,6 +518,7 @@ export function placeOpening(
   const r = room(draft);
   const wall = r.walls.find((w) => w.wall_id === wallId);
   if (!wall) return refuse('That wall no longer exists.');
+  if (wall.kind === 'floating') return refuse(`A floating wall can't have a ${kind}.`);
   const std = STANDARD_SIZES.openings[kind];
   const offset = standardOpeningOffset(wall, kind, centre);
   const opening: Opening = {
@@ -500,7 +541,9 @@ export function moveOpening(draft: Draft, env: Env, openingId: string, offset: L
   if (!found) return refuse('That opening no longer exists.');
   if (offset < 0) return refuse('An opening cannot start before the beginning of its wall.');
   const target = toWallId ?? found.wall.wall_id;
-  if (!r.walls.some((w) => w.wall_id === target)) return refuse('That wall no longer exists.');
+  const targetWall = r.walls.find((w) => w.wall_id === target);
+  if (!targetWall) return refuse('That wall no longer exists.');
+  if (targetWall.kind === 'floating') return refuse(`A floating wall can't have a ${found.opening.kind}.`);
   const moved = { ...found.opening, offset: rough(offset) };
   const walls = r.walls.map((w) => {
     const without = w.wall_id === found.wall.wall_id ? w.openings.filter((o) => o.opening_id !== openingId) : w.openings;
@@ -567,6 +610,8 @@ export function upgradeStoredDraft(data: unknown): { job: unknown; wallDefaults:
     Object.values(o).forEach(retag);
   };
   retag(job);
+  // Walls saved before floating walls existed are room walls.
+  for (const room of job?.rooms ?? []) for (const wall of room.walls ?? []) if (!('kind' in wall)) wall.kind = 'room';
   const oldThickness = d.wallDefaults?.thickness as unknown;
   retag(oldThickness);
   if (retagged > 0) notes.push('Your saved room was updated: sizes are now either unmeasured (red) or confirmed (black).');

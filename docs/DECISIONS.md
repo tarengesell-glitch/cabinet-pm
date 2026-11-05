@@ -109,6 +109,14 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
   - **Two states for sizes: unmeasured (pastel red) and confirmed (black, as in CAD programs).** These replace rough / measured / verified. Typing or dragging a size never confirms it; only the Confirm button does. A confirmed wall whose length changes goes back to unmeasured, with a notice. Rooms saved with the old states convert: verified becomes confirmed, everything else becomes unmeasured.
   - **The "Type the next wall" card is removed.** It was added without the owner asking. Walls are drawn on the plan, with lengths typed while drawing or on the plan.
   - **Measurement chains on walls with doors or windows:** corner → opening edge, opening width, … → corner, with the overall length on a second line. Researched in cabinet makers' planning guides; see `docs/ux/INDUSTRY_REVIEW.md`.
+- **Room drawing, round 8 (owner, 2026-11-05):**
+  - **Floating walls for islands and peninsulas**, carried over from closet-builder's owner decision A-21 (2026-10-09). The owner pointed to it.
+    - A floating wall is an invisible wall: a line with a position and direction, no thickness, not part of the room's outline, which cabinets can stand against on both faces. One kind serves islands and peninsulas.
+    - In Core, a wall has `kind: 'room' | 'floating'`. A floating wall has no thickness and no doors, windows or obstacles.
+    - On the plan it is a thin dashed line, with no unmeasured/confirmed colour, because its position is a design choice, not a site measurement.
+    - Drawn with the "Floating wall" tool, one line at a time, or by switching an existing wall in its panel.
+  - **Bug fixed: drawing more walls after some exist.** Starting to draw made the toolbar wrap onto a second line, which moved the plan about 20 px under the cursor, so walls started in the wrong place and missed snaps. The toolbar is now always one line, and the drawing holds its position if the plan area changes size.
+  - **New walls snap onto existing walls**, not just their corners: CAD's "nearest" object snap. A wall can start or end anywhere along another.
 - Room capture is pulled ahead of Phase 5 (BUILD_PLAN). Order: scaffold (1a), then Core walls and openings, then the Designer drawing screen.
 
 ### 2026-11-05: Where the work lives and deploys
@@ -171,7 +179,7 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 
 ### Carried over from closet-builder
 - **C-1 Reuse.** closet-builder already has pieces that match parts of this spec:
-  - room geometry, including "floating walls" for islands and peninsulas (its A-21);
+  - room geometry, including "floating walls" for islands and peninsulas (its A-21). *Answered for floating walls (owner, 2026-11-05):* the idea is carried over; see "Room drawing, round 8";
   - a 3D view and a wall elevation view;
   - integer-unit handling;
   - a cabinetry knowledge base (`docs/cabinetry-intelligence/`) that already separates hard design limits from preferences. That is close to the spec's block-vs-warn design rules, and could seed Shop Settings.

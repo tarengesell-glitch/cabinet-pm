@@ -9,6 +9,7 @@ const THICKNESS = measured(inch(4, 1, 2));
 function wall(n: number, start: Point, end: Point, extra: Partial<Wall> = {}): Wall {
   return {
     wall_id: id(n),
+    kind: 'room',
     start_point: start,
     end_point: end,
     entered_length: null,

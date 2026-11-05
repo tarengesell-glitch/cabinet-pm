@@ -145,7 +145,7 @@ export function RoomPanel({ room, wallDefaults, canEdit, onRename, onCeiling, on
                     Wall {wallLetter(i)}: {lengthText(d)}
                     {w.openings.length > 0 && ` · ${w.openings.map((o) => KIND_LABEL[o.kind].toLowerCase()).join(', ')}`}
                   </span>
-                  <ProvenanceChip provenance={w.length_provenance} />
+                  {w.kind === 'floating' ? <span className={s.muted}>Floating</span> : <ProvenanceChip provenance={w.length_provenance} />}
                 </button>
               </li>
             );
@@ -161,7 +161,7 @@ export function RoomPanel({ room, wallDefaults, canEdit, onRename, onCeiling, on
   );
 }
 
-export function WallPanel({ room, wall, canEdit, onSize, onProvenance, onDelete, onSelect, onAddOpening }: {
+export function WallPanel({ room, wall, canEdit, onSize, onProvenance, onDelete, onSelect, onAddOpening, onKind }: {
   room: Room;
   wall: Wall;
   canEdit: boolean;
@@ -170,8 +170,12 @@ export function WallPanel({ room, wall, canEdit, onSize, onProvenance, onDelete,
   onDelete: () => void;
   onSelect: (sel: Selection) => void;
   onAddOpening: (kind: Opening['kind']) => void;
+  /** Room wall or floating wall (island / peninsula). */
+  onKind: (kind: Wall['kind']) => Result<unknown>;
 }) {
   const index = room.walls.findIndex((w) => w.wall_id === wall.wall_id);
+  const floating = wall.kind === 'floating';
+  const [kindError, setKindError] = useState<string | null>(null);
   const d = distanceForDisplay(wall.start_point, wall.end_point);
   const lengthMeasured: Measured = { value: d.value, provenance: wall.length_provenance, source_mm: wall.length_source_mm };
   const detail =
@@ -182,8 +186,26 @@ export function WallPanel({ room, wall, canEdit, onSize, onProvenance, onDelete,
     <section className={s.card}>
       <BackToRoom onSelect={onSelect} />
       <h2 className={s.cardTitle}>
-        Wall {wallLetter(index)} <ProvenanceChip provenance={wall.length_provenance} />
+        Wall {wallLetter(index)} {!floating && <ProvenanceChip provenance={wall.length_provenance} />}
       </h2>
+      <div className={s.row} role="group" aria-label="Wall kind">
+        {(['room', 'floating'] as const).map((k) => (
+          <button
+            key={k}
+            className={k === wall.kind ? s.buttonActive : s.button}
+            aria-pressed={k === wall.kind}
+            disabled={!canEdit}
+            onClick={() => {
+              if (k === wall.kind) return;
+              const r = onKind(k);
+              setKindError(r.ok ? null : r.reason);
+            }}
+          >
+            {k === 'room' ? 'Room wall' : 'Floating wall'}
+          </button>
+        ))}
+      </div>
+      {kindError && <p className={s.error} role="alert">{kindError}</p>}
       <SizeField
         label="Length"
         measured={lengthMeasured}
@@ -191,9 +213,13 @@ export function WallPanel({ room, wall, canEdit, onSize, onProvenance, onDelete,
         {...(detail ? { detail } : {})}
         canEdit={canEdit}
         onSet={(v) => onSize('length', v)}
-        onProvenance={(p) => onProvenance('length', p)}
+        // A floating wall's length is where the island or peninsula goes, not a site measurement.
+        {...(floating ? {} : { onProvenance: (p: Measured['provenance']) => onProvenance('length', p) })}
       />
-      <SizeField label="Thickness" measured={wall.thickness} canEdit={canEdit} onSet={(v) => onSize('thickness', v)} onProvenance={(p) => onProvenance('thickness', p)} />
+      {wall.thickness && (
+        <SizeField label="Thickness" measured={wall.thickness} canEdit={canEdit} onSet={(v) => onSize('thickness', v)} onProvenance={(p) => onProvenance('thickness', p)} />
+      )}
+      {!floating && (
       <div>
         <p className={s.muted}>Doors and windows on this wall</p>
         <ul className={s.list}>
@@ -212,13 +238,16 @@ export function WallPanel({ room, wall, canEdit, onSize, onProvenance, onDelete,
           <p className={s.muted}>Also on this wall: {wall.obstacles.map((o) => o.kind).join(', ')} (shown on the plan; editing comes later).</p>
         )}
       </div>
-      <div className={s.row}>
-        {(['door', 'window', 'passthrough'] as const).map((k) => (
-          <button key={k} className={s.button} disabled={!canEdit} onClick={() => onAddOpening(k)}>
-            + {KIND_LABEL[k]}
-          </button>
-        ))}
-      </div>
+      )}
+      {!floating && (
+        <div className={s.row}>
+          {(['door', 'window', 'passthrough'] as const).map((k) => (
+            <button key={k} className={s.button} disabled={!canEdit} onClick={() => onAddOpening(k)}>
+              + {KIND_LABEL[k]}
+            </button>
+          ))}
+        </div>
+      )}
       <div className={s.row}>
         <button className={s.buttonDanger} disabled={!canEdit} onClick={onDelete}>
           Delete wall
@@ -238,8 +267,9 @@ export function WallsPanel({ room, walls, canEdit, onSelect, onThickness, onDele
   onDelete: () => void;
 }) {
   const numbers = walls.map((w) => room.walls.findIndex((x) => x.wall_id === w.wall_id) + 1);
-  const thicknesses = new Set(walls.map((w) => w.thickness.value));
-  const first = walls[0] as Wall;
+  const roomWalls = walls.filter((w) => w.thickness !== null);
+  const thicknesses = new Set(roomWalls.map((w) => w.thickness?.value));
+  const first = roomWalls[0] ?? null;
   const doorsAndWindows = walls.reduce((n, w) => n + w.openings.length, 0);
   return (
     <section className={s.card}>
@@ -255,19 +285,21 @@ export function WallsPanel({ room, walls, canEdit, onSelect, onThickness, onDele
                 <span>
                   Wall {wallLetter((numbers[i] as number) - 1)}: {lengthText(d)}
                 </span>
-                <ProvenanceChip provenance={w.length_provenance} />
+                {w.kind === 'floating' ? <span className={s.muted}>Floating</span> : <ProvenanceChip provenance={w.length_provenance} />}
               </button>
             </li>
           );
         })}
       </ul>
-      <SizeField
-        label="Thickness (all selected)"
-        measured={thicknesses.size === 1 ? first.thickness : null}
-        {...(thicknesses.size === 1 ? {} : { display: 'Mixed' })}
-        canEdit={canEdit}
-        onSet={onThickness}
-      />
+      {first && (
+        <SizeField
+          label="Thickness (all selected)"
+          measured={thicknesses.size === 1 ? first.thickness : null}
+          {...(thicknesses.size === 1 ? {} : { display: 'Mixed' })}
+          canEdit={canEdit}
+          onSet={onThickness}
+        />
+      )}
       <div className={s.row}>
         <button className={s.buttonDanger} disabled={!canEdit} onClick={onDelete}>
           Delete {walls.length} walls{doorsAndWindows > 0 ? ` (and ${doorsAndWindows} door${doorsAndWindows === 1 ? '' : 's'}/window${doorsAndWindows === 1 ? '' : 's'} on them)` : ''}

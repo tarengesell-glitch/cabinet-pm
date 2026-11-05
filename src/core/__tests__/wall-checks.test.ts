@@ -42,7 +42,7 @@ describe('each check fails on a copy broken for it', () => {
     const issues = issuesFrom(fitsAlongWall, job);
     expect(issues).toHaveLength(1);
     expect(issues[0]!.message).toBe(
-      `Window 1 on wall 1 in "Kitchen" runs past the end of the wall: its far edge is 13' 0" from the start, but the wall is 12' 0" long (1' 0" too far).`,
+      `Window 1 on wall 1 in "Kitchen" runs past the end of the wall: its far edge is 156" from the start, but the wall is 144" long (12" too far).`,
     );
     expect(issues[0]!.ref).toEqual({ kind: 'opening', id: window.opening_id });
   });
@@ -64,7 +64,7 @@ describe('each check fails on a copy broken for it', () => {
     window.width = { ...window.width, value: inch(48) + 2 };
     const issues = issuesFrom(fitsAlongWall, job);
     expect(issues).toHaveLength(1);
-    expect(issues[0]!.message).toMatch(/the wall is about 4' 0" long/);
+    expect(issues[0]!.message).toMatch(/the wall is about 48" long/);
   });
 
   it('a window reaching above the ceiling', () => {
@@ -74,7 +74,7 @@ describe('each check fails on a copy broken for it', () => {
     const issues = issuesFrom(fitsUnderCeiling, job);
     expect(issues).toHaveLength(1);
     expect(issues[0]!.message).toBe(
-      `Window 1 on wall 1 in "Kitchen" reaches 8' 6" from the floor, but the ceiling is only 8' 0" high (6" too tall).`,
+      `Window 1 on wall 1 in "Kitchen" reaches 102" from the floor, but the ceiling is only 96" high (6" too tall).`,
     );
   });
 

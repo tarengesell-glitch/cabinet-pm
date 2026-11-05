@@ -8,6 +8,8 @@ Master brief for establishing the visual UX/UI specification. If anything here c
 > - The colour tokens in Part 4 are not settled: closet-builder has an owner-approved design system that may apply instead (DECISIONS C-2).
 > - UX work starts before Phase 5 (`docs/BUILD_PLAN.md`).
 
+> **Owner rule (2026-11-05): less is more.** Always reduce clutter. Show only what the person needs at that moment. Never add keys, legends, extra labels or panels "just in case"; the owner would only have to undo them later. When in doubt, leave it out and ask. This rule beats any "show more" guidance below.
+
 Act as senior product designer, UX architect, UI designer and frontend engineer. Define actual screens, layouts, dimensions, components, interactions and states, not generic advice.
 
 ---
@@ -91,7 +93,7 @@ Links: help.typeform.com picture-choice article; pro.houzz.com selections help; 
 | danger | #BE3D42 | blocked, error |
 | focus | #2563EB | keyboard focus |
 
-Status never relies on colour alone; always icon and/or text. Provide dark-mode values later; structure tokens to allow it.
+Status never relies on colour alone; always icon and/or text. *Exception (owner, 2026-11-05):* on the room plan, a wall's colour alone shows how sure we are of it, because markers there were clutter. The panel for a selected wall says it in words. Provide dark-mode values later; structure tokens to allow it.
 
 **Type.** Inter or Geist. Page title 24–28, screen question 26–32, section 18–20, body 14–16, metadata 12–13, client selection labels 16–18. Semibold for emphasis.
 

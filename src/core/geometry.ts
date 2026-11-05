@@ -5,7 +5,7 @@
  */
 import { FULL_TURN, HALF_TURN, QUARTER_TURN, directionOf, normalizeAngle, snapAngle, type Angle } from './angles';
 import { ok, refuse, type Result } from './result';
-import { formatInches, isLength, type Length } from './units';
+import { formatInches, formatInchesApprox, isLength, type Length } from './units';
 
 export interface Point {
   readonly x: Length;
@@ -57,7 +57,7 @@ export function distanceForDisplay(a: Point, b: Point): { value: Length; exact: 
 
 export function describeDistance(a: Point, b: Point): string {
   const d = distanceForDisplay(a, b);
-  return d.exact ? formatInches(d.value) : `about ${formatInches(d.value)}`;
+  return d.exact ? formatInches(d.value) : formatInchesApprox(d.value);
 }
 
 /** Sign of the cross product (b - a) × (c - a): 1 left turn, -1 right turn, 0 in line. */

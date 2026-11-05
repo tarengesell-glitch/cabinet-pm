@@ -5,17 +5,16 @@ import type { TypedSize } from '../model/editor';
 import { parseSize } from './parseSize';
 import s from './RoomCapture.module.css';
 
-const CHIP: Record<Provenance, { className: string; icon: string; text: string }> = {
-  rough: { className: s.chipRough as string, icon: '?', text: 'Rough' },
-  measured: { className: s.chipMeasured as string, icon: '✎', text: 'Measured' },
-  verified: { className: s.chipVerified as string, icon: '✓', text: 'Verified' },
+const CHIP: Record<Provenance, { className: string; text: string }> = {
+  rough: { className: s.chipRough as string, text: 'Rough' },
+  measured: { className: s.chipMeasured as string, text: 'Measured' },
+  verified: { className: s.chipVerified as string, text: 'Verified' },
 };
 
 export function ProvenanceChip({ provenance }: { provenance: Provenance }) {
   const c = CHIP[provenance];
   return (
     <span className={c.className} data-provenance={provenance}>
-      <span aria-hidden>{c.icon}</span>
       {c.text}
     </span>
   );
@@ -25,7 +24,7 @@ interface Props {
   label: string;
   /** The current size, or null when there isn't one yet. */
   measured: Measured | null;
-  /** Shown instead of the exact value (for example "about 4' 0"" on a slanted wall). */
+  /** Shown instead of the exact value (for example "≈ 48 1/16\"" on a slanted wall). */
   display?: string;
   /** Extra detail under the value (for example the length that was typed). */
   detail?: string;

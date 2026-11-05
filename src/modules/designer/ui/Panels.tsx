@@ -13,6 +13,7 @@ import {
   type Wall,
 } from '@/core/index';
 import type { OpeningField, TypedSize, WallDefaults } from '../model/editor';
+import { lengthText } from './format';
 import { parseSize } from './parseSize';
 import { ProvenanceChip, SizeField } from './SizeField';
 import type { Selection } from './PlanCanvas';
@@ -208,8 +209,7 @@ export function RoomPanel({ room, wallDefaults, canEdit, onRename, onCeiling, on
               <li key={w.wall_id}>
                 <button className={s.listButton} onClick={() => onSelect({ kind: 'wall', id: w.wall_id })}>
                   <span>
-                    Wall {i + 1}: {d.exact ? '' : '≈ '}
-                    {formatInches(d.value)}
+                    Wall {i + 1}: {lengthText(d)}
                     {w.openings.length > 0 && ` · ${w.openings.map((o) => KIND_LABEL[o.kind].toLowerCase()).join(', ')}`}
                   </span>
                   <ProvenanceChip provenance={w.length_provenance} />
@@ -254,13 +254,12 @@ export function WallPanel({ room, wall, canEdit, onSize, onProvenance, onDelete,
       <SizeField
         label="Length"
         measured={lengthMeasured}
-        display={`${d.exact ? '' : 'about '}${formatInches(d.value)}`}
+        display={lengthText(d)}
         {...(detail ? { detail } : {})}
         canEdit={canEdit}
         onSet={(v) => onSize('length', v)}
         onProvenance={(p) => onProvenance('length', p)}
       />
-      <p className={s.muted}>Typing a length moves this wall&apos;s far corner, and the wall joined to it. Walls are as high as the ceiling.</p>
       <SizeField label="Thickness" measured={wall.thickness} canEdit={canEdit} onSet={(v) => onSize('thickness', v)} onProvenance={(p) => onProvenance('thickness', p)} />
       <div>
         <p className={s.muted}>Doors and windows on this wall</p>
@@ -321,8 +320,7 @@ export function WallsPanel({ room, walls, canEdit, onSelect, onThickness, onDele
             <li key={w.wall_id}>
               <button className={s.listButton} onClick={() => onSelect({ kind: 'wall', id: w.wall_id })}>
                 <span>
-                  Wall {numbers[i]}: {d.exact ? '' : '≈ '}
-                  {formatInches(d.value)}
+                  Wall {numbers[i]}: {lengthText(d)}
                 </span>
                 <ProvenanceChip provenance={w.length_provenance} />
               </button>
@@ -382,7 +380,6 @@ export function OpeningPanel({ room, wall, opening, canEdit, onKind, onSize, onP
           </button>
         ))}
       </div>
-      <p className={s.muted}>Drag it along the wall on the plan, or type exact sizes here.</p>
       {OPENING_FIELDS.map(({ field, label }) => (
         <SizeField key={field} label={label} measured={opening[field]} canEdit={canEdit} onSet={(v) => onSize(field, v)} onProvenance={(p) => onProvenance(field, p)} />
       ))}

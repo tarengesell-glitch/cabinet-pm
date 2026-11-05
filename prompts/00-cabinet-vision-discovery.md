@@ -7,7 +7,7 @@ Read CLAUDE.md, docs/BUILD_SPEC.md (sections 5.8, 8 and 11), docs/ARCHITECTURE.m
 Write `docs/cabinet-vision/FORMAT_REFERENCE.md`, the ORDX format reference that the writer and reader will be built from. Cover:
 
 1. **File structure:** what the ORDX file is (text, XML, other), its overall layout, and every element and field seen across the samples, with an example of each.
-2. **Units and precision:** which length units ORDX uses, how many decimals, and how fractions appear. This feeds the base-unit decision (DECISIONS U-1).
+2. **Units and precision:** which length units ORDX uses, how many decimals, and how fractions appear. The base unit is already 1/64 inch (DECISIONS U-1); report whether ORDX values convert exactly, which feeds U-2.
 3. **Rooms, walls and placement:**
    - how rooms and walls are described;
    - how a cabinet's position along a wall, its elevation and its rotation are expressed;

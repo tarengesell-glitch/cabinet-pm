@@ -44,9 +44,23 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 - Quotes freeze the prices and tax used.
 - Multi-user locking: one editor at a time, others read-only. Locks release when the session drops; managers can override.
 
+### 2026-11-05: Base unit and room drawing
+- **U-1 answered: the base unit is 1/64 inch.** Every length is stored as a whole number of 1/64ths. Feet, inches and mm appear only on screen and in the adapters, and a conversion that is not exact is refused. Decided by the owner before Phase 0, so room drawing can be built now.
+  - Consequence: whole millimetres are not exact in 1/64 inch (1 mm ≈ 2.52/64 in). See U-2 below for how metric values are handled.
+- **Room drawing (walls, doors, windows) is our own tool on react-konva**, inside the Designer module, drawn only from the master copy. Ideas for wall joins and openings may be ported from MIT projects, with attribution. No whole open-source editor is embedded, because each keeps its own room data in decimal numbers (P1, P6, rule 11). Research, checked on 2026-11-05:
+  - pascalorg/editor: MIT, about 25k stars, React and react-three-fiber, under a year old. Kept as a reference and a possible 3D viewer later.
+  - cvdlab/react-planner (MIT, about 1.5k stars, last push 2024) and furnishup/blueprint3d (MIT, about 2k stars, last push 2021): unmaintained.
+  - laanlabs/openPlan3D: MIT, SvelteKit, so not our stack.
+  - ekymo/homeRoughEditor: MIT, plain JavaScript; a reference for its wall and opening code.
+  - konvajs/konva and react-konva: MIT, about 15k and 6k stars, actively maintained. Chosen.
+  - Rejected: tldraw (commercial licence key), Sweet Home 3D (GPL, Java), kitchen-planner-3d (AGPL).
+- **U-2 answered: metric values are rounded to the nearest 1/64 inch.** This is an owner exception to "refuse inexact conversions", for millimetre input only (appliance spec sheets, and ORDX if it uses mm). The most a value can move is 1/128 inch (about 0.2 mm). A tie rounds away from zero, so the result is always the same. The original mm value is kept next to the rounded one, so it can always be traced. Every other inexact conversion is still refused.
+- **The stack in ARCHITECTURE "Stack" is confirmed** (the owner said "proceed" after being told the scaffold locks it in). Each part is installed only when the first code needs it.
+- Room capture is pulled ahead of Phase 5 (BUILD_PLAN). Order: scaffold (1a), then Core walls and openings, then the Designer drawing screen.
+
 ### Replaced on 2026-10-27
 - ~~Mozaik is the design source of truth; this tool can't write to Mozaik.~~ The master copy is the source of truth; Cabinet Vision is the target.
-- ~~Lengths in integer mm.~~ The base unit is open (U-1).
+- ~~Lengths in integer mm.~~ The base unit is 1/64 inch (U-1, answered 2026-11-05).
 - ~~Mozaik data captured from the SketchUp export and job files; manual upload, then a Windows desktop uploader; upload matches confirmed by a person.~~ Dropped. A Mozaik reader may come back in Phase 8, from its SQLite export.
 - ~~Guided Mozaik drawing.~~ Replaced by the AI draft and the visual editor.
 - ~~Build starts with the quick quote, after the foundation.~~ Build starts with Phase 0 discovery and the Phase 1 proof slice.
@@ -56,13 +70,14 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 
 ### Needed before Phase 1 code
 - **CV-1 Where does Cabinet Vision run, and who works in it?** Is it on a computer at the colony, operated by colony staff, or with you? How reliable is that computer's internet? The automatic library sync and read-back (OA-6) need something running on that computer. Phase 0's samples also come from there.
-- **U-1 Base unit (spec Q5).** The intake uses feet (7', 8', 10'), so the shop looks imperial. Options:
-  - 1/64 inch (the spec's candidate);
-  - millimetres (the earlier plan);
-  - nanometres (closet-builder). It holds both mm and 1/64 inch exactly (1/64 in = 396,875 nm), but area numbers grow too large.
-
-  Recommendation: decide once Phase 0 shows which units and precision ORDX uses.
+- ~~**U-1 Base unit (spec Q5).**~~ Answered 2026-11-05: 1/64 inch (see "Decided").
+- ~~**U-2 Metric values.**~~ Answered 2026-11-05: rounded to the nearest 1/64 inch (see "Decided").
 - **A-1 Angle convention.** Proposed for Phase 1: degrees as integers or fixed decimals, counter-clockwise, measured from the room's +X axis. Confirm or change.
+- **PROPOSED (from the Phase 1a scaffold, 2026-11-05).** These are technical readings of ARCHITECTURE where the table was silent. They are built this way and the checks enforce them:
+  - `app` may import `core`, `platform`, and adapter and connector `contract.ts` files, as well as module contracts and `ui/index`. It is the composition root that wires "send" to the adapter.
+  - `visual-library` may import only `platform` and the catalog contract, exactly as the table says, so not `core`. "Item IDs only" is not checked by a tool; it is in the module's `CLAUDE.md`.
+  - The vendor-name check also allows the root `CLAUDE.md`, `README.md` and `prompts/`, which are project documents like `docs/`. Lock-file integrity hashes are ignored, because random letters could spell the format name.
+  - Only the parts of the stack that the scaffold uses are installed. Supabase, Drizzle, Tailwind, shadcn/ui and react-konva come with the first code that needs them.
 - **PROPOSED:**
   - the `core/` / `platform/` split, and the master copy stored as versioned JSON with the named writers (ARCHITECTURE);
   - dimension provenance and appliance placements added to the master copy (DATA_MODEL "core").
@@ -82,7 +97,7 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 - **S-2** How much room placement and elevation detail does ORDX keep on import?
 - **S-3** Which read-back source is most reliable: ORDX export, SQL database, or reports? If it's the database or files on the shop's computer, do we need a small helper app there?
 - **S-4** Is there a Cabinet Vision or Cyncly partner program with documentation or support? Licensing and terms must be reviewed before Phase 3.
-- **S-5** = U-1.
+- ~~**S-5**~~ = U-1, answered 2026-11-05.
 - **S-6** Which design rules block and which only warn, by default?
 
 ### Earlier plan features: keep, defer or drop?
@@ -114,5 +129,5 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 ### Still open from earlier
 - CRM choice; QuickBooks vs Xero.
 - What clients see, if a client portal is built.
-- Tech stack confirmation (ARCHITECTURE "Stack").
+- ~~Tech stack confirmation (ARCHITECTURE "Stack").~~ Confirmed 2026-11-05.
 - The Comparer's strict tolerance: the values, and whether they are per dimension or per item.

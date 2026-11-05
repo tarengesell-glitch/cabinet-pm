@@ -2,7 +2,7 @@
 
 A platform where designers capture a room and the customer's selections, an AI proposes a layout, and the designer refines it in a visual editor. The finished design is translated into Cabinet Vision's ORDX import format. Once Cabinet Vision has engineered the job, the platform reads it back and checks that everything arrived as intended. Cabinet Vision stays responsible for how each cabinet is built.
 
-No application code yet. The plan comes first: translation is proven (Phases 0â€“1) before the editor and AI are built.
+The scaffold and its guardrails exist (Phase 1a, 2026-11-05); there are no features yet. See `docs/DEVELOPMENT.md` for how to run and check it. Translation is proven (Phases 0â€“1) before the editor and AI are built, except room drawing, which was pulled forward (DECISIONS 2026-11-05).
 
 ## Files
 
@@ -14,6 +14,9 @@ No application code yet. The plan comes first: translation is proven (Phases 0â€
 | `docs/DATA_MODEL.md` | Tables and which module owns each. |
 | `docs/DECISIONS.md` | What's decided, what was replaced, and the open questions. |
 | `docs/BUILD_PLAN.md` | Phases broken into one-session steps. |
+| `docs/DEVELOPMENT.md` | How to run, check and test the code, and how to add a module or adapter. |
+| `src/` | The app: `core`, `platform`, `modules/*`, `adapters/*`, `connectors/*`, `app`. Each module has its own `CLAUDE.md`. |
+| `tools/architecture.cjs` | The dependency table as data, read by both boundary checks. |
 | `docs/intake/` | Visual intake (image selector) content per room type, starting with the kitchen. |
 | `docs/ux/UX_BRIEF.md` | Visual UX/UI brief. |
 | `modules/_TEMPLATE/CLAUDE.md` | Rules file copied into every new module folder. |
@@ -23,7 +26,7 @@ No application code yet. The plan comes first: translation is proven (Phases 0â€
 ## How to start
 
 1. Gather the samples listed in `samples/cabinet-vision/README.md` and add them to the repo.
-2. Meanwhile, run `prompts/01-scaffold-and-guardrails.md` (it doesn't need the samples).
+2. ~~Run `prompts/01-scaffold-and-guardrails.md`.~~ Done 2026-11-05.
 3. With the samples in, run `prompts/00-cabinet-vision-discovery.md`, then review the format reference with someone who knows Cabinet Vision.
 4. Run the rest of `prompts/` in order, one session each, and make the go/no-go call.
 5. After each session, record new decisions in `docs/DECISIONS.md`.

@@ -56,6 +56,9 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
   - Rejected: tldraw (commercial licence key), Sweet Home 3D (GPL, Java), kitchen-planner-3d (AGPL).
 - **U-2 answered: metric values are rounded to the nearest 1/64 inch.** This is an owner exception to "refuse inexact conversions", for millimetre input only (appliance spec sheets, and ORDX if it uses mm). The most a value can move is 1/128 inch (about 0.2 mm). A tie rounds away from zero, so the result is always the same. The original mm value is kept next to the rounded one, so it can always be traced. Every other inexact conversion is still refused.
 - **The stack in ARCHITECTURE "Stack" is confirmed** (the owner said "proceed" after being told the scaffold locks it in). Each part is installed only when the first code needs it.
+- **A-1 answered: the angle convention.** Angles are whole numbers of hundredths of a degree (22.5° is 2250), counter-clockwise from the room's +X axis. Room coordinates have Y pointing up, as on paper, so 90° points up the plan. Stored angles run from 0 to 35999. Details are in `src/core/README.md`.
+- **Slanted walls: corners are rounded.** A wall typed as a length and an angle that isn't 0°, 90°, 180° or 270° rarely ends on a 1/64" mark. Its corner is rounded to the nearest 1/64", and the typed length is kept with the wall (`entered_length`), as with the mm rule. The stored wall stays within about 1/90" of the typed length. Walls at 0°, 90°, 180° and 270° are exact.
+- **Sureness tags (provenance) approved.** Every wall length, wall height and thickness, opening and obstacle dimension, and ceiling height records `rough` (from the client or intake), `measured` (entered on site) or `verified`. Entering a value never verifies it. This was PROPOSED in DATA_MODEL "core".
 - Room capture is pulled ahead of Phase 5 (BUILD_PLAN). Order: scaffold (1a), then Core walls and openings, then the Designer drawing screen.
 
 ### Replaced on 2026-10-27
@@ -72,7 +75,7 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 - **CV-1 Where does Cabinet Vision run, and who works in it?** Is it on a computer at the colony, operated by colony staff, or with you? How reliable is that computer's internet? The automatic library sync and read-back (OA-6) need something running on that computer. Phase 0's samples also come from there.
 - ~~**U-1 Base unit (spec Q5).**~~ Answered 2026-11-05: 1/64 inch (see "Decided").
 - ~~**U-2 Metric values.**~~ Answered 2026-11-05: rounded to the nearest 1/64 inch (see "Decided").
-- **A-1 Angle convention.** Proposed for Phase 1: degrees as integers or fixed decimals, counter-clockwise, measured from the room's +X axis. Confirm or change.
+- ~~**A-1 Angle convention.**~~ Answered 2026-11-05 (see "Decided").
 - **PROPOSED (from the Phase 1a scaffold, 2026-11-05).** These are technical readings of ARCHITECTURE where the table was silent. They are built this way and the checks enforce them:
   - `app` may import `core`, `platform`, and adapter and connector `contract.ts` files, as well as module contracts and `ui/index`. It is the composition root that wires "send" to the adapter.
   - `visual-library` may import only `platform` and the catalog contract, exactly as the table says, so not `core`. "Item IDs only" is not checked by a tool; it is in the module's `CLAUDE.md`.
@@ -80,7 +83,7 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
   - Only the parts of the stack that the scaffold uses are installed. Supabase, Drizzle, Tailwind, shadcn/ui and react-konva come with the first code that needs them.
 - **PROPOSED:**
   - the `core/` / `platform/` split, and the master copy stored as versioned JSON with the named writers (ARCHITECTURE);
-  - dimension provenance and appliance placements added to the master copy (DATA_MODEL "core").
+  - appliance placements added to the master copy (DATA_MODEL "core"). Dimension provenance was approved on 2026-11-05.
 
 ### From the owner's workflow (2026-10-27)
 - **CV-2 More than one colony.** Will each colony have its own Cabinet Vision library (so its own catalog mappings), or will all colonies share one library? And does each have its own prices?

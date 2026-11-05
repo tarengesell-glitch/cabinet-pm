@@ -21,7 +21,8 @@ The phases are `docs/BUILD_SPEC.md` section 10. Phases 9 and 10 and the addition
 | # | Who | Step | Prompt |
 |---|---|---|---|
 | 1a | Claude | Scaffold the repo and its guardrails: folders, dependency rules, vendor-name check, purity checks, test runners. Can run alongside Phase 0. **Done 2026-11-05** (see `docs/DEVELOPMENT.md`). | `prompts/01-scaffold-and-guardrails.md` |
-| 1b | Claude | Core: master copy schemas, base unit, angles, selection resolution, check interface, first layout checks. **Needs A-1 decided** (U-1 is 1/64 inch). | `prompts/02-core-master-copy.md` |
+| 1b-walls | Claude | Core, room shell: base unit, angles, Job/Room/Wall/Opening/Obstacle schemas, check interface, wall layout checks. **Done 2026-11-05.** | `prompts/02-core-master-copy.md` (part) |
+| 1b-items | Claude | Core, cabinets: PlacedItem, selections and modifications, selection resolution, item layout checks (overlap, past a wall end, blocks an opening), proof-slice fixtures. Raises `schema_version`. | `prompts/02-core-master-copy.md` (rest) |
 | 1c | Claude | Catalog, minimal: the proof-slice items as versioned data, plus the buildability checks | `prompts/03-catalog-proof-slice.md` |
 | 1d | Claude | Cabinet Vision adapter, minimal: mapping data, preflight, deterministic writer, first golden cases | `prompts/04-ordx-writer-proof-slice.md` |
 | 1e | Owner | Import the generated files into Cabinet Vision and record the go/no-go in `DECISIONS.md` | `golden/cabinet-vision/README.md` (written in 1d) |

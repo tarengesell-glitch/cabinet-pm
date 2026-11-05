@@ -35,12 +35,15 @@ const allowed = (path) =>
     prefix.endsWith('/') ? path.startsWith(prefix) : path === prefix,
   );
 
-// Tracked files plus new files not yet committed (but not ignored ones).
-const files = execFileSync('git', ['ls-files', '--cached', '--others', '--exclude-standard', '-z'], {
-  encoding: 'utf8',
-})
-  .split('\0')
-  .filter(Boolean);
+const git = (...args) =>
+  execFileSync('git', [...args, '-z'], { encoding: 'utf8' })
+    .split('\0')
+    .filter(Boolean);
+
+// Tracked files plus new files not yet committed (but not ignored ones), minus
+// files deleted from the working tree but not yet committed: they no longer exist.
+const deleted = new Set(git('ls-files', '--deleted'));
+const files = git('ls-files', '--cached', '--others', '--exclude-standard').filter((f) => !deleted.has(f));
 
 const problems = [];
 for (const path of files) {

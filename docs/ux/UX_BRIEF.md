@@ -103,7 +103,7 @@ Status never relies on colour alone; always icon and/or text. Provide dark-mode 
 
 **Responsive.** Desktop baseline. Collapse secondary panels before shrinking the workspace. Presentation mode prioritises images. Tablet split views; phone full-width plan with bottom sheets. No horizontal scrolling for core tasks.
 
-**Units.** Lengths are stored as exact integers in Core's base unit (not chosen yet; DECISIONS U-1). Display units are a user preference. Inputs convert on entry and refuse values that don't land exactly on an allowed increment.
+**Units.** Lengths are stored as exact integers in Core's base unit, 1/64 inch (DECISIONS U-1). Display units are a user preference. Inputs convert on entry and refuse values that don't land exactly on an allowed increment.
 
 ---
 

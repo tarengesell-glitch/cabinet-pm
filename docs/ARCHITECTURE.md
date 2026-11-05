@@ -139,7 +139,8 @@ The writer is a pure function: (master copy version + mapping snapshot) → file
 - Vitest (unit and golden tests) and Playwright (UI flows).
 - Added for this spec, each chosen when its phase arrives:
   - an XML/file library for the writer and reader, once the ORDX format reference exists (Phase 0–1);
-  - three.js / react-three-fiber for the editor (Phase 5);
+  - react-konva for the 2D room drawing (walls, doors, windows), decided 2026-11-05 and pulled ahead of Phase 5;
+  - three.js / react-three-fiber for the 3D editor view (Phase 5);
   - the Claude API, server-side only, for AI Design (Phase 6).
 
 ## Getting data back out of Cabinet Vision (automatically, OA-6)

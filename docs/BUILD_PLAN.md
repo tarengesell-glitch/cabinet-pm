@@ -12,7 +12,7 @@ The phases are `docs/BUILD_SPEC.md` section 10. Phases 9 and 10 and the addition
 |---|---|---|---|
 | 0a | Owner + shop | Gather 15–30 varied completed jobs with their ORDX exports and engineered outputs, plus the shop's catalog export and Cabinet Vision version | `samples/cabinet-vision/README.md` |
 | 0b | Claude | Write the ORDX format reference and the read-back options from the samples. No app code. | `prompts/00-cabinet-vision-discovery.md` |
-| 0c | Owner + a Cabinet Vision expert | Review the format reference, answer what you can, choose the read-back source, decide the base unit (U-1) | — |
+| 0c | Owner + a Cabinet Vision expert | Review the format reference, answer what you can, choose the read-back source (U-1 already decided 2026-11-05: 1/64 inch) | — |
 
 ## Phase 1: Proof slice (go/no-go)
 
@@ -21,7 +21,7 @@ The phases are `docs/BUILD_SPEC.md` section 10. Phases 9 and 10 and the addition
 | # | Who | Step | Prompt |
 |---|---|---|---|
 | 1a | Claude | Scaffold the repo and its guardrails: folders, dependency rules, vendor-name check, purity checks, test runners. Can run alongside Phase 0. | `prompts/01-scaffold-and-guardrails.md` |
-| 1b | Claude | Core: master copy schemas, base unit, angles, selection resolution, check interface, first layout checks. **Needs U-1 and A-1 decided.** | `prompts/02-core-master-copy.md` |
+| 1b | Claude | Core: master copy schemas, base unit, angles, selection resolution, check interface, first layout checks. **Needs A-1 decided** (U-1 is 1/64 inch). | `prompts/02-core-master-copy.md` |
 | 1c | Claude | Catalog, minimal: the proof-slice items as versioned data, plus the buildability checks | `prompts/03-catalog-proof-slice.md` |
 | 1d | Claude | Cabinet Vision adapter, minimal: mapping data, preflight, deterministic writer, first golden cases | `prompts/04-ordx-writer-proof-slice.md` |
 | 1e | Owner | Import the generated files into Cabinet Vision and record the go/no-go in `DECISIONS.md` | `golden/cabinet-vision/README.md` (written in 1d) |
@@ -53,6 +53,8 @@ Full Product Catalog with versions and the editor for it; **automatic** catalog 
 ## Phase 5: Designer
 
 **Exit:** designers produce jobs that pass the gate and import cleanly.
+
+**Pulled forward (2026-11-05):** room capture (walls, doors, windows on react-konva) is built early, right after the scaffold (1a): Core walls and openings first, then the Designer drawing screen. See DECISIONS "2026-11-05".
 
 Before this phase: a UX session that turns `docs/ux/UX_BRIEF.md` into screen specs and design tokens (C-2 must be decided). Then:
 - room capture (rough dimensions first);

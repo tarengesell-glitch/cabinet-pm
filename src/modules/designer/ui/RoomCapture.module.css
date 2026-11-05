@@ -343,3 +343,40 @@
   display: inline-flex;
   align-items: center;
 }
+
+.toast {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  right: 12px;
+  z-index: 2;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 8px 10px 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  background: #fbf4e8;
+  border: 1px solid #ecd9b4;
+  color: var(--warning);
+  box-shadow: 0 2px 8px rgba(23, 33, 43, 0.08);
+}
+
+.toastError {
+  composes: toast;
+  background: #fbeeee;
+  border-color: #efcfd0;
+  color: var(--danger);
+}
+
+.toastClose {
+  font: inherit;
+  font-size: 16px;
+  line-height: 1;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  padding: 0 2px;
+}

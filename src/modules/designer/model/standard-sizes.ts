@@ -13,6 +13,7 @@ const FileSchema = z.strictObject({
   source: z.string().min(1),
   wall_thickness: Size,
   openings: z.strictObject({ door: OpeningSizes, window: OpeningSizes, passthrough: OpeningSizes }),
+  door_swing: z.strictObject({ hinge: z.enum(['start', 'end']), opens: z.enum(['inside', 'outside']), source: z.string().min(1) }),
 });
 
 export interface OpeningStandard {
@@ -23,6 +24,8 @@ export interface OpeningStandard {
 
 export interface StandardSizes {
   readonly source: string;
+  /** How a new door hangs: hinge end, and whether it swings into or out of the room. */
+  readonly door_swing: { readonly hinge: 'start' | 'end'; readonly opens: 'inside' | 'outside' };
   readonly wall_thickness: Length;
   readonly openings: Readonly<Record<'door' | 'window' | 'passthrough', OpeningStandard>>;
 }
@@ -44,6 +47,7 @@ export function readStandardSizes(data: unknown): { ok: true; value: StandardSiz
   });
   const value: StandardSizes = {
     source: parsed.data.source,
+    door_swing: { hinge: parsed.data.door_swing.hinge, opens: parsed.data.door_swing.opens },
     wall_thickness: length('wall thickness', parsed.data.wall_thickness),
     openings: {
       door: opening('door', parsed.data.openings.door),

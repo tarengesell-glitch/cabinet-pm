@@ -1,6 +1,7 @@
 // Public API of core.
 export * from './result';
 export * from './units';
+export * from './labels';
 export * from './angles';
 export * from './geometry';
 export * from './schema/master-copy';

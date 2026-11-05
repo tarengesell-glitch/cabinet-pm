@@ -19,10 +19,14 @@ import {
   type Point,
   type Provenance,
   type Room,
+  type Swing,
   type Wall,
+  wallLetter,
 } from '@/core/index';
-import { nearestWall, standardOpeningOffset } from '../model/editor';
+import { findOpening, nearestWall, projectOntoWall, standardOpeningOffset } from '../model/editor';
 import { lengthText } from './format';
+import { parseSize } from './parseSize';
+import type { TypedSize } from '../model/editor';
 import { STANDARD_SIZES } from '../model/standard-sizes';
 
 export type Tool = 'select' | 'draw' | Opening['kind'];
@@ -96,10 +100,15 @@ interface Props {
   canEdit: boolean;
   onSelect: (selection: Selection) => void;
   onAddWall: (start: Point, end: Point) => void;
+  /** A wall typed while drawing: length (parsed) in a direction, from the current corner. Returns the new corner, or null if refused. */
+  onAddWallTyped: (from: Point, length: TypedSize, angle: number) => Point | null;
+  onDrawError: (reason: string) => void;
   /** The tap position along the wall (centre of the new opening). */
   onPickWallForOpening: (wallId: string, centre: number) => void;
-  /** An opening dragged along its wall to a new offset. */
-  onMoveOpening: (openingId: string, offset: number) => void;
+  /** A door/window dragged: to `offset` along wall `wallId` (its own or another). Preview until done. */
+  onOpeningMove: (openingId: string, wallId: string, offset: number, done: boolean) => void;
+  /** A door/window end handle dragged: its new start offset and width. Preview until done. */
+  onOpeningResize: (openingId: string, offset: number, width: number, done: boolean) => void;
   /** A corner handle dragged (done = released). The parent previews, then commits on release. */
   onCornerDrag: (from: Point, to: Point, done: boolean) => void;
   /** An end handle dragged along the wall: the wall's new length from its other end. */
@@ -152,6 +161,15 @@ export function PlanCanvas(props: Props) {
 
   const corners = useMemo(() => room.walls.flatMap((w) => [w.start_point, w.end_point]), [room.walls]);
 
+  // Typing a length while drawing (kitchen CAD tools and AutoCAD dynamic input; see docs/ux/INDUSTRY_REVIEW.md): point the
+  // way the wall should go, type its length, press Enter.
+  const [typed, setTyped] = useState('');
+  const typedRef = useRef({ typed, chainStart, hover, tool });
+  typedRef.current = { typed, chainStart, hover, tool };
+  useEffect(() => {
+    if (chainStart === null) setTyped('');
+  }, [chainStart]);
+
   // Fit the room (plus a margin to draw into) on screen. While a chain of walls is
   // being drawn the view stays still, so each tap lands where the person aimed.
   // The same goes for dragging a wall handle, whose preview changes the room's size.
@@ -173,19 +191,105 @@ export function PlanCanvas(props: Props) {
     setManual({ ...view, scale, ox: px - (rx - view.minX) * scale, oy: py - (view.maxY - ry) * scale });
   };
 
-  /** Mouse wheel zooms; a sideways wheel (or Shift + wheel) scrolls left and right. */
+  /**
+   * Scrolling, the way CAD and design apps do it (research, 2026-11-05: AutoCAD, SketchUp,
+   * Revit and Cyncly's kitchen tools zoom on the mouse wheel; Figma pans on a trackpad):
+   * - a pinch on a trackpad, or Ctrl/Cmd + scroll, zooms at the cursor;
+   * - a mouse wheel (coarse steps, up/down only) zooms at the cursor;
+   * - a trackpad two-finger scroll (fine steps) moves the plan in any direction;
+   * - a sideways mouse wheel, or Shift + wheel, moves it left and right.
+   */
   const onWheel = (e: Konva.KonvaEventObject<WheelEvent>) => {
     e.evt.preventDefault();
-    const { deltaX, deltaY, shiftKey } = e.evt;
-    const sideways = Math.abs(deltaX) > Math.abs(deltaY) || (shiftKey && deltaY !== 0);
-    if (sideways) {
-      const amount = Math.abs(deltaX) > Math.abs(deltaY) ? deltaX : deltaY;
-      setManual({ ...view, ox: view.ox - amount });
+    const { deltaX, deltaY, deltaMode, shiftKey, ctrlKey, metaKey } = e.evt;
+    const pos = e.target.getStage()?.getPointerPosition() ?? { x: size.width / 2, y: size.height / 2 };
+    if (ctrlKey || metaKey) {
+      zoomAt(Math.exp(-deltaY * 0.01), pos.x, pos.y);
       return;
     }
-    const pos = e.target.getStage()?.getPointerPosition() ?? { x: size.width / 2, y: size.height / 2 };
-    zoomAt(Math.exp(-deltaY * 0.0015), pos.x, pos.y);
+    const mouseWheel = deltaMode !== 0 || (deltaX === 0 && Number.isInteger(deltaY) && Math.abs(deltaY) >= 50);
+    if (mouseWheel && !shiftKey) {
+      zoomAt(Math.exp(-deltaY * 0.0015), pos.x, pos.y);
+      return;
+    }
+    const dx = shiftKey && deltaX === 0 ? deltaY : deltaX;
+    const dy = shiftKey && deltaX === 0 ? 0 : deltaY;
+    setManual({ ...view, ox: view.ox - dx, oy: view.oy - dy });
   };
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const { typed: t, chainStart: start, hover: at, tool: tl } = typedRef.current;
+      if (tl !== 'draw' || !start) return;
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || e.metaKey || e.ctrlKey) return;
+      if (/^[0-9'"./ \-m]$/i.test(e.key) && !(e.key === ' ' && t === '')) {
+        e.preventDefault();
+        setTyped(t + e.key);
+      } else if (e.key === 'Backspace' && t !== '') {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        setTyped(t.slice(0, -1));
+      } else if (e.key === 'Enter' && t.trim() !== '') {
+        e.preventDefault();
+        const size = parseSize(t);
+        if (!size.ok) return props.onDrawError(size.reason);
+        if (!at) return props.onDrawError('Point the mouse the way the wall should go, then press Enter.');
+        const dir = snapEndToAngle(start, at, ANGLE_STEP);
+        if (!dir.ok) return props.onDrawError(dir.reason);
+        const corner = props.onAddWallTyped(start, size.value, dir.value.angle);
+        if (corner) {
+          setTyped('');
+          const first = firstOfChain.current;
+          props.onChainStart(first && samePoint(first, corner) ? null : corner);
+        }
+      }
+    };
+    window.addEventListener('keydown', onKey, true);
+    return () => window.removeEventListener('keydown', onKey, true);
+  });
+
+  // Panning by dragging: middle mouse button (AutoCAD, Revit) or Space + drag (Figma, Sweet Home 3D).
+  const [spaceHeld, setSpaceHeld] = useState(false);
+  const [panning, setPanning] = useState<V | null>(null);
+  const viewRef = useRef(view);
+  viewRef.current = view;
+  useEffect(() => {
+    const typing = (t: EventTarget | null) => t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement;
+    const down = (e: KeyboardEvent) => {
+      if (typing(e.target)) return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        setSpaceHeld(true);
+      }
+      // Zoom to fit: Shift+1 (Figma); the Fit button does the same.
+      if (e.shiftKey && e.code === 'Digit1') setManual(null);
+    };
+    const up = (e: KeyboardEvent) => {
+      if (e.code === 'Space') setSpaceHeld(false);
+    };
+    window.addEventListener('keydown', down);
+    window.addEventListener('keyup', up);
+    return () => {
+      window.removeEventListener('keydown', down);
+      window.removeEventListener('keyup', up);
+    };
+  }, []);
+  useEffect(() => {
+    if (!panning) return;
+    let last = panning;
+    const move = (e: PointerEvent) => {
+      const v = viewRef.current;
+      setManual({ ...v, ox: v.ox + (e.clientX - last.x), oy: v.oy + (e.clientY - last.y) });
+      last = { x: e.clientX, y: e.clientY };
+    };
+    const stop = () => setPanning(null);
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', stop);
+    return () => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', stop);
+    };
+  }, [panning]);
 
   const toScreen = (p: Point) => ({ x: view.ox + (p.x - view.minX) * view.scale, y: view.oy + (view.maxY - p.y) * view.scale });
   const toRoom = (sx: number, sy: number): Point => ({
@@ -224,10 +328,16 @@ export function PlanCanvas(props: Props) {
   };
 
   // Handles on a single selected wall: drag a corner, or the middle to slide the wall.
-  type Drag =
+  type Drag = (
     | { kind: 'corner'; wallId: string; which: 'start' | 'end'; from: Point }
-    | { kind: 'wall'; wallId: string; grabbed: Point };
+    | { kind: 'wall'; wallId: string; grabbed: Point }
+    | { kind: 'opening'; id: string; grab: number }
+    | { kind: 'opening-end'; id: string; which: 'start' | 'end' }
+  ) & { at: V; moved: boolean };
+  /** The last wall and offset a dragged door/window snapped to, so release keeps it there. */
+  const lastOpeningSpot = useRef<{ wallId: string; offset: number } | null>(null);
   const drag = useRef<Drag | null>(null);
+  const openingForHandles = tool === 'select' && canEdit && selection?.kind === 'opening' ? findOpening(room, selection.id) : null;
   const handleWall =
     tool === 'select' && canEdit && selection?.kind === 'wall' ? room.walls.find((w) => w.wall_id === selection.id) ?? null : null;
 
@@ -257,7 +367,35 @@ export function PlanCanvas(props: Props) {
   const dragTo = (raw: Point, done: boolean, free = false) => {
     const d = drag.current;
     if (!d) return;
-    if (d.kind === 'corner') {
+    if (d.kind === 'opening') {
+      // Slides along its wall, or jumps to another wall when the pointer comes near one.
+      const found = findOpening(props.baseRoom, d.id);
+      if (!found) return;
+      const hit = nearestWall(props.baseRoom, raw, GHOST_PX / view.scale);
+      if (hit) {
+        const width = found.opening.width.value;
+        const len = distanceForDisplay(hit.wall.start_point, hit.wall.end_point).value;
+        const wanted = hit.wall.wall_id === found.wall.wall_id ? hit.offset - d.grab : hit.offset - width / 2;
+        const offset = Math.min(Math.max(0, roundToInch(wanted)), Math.max(0, Math.floor((len - width) / INCH) * INCH));
+        lastOpeningSpot.current = { wallId: hit.wall.wall_id, offset };
+      }
+      const spot = lastOpeningSpot.current;
+      if (spot) props.onOpeningMove(d.id, spot.wallId, spot.offset, done);
+    } else if (d.kind === 'opening-end') {
+      // Stretches or shrinks it from one end, along its wall.
+      const found = findOpening(props.baseRoom, d.id);
+      if (!found) return;
+      const len = distanceForDisplay(found.wall.start_point, found.wall.end_point).value;
+      const at = Math.min(Math.max(0, roundToInch(projectOntoWall(found.wall, raw).offset)), len);
+      const start = found.opening.offset.value;
+      const end = start + found.opening.width.value;
+      if (d.which === 'start') {
+        const offset = Math.min(at, end - INCH);
+        props.onOpeningResize(d.id, offset, end - offset, done);
+      } else {
+        props.onOpeningResize(d.id, start, Math.max(INCH, at - start), done);
+      }
+    } else if (d.kind === 'corner') {
       const wall = props.baseRoom.walls.find((w) => w.wall_id === d.wallId);
       if (!wall) return;
       if (free) {
@@ -303,7 +441,18 @@ export function PlanCanvas(props: Props) {
   const finishMarquee = () => {
     if (!marquee) return;
     if (dragged.current) {
-      const ids = room.walls.filter((w) => segmentTouchesBox(toScreen(w.start_point), toScreen(w.end_point), marquee)).map((w) => w.wall_id);
+      // Like AutoCAD: dragged left to right ("window") picks walls fully inside the box;
+      // right to left ("crossing") picks any wall the box touches.
+      const crossing = marquee.x1 < marquee.x0;
+      const inBox = (p: V) =>
+        p.x >= Math.min(marquee.x0, marquee.x1) && p.x <= Math.max(marquee.x0, marquee.x1) && p.y >= Math.min(marquee.y0, marquee.y1) && p.y <= Math.max(marquee.y0, marquee.y1);
+      const ids = room.walls
+        .filter((w) => {
+          const a = toScreen(w.start_point);
+          const b = toScreen(w.end_point);
+          return crossing ? segmentTouchesBox(a, b, marquee) : inBox(a) && inBox(b);
+        })
+        .map((w) => w.wall_id);
       props.onSelect(wallSelection(ids));
     }
     setMarquee(null);
@@ -370,16 +519,52 @@ export function PlanCanvas(props: Props) {
   // Door / window / passthrough tools: a ghost follows the cursor and snaps onto walls.
   const placing = tool !== 'select' && tool !== 'draw' ? tool : null;
   const ghost = placing && hover ? openingTarget(hover) : null;
-  const cursor = tool === 'select' ? 'default' : placing ? (ghost ? 'copy' : hover ? 'not-allowed' : 'default') : 'crosshair';
+  const cursor = panning
+    ? 'grabbing'
+    : spaceHeld
+      ? 'grab'
+      : tool === 'select'
+        ? 'default'
+        : placing
+          ? ghost
+            ? 'copy'
+            : hover
+              ? 'not-allowed'
+              : 'default'
+          : 'crosshair';
 
   return (
-    <div ref={box} style={{ position: 'absolute', inset: 0, cursor }} data-testid="plan">
+    <div
+      ref={box}
+      style={{ position: 'absolute', inset: 0, cursor }}
+      data-testid="plan"
+      // Pan starts here, before the plan sees the press, so it works over walls and handles too.
+      onPointerDownCapture={(e) => {
+        if (e.button === 1 || (e.button === 0 && spaceHeld)) {
+          e.preventDefault();
+          e.stopPropagation();
+          setPanning({ x: e.clientX, y: e.clientY });
+        }
+      }}
+      onMouseDown={(e) => {
+        if (e.button === 1) e.preventDefault(); // no browser auto-scroll on middle click
+      }}
+      // Double-click the middle button: zoom to fit (AutoCAD, WinnerDesign).
+      onAuxClick={(e) => {
+        if (e.button === 1 && e.detail === 2) setManual(null);
+      }}
+    >
       <Stage
         width={size.width}
         height={size.height}
         onClick={onStageClick}
         onTap={onStageClick}
         onWheel={onWheel}
+        // Right-click finishes a run of walls (Mozaik); no browser menu over the plan.
+        onContextMenu={(e) => {
+          e.evt.preventDefault();
+          if (chainStart) props.onChainStart(null);
+        }}
         onPointerDown={(e) => {
           if (tool !== 'select' || e.target !== e.target.getStage()) return;
           const pos = e.target.getStage()?.getPointerPosition();
@@ -391,6 +576,9 @@ export function PlanCanvas(props: Props) {
           const at = pointer(e);
           setHover(at);
           if (drag.current && at) {
+            const pos = e.target.getStage()?.getPointerPosition();
+            if (!drag.current.moved && pos && Math.hypot(pos.x - drag.current.at.x, pos.y - drag.current.at.y) <= DRAG_PX) return;
+            drag.current.moved = true;
             dragTo(at, false, e.evt.altKey);
             return;
           }
@@ -402,6 +590,12 @@ export function PlanCanvas(props: Props) {
         }}
         onPointerUp={(e) => {
           if (drag.current) {
+            if (!drag.current.moved) {
+              // A press without a drag: just a click (selects what was pressed).
+              drag.current = null;
+              setDragging(false);
+              return;
+            }
             const at = pointer(e);
             if (at) dragTo(at, true, e.evt.altKey);
             dragged.current = true; // the click that follows is not a deselect
@@ -429,7 +623,15 @@ export function PlanCanvas(props: Props) {
               neighbours={neighboursOf(room.walls, wall)}
               outside={outside}
               canEdit={canEdit}
-              onMoveOpening={props.onMoveOpening}
+              onGrabOpening={(id, at) => {
+                const found = findOpening(props.baseRoom, id);
+                if (!found) return;
+                const p = toRoom(at.x, at.y);
+                drag.current = { kind: 'opening', id, grab: projectOntoWall(found.wall, p).offset - found.opening.offset.value, at, moved: false };
+                lastOpeningSpot.current = null;
+                setDragging(true);
+                props.onSelect({ kind: 'opening', id });
+              }}
               toScreen={toScreen}
               scale={view.scale}
               selected={selectedWallIds(selection).includes(wall.wall_id)}
@@ -445,12 +647,24 @@ export function PlanCanvas(props: Props) {
               wall={handleWall}
               toScreen={toScreen}
               onGrabCorner={(from, which) => {
-                drag.current = { kind: 'corner', wallId: handleWall.wall_id, which, from };
+                drag.current = { kind: 'corner', wallId: handleWall.wall_id, which, from, at: toScreen(from), moved: false };
                 setDragging(true);
               }}
               onGrabMiddle={(at) => {
                 const grabbed = toRoom(at.x, at.y);
-                drag.current = { kind: 'wall', wallId: handleWall.wall_id, grabbed };
+                drag.current = { kind: 'wall', wallId: handleWall.wall_id, grabbed, at, moved: false };
+                setDragging(true);
+              }}
+            />
+          )}
+          {openingForHandles && (
+            <OpeningHandles
+              wall={openingForHandles.wall}
+              offset={openingForHandles.opening.offset.value}
+              width={openingForHandles.opening.width.value}
+              toScreen={toScreen}
+              onGrab={(which, at) => {
+                drag.current = { kind: 'opening-end', id: openingForHandles.opening.opening_id, which, at, moved: false };
                 setDragging(true);
               }}
             />
@@ -458,7 +672,7 @@ export function PlanCanvas(props: Props) {
           {chainStart && (
             <Circle {...toScreen(chainStart)} radius={6} stroke={ACCENT} strokeWidth={2} listening={false} />
           )}
-          {preview && chainStart && <PreviewWall start={chainStart} end={preview} toScreen={toScreen} />}
+          {preview && chainStart && <PreviewWall start={chainStart} end={preview} toScreen={toScreen} typed={typed} />}
           {placing && ghost && (
             <GhostOpening kind={placing} wall={ghost.wall} offset={ghost.offset} toScreen={toScreen} scale={view.scale} outside={outside} />
           )}
@@ -472,8 +686,9 @@ export function PlanCanvas(props: Props) {
               fill="rgba(23, 107, 112, 0.08)"
               stroke={ACCENT}
               strokeWidth={1}
-              dash={[5, 4]}
+              dash={marquee.x1 < marquee.x0 ? [5, 4] : []}
               listening={false}
+              name={marquee.x1 < marquee.x0 ? 'marquee-crossing' : 'marquee-window'}
             />
           )}
         </Layer>
@@ -521,15 +736,22 @@ function ZoomButton({ label, onClick, children }: { label: string; onClick: () =
   );
 }
 
-function PreviewWall({ start, end, toScreen }: { start: Point; end: Point; toScreen: (p: Point) => Point }) {
+function PreviewWall({ start, end, toScreen, typed }: { start: Point; end: Point; toScreen: (p: Point) => Point; typed: string }) {
   const a = toScreen(start);
   const b = toScreen(end);
   const d = distanceForDisplay(start, end);
   return (
-    <Group listening={false}>
+    <Group listening={false} name="preview-wall">
       <Line points={[a.x, a.y, b.x, b.y]} stroke={ACCENT} strokeWidth={3} dash={[8, 6]} />
       <Circle x={b.x} y={b.y} radius={5} fill={ACCENT} />
-      <Text x={b.x + 10} y={b.y - 22} text={lengthText(d)} fontSize={13} fill={ACCENT} fontStyle="bold" />
+      {typed ? (
+        <>
+          <Rect x={b.x + 8} y={b.y - 28} width={Math.max(40, typed.length * 8 + 16)} height={22} cornerRadius={5} fill="#ffffff" stroke={ACCENT} strokeWidth={1.5} />
+          <Text x={b.x + 16} y={b.y - 23} text={`${typed}▏`} fontSize={13} fill={ACCENT} fontStyle="bold" name="typed-length" />
+        </>
+      ) : (
+        <Text x={b.x + 10} y={b.y - 22} text={lengthText(d)} fontSize={13} fill={ACCENT} fontStyle="bold" />
+      )}
     </Group>
   );
 }
@@ -605,7 +827,8 @@ interface WallShapeProps {
   canEdit: boolean;
   onSelect: (selection: Selection) => void;
   onWallTap: (wallId: string, additive: boolean) => void;
-  onMoveOpening: (openingId: string, offset: number) => void;
+  /** Pressing on a door/window: may become a drag (screen point where it was pressed). */
+  onGrabOpening: (openingId: string, at: V) => void;
 }
 
 function WallShape(props: WallShapeProps) {
@@ -631,7 +854,9 @@ function WallShape(props: WallShapeProps) {
   const fill = FILL[wall.length_provenance];
   const length = distanceForDisplay(wall.start_point, wall.end_point);
   // Less is more (owner, 2026-11-05): the colour shows how sure we are; the panel says it in words.
-  const label = `${index + 1}: ${lengthText(length)}`;
+  // The length outside the wall (where dimensions go); the wall's letter in a circle inside.
+  const label = lengthText(length);
+  const letter = wallLetter(index);
   const mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
   const labelOffset = h + 14;
   const angleDeg = (Math.atan2(dy, dx) * 180) / Math.PI;
@@ -642,7 +867,6 @@ function WallShape(props: WallShapeProps) {
     onSelect(sel);
   };
   const along = (offset: number) => ({ x: a.x + ux * offset * scale, y: a.y + uy * offset * scale });
-  const wallLength = length.value;
 
   return (
     <Group>
@@ -681,6 +905,10 @@ function WallShape(props: WallShapeProps) {
         offsetY={6}
         listening={false}
       />
+      <Group x={mid.x - nx * (h + 16)} y={mid.y - ny * (h + 16)} listening={false} name={`wall-tag-${letter}`}>
+        <Circle radius={10} fill="#ffffff" stroke={TEXT[wall.length_provenance]} strokeWidth={1.5} />
+        <Text text={letter} fontSize={11} fontStyle="bold" fill={TEXT[wall.length_provenance]} width={20} height={20} offsetX={10} offsetY={10} align="center" verticalAlign="middle" />
+      </Group>
       {wall.openings.map((o) => {
         const s = along(o.offset.value);
         const e = along(o.offset.value + o.width.value);
@@ -689,7 +917,6 @@ function WallShape(props: WallShapeProps) {
         const stroke = bad ? DANGER : isSel ? ACCENT : '#17212b';
         const sel = select({ kind: 'opening', id: o.opening_id });
         const w = o.width.value * scale;
-        const swingAngle = (Math.atan2(uy, ux) * 180) / Math.PI;
         const draggable = selectable && canEdit;
         return (
           <Group
@@ -697,24 +924,14 @@ function WallShape(props: WallShapeProps) {
             name={`opening-${o.kind}`}
             onClick={sel}
             onTap={sel}
-            draggable={draggable}
-            // Only along the wall.
-            dragBoundFunc={function (this: Konva.Node, pos) {
-              const parent = this.getParent()?.getAbsolutePosition() ?? { x: 0, y: 0 };
-              const t = (pos.x - parent.x) * ux + (pos.y - parent.y) * uy;
-              return { x: parent.x + ux * t, y: parent.y + uy * t };
-            }}
-            onDragStart={() => onSelect({ kind: 'opening', id: o.opening_id })}
-            onDragEnd={(ev) => {
-              const node = ev.target;
-              const moved = (node.x() * ux + node.y() * uy) / scale;
-              node.position({ x: 0, y: 0 });
-              const max = Math.max(0, wallLength - o.width.value);
-              const next = Math.min(Math.max(0, Math.round((o.offset.value + moved) / INCH) * INCH), Math.floor(max / INCH) * INCH);
-              if (next !== o.offset.value) props.onMoveOpening(o.opening_id, next);
+            onPointerDown={(ev) => {
+              if (!draggable) return;
+              ev.cancelBubble = true;
+              const pos = ev.target.getStage()?.getPointerPosition();
+              if (pos) props.onGrabOpening(o.opening_id, pos);
             }}
           >
-            <OpeningSymbol kind={o.kind} s={s} e={e} n={n} h={h} wallWidth={width} widthPx={w} swingAngle={swingAngle} outside={outside} stroke={stroke} thick={isSel || bad} />
+            <OpeningSymbol kind={o.kind} s={s} e={e} n={n} h={h} wallWidth={width} widthPx={w} swing={o.swing} stroke={stroke} thick={isSel || bad} />
           </Group>
         );
       })}
@@ -743,12 +960,13 @@ function OpeningSymbol(p: {
   h: number;
   wallWidth: number;
   widthPx: number;
-  swingAngle: number;
-  outside: 1 | -1;
+  /** For a door: its hinge end and swing side (relative to the wall); null otherwise. */
+  swing: Swing | null;
   stroke: string;
   thick?: boolean;
 }) {
-  const { kind, s, e, n, h, wallWidth, widthPx: w, swingAngle, outside, stroke } = p;
+  const { kind, s, e, n, h, wallWidth, widthPx: w, stroke } = p;
+  const door = kind === 'door' && p.swing ? doorGeometry(s, e, w, p.swing) : null;
   return (
     <>
       <Line points={[s.x, s.y, e.x, e.y]} stroke="#ffffff" strokeWidth={wallWidth + 1} hitStrokeWidth={Math.max(wallWidth, 22)} />
@@ -758,10 +976,10 @@ function OpeningSymbol(p: {
           <Line points={[s.x - n.x * (h / 2), s.y - n.y * (h / 2), e.x - n.x * (h / 2), e.y - n.y * (h / 2)]} stroke={stroke} strokeWidth={1.5} />
         </>
       )}
-      {kind === 'door' && (
+      {door && (
         <>
-          <Line points={[s.x, s.y, s.x - n.x * w, s.y - n.y * w]} stroke={stroke} strokeWidth={2} />
-          <Arc x={s.x} y={s.y} innerRadius={w} outerRadius={w} angle={90} rotation={outside === 1 ? swingAngle - 90 : swingAngle} stroke={stroke} strokeWidth={1} dash={[4, 4]} />
+          <Line points={[door.hinge.x, door.hinge.y, door.leafEnd.x, door.leafEnd.y]} stroke={stroke} strokeWidth={2} name="door-leaf" />
+          <Arc x={door.hinge.x} y={door.hinge.y} innerRadius={w} outerRadius={w} angle={90} rotation={door.arcStart} stroke={stroke} strokeWidth={1} dash={[4, 4]} />
         </>
       )}
       {kind === 'passthrough' && <Line points={[s.x, s.y, e.x, e.y]} stroke={stroke} strokeWidth={1.5} dash={[6, 4]} />}
@@ -770,6 +988,25 @@ function OpeningSymbol(p: {
       ))}
     </>
   );
+}
+
+/**
+ * Where a door's leaf and swing arc go on screen. The leaf stands at 90° to the wall from the
+ * hinge jamb, on the side it opens to; the arc sweeps from the leaf back to the other jamb.
+ * Screen Y points down, so "left of the wall's direction" in the room is (u.y, -u.x) on screen.
+ */
+function doorGeometry(s: V, e: V, w: number, swing: Swing) {
+  const u = unit(sub(e, s));
+  const side = swing.opens === 'left' ? { x: u.y, y: -u.x } : { x: -u.y, y: u.x };
+  const hinge = swing.hinge === 'start' ? s : e;
+  const other = swing.hinge === 'start' ? e : s;
+  const leafEnd = { x: hinge.x + side.x * w, y: hinge.y + side.y * w };
+  const deg = (v: V) => (Math.atan2(v.y, v.x) * 180) / Math.PI;
+  const leafAngle = deg(side);
+  const jambAngle = deg(sub(other, hinge));
+  // Konva draws arcs clockwise from `rotation`: start from whichever edge leads clockwise.
+  const clockwiseGap = (((jambAngle - leafAngle) % 360) + 360) % 360;
+  return { hinge, leafEnd, arcStart: Math.abs(clockwiseGap - 90) < 1 ? leafAngle : jambAngle };
 }
 
 /** A dimension line (screen space) from a to b, set off by `off`, with end ticks and a centred label. */
@@ -824,11 +1061,18 @@ function GhostOpening(p: { kind: Opening['kind']; wall: Wall; offset: number; to
   const inside = { x: -n.x * (h + 22), y: -n.y * (h + 22) };
   return (
     <Group listening={false} opacity={0.9} name="ghost-opening">
-      <OpeningSymbol kind={kind} s={s} e={e} n={n} h={h} wallWidth={wallWidth} widthPx={std.width * scale} swingAngle={(Math.atan2(u.y, u.x) * 180) / Math.PI} outside={outside} stroke={GHOST} thick />
+      <OpeningSymbol kind={kind} s={s} e={e} n={n} h={h} wallWidth={wallWidth} widthPx={std.width * scale} swing={kind === 'door' ? ghostSwing(outside) : null} stroke={GHOST} thick />
       <Dimension a={a} b={s} off={inside} text={formatInches(offset)} />
       <Dimension a={e} b={b} off={inside} text={lengthText({ value: Math.max(0, after), exact: wallLength.exact })} />
     </Group>
   );
+}
+
+/** How a newly dropped door will hang (data/standard-sizes.json), for the ghost. outside=1: room drawn counter-clockwise, so inside is each wall's left. */
+function ghostSwing(outside: 1 | -1): Swing {
+  const inside = outside === 1 ? 'left' : 'right';
+  const std = STANDARD_SIZES.door_swing;
+  return { hinge: std.hinge, opens: std.opens === 'inside' ? inside : inside === 'left' ? 'right' : 'left' };
 }
 
 /** Off any wall: a faint ghost at the cursor saying where it needs to go. */
@@ -900,6 +1144,53 @@ function WallHandles({ wall, toScreen, onGrabCorner, onGrabMiddle }: {
         onMouseEnter={cursor(Math.abs(Math.cos((angle * Math.PI) / 180)) > 0.7 ? 'ns-resize' : 'ew-resize')}
         onMouseLeave={cursor('')}
       />
+    </Group>
+  );
+}
+
+/** Handles on the selected door/window: a dot at each end to make it wider or narrower. */
+function OpeningHandles({ wall, offset, width, toScreen, onGrab }: {
+  wall: Wall;
+  offset: number;
+  width: number;
+  toScreen: (p: Point) => Point;
+  onGrab: (which: 'start' | 'end', at: V) => void;
+}) {
+  const a = toScreen(wall.start_point);
+  const b = toScreen(wall.end_point);
+  const len = Math.hypot(b.x - a.x, b.y - a.y) || 1;
+  const wallLen = distanceForDisplay(wall.start_point, wall.end_point).value || 1;
+  const at = (d: number) => ({ x: a.x + ((b.x - a.x) / len) * (d / wallLen) * len, y: a.y + ((b.y - a.y) / len) * (d / wallLen) * len });
+  return (
+    <Group name="opening-handles">
+      {(['start', 'end'] as const).map((which) => {
+        const p = at(which === 'start' ? offset : offset + width);
+        return (
+          <Circle
+            key={which}
+            name={`opening-handle-${which}`}
+            x={p.x}
+            y={p.y}
+            radius={7}
+            fill="#ffffff"
+            stroke={ACCENT}
+            strokeWidth={2.5}
+            hitStrokeWidth={14}
+            onPointerDown={(e) => {
+              e.cancelBubble = true;
+              onGrab(which, p);
+            }}
+            onMouseEnter={(e) => {
+              const box = e.target.getStage()?.container();
+              if (box) box.style.cursor = 'ew-resize';
+            }}
+            onMouseLeave={(e) => {
+              const box = e.target.getStage()?.container();
+              if (box) box.style.cursor = '';
+            }}
+          />
+        );
+      })}
     </Group>
   );
 }

@@ -7,6 +7,7 @@
  * Fields that may be empty are required and nullable, so "not known" is explicit.
  */
 import { z } from 'zod';
+import { wallLetter } from '../labels';
 import { isLength } from '../units';
 
 export const SCHEMA_VERSION = 0;
@@ -40,7 +41,21 @@ export const PointSchema = z.strictObject({ x: LengthSchema, y: LengthSchema });
 /** BUILD_SPEC section 6: "windows, doors, and passthroughs". */
 export const OpeningKindSchema = z.enum(['window', 'door', 'passthrough']);
 
-export const OpeningSchema = z.strictObject({
+/**
+ * How a door hangs (owner, 2026-11-05: hinge side and swing direction are choosable).
+ * Stored relative to its wall, looking from the wall's start corner towards its end:
+ * - hinge: the opening's edge nearer the wall's start ('start') or end ('end');
+ * - opens: the side of the wall the door swings to ('left' or 'right' of that direction).
+ * Whether that is "in" or "out", or a left- or right-hand door, depends on the room and is
+ * worked out for display. Windows and passthroughs have no swing (null).
+ */
+export const SwingSchema = z.strictObject({
+  hinge: z.enum(['start', 'end']),
+  opens: z.enum(['left', 'right']),
+});
+
+export const OpeningSchema = z
+  .strictObject({
   opening_id: IdSchema,
   kind: OpeningKindSchema,
   /** Along the wall, from the wall's start corner to the opening's near edge. */
@@ -49,7 +64,11 @@ export const OpeningSchema = z.strictObject({
   height: MeasuredSchema,
   /** From the floor to the bottom of the opening. 0 for a door. */
   sill_height: MeasuredSchema,
-});
+  swing: SwingSchema.nullable(),
+  })
+  .refine((o) => (o.kind === 'door') === (o.swing !== null), {
+    message: 'A door needs a swing (hinge side and direction); windows and passthroughs have none.',
+  });
 
 export const ObstacleSchema = z.strictObject({
   obstacle_id: IdSchema,
@@ -137,9 +156,9 @@ export const JobSchema = z
     job.rooms.forEach((room) => {
       note(room.room_id, `room "${room.name}"`);
       room.walls.forEach((wall, w) => {
-        note(wall.wall_id, `wall ${w + 1} in "${room.name}"`);
-        wall.openings.forEach((o, i) => note(o.opening_id, `opening ${i + 1} on wall ${w + 1} in "${room.name}"`));
-        wall.obstacles.forEach((o, i) => note(o.obstacle_id, `obstacle ${i + 1} on wall ${w + 1} in "${room.name}"`));
+        note(wall.wall_id, `wall ${wallLetter(w)} in "${room.name}"`);
+        wall.openings.forEach((o, i) => note(o.opening_id, `opening ${i + 1} on wall ${wallLetter(w)} in "${room.name}"`));
+        wall.obstacles.forEach((o, i) => note(o.obstacle_id, `obstacle ${i + 1} on wall ${wallLetter(w)} in "${room.name}"`));
       });
     });
   });
@@ -147,6 +166,7 @@ export const JobSchema = z
 export type Provenance = z.infer<typeof ProvenanceSchema>;
 export type Measured = z.infer<typeof MeasuredSchema>;
 export type Opening = z.infer<typeof OpeningSchema>;
+export type Swing = z.infer<typeof SwingSchema>;
 export type Obstacle = z.infer<typeof ObstacleSchema>;
 export type Wall = z.infer<typeof WallSchema>;
 export type Room = z.infer<typeof RoomSchema>;

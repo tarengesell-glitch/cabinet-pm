@@ -8,6 +8,8 @@ Master brief for establishing the visual UX/UI specification. If anything here c
 > - The colour tokens in Part 4 are not settled: closet-builder has an owner-approved design system that may apply instead (DECISIONS C-2).
 > - UX work starts before Phase 5 (`docs/BUILD_PLAN.md`).
 
+> **Owner rule (2026-11-05): familiar, not custom.** For anything about drawing, navigating or editing a plan, first research how the most-used apps do it: Cabinet Vision, 2020 Design, Mozaik, Chief Architect, AutoCAD, Revit, SketchUp and Figma. Follow the common convention, and record the source in `docs/ux/INDUSTRY_REVIEW.md` or `docs/DECISIONS.md`. Cabinet designers should feel at home, not have to learn our way.
+>
 > **Owner rule (2026-11-05): less is more.** Always reduce clutter. Show only what the person needs at that moment. Never add keys, legends, extra labels or panels "just in case"; the owner would only have to undo them later. When in doubt, leave it out and ask. This rule beats any "show more" guidance below.
 
 Act as senior product designer, UX architect, UI designer and frontend engineer. Define actual screens, layouts, dimensions, components, interactions and states, not generic advice.

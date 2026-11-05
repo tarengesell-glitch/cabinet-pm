@@ -11,6 +11,11 @@ import {
   loadJob,
   moveCorner,
   moveOpening,
+  resizeOpening,
+  setDoorSwing,
+  doorHanding,
+  swingFromHanding,
+  setOpeningKind,
   slideWall,
   nearestWall,
   resizeWall,
@@ -100,10 +105,10 @@ describe('starting and drawing a room', () => {
     const d = rectangle(testEnv());
     expect(d.job.history.map((h) => h.summary)).toEqual([
       'Started room "Kitchen"',
-      `Added wall 1 (144")`,
-      `Added wall 2 (120")`,
-      `Added wall 3 (144")`,
-      `Added wall 4 (120")`,
+      `Added wall A (144")`,
+      `Added wall B (120")`,
+      `Added wall C (144")`,
+      `Added wall D (120")`,
     ]);
   });
 });
@@ -118,14 +123,14 @@ describe('typing a wall length', () => {
     if (!r.ok) throw new Error(r.reason);
     const walls = room(r.value.draft).walls;
     expect(walls[0]!.end_point).toEqual({ x: 13 * FT, y: 0 });
-    // Wall 2 moved across as a whole: still upright, still 10', still verified.
+    // Wall B moved across as a whole: still upright, still 10', still verified.
     expect(walls[1]!.start_point).toEqual({ x: 13 * FT, y: 0 });
     expect(walls[1]!.end_point).toEqual({ x: 13 * FT, y: 10 * FT });
     expect(walls[1]!.length_provenance).toBe('verified');
-    // Wall 3 stretched to stay joined, so it goes back to rough and says so.
+    // Wall C stretched to stay joined, so it goes back to rough and says so.
     expect(walls[2]!.start_point).toEqual({ x: 13 * FT, y: 10 * FT });
     expect(walls[2]!.length_provenance).toBe('rough');
-    expect(r.value.notices).toEqual([`Wall 3 changed length, so it's back to rough. Measure it again.`]);
+    expect(r.value.notices).toEqual([`Wall C changed length, so it's back to rough. Measure it again.`]);
     expect(runChecks(WALL_CHECKS, r.value.draft.job, {}).passed).toBe(true);
   });
 
@@ -144,7 +149,7 @@ describe('typing a wall length', () => {
     // Shortening from the start through the window is refused.
     const cut = resizeWall(d, env, w1.wall_id, 'start', size(7 * FT), 'dragged');
     expect(cut.ok).toBe(false);
-    if (!cut.ok) expect(cut.reason).toBe('That would cut through the window on wall 1.');
+    if (!cut.ok) expect(cut.reason).toBe('That would cut through the window on wall A.');
   });
 
   it('is measured, never verified, when typed', () => {
@@ -228,6 +233,81 @@ describe('doors and windows', () => {
   });
 });
 
+describe('door swing', () => {
+  it('a new door swings into the room, hinged at its start side; windows have no swing', () => {
+    const env = testEnv();
+    const d = rectangle(env); // drawn counter-clockwise: inside is to each wall's left
+    const placed = unwrap(placeOpening(d, env, room(d).walls[0]!.wall_id, 'door', null));
+    expect(room(placed).walls[0]!.openings[0]!.swing).toEqual({ hinge: 'start', opens: 'left' });
+    const win = unwrap(placeOpening(d, env, room(d).walls[0]!.wall_id, 'window', null));
+    expect(room(win).walls[0]!.openings[0]!.swing).toBeNull();
+  });
+
+  it('converts to and from left/right hand and in/out, judged from outside the door', () => {
+    const d = rectangle(testEnv()); // counter-clockwise: inside is each wall's left
+    const r = room(d);
+    // Wall A runs left to right along the bottom; outside is below it, looking up at it.
+    // Hinged at its start (the left end as seen from outside), swinging into the room: left hand.
+    expect(doorHanding(r, { hinge: 'start', opens: 'left' })).toEqual({ hand: 'left', swings: 'in' });
+    expect(doorHanding(r, { hinge: 'end', opens: 'right' })).toEqual({ hand: 'right', swings: 'out' });
+    for (const hand of ['left', 'right'] as const) {
+      for (const swings of ['in', 'out'] as const) {
+        expect(doorHanding(r, swingFromHanding(r, hand, swings))).toEqual({ hand, swings });
+      }
+    }
+  });
+
+  it('can be flipped to the other hinge side and to swing out', () => {
+    const env = testEnv();
+    let d = rectangle(env);
+    d = unwrap(placeOpening(d, env, room(d).walls[0]!.wall_id, 'door', null));
+    const id = room(d).walls[0]!.openings[0]!.opening_id;
+    d = unwrap(setDoorSwing(d, env, id, { hinge: 'end', opens: 'right' }));
+    expect(room(d).walls[0]!.openings[0]!.swing).toEqual({ hinge: 'end', opens: 'right' });
+    expect(d.job.history.at(-1)?.summary).toBe('Set a door to swing out, hinged at its end side');
+    expect(JobSchema.safeParse(d.job).success).toBe(true);
+  });
+
+  it('turning a window into a door gives it a swing, and back again removes it', () => {
+    const env = testEnv();
+    let d = rectangle(env);
+    d = unwrap(placeOpening(d, env, room(d).walls[0]!.wall_id, 'window', null));
+    const id = room(d).walls[0]!.openings[0]!.opening_id;
+    d = unwrap(setOpeningKind(d, env, id, 'door'));
+    expect(room(d).walls[0]!.openings[0]!.swing).not.toBeNull();
+    d = unwrap(setOpeningKind(d, env, id, 'window'));
+    expect(room(d).walls[0]!.openings[0]!.swing).toBeNull();
+    expect(setDoorSwing(d, env, id, { hinge: 'start', opens: 'left' }).ok).toBe(false);
+  });
+});
+
+describe('moving and resizing doors and windows', () => {
+  it('moves one onto another wall', () => {
+    const env = testEnv();
+    let d = rectangle(env);
+    const [w1, w2] = room(d).walls;
+    d = unwrap(placeOpening(d, env, w1!.wall_id, 'window', null));
+    const id = room(d).walls[0]!.openings[0]!.opening_id;
+    d = unwrap(moveOpening(d, env, id, 24 * IN, w2!.wall_id));
+    expect(room(d).walls[0]!.openings).toHaveLength(0);
+    expect(room(d).walls[1]!.openings[0]!.opening_id).toBe(id);
+    expect(room(d).walls[1]!.openings[0]!.offset.value).toBe(24 * IN);
+  });
+
+  it('resizes from an end; changed sizes become rough', () => {
+    const env = testEnv();
+    let d = rectangle(env);
+    d = unwrap(placeOpening(d, env, room(d).walls[0]!.wall_id, 'window', null));
+    const id = room(d).walls[0]!.openings[0]!.opening_id;
+    d = unwrap(setSize(d, env, { kind: 'opening', id, field: 'width' }, size(36 * IN)));
+    expect(room(d).walls[0]!.openings[0]!.width.provenance).toBe('measured');
+    d = unwrap(resizeOpening(d, env, id, 50 * IN, 40 * IN));
+    const o = room(d).walls[0]!.openings[0]!;
+    expect([o.offset.value, o.width.value, o.width.provenance]).toEqual([50 * IN, 40 * IN, 'rough']);
+    expect(resizeOpening(d, env, id, 50 * IN, 0).ok).toBe(false);
+  });
+});
+
 describe('standard sizes (data/standard-sizes.json)', () => {
   it('are the owner\'s values', () => {
     expect(STANDARD_SIZES.wall_thickness).toBe(5 * IN + 32);
@@ -237,7 +317,12 @@ describe('standard sizes (data/standard-sizes.json)', () => {
   });
   it('refuse a bad data file instead of filling it in', () => {
     const o = { width: '32', height: '80', sill_height: '0' };
-    const good = { source: 'test', wall_thickness: '5 1/2', openings: { door: o, window: o, passthrough: o } };
+    const good = {
+      source: 'test',
+      wall_thickness: '5 1/2',
+      openings: { door: o, window: o, passthrough: o },
+      door_swing: { hinge: 'start', opens: 'inside', source: 'test' },
+    };
     expect(readStandardSizes(good).ok).toBe(true);
     const bad = readStandardSizes({ ...good, wall_thickness: '5 1/3' });
     expect(bad.ok).toBe(false);
@@ -247,6 +332,16 @@ describe('standard sizes (data/standard-sizes.json)', () => {
 });
 
 describe('older saved drafts', () => {
+  it('give doors saved before swings existed the swing they were drawn with', () => {
+    const job = structuredClone(examples.kitchen()) as unknown as { rooms: { walls: { openings: Record<string, unknown>[] }[] }[] };
+    for (const w of job.rooms[0]!.walls) for (const o of w.openings) delete o.swing;
+    const up = upgradeStoredDraft({ job, wallDefaults: null });
+    const loaded = loadJob(up.job, up.wallDefaults);
+    if (!loaded.ok) throw new Error(loaded.reason);
+    expect(room(loaded.value.draft).walls[3]!.openings[0]!.swing).toEqual({ hinge: 'start', opens: 'left' });
+    expect(room(loaded.value.draft).walls[0]!.openings[0]!.swing).toBeNull();
+  });
+
   it('drop the old wall height and say so', () => {
     const job = structuredClone(examples.kitchen()) as unknown as { rooms: { walls: Record<string, unknown>[] }[] };
     for (const w of job.rooms[0]!.walls) w.height = { value: 6144, provenance: 'measured', source_mm: null };
@@ -313,7 +408,7 @@ describe('handles on a selected wall', () => {
     d = unwrap(addWall(d, env, { x: 0, y: 0 }, { x: 4 * FT, y: 0 }));
     const back = addWall(d, env, { x: 4 * FT, y: 0 }, { x: 1 * FT, y: 0 });
     expect(back.ok).toBe(false);
-    if (!back.ok) expect(back.reason).toMatch(/run back over wall 1/);
+    if (!back.ok) expect(back.reason).toMatch(/run back over wall A/);
   });
 });
 
@@ -325,7 +420,7 @@ describe('several walls at once', () => {
     let t = startTimeline(d);
     t = commit(t, unwrap(deleteWalls(d, env, ids)));
     expect(room(t.present).walls).toHaveLength(2);
-    expect(t.present.job.history.at(-1)?.summary).toBe('Deleted 2 walls (wall 1, wall 2)');
+    expect(t.present.job.history.at(-1)?.summary).toBe('Deleted 2 walls (wall A, wall B)');
     expect(room(undo(t).present).walls).toHaveLength(4);
     expect(deleteWalls(d, env, []).ok).toBe(false);
   });

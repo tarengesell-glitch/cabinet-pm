@@ -56,6 +56,7 @@ export function kitchen(): Job {
               width: measured(inch(36)),
               height: measured(inch(40)),
               sill_height: measured(inch(42)),
+              swing: null,
             },
           ],
           obstacles: [
@@ -80,6 +81,8 @@ export function kitchen(): Job {
               width: measured(inch(32)),
               height: measured(inch(80)),
               sill_height: measured(0),
+              // Wall 4 runs down the left side of a counter-clockwise room: inside is its left.
+              swing: { hinge: 'start', opens: 'left' },
             },
           ],
         }),
@@ -112,6 +115,7 @@ export function lShapeWithAngledWall(): Job {
               width: measured(inch(36)),
               height: measured(inch(84)),
               sill_height: measured(0),
+              swing: null,
             },
           ],
         }),
@@ -127,6 +131,7 @@ export function lShapeWithAngledWall(): Job {
               width: measured(ft(4) - inch(6)),
               height: measured(inch(30)),
               sill_height: measured(inch(40)),
+              swing: null,
             },
           ],
         }),

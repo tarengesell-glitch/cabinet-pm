@@ -22,11 +22,17 @@ Open it at `/rooms/preview` (`npm run dev`, then http://localhost:3000/rooms/pre
   - The move is saved on release as one undo step, and Escape cancels it. Walls whose length changes go back to rough.
 - **No walls on top of each other:** drawing or moving a wall back over another is refused with a reason.
 - **Edit a wall:** its length and thickness. Typing a length moves the far end along the wall's line, as dragging an end handle does.
-- **Moving around the plan:** the scroll wheel zooms in and out around the cursor. A sideways scroll (or Shift + scroll) moves left and right. Fit, + and − buttons sit at the bottom right.
-- **Doors, windows and passthroughs:** choose the tool and move the cursor. A ghost of the item follows it and snaps onto the nearest wall, showing its distance to each end of the wall; click to place it exactly there. Off a wall the cursor shows "not allowed" and clicking does nothing. Or use "+ Door" on a selected wall.
-  - A standard one drops in at once, rough, centred where you tapped.
-  - Drag it along the wall, or type exact sizes.
-  - The standard sizes are in `data/standard-sizes.json` (owner, 2026-11-05).
+- **Moving around the plan** (see `docs/ux/INDUSTRY_REVIEW.md`):
+  - the mouse wheel zooms at the cursor;
+  - on a trackpad, two fingers move the plan and pinch zooms;
+  - middle-button drag or Space + drag pans;
+  - double-click the middle button, press Shift+1, or press Fit to see the whole room.
+- **Drawing walls:** tap corner to corner, or point the way and type a length, then press Enter. Right-click or Esc finishes.
+- **Walls are lettered A, B, C … in circles**, as kitchen drawings do.
+- **Box select:** dragging left to right picks walls fully inside the box; right to left picks anything it touches.
+- **Doors, windows and passthroughs:** choose the tool and move onto a wall; a ghost shows where it lands, and a click places it.
+  - A selected one can be dragged along its wall or onto another wall, and resized from its end handles.
+  - A door can be set to Left hand / Right hand and Swings in / out, judged from outside the door per the US convention.
 - **Selecting several walls:**
   - Drag a box on an empty part of the plan; every wall it touches is selected.
   - Shift-click a wall to add it to the selection, or remove it.

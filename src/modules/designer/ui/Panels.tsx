@@ -296,6 +296,57 @@ export function WallPanel({ room, wall, canEdit, onSize, onProvenance, onDelete,
   );
 }
 
+/** Several walls selected at once. */
+export function WallsPanel({ room, walls, canEdit, onSelect, onThickness, onDelete }: {
+  room: Room;
+  walls: readonly Wall[];
+  canEdit: boolean;
+  onSelect: (sel: Selection) => void;
+  onThickness: (v: TypedSize) => Result<unknown>;
+  onDelete: () => void;
+}) {
+  const numbers = walls.map((w) => room.walls.findIndex((x) => x.wall_id === w.wall_id) + 1);
+  const thicknesses = new Set(walls.map((w) => w.thickness.value));
+  const first = walls[0] as Wall;
+  const doorsAndWindows = walls.reduce((n, w) => n + w.openings.length, 0);
+  return (
+    <section className={s.card}>
+      <BackToRoom onSelect={onSelect} />
+      <h2 className={s.cardTitle}>{walls.length} walls selected</h2>
+      <p className={s.muted}>Walls {numbers.join(', ')}. Shift-click a wall on the plan to add or remove it.</p>
+      <ul className={s.list}>
+        {walls.map((w, i) => {
+          const d = distanceForDisplay(w.start_point, w.end_point);
+          return (
+            <li key={w.wall_id}>
+              <button className={s.listButton} onClick={() => onSelect({ kind: 'wall', id: w.wall_id })}>
+                <span>
+                  Wall {numbers[i]}: {d.exact ? '' : '≈ '}
+                  {formatInches(d.value)}
+                </span>
+                <ProvenanceChip provenance={w.length_provenance} />
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+      <SizeField
+        label="Thickness (all selected)"
+        measured={thicknesses.size === 1 ? first.thickness : null}
+        {...(thicknesses.size === 1 ? {} : { display: 'Mixed' })}
+        canEdit={canEdit}
+        onSet={onThickness}
+      />
+      <div className={s.row}>
+        <button className={s.buttonDanger} disabled={!canEdit} onClick={onDelete}>
+          Delete {walls.length} walls{doorsAndWindows > 0 ? ` (and ${doorsAndWindows} door${doorsAndWindows === 1 ? '' : 's'}/window${doorsAndWindows === 1 ? '' : 's'} on them)` : ''}
+        </button>
+      </div>
+      <p className={s.muted}>Or press Delete on your keyboard.</p>
+    </section>
+  );
+}
+
 const OPENING_FIELDS: { field: OpeningField; label: string }[] = [
   { field: 'offset', label: 'From wall start' },
   { field: 'width', label: 'Width' },

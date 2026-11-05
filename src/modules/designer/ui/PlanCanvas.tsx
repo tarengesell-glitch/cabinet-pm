@@ -24,7 +24,43 @@ import {
 import { nearestWall } from '../model/editor';
 
 export type Tool = 'select' | 'draw' | Opening['kind'];
-export type Selection = { kind: 'wall'; id: string } | { kind: 'opening'; id: string } | null;
+export type Selection =
+  | { kind: 'wall'; id: string }
+  | { kind: 'walls'; ids: readonly string[] }
+  | { kind: 'opening'; id: string }
+  | null;
+
+/** The walls a selection covers (one, several or none). */
+export const selectedWallIds = (sel: Selection): readonly string[] =>
+  sel?.kind === 'wall' ? [sel.id] : sel?.kind === 'walls' ? sel.ids : [];
+
+/** A selection made of these walls: none, one or several. */
+export const wallSelection = (ids: readonly string[]): Selection =>
+  ids.length === 0 ? null : ids.length === 1 ? { kind: 'wall', id: ids[0] as string } : { kind: 'walls', ids };
+
+type Box = { x0: number; y0: number; x1: number; y1: number };
+
+/** Whether a segment touches a rectangle (screen space). */
+function segmentTouchesBox(a: V, b: V, box: Box): boolean {
+  const minX = Math.min(box.x0, box.x1);
+  const maxX = Math.max(box.x0, box.x1);
+  const minY = Math.min(box.y0, box.y1);
+  const maxY = Math.max(box.y0, box.y1);
+  const inside = (p: V) => p.x >= minX && p.x <= maxX && p.y >= minY && p.y <= maxY;
+  if (inside(a) || inside(b)) return true;
+  const cross = (p: V, q: V, r: V) => (q.x - p.x) * (r.y - p.y) - (q.y - p.y) * (r.x - p.x);
+  const hits = (p: V, q: V, r: V, t: V) => cross(p, q, r) * cross(p, q, t) <= 0 && cross(r, t, p) * cross(r, t, q) <= 0;
+  const c = [
+    { x: minX, y: minY },
+    { x: maxX, y: minY },
+    { x: maxX, y: maxY },
+    { x: minX, y: maxY },
+  ] as const;
+  return [0, 1, 2, 3].some((i) => hits(a, b, c[i] as V, c[(i + 1) % 4] as V));
+}
+
+/** Drags shorter than this many pixels count as a plain click. */
+const DRAG_PX = 4;
 
 /** UI settings for drawing (not business values): snap to whole inches, 45° steps, corners within 14 px. */
 const INCH = 64;
@@ -130,10 +166,33 @@ export function PlanCanvas(props: Props) {
     return pos ? toRoom(pos.x, pos.y) : null;
   };
 
+  // Box selection: press on an empty part of the plan, drag, release.
+  const [marquee, setMarquee] = useState<Box | null>(null);
+  const dragged = useRef(false);
+  const finishMarquee = () => {
+    if (!marquee) return;
+    if (dragged.current) {
+      const ids = room.walls.filter((w) => segmentTouchesBox(toScreen(w.start_point), toScreen(w.end_point), marquee)).map((w) => w.wall_id);
+      props.onSelect(wallSelection(ids));
+    }
+    setMarquee(null);
+  };
+
+  /** A tap on a wall: selects it, or with Shift adds it to (or removes it from) the selection. */
+  const onWallTap = (wallId: string, additive: boolean) => {
+    if (!additive) return props.onSelect({ kind: 'wall', id: wallId });
+    const current = selectedWallIds(selection);
+    props.onSelect(wallSelection(current.includes(wallId) ? current.filter((id) => id !== wallId) : [...current, wallId]));
+  };
+
   const onStageClick = (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
     const p = pointer(e);
     if (!p) return;
     if (tool === 'select') {
+      if (dragged.current) {
+        dragged.current = false;
+        return;
+      }
       if (e.target === e.target.getStage()) props.onSelect(null);
       return;
     }
@@ -182,8 +241,26 @@ export function PlanCanvas(props: Props) {
         height={size.height}
         onClick={onStageClick}
         onTap={onStageClick}
-        onMouseMove={(e) => setHover(pointer(e))}
-        onMouseLeave={() => setHover(null)}
+        onPointerDown={(e) => {
+          if (tool !== 'select' || e.target !== e.target.getStage()) return;
+          const pos = e.target.getStage()?.getPointerPosition();
+          if (!pos) return;
+          dragged.current = false;
+          setMarquee({ x0: pos.x, y0: pos.y, x1: pos.x, y1: pos.y });
+        }}
+        onPointerMove={(e) => {
+          setHover(pointer(e));
+          if (!marquee) return;
+          const pos = e.target.getStage()?.getPointerPosition();
+          if (!pos) return;
+          if (Math.hypot(pos.x - marquee.x0, pos.y - marquee.y0) > DRAG_PX) dragged.current = true;
+          setMarquee({ ...marquee, x1: pos.x, y1: pos.y });
+        }}
+        onPointerUp={finishMarquee}
+        onPointerLeave={() => {
+          setHover(null);
+          finishMarquee();
+        }}
       >
         <Layer>
           {gridLines}
@@ -198,7 +275,8 @@ export function PlanCanvas(props: Props) {
               onMoveOpening={props.onMoveOpening}
               toScreen={toScreen}
               scale={view.scale}
-              selected={selection?.kind === 'wall' && selection.id === wall.wall_id}
+              selected={selectedWallIds(selection).includes(wall.wall_id)}
+              onWallTap={onWallTap}
               selectedOpening={selection?.kind === 'opening' ? selection.id : null}
               issueIds={issueIds}
               selectable={tool === 'select'}
@@ -209,6 +287,19 @@ export function PlanCanvas(props: Props) {
             <Circle {...toScreen(chainStart)} radius={6} stroke={ACCENT} strokeWidth={2} listening={false} />
           )}
           {preview && chainStart && <PreviewWall start={chainStart} end={preview} toScreen={toScreen} />}
+          {marquee && dragged.current && (
+            <Rect
+              x={Math.min(marquee.x0, marquee.x1)}
+              y={Math.min(marquee.y0, marquee.y1)}
+              width={Math.abs(marquee.x1 - marquee.x0)}
+              height={Math.abs(marquee.y1 - marquee.y0)}
+              fill="rgba(23, 107, 112, 0.08)"
+              stroke={ACCENT}
+              strokeWidth={1}
+              dash={[5, 4]}
+              listening={false}
+            />
+          )}
         </Layer>
       </Stage>
     </div>
@@ -296,6 +387,7 @@ interface WallShapeProps {
   selectable: boolean;
   canEdit: boolean;
   onSelect: (selection: Selection) => void;
+  onWallTap: (wallId: string, additive: boolean) => void;
   onMoveOpening: (openingId: string, offset: number) => void;
 }
 
@@ -345,8 +437,16 @@ function WallShape(props: WallShapeProps) {
         stroke={colour}
         strokeWidth={0.5}
         hitStrokeWidth={Math.max(0, 22 - width)}
-        onClick={select({ kind: 'wall', id: wall.wall_id })}
-        onTap={select({ kind: 'wall', id: wall.wall_id })}
+        onClick={(e) => {
+          if (!selectable) return;
+          e.cancelBubble = true;
+          props.onWallTap(wall.wall_id, e.evt.shiftKey);
+        }}
+        onTap={(e) => {
+          if (!selectable) return;
+          e.cancelBubble = true;
+          props.onWallTap(wall.wall_id, false);
+        }}
         name={`wall-${index + 1}`}
       />
       <Text

@@ -20,6 +20,11 @@ Open it at `/rooms/preview` (`npm run dev`, then http://localhost:3000/rooms/pre
   - A standard one drops in at once, rough, centred where you tapped.
   - Drag it along the wall, or type exact sizes.
   - The standard sizes are in `data/standard-sizes.json` (owner, 2026-11-05).
+- **Selecting several walls:**
+  - Drag a box on an empty part of the plan; every wall it touches is selected.
+  - Shift-click a wall to add it to the selection, or remove it.
+  - Several selected walls can be deleted together, or given one thickness.
+- **Delete key:** removes what is selected (walls with their doors and windows, or one opening), except while typing in a box. On a Mac it's the "delete" key. One undo brings it all back.
 - **Sizes:**
   - Feet and inches are exact. Anything not on a 1/64" mark is refused with Core's reason.
   - "mm" sizes are rounded (U-2), and the mm value is kept.

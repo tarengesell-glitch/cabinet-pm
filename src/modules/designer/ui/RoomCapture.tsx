@@ -4,7 +4,7 @@
  * - the room is kept in this browser only (no database yet);
  * - the user and shop are mocked (no sign-in yet), and the screen says so.
  */
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { JobSchema, WALL_CHECKS, examples, runChecks, type Opening, type Point, type Result } from '@/core/index';
 import { can, PREVIEW_SHOP, type User } from '@/platform/index';
 import {
@@ -14,6 +14,8 @@ import {
   commit,
   deleteOpening,
   deleteWall,
+  deleteWalls,
+  setWallsThickness,
   findOpening,
   loadJob,
   moveOpening,
@@ -32,13 +34,13 @@ import {
   type Env,
   type Timeline,
 } from '../model/editor';
-import { AddWallForm, ChecksPanel, MasterCopyPanel, OpeningPanel, RoomPanel, StartRoomForm, WallPanel, KIND_LABEL } from './Panels';
-import { PlanCanvas, type Selection, type Tool } from './PlanCanvas';
+import { AddWallForm, ChecksPanel, MasterCopyPanel, OpeningPanel, RoomPanel, StartRoomForm, WallPanel, WallsPanel, KIND_LABEL } from './Panels';
+import { PlanCanvas, selectedWallIds, wallSelection, type Selection, type Tool } from './PlanCanvas';
 import { downloadText, readStored, writeStored } from './storage';
 import s from './RoomCapture.module.css';
 
 const TOOL_HINT: Record<Tool, string> = {
-  select: 'Tap a wall, door or window to edit it.',
+  select: 'Tap a wall, door or window to edit it. Drag across the plan to select several walls (Shift-click adds one). Delete removes what is selected.',
   draw: 'Tap corner to corner. Snaps to corners, whole inches and 45°. Tap the first corner, or Finish, to stop.',
   door: 'Tap a wall to drop a standard door there. Drag it or type sizes after.',
   window: 'Tap a wall to drop a standard window there. Drag it or type sizes after.',
@@ -111,11 +113,29 @@ export function RoomCapture({ user }: { user: User }) {
   const doUndo = useCallback(() => setTimeline((t) => (t ? undo(t) : t)), []);
   const doRedo = useCallback(() => setTimeline((t) => (t ? redo(t) : t)), []);
 
+  /** Deletes whatever is selected: walls (with their doors and windows) or one opening. */
+  const deleteSelected = useRef<() => void>(() => undefined);
+  deleteSelected.current = () => {
+    if (!draft || !selection) return;
+    const r =
+      selection.kind === 'opening'
+        ? apply(deleteOpening(draft, env, selection.id))
+        : apply(deleteWalls(draft, env, selectedWallIds(selection)));
+    if (r.ok) setSelection(null);
+    else setMessage({ kind: 'error', text: r.reason });
+  };
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const typing = e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement;
       if (e.key === 'Escape') setChainStart(null);
       if (typing || !canEdit) return;
+      // The Mac "delete" key sends Backspace.
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        e.preventDefault();
+        deleteSelected.current();
+        return;
+      }
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z') {
         e.preventDefault();
         if (e.shiftKey) doRedo();
@@ -129,8 +149,13 @@ export function RoomCapture({ user }: { user: User }) {
   // A selection pointing at something that no longer exists (after undo or delete) is cleared.
   useEffect(() => {
     if (!room || !selection) return;
-    const exists = selection.kind === 'wall' ? room.walls.some((w) => w.wall_id === selection.id) : findOpening(room, selection.id) !== null;
-    if (!exists) setSelection(null);
+    if (selection.kind === 'opening') {
+      if (findOpening(room, selection.id) === null) setSelection(null);
+      return;
+    }
+    const ids = selectedWallIds(selection);
+    const still = ids.filter((id) => room.walls.some((w) => w.wall_id === id));
+    if (still.length !== ids.length) setSelection(wallSelection(still));
   }, [room, selection]);
 
   if (!canView) {
@@ -212,6 +237,7 @@ export function RoomCapture({ user }: { user: User }) {
     if (added) setSelection({ kind: 'opening', id: added.opening_id });
   };
 
+  const multiWalls = room && selection?.kind === 'walls' ? room.walls.filter((w) => selection.ids.includes(w.wall_id)) : [];
   const selectedWall = room && selection?.kind === 'wall' ? room.walls.find((w) => w.wall_id === selection.id) ?? null : null;
   const selectedOpening = room && selection?.kind === 'opening' ? findOpening(room, selection.id) : null;
 
@@ -324,7 +350,19 @@ export function RoomCapture({ user }: { user: User }) {
                 />
               )}
 
-              {!selectedWall && !selectedOpening && (
+              {multiWalls.length > 1 && (
+                <WallsPanel
+                  key={multiWalls.map((w) => w.wall_id).join()}
+                  room={room}
+                  walls={multiWalls}
+                  canEdit={canEdit}
+                  onSelect={setSelection}
+                  onThickness={(v) => apply(setWallsThickness(draft, env, multiWalls.map((w) => w.wall_id), v))}
+                  onDelete={() => deleteSelected.current()}
+                />
+              )}
+
+              {!selectedWall && !selectedOpening && multiWalls.length < 2 && (
                 <>
                   <AddWallForm
                     canEdit={canEdit}

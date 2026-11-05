@@ -183,10 +183,28 @@ export function closeRoom(draft: Draft, env: Env): Result<Change> {
 }
 
 export function deleteWall(draft: Draft, env: Env, wallId: string): Result<Change> {
+  return deleteWalls(draft, env, [wallId]);
+}
+
+/** Deletes one or more walls (with their doors and windows) as one step, so one undo brings them back. */
+export function deleteWalls(draft: Draft, env: Env, wallIds: readonly string[]): Result<Change> {
   const r = room(draft);
-  if (!r.walls.some((w) => w.wall_id === wallId)) return refuse('That wall no longer exists.');
-  const label = wallLabel(r, wallId);
-  return ok(withRoom(draft, env, `Deleted ${label}`, { ...r, walls: r.walls.filter((w) => w.wall_id !== wallId) }));
+  if (wallIds.length === 0) return refuse('No walls are selected.');
+  const missing = wallIds.filter((id) => !r.walls.some((w) => w.wall_id === id));
+  if (missing.length > 0) return refuse('Some of those walls no longer exist.');
+  const labels = r.walls.filter((w) => wallIds.includes(w.wall_id)).map((w) => wallLabel(r, w.wall_id));
+  const summary = labels.length === 1 ? `Deleted ${labels[0]}` : `Deleted ${labels.length} walls (${labels.join(', ')})`;
+  return ok(withRoom(draft, env, summary, { ...r, walls: r.walls.filter((w) => !wallIds.includes(w.wall_id)) }));
+}
+
+/** Sets the thickness of several walls at once (typed, so measured). */
+export function setWallsThickness(draft: Draft, env: Env, wallIds: readonly string[], size: TypedSize): Result<Change> {
+  const r = room(draft);
+  if (wallIds.length === 0) return refuse('No walls are selected.');
+  if (size.value <= 0) return refuse('A wall needs a thickness greater than zero.');
+  if (wallIds.some((id) => !r.walls.some((w) => w.wall_id === id))) return refuse('Some of those walls no longer exist.');
+  const walls = r.walls.map((w) => (wallIds.includes(w.wall_id) ? { ...w, thickness: typed(size) } : w));
+  return ok(withRoom(draft, env, `Set ${wallIds.length} walls' thickness to ${formatInches(size.value)}`, { ...r, walls }));
 }
 
 /**

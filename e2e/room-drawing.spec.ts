@@ -145,3 +145,68 @@ test('loads the example rooms', async ({ page }) => {
   await expect(page.getByRole('button', { name: /^Wall 3: ≈ 4' 0"/ })).toBeVisible();
   await expect(checks(page).getByText('No problems found')).toBeVisible();
 });
+
+test('drag a box to select several walls, then press Delete', async ({ page }) => {
+  await page.goto('/rooms/preview');
+  await page.getByRole('button', { name: /Example kitchen/ }).click();
+  const box = await page.getByTestId('plan').boundingBox();
+  if (!box) throw new Error('no plan');
+  // A box over the whole plan, starting on empty space.
+  await page.mouse.move(box.x + 8, box.y + 8);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 5 });
+  await page.mouse.move(box.x + box.width - 8, box.y + box.height - 8, { steps: 5 });
+  await page.mouse.up();
+  await expect(page.getByRole('heading', { name: '4 walls selected' })).toBeVisible();
+  await page.keyboard.press('Delete');
+  await expect(page.getByRole('heading', { name: /walls selected/ })).toHaveCount(0);
+  await expect(wallButtons(page)).toHaveCount(0);
+  await page.getByRole('button', { name: 'Undo' }).click();
+  await expect(wallButtons(page)).toHaveCount(4);
+});
+
+test('a small box selects just the walls it touches; Shift-click adds one', async ({ page }) => {
+  await page.goto('/rooms/preview');
+  await page.getByRole('button', { name: /Example kitchen/ }).click();
+  const point = (name: string) =>
+    page.evaluate((n) => {
+      const w = window as unknown as { Konva: { stages: { findOne: (s: string) => { getClientRect: () => { x: number; y: number; width: number; height: number } } }[] } };
+      const r = w.Konva.stages[0]!.findOne(n).getClientRect();
+      return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
+    }, name);
+  const box = await page.getByTestId('plan').boundingBox();
+  if (!box) throw new Error('no plan');
+  // A box across the middle of wall 2 only (the right wall).
+  const w2 = await point('.wall-2');
+  await page.mouse.move(box.x + w2.x - 30, box.y + w2.y - 20);
+  await page.mouse.down();
+  await page.mouse.move(box.x + w2.x + 30, box.y + w2.y + 20, { steps: 5 });
+  await page.mouse.up();
+  await expect(page.getByRole('heading', { name: /^Wall 2/ })).toBeVisible();
+  // Shift-click wall 4 to add it.
+  const w4 = await point('.wall-4');
+  await page.keyboard.down('Shift');
+  await page.mouse.click(box.x + w4.x, box.y + w4.y + 80); // below the door
+  await page.keyboard.up('Shift');
+  await expect(page.getByRole('heading', { name: '2 walls selected' })).toBeVisible();
+});
+
+test('select one wall and press Delete', async ({ page }) => {
+  await page.goto('/rooms/preview');
+  await page.getByRole('button', { name: /Example kitchen/ }).click();
+  await wallButtons(page).first().click();
+  await expect(page.getByRole('heading', { name: /^Wall 1/ })).toBeVisible();
+  await page.keyboard.press('Backspace'); // the Mac "delete" key
+  await expect(wallButtons(page)).toHaveCount(3);
+});
+
+test('Delete does nothing while typing in a box', async ({ page }) => {
+  await page.goto('/rooms/preview');
+  await page.getByRole('button', { name: /Example kitchen/ }).click();
+  await wallButtons(page).first().click();
+  await page.getByRole('button', { name: 'Edit Length' }).click();
+  await page.getByRole('textbox', { name: 'Length' }).press('Backspace');
+  await page.getByRole('button', { name: 'Cancel' }).click();
+  await page.getByRole('button', { name: '← Room' }).click();
+  await expect(wallButtons(page)).toHaveCount(4);
+});

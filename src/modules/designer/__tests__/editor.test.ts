@@ -6,6 +6,8 @@ import {
   closeRoom,
   commit,
   deleteWall,
+  deleteWalls,
+  setWallsThickness,
   loadJob,
   moveOpening,
   nearestWall,
@@ -236,6 +238,29 @@ describe('sureness tags', () => {
     expect(room(d).ceiling_height.provenance).toBe('verified');
     d = unwrap(setProvenance(d, env, target, 'measured'));
     expect(room(d).ceiling_height.provenance).toBe('measured');
+  });
+});
+
+describe('several walls at once', () => {
+  it('deletes them as one step', () => {
+    const env = testEnv();
+    const d = rectangle(env);
+    const ids = room(d).walls.slice(0, 2).map((w) => w.wall_id);
+    let t = startTimeline(d);
+    t = commit(t, unwrap(deleteWalls(d, env, ids)));
+    expect(room(t.present).walls).toHaveLength(2);
+    expect(t.present.job.history.at(-1)?.summary).toBe('Deleted 2 walls (wall 1, wall 2)');
+    expect(room(undo(t).present).walls).toHaveLength(4);
+    expect(deleteWalls(d, env, []).ok).toBe(false);
+  });
+  it('sets their thickness together, as measured', () => {
+    const env = testEnv();
+    const d = rectangle(env);
+    const ids = room(d).walls.slice(1, 3).map((w) => w.wall_id);
+    const next = unwrap(setWallsThickness(d, env, ids, size(4 * IN)));
+    expect(room(next).walls.map((w) => w.thickness.value)).toEqual([5 * IN + 32, 4 * IN, 4 * IN, 5 * IN + 32]);
+    expect(room(next).walls[1]!.thickness.provenance).toBe('measured');
+    expect(setWallsThickness(d, env, ids, size(0)).ok).toBe(false);
   });
 });
 

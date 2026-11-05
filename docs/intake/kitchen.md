@@ -12,7 +12,7 @@ These questions, options, images and conditions are **data** (CLAUDE.md rule 6).
   - Fidelity: line drawing.
   - Options: Galley, L-Shape with Island, Peninsula, U Shape, Double Island.
   - Ceiling height: 7', 8', 10'.
-  - Cabinet height: 7', 8', 10', To the Ceiling.
+  - Cabinet height: 7', 8', 10', To the Ceiling. **Updated 2026-11-05 (OA-20):** 7', 8', 9', 10', or a number of inches below the ceiling depending on the crown moulding (H-2).
 - **Feel**
   - Fidelity: photorealistic, no counters.
   - Options: Ultra modern, Modern, Transitional, Country, Classic.
@@ -71,7 +71,7 @@ These questions, options, images and conditions are **data** (CLAUDE.md rule 6).
 - **IK-1:** Feel and door style list the same five names. Is door style a separate pick, with photos of actual doors filtered by the chosen feel, or the same thing asked twice?
 - **IK-2:** Does material (solid painted / wood grain) narrow the colour tones and colours offered?
 - **IK-3:** What are the "standard sub-colours" for each tone? Is that list the shop's real colour catalog?
-- **IK-4:** Cabinet height "7', 8', 10'": is that the top of the uppers measured from the floor?
+- ~~**IK-4**~~ Answered 2026-11-05 (OA-20, H-2).
 - **IK-5:** Drawers, Minimum: "along the tops of all base cabinets" means one drawer over doors in every base. Is that right?
 - **IK-6:** Is "Prestige maple" a supplier product name, and is "Tafisa matching" the interior matching the Tafisa exterior colour?
 - **IK-7:** Will the other room types (bathroom, laundry, closet…) each get their own outline like this?

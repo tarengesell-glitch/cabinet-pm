@@ -134,7 +134,7 @@ The writer is a pure function: (master copy version + mapping snapshot) → file
 ## Stack (proposed 2026-10-24, still awaiting confirmation)
 
 - TypeScript (strict), Next.js (App Router), hosted on Netlify.
-- Supabase in the Canada region: Postgres, Auth, Storage (samples, exports, returned files), Realtime presence for locks.
+- Supabase in the Canada region, **a new project for this tool** (OA-20; not closet-builder's): Postgres, Auth, Storage (samples, exports, returned files), Realtime presence for locks.
 - Drizzle ORM and migrations; Zod for every schema, contract and file format.
 - Tailwind, shadcn/ui and Lucide.
 - Vitest (unit and golden tests) and Playwright (UI flows).

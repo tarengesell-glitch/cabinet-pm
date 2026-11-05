@@ -37,7 +37,9 @@ Core owns no tables. It owns the master copy *format*: Job, Room, Wall, PlacedIt
 - **catalog_versions**: a numbered snapshot per shop, so a job can be checked against the catalog as it was.
 - **shop_item_availability**: whether an item is available, excluded or "manual work required".
 - **automatic_effects** (OA-18, PROPOSED): the trigger (a setting value or a condition on the item, as structured data), what it changes (for example the toe kick recess), the value, a plain-language description, and whether it is shown in the editor. Versioned with the catalog. No vendor names.
-- **prices** (PROPOSED here, because "pricing reads from the catalog"; the price structure is an open question, DECISIONS E-3). The owner's estimate is an exact number from formulas (OA-16); the formulas are stored as data once the spreadsheet arrives (PR-1).
+- **prices** (PROPOSED here, because "pricing reads from the catalog"; see `docs/pricing/legacy-pricing-logic.md` for what they must express). Versioned price lists with effective dates; no global markup factor. Each rule: the item or option, how it is priced (per inch of width by category, height and depth; per piece; per length; per area; flat), the door-style tier where it applies, discountable or not, and its source.
+- **pricing_rules** (config data, PROPOSED): rounding, install, taxes by province, customer price levels (PRC-1, PRC-2).
+- **cabinet_heights** (config data, OA-20): 7', 8', 9', 10', and "below the ceiling" with an allowance per crown moulding type (H-2).
 
 ## shop-settings
 

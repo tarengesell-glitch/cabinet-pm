@@ -15,6 +15,7 @@ No application code yet. The plan comes first: translation is proven (Phases 0â€
 | `docs/DECISIONS.md` | What's decided, what was replaced, and the open questions. |
 | `docs/BUILD_PLAN.md` | Phases broken into one-session steps. |
 | `docs/intake/` | Visual intake (image selector) content per room type, starting with the kitchen, and the owner's design software workflow (`design-workflow.md`). |
+| `docs/pricing/` | How the old pricing spreadsheet worked (logic only, no figures) and what the new pricing must express. |
 | `docs/ux/UX_BRIEF.md` | Visual UX/UI brief. |
 | `modules/_TEMPLATE/CLAUDE.md` | Rules file copied into every new module folder. |
 | `prompts/` | Ready-to-paste prompts for the Phase 0 and Phase 1 sessions. |

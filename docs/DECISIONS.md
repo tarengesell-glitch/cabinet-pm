@@ -46,7 +46,7 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 
 ### 2026-11-05: Base unit and room drawing
 - **U-1 answered: the base unit is 1/64 inch.** Every length is stored as a whole number of 1/64ths. Feet, inches and mm appear only on screen and in the adapters, and a conversion that is not exact is refused. Decided by the owner before Phase 0, so room drawing can be built now.
-  - Consequence: whole millimetres are not exact in 1/64 inch (1 mm ≈ 2.52/64 in). A metric value (for example a European appliance size, or mm in ORDX) is refused unless a rounding rule is agreed. Open question U-2.
+  - Consequence: whole millimetres are not exact in 1/64 inch (1 mm ≈ 2.52/64 in). See U-2 below for how metric values are handled.
 - **Room drawing (walls, doors, windows) is our own tool on react-konva**, inside the Designer module, drawn only from the master copy. Ideas for wall joins and openings may be ported from MIT projects, with attribution. No whole open-source editor is embedded, because each keeps its own room data in decimal numbers (P1, P6, rule 11). Research, checked on 2026-11-05:
   - pascalorg/editor: MIT, about 25k stars, React and react-three-fiber, under a year old. Kept as a reference and a possible 3D viewer later.
   - cvdlab/react-planner (MIT, about 1.5k stars, last push 2024) and furnishup/blueprint3d (MIT, about 2k stars, last push 2021): unmaintained.
@@ -54,6 +54,8 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
   - ekymo/homeRoughEditor: MIT, plain JavaScript; a reference for its wall and opening code.
   - konvajs/konva and react-konva: MIT, about 15k and 6k stars, actively maintained. Chosen.
   - Rejected: tldraw (commercial licence key), Sweet Home 3D (GPL, Java), kitchen-planner-3d (AGPL).
+- **U-2 answered: metric values are rounded to the nearest 1/64 inch.** This is an owner exception to "refuse inexact conversions", for millimetre input only (appliance spec sheets, and ORDX if it uses mm). The most a value can move is 1/128 inch (about 0.2 mm). A tie rounds away from zero, so the result is always the same. The original mm value is kept next to the rounded one, so it can always be traced. Every other inexact conversion is still refused.
+- **The stack in ARCHITECTURE "Stack" is confirmed** (the owner said "proceed" after being told the scaffold locks it in). Each part is installed only when the first code needs it.
 - Room capture is pulled ahead of Phase 5 (BUILD_PLAN). Order: scaffold (1a), then Core walls and openings, then the Designer drawing screen.
 
 ### Replaced on 2026-10-27
@@ -69,7 +71,7 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 ### Needed before Phase 1 code
 - **CV-1 Where does Cabinet Vision run, and who works in it?** Is it on a computer at the colony, operated by colony staff, or with you? How reliable is that computer's internet? The automatic library sync and read-back (OA-6) need something running on that computer. Phase 0's samples also come from there.
 - ~~**U-1 Base unit (spec Q5).**~~ Answered 2026-11-05: 1/64 inch (see "Decided").
-- **U-2 Metric values.** 1/64 inch cannot hold whole millimetres exactly. When a value arrives in mm (an appliance spec sheet, or ORDX if Phase 0 shows it uses mm), should it be refused, or rounded to the nearest 1/64 inch with a recorded tolerance? Until answered, it is refused.
+- ~~**U-2 Metric values.**~~ Answered 2026-11-05: rounded to the nearest 1/64 inch (see "Decided").
 - **A-1 Angle convention.** Proposed for Phase 1: degrees as integers or fixed decimals, counter-clockwise, measured from the room's +X axis. Confirm or change.
 - **PROPOSED:**
   - the `core/` / `platform/` split, and the master copy stored as versioned JSON with the named writers (ARCHITECTURE);
@@ -122,5 +124,5 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 ### Still open from earlier
 - CRM choice; QuickBooks vs Xero.
 - What clients see, if a client portal is built.
-- Tech stack confirmation (ARCHITECTURE "Stack").
+- ~~Tech stack confirmation (ARCHITECTURE "Stack").~~ Confirmed 2026-11-05.
 - The Comparer's strict tolerance: the values, and whether they are per dimension or per item.

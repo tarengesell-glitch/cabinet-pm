@@ -5,7 +5,7 @@
 ## Conventions
 
 - IDs are UUIDs. Catalog IDs are stable forever once used in a job (spec 5.3).
-- **Lengths:** exact integers in the base unit, **1/64 inch** (DECISIONS U-1, 2026-11-05). Inexact conversions are refused (see U-2 for mm). Conversion happens only at the edges: editor display and adapters.
+- **Lengths:** exact integers in the base unit, **1/64 inch** (DECISIONS U-1, 2026-11-05). Inexact conversions are refused, except mm input, which is rounded to the nearest 1/64 inch with the original kept (U-2). Conversion happens only at the edges: editor display and adapters.
 - **Angles:** one convention, documented in `core/` when the master copy is defined (Phase 1).
 - **Money:** integer cents, CAD.
 - Every table has `created_at`, `created_by`, `updated_at`. Every change goes to `audit_log`. Rows are soft-deleted only.

@@ -130,7 +130,7 @@ The writer is a pure function: (master copy version + mapping snapshot) → file
   - automatic orders (OA-9);
   - the automatic catalog sync and read-back loops (OA-6).
 
-## Stack (proposed 2026-10-24, still awaiting confirmation)
+## Stack (proposed 2026-10-24, confirmed by the owner 2026-11-05)
 
 - TypeScript (strict), Next.js (App Router), hosted on Netlify.
 - Supabase in the Canada region: Postgres, Auth, Storage (samples, exports, returned files), Realtime presence for locks.

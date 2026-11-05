@@ -41,7 +41,7 @@ When docs disagree, `docs/BUILD_SPEC.md` wins. Then the "Decided" list in `docs/
 8. **Translation is deterministic** (P5). The writer and reader are ordinary code: no AI calls, no clock, no randomness. The same input gives the same bytes. AI drafts designs and writes code; it never translates at runtime and never changes mappings without review.
 9. **Never guess how Cabinet Vision behaves.** If the samples and format reference don't answer it, add an open question to `docs/DECISIONS.md` and stop.
 10. **Every translator fix comes with a golden test case**, and ships only if the whole golden library passes (spec section 8).
-11. **Units.** Every length is an exact integer in the base unit defined in `src/core/`. Convert only at the edges (display and adapters), and refuse inexact conversions. Until the base unit is decided (DECISIONS U-1), write no length code. Money is integer cents, CAD.
+11. **Units.** Every length is an exact integer in the base unit defined in `src/core/`. Convert only at the edges (display and adapters), and refuse inexact conversions. The base unit is 1/64 inch (DECISIONS U-1). The one exception: millimetre input is rounded to the nearest 1/64 inch, keeping the original value (DECISIONS U-2). Money is integer cents, CAD.
 12. **Never overwrite history.** Master copy versions, sent files, returned jobs, quotes and test runs are versioned. A version that has been sent is frozen. Every write goes through the audit log.
 13. **Permissions on everything.** Every screen and action checks `can(user, permission)` from `src/platform/`. Never check role names in code.
 14. **No fake integrations.** Mocked connectors are labelled as mocked in code and UI.

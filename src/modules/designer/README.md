@@ -29,6 +29,7 @@ Open it at `/rooms/preview` (`npm run dev`, then http://localhost:3000/rooms/pre
   - on a trackpad, two fingers move the plan and pinch zooms;
   - middle-button drag or Space + drag pans;
   - double-click the middle button, press Shift+1, or press Fit to see the whole room.
+- **Edge scrolling:** while drawing walls or dragging a handle, move the cursor near the plan's edge and the plan scrolls that way.
 - **Drawing walls:** tap corner to corner, or point the way and type a length, then press Enter. Right-click or Esc finishes.
 - **Walls are lettered A, B, C … in circles**, as kitchen drawings do.
 - **Box select:** dragging left to right picks walls fully inside the box; right to left picks anything it touches.

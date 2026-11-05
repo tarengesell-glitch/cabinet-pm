@@ -117,6 +117,7 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
     - Drawn with the "Floating wall" tool, one line at a time, or by switching an existing wall in its panel.
   - **Bug fixed: drawing more walls after some exist.** Starting to draw made the toolbar wrap onto a second line, which moved the plan about 20 px under the cursor, so walls started in the wrong place and missed snaps. The toolbar is now always one line, and the drawing holds its position if the plan area changes size.
   - **New walls snap onto existing walls**, not just their corners: CAD's "nearest" object snap. A wall can start or end anywhere along another.
+- **Room drawing, round 9 (owner, 2026-11-05): edge scrolling.** While drawing walls or dragging a handle, a cursor within 40 px of the plan's edge scrolls the plan that way, faster nearer the edge, as AutoCAD, SketchUp and Figma do. The wall or drag being made follows the cursor. It stops when the cursor moves back in.
 - Room capture is pulled ahead of Phase 5 (BUILD_PLAN). Order: scaffold (1a), then Core walls and openings, then the Designer drawing screen.
 
 ### 2026-11-05: Where the work lives and deploys

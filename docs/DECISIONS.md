@@ -92,6 +92,13 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 - **Cabinet heights:** 7', 8', 9', 10', or a number of inches below the ceiling, where that number depends on the crown moulding type. The heights and each crown's allowance are data. Answers H-1 and IK-4 (our reading of "inches down" is H-2).
 - **A new Supabase project** for this tool, in the Canada region (as decided earlier). It is not created yet: it's created when the build starts (Phase 1a), with your OK. closet-builder's project is left alone. Answers CL-1.
 
+### 2026-11-05: Heights to the ceiling, partners, install, counters (answers H-2, PRC-1 to PRC-3)
+- **Cabinet heights:** the standard options are 7', 8', 9' and 10', each with its own parameters (data). **"To the ceiling"** uses the room's actual ceiling height minus the chosen crown moulding's allowance (for example, a 3" crown means 3" below the ceiling). It is not rounded to one of the standard heights.
+- **Builder and design partners** are priced here, with their discounts. Each partner's price level is data; a job's partner sets its level. Retail clients have their own level.
+- **Keep install, rounding and taxes** (as data: install rule, rounding per room, GST/PST by province).
+- **Counters are designed into the job and priced from our own rates** (by material, edge and size, as catalog data), not typed in per job.
+- The spreadsheet's apparent mistakes are noted and left for later.
+
 ### Still in force from the earlier plan (2026-10-24 and before)
 - Modular monolith with enforced module boundaries; one owner per table; data, not code.
 - Fail loudly: alerts persist until a person resolves them with a note. Never show false success.
@@ -150,22 +157,12 @@ Details and context for each: `docs/intake/design-workflow.md`.
 - **UE-2 The first UCS export: not needed yet.** We're designing the workflow and architecture now. The export is needed only when the adapter's effect links are built against real UCSs (Phase 1d at the earliest, if the proof slice uses any UCS; otherwise Phase 3).
 - ~~**MC-1**~~, ~~**MD-1**~~, ~~**WF-1**~~ Answered 2026-11-05 (see decisions).
 - ~~**PR-1**~~, ~~**H-1**~~, ~~**CL-1**~~ Answered 2026-11-05 (OA-20).
-- **H-2 "Inches down".** Our reading: besides 7', 8', 9' and 10', one option is "to the ceiling", where the cabinets stop a set number of inches below the ceiling to leave room for the chosen crown. Is that right, or does the crown allowance come off each of the four heights?
+- ~~**H-2**~~ Answered 2026-11-05 (see decisions).
+- **H-3 "To the ceiling" after measuring.** These cabinets follow the real ceiling, so the site measure can change their height. The trivial-change rule says any height change needs a new sign-off. Should a "to the ceiling" height that only follows the measured ceiling count as trivial (within the 5% price rule)? We propose yes.
 
 ### From the old pricing spreadsheet (2026-11-05)
 Details: `docs/pricing/legacy-pricing-logic.md`.
-- **PRC-1 Customer price levels.** The spreadsheet gave builder and design partners a discount and retail customers a markup. Will this platform price for partners too, or only for our own retail clients?
-- **PRC-2 Install, rounding and taxes.** The spreadsheet added install as a percentage (not on stone counters), rounded each room up, and added GST and PST (no PST on install). Keep all three? Is install part of the price the client sees in the design?
-- **PRC-3 Counters.** The spreadsheet had counters typed in by hand. Will counters be priced from our own rates (by material and size), or from a supplier's quote entered per job?
-- ~~**PV-1**~~ Answered (OA-19): the first price comes with the AI's first pass. The drawer level picked in the intake is the default.
-- ~~**FL-1**~~ Answered (OA-19): intake → appliances and fixtures → cabinet runs → AI first pass → fine-tune.
-- ~~**SH-1**~~ Moot: the room shape picker is dropped. The image selector's kitchen shape becomes a hint for the AI.
-- **CAL-1** Which calendar feeds the home screen's meetings?
-- ~~**PS-1**~~ Replaced by CV-3: section, shelf and drawer positions are settings sent as ORDX or UCS values (OA-17).
-- **POP-1** Mostly moot (the shape and layout lists are dropped). Still open for handles: is "most popular" Richelieu's order, or ours once we have job history?
-- **RT-1** The starting list of room types. Is "Closet Builder" the fine-tune screen or the whole tool?
-- **R-1** is now partly answered (OA-15): a live 3D view plus an on-demand AI render. Still open: is the AI render shown to clients as a likeness only? (We propose labelling it "illustration", since an AI picture can't be guaranteed exact.)
-- **IK-6** is answered: see the 2026-11-05 decisions.
+- ~~**PRC-1**~~, ~~**PRC-2**~~, ~~**PRC-3**~~ Answered 2026-11-05 (see decisions).
 
 ### From the spec (section 11)
 - **S-1** Which Cabinet Vision versions do target shops run, and does ORDX behave the same across them?

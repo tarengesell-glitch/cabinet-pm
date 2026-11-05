@@ -38,8 +38,10 @@ Core owns no tables. It owns the master copy *format*: Job, Room, Wall, PlacedIt
 - **shop_item_availability**: whether an item is available, excluded or "manual work required".
 - **automatic_effects** (OA-18, PROPOSED): the trigger (a setting value or a condition on the item, as structured data), what it changes (for example the toe kick recess), the value, a plain-language description, and whether it is shown in the editor. Versioned with the catalog. No vendor names.
 - **prices** (PROPOSED here, because "pricing reads from the catalog"; see `docs/pricing/legacy-pricing-logic.md` for what they must express). Versioned price lists with effective dates; no global markup factor. Each rule: the item or option, how it is priced (per inch of width by category, height and depth; per piece; per length; per area; flat), the door-style tier where it applies, discountable or not, and its source.
-- **pricing_rules** (config data, PROPOSED): rounding, install, taxes by province, customer price levels (PRC-1, PRC-2).
-- **cabinet_heights** (config data, OA-20): 7', 8', 9', 10', and "below the ceiling" with an allowance per crown moulding type (H-2).
+- **pricing_rules** (config data): rounding per room, install (excluding stone counters, as the old program did, unless the owner changes it), taxes by province (OA-21).
+- **price_levels** (config data, OA-21): one per builder or design partner, plus retail. A job's partner sets its level; it applies to the discountable lines only.
+- **counter prices** (OA-21): our own rates by counter material, edge and size, as catalog items. Counters are designed into the job, not typed in.
+- **cabinet_heights** (config data, OA-21): 7', 8', 9' and 10', each with its own parameters, plus **to the ceiling** = the room's actual ceiling height minus the chosen crown moulding's allowance. Each crown option carries its allowance.
 
 ## shop-settings
 

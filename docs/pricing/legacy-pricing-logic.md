@@ -50,7 +50,7 @@ The designer types in quantities:
 ### How prices are kept current
 Every base cost is a 2009 cost × one **annual markup** factor, applied to the whole price list.
 
-### Things that look like mistakes (don't copy them)
+### Things that look like mistakes (the owner: "don't worry about those, we'll fix them later")
 - Light valance is "cost per foot" but is multiplied by **inches**.
 - Some extras (glass doors, angled cabinets) are priced from averages of other tables instead of their own price.
 - One price-list column is typed in by hand while its neighbours are formulas.
@@ -67,11 +67,11 @@ The new estimate is calculated from the master copy, so it knows every actual ca
 | Options priced per unit: per drawer, per handle, per length of crown or valance, per square foot of panel | Each catalog option carries its price rule (per piece, per length, per area), as data. |
 | Fillers, finished ends and panels priced by material tier | Catalog items with their own price data, priced from their real size. |
 | Accessories with unit prices | Catalog add-on items. |
-| Counters | A counter price input. **Open: PRC-3.** |
+| Counters | Designed into the job and priced from our own rates by material, edge and size (OA-21). |
 | Discountable vs non-discountable lines | A flag on each price rule. |
-| Customer price levels (partner discounts, retail markup) | **Open: PRC-1.** |
-| Rounding up per room | Rounding rule as data. **Open: PRC-2.** |
-| Install as a percentage, excluding stone | Install rule as data. **Open: PRC-2.** |
+| Customer price levels (partner discounts, retail markup) | A price level per builder or design partner, plus retail (OA-21). |
+| Rounding up per room | Rounding rule as data (kept, OA-21). |
+| Install as a percentage, excluding stone | Install rule as data (kept, OA-21). |
 | GST and PST, install taxed differently | Tax rules as data, by province (earlier decision E-3). |
 | Upgrade offers on the quote | Proposed: the quote can show the price difference for a chosen alternative, calculated by pricing the alternative. |
 | Selections shown in words on the quote | The quote lists each room's selections from the catalog names. |

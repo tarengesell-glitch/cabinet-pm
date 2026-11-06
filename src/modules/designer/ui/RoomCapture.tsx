@@ -44,6 +44,8 @@ import {
 import { findAppliance, findRun } from '../model/layout';
 import { LAYOUT_RULES } from '../model/layout-rules';
 import { ApplianceTray, RunsFrame } from './LayoutPanels';
+import { OpeningIcon } from './applianceIcons';
+import { STEP_LABEL, StepList, type StepId } from './Steps';
 import { applyLayoutEdit, type LayoutEdit } from './layoutEdits';
 import { ChecksPanel, MasterCopyPanel, OpeningPanel, RoomPanel, StartRoomForm, WallPanel, WallsPanel, KIND_LABEL } from './Panels';
 import { PlanCanvas, selectedWallIds, wallSelection, type Selection, type Tool } from './PlanCanvas';
@@ -51,7 +53,7 @@ import { downloadText, readStored, writeStored } from './storage';
 import s from './RoomCapture.module.css';
 
 const TOOL_HINT: Record<Tool, string> = {
-  select: 'Tap a wall, door or window to edit it.',
+  select: 'Tap a wall, door or window on the plan to change it.',
   draw: 'Tap corner to corner. Tap the first corner, or Finish, to stop.',
   floating: 'Click where the island or peninsula wall starts, then where it ends.',
   door: 'Move onto a wall and click to place.',
@@ -59,6 +61,17 @@ const TOOL_HINT: Record<Tool, string> = {
   passthrough: 'Move onto a wall and click to place.',
   layout: 'Tap a wall to fill it with cabinets, or drag along it. Drag on the floor for an island. Place appliances from the tray.',
 };
+
+type WallTool = 'select' | 'draw' | 'floating';
+const WALL_TOOLS: readonly { tool: WallTool; label: string; hint: string }[] = [
+  { tool: 'select', label: 'Select', hint: 'Tap a wall to change it, or drag its handles.' },
+  { tool: 'draw', label: 'Room wall', hint: 'Tap corner to corner, or point the way, type a length and press Enter. Tap the first corner, or Finish, to stop.' },
+  { tool: 'floating', label: 'Floating wall', hint: 'For islands and peninsulas: tap where the line starts, then where it ends. It has no thickness and no doors or windows.' },
+];
+
+/** The step a selection belongs to: picking something on the plan opens its step. */
+const stepFor = (sel: Selection): StepId | null =>
+  !sel ? null : sel.kind === 'wall' || sel.kind === 'walls' ? 'walls' : sel.kind === 'opening' ? 'openings' : sel.kind === 'runs' ? 'cabinets' : 'appliances';
 
 const runIds = (r: Room) => new Set(r.walls.flatMap((w) => w.runs.map((x) => x.run_id)));
 const applianceIds = (r: Room) => new Set(r.walls.flatMap((w) => w.appliances.map((a) => a.placement_id)));
@@ -105,6 +118,13 @@ export function RoomCapture({ user }: { user: User }) {
   const [storageProblem, setStorageProblem] = useState<string | null>(null);
   const [unreadable, setUnreadable] = useState<{ raw: string; reason: string } | null>(null);
   const [tool, setTool] = useState<Tool>('select');
+  /** The open step (null when all are closed), the steps visited, and each step's own choice. */
+  const [step, setStep] = useState<StepId | null>('walls');
+  const [visited, setVisited] = useState<ReadonlySet<StepId>>(() => new Set<StepId>(['walls']));
+  const [wallTool, setWallTool] = useState<WallTool>('select');
+  const [openingTool, setOpeningTool] = useState<Opening['kind'] | null>(null);
+  /** On a phone the steps are a bottom sheet, which can be folded down to see the plan. */
+  const [sheetOpen, setSheetOpen] = useState(true);
   const [selection, setSelection] = useState<Selection>(null);
   const [chainStart, setChainStart] = useState<Point | null>(null);
   /** While a wall handle is dragged: the room with the move applied, not yet saved. */
@@ -185,6 +205,11 @@ export function RoomCapture({ user }: { user: User }) {
       if (e.key === 'Escape') {
         setChainStart(null);
         setArmed(null);
+        // Esc puts down a door, window or passthrough that was picked up.
+        setOpeningTool((k) => {
+          if (k) setTool('select');
+          return null;
+        });
       }
       if (typing || !canEdit) return;
       // The Mac "delete" key sends Backspace.
@@ -235,12 +260,36 @@ export function RoomCapture({ user }: { user: User }) {
     );
   }
 
-  const chooseTool = (t: Tool) => {
+  /** Switches the plan's tool (clearing anything half done). */
+  const switchTool = (t: Tool, keepSelection = false) => {
     setTool(t);
     setChainStart(null);
     setArmed(null);
     setDragPreview(null);
-    if (t !== 'select') setSelection(null);
+    if (!keepSelection && t !== 'select') setSelection(null);
+  };
+  /** The tool a step works with: its own choice for walls and openings; the layout tool after. */
+  const toolForStep = (st: StepId | null, walls: WallTool = wallTool, opening: Opening['kind'] | null = openingTool): Tool =>
+    st === 'walls' ? walls : st === 'openings' ? opening ?? 'select' : st === null ? 'select' : 'layout';
+  /** Opens a step (closing the others). Opening the step already open keeps it open. */
+  const openStep = (st: StepId | null, keepSelection = false) => {
+    setStep(st);
+    if (st) setVisited((v) => new Set([...v, st]));
+    setSheetOpen(true);
+    if (!keepSelection) setSelection(null);
+    switchTool(toolForStep(st), keepSelection);
+  };
+  /** Selects something; if it belongs to another step, that step opens with it selected. */
+  const selectAndOpen = (sel: Selection) => {
+    setSelection(sel);
+    const target = stepFor(sel);
+    if (!target || target === step) return;
+    setStep(target);
+    setVisited((v) => new Set([...v, target]));
+    // Walls and openings are selected with their step's Select choice.
+    if (target === 'walls') setWallTool('select');
+    if (target === 'openings') setOpeningTool(null);
+    switchTool(target === 'walls' || target === 'openings' ? 'select' : 'layout', true);
   };
 
   /**
@@ -261,7 +310,7 @@ export function RoomCapture({ user }: { user: User }) {
     }
     apply(r);
     const next = selectionAfter(edit, roomOf(draft), roomOf(r.value.draft));
-    if (next !== 'keep') setSelection(next);
+    if (next !== 'keep') selectAndOpen(next);
     return r;
   };
 
@@ -296,12 +345,6 @@ export function RoomCapture({ user }: { user: User }) {
         {PREVIEW_SHOP.name}
         {!canEdit && ' · read-only'}
       </span>
-      <button className={s.button} onClick={doUndo} disabled={!canEdit || !timeline || timeline.past.length === 0}>
-        Undo
-      </button>
-      <button className={s.button} onClick={doRedo} disabled={!canEdit || !timeline || timeline.future.length === 0}>
-        Redo
-      </button>
     </header>
   );
 
@@ -350,37 +393,106 @@ export function RoomCapture({ user }: { user: User }) {
     const wall = roomOf(r.value.draft).walls.find((w) => w.wall_id === wallId);
     const added = wall?.openings[wall.openings.length - 1];
     setTool('select');
-    if (added) setSelection({ kind: 'opening', id: added.opening_id });
+    setOpeningTool(null);
+    if (added) selectAndOpen({ kind: 'opening', id: added.opening_id });
   };
 
   const multiWalls = room && selection?.kind === 'walls' ? room.walls.filter((w) => selection.ids.includes(w.wall_id)) : [];
   const selectedWall = room && selection?.kind === 'wall' ? room.walls.find((w) => w.wall_id === selection.id) ?? null : null;
   const selectedOpening = room && selection?.kind === 'opening' ? findOpening(room, selection.id) : null;
 
+  // The Walls step shows the selected wall (or walls); with nothing selected, the room itself.
+  const wallPanels =
+    !draft || !room ? null : selectedWall ? (
+      <WallPanel
+        key={selectedWall.wall_id}
+        room={room}
+        wall={selectedWall}
+        canEdit={canEdit}
+        onSelect={selectAndOpen}
+        onSize={(field, v) => apply(setSize(draft, env, { kind: 'wall', id: selectedWall.wall_id, field }, v))}
+        onProvenance={(field, p) => apply(setProvenance(draft, env, { kind: 'wall', id: selectedWall.wall_id, field }, p))}
+        onAddOpening={(kind) => dropOpening(selectedWall.wall_id, kind, null)}
+        onKind={(kind) => apply(setWallKind(draft, env, selectedWall.wall_id, kind))}
+        onDelete={() => {
+          const r = apply(deleteWall(draft, env, selectedWall.wall_id));
+          if (r.ok) setSelection(null);
+        }}
+      />
+    ) : multiWalls.length > 1 ? (
+      <WallsPanel
+        key={multiWalls.map((w) => w.wall_id).join()}
+        room={room}
+        walls={multiWalls}
+        canEdit={canEdit}
+        onSelect={selectAndOpen}
+        onThickness={(v) => apply(setWallsThickness(draft, env, multiWalls.map((w) => w.wall_id), v))}
+        onDelete={() => deleteSelected.current()}
+      />
+    ) : (
+      <>
+        <RoomPanel
+          key={room.room_id}
+          room={room}
+          wallDefaults={draft.wallDefaults}
+          canEdit={canEdit}
+          onSelect={selectAndOpen}
+          onRename={(name) => apply(renameRoom(draft, env, name))}
+          onCeiling={{
+            set: (v) => apply(setSize(draft, env, { kind: 'room', field: 'ceiling_height' }, v)),
+            provenance: (p) => apply(setProvenance(draft, env, { kind: 'room', field: 'ceiling_height' }, p)),
+          }}
+          onDefaults={(field, v) => apply(setSize(draft, env, { kind: 'wall-defaults', field }, v))}
+          onNewRoom={() => {
+            if (!window.confirm('Start a new room? This one is replaced (download it first to keep it).')) return;
+            setTimeline(null);
+            setSelection(null);
+            setChainStart(null);
+            setWallTool('select');
+            setStep('walls');
+            setTool('select');
+          }}
+        />
+        <section className={s.card}>
+          <h2 className={s.cardTitle}>Examples</h2>
+          <div className={s.row}>
+            <button className={s.button} disabled={!canEdit} onClick={() => loadExample('kitchen')}>
+              Load example kitchen
+            </button>
+            <button className={s.button} disabled={!canEdit} onClick={() => loadExample('lshape')}>
+              Load example L-shaped room
+            </button>
+          </div>
+        </section>
+      </>
+    );
+
+  // The Openings step shows the selected door, window or passthrough.
+  const openingPanel =
+    draft && room && selectedOpening ? (
+      <OpeningPanel
+        key={selectedOpening.opening.opening_id}
+        room={room}
+        wall={selectedOpening.wall}
+        opening={selectedOpening.opening}
+        canEdit={canEdit}
+        onSelect={selectAndOpen}
+        onKind={(k) => apply(setOpeningKind(draft, env, selectedOpening.opening.opening_id, k))}
+        onHanding={(hand, swings) => apply(setDoorSwing(draft, env, selectedOpening.opening.opening_id, swingFromHanding(room, hand, swings)))}
+        onSize={(field, v) => apply(setSize(draft, env, { kind: 'opening', id: selectedOpening.opening.opening_id, field }, v))}
+        onProvenance={(field, p) => apply(setProvenance(draft, env, { kind: 'opening', id: selectedOpening.opening.opening_id, field }, p))}
+        onDelete={() => {
+          const r = apply(deleteOpening(draft, env, selectedOpening.opening.opening_id));
+          if (r.ok) setSelection(null);
+        }}
+      />
+    ) : null;
+
   return (
     <div className={s.screen}>
       {header}
       <div className={s.body}>
         <div className={s.planColumn}>
-          <div className={s.toolbar} role="toolbar" aria-label="Tools">
-            {(['select', 'draw', 'floating', 'door', 'window', 'passthrough', 'layout'] as const).map((t) => (
-              <button
-                key={t}
-                className={tool === t ? s.buttonActive : s.button}
-                disabled={!room || (t !== 'select' && !canEdit)}
-                aria-pressed={tool === t}
-                onClick={() => chooseTool(t)}
-              >
-                {t === 'select' ? 'Select' : t === 'draw' ? 'Draw walls' : t === 'floating' ? 'Floating wall' : t === 'layout' ? 'Cabinets & appliances' : `Add ${KIND_LABEL[t].toLowerCase()}`}
-              </button>
-            ))}
-            {chainStart && (
-              <button className={s.buttonPrimary} onClick={() => setChainStart(null)}>
-                Finish
-              </button>
-            )}
-            <span className={s.hint}>{room ? TOOL_HINT[tool] : 'Start a room on the right.'}</span>
-          </div>
           <div className={s.canvas}>
             {message && (
               // Floats over the top of the plan, so the plan never jumps when a notice appears.
@@ -405,7 +517,11 @@ export function RoomCapture({ user }: { user: User }) {
                 selection={selection}
                 issues={issues}
                 canEdit={canEdit}
-                onSelect={setSelection}
+                onSelect={selectAndOpen}
+                onUndo={doUndo}
+                onRedo={doRedo}
+                canUndo={canEdit && !!timeline && timeline.past.length > 0}
+                canRedo={canEdit && !!timeline && timeline.future.length > 0}
                 onAddWallTyped={(from, length, angle) => {
                   if (!draft) return null;
                   const r = apply(addWallByLength(draft, env, length, angle, from, tool === 'floating' ? 'floating' : 'room'));
@@ -430,7 +546,7 @@ export function RoomCapture({ user }: { user: User }) {
                 onLayoutEdit={(edit, done) => void layoutEdit(edit, done)}
                 armed={armed}
                 onArm={setArmed}
-                onRunLengthLabel={(runId) => setSelection({ kind: 'runs', ids: [runId] })}
+                onRunLengthLabel={(runId) => selectAndOpen({ kind: 'runs', ids: [runId] })}
                 trayDropRef={trayDropRef}
                 onOpeningMove={(openingId, wallId, offset, done) => handleDrag(moveOpening(draft!, env, openingId, offset, wallId), done)}
                 onOpeningResize={(openingId, offset, width, done) => handleDrag(resizeOpening(draft!, env, openingId, offset, width), done)}
@@ -448,120 +564,111 @@ export function RoomCapture({ user }: { user: User }) {
               onExample={loadExample}
               onStart={(input) => {
                 const r = apply(startRoom(env, { ...input, shopId: PREVIEW_SHOP.id }));
-                if (r.ok) setTool('draw');
+                if (r.ok) {
+                  setWallTool('draw');
+                  setStep('walls');
+                  setTool('draw');
+                }
                 return r;
               }}
             />
           ) : (
             <>
-              <ChecksPanel
-                formatErrors={formatErrors}
-                issues={issues}
-                onSelect={(sel) => (setSelection(sel), setTool(sel?.kind === 'runs' || sel?.kind === 'appliance' ? 'layout' : 'select'))}
+              <button className={s.sheetToggle} aria-expanded={sheetOpen} onClick={() => setSheetOpen((o) => !o)}>
+                <span className={s.sheetGrip} aria-hidden="true" />
+                {step ? STEP_LABEL[step] : 'Steps'}
+                <span aria-hidden="true">{sheetOpen ? '▾' : '▴'}</span>
+              </button>
+              <div className={sheetOpen ? s.sheetBody : s.sheetBodyFolded}>
+              <StepList
+                open={step}
+                visited={visited}
+                onOpen={(st) => openStep(st, stepFor(selection) === st)}
+                content={(st) => {
+                  if (st === 'walls')
+                    return (
+                      <>
+                        <div className={s.segmented} role="group" aria-label="Wall tool">
+                          {WALL_TOOLS.map((w) => (
+                            <button
+                              key={w.tool}
+                              className={wallTool === w.tool ? s.buttonActive : s.button}
+                              aria-pressed={wallTool === w.tool}
+                              disabled={w.tool !== 'select' && !canEdit}
+                              onClick={() => {
+                                setWallTool(w.tool);
+                                switchTool(w.tool);
+                              }}
+                            >
+                              {w.label}
+                            </button>
+                          ))}
+                        </div>
+                        <p className={s.muted}>{WALL_TOOLS.find((w) => w.tool === wallTool)?.hint}</p>
+                        {chainStart && (
+                          <div className={s.row}>
+                            <button className={s.buttonPrimary} onClick={() => setChainStart(null)}>
+                              Finish
+                            </button>
+                          </div>
+                        )}
+                        {wallPanels}
+                      </>
+                    );
+                  if (st === 'openings')
+                    return (
+                      <>
+                        <div className={s.tiles} role="group" aria-label="Opening type">
+                          {(['door', 'window', 'passthrough'] as const).map((k) => (
+                            <button
+                              key={k}
+                              className={openingTool === k ? s.tileActive : s.tile}
+                              aria-pressed={openingTool === k}
+                              disabled={!canEdit}
+                              onClick={() => {
+                                const next = openingTool === k ? null : k;
+                                setOpeningTool(next);
+                                switchTool(next ?? 'select');
+                              }}
+                            >
+                              <OpeningIcon kind={k} />
+                              <span>{KIND_LABEL[k]}</span>
+                            </button>
+                          ))}
+                        </div>
+                        <p className={s.muted}>{openingTool ? TOOL_HINT[openingTool] : 'Pick Door, Window or Passthrough, then tap a wall to place it. Tap one on the plan to change it.'}</p>
+                        {openingPanel}
+                      </>
+                    );
+                  if (st === 'cabinets')
+                    return (
+                      <RunsFrame
+                        room={dragPreview ? roomOf(dragPreview) : room}
+                        selectedRunIds={selection?.kind === 'runs' ? selection.ids : []}
+                        canEdit={canEdit}
+                        onEdit={(edit) => layoutEdit(edit, true) ?? { ok: false, reason: 'There is no room yet.' }}
+                        onAddIsland={addIslandInMiddle}
+                      />
+                    );
+                  return (
+                    <>
+                      <ApplianceTray
+                        armed={armed}
+                        canEdit={canEdit}
+                        onArm={(k) => (setArmed(k), setSelection(null))}
+                        onTrayDrag={(kind, x, y, done) => trayDropRef.current?.(kind, x, y, done)}
+                      />
+                      <div className={s.row} style={{ justifyContent: 'flex-end' }}>
+                        <button className={s.buttonPrimary} onClick={() => openStep(null)}>
+                          Done
+                        </button>
+                      </div>
+                    </>
+                  );
+                }}
               />
 
-              {tool === 'layout' && (
-                <>
-                  <RunsFrame
-                    room={dragPreview ? roomOf(dragPreview) : room}
-                    selectedRunIds={selection?.kind === 'runs' ? selection.ids : []}
-                    canEdit={canEdit}
-                    onEdit={(edit) => layoutEdit(edit, true) ?? { ok: false, reason: 'There is no room yet.' }}
-                    onAddIsland={addIslandInMiddle}
-                  />
-                  <ApplianceTray
-                    armed={armed}
-                    canEdit={canEdit}
-                    onArm={(k) => (setArmed(k), setSelection(null))}
-                    onTrayDrag={(kind, x, y, done) => trayDropRef.current?.(kind, x, y, done)}
-                  />
-                </>
-              )}
-
-              {selectedWall && (
-                <WallPanel
-                  key={selectedWall.wall_id}
-                  room={room}
-                  wall={selectedWall}
-                  canEdit={canEdit}
-                  onSelect={setSelection}
-                  onSize={(field, v) => apply(setSize(draft, env, { kind: 'wall', id: selectedWall.wall_id, field }, v))}
-                  onProvenance={(field, p) => apply(setProvenance(draft, env, { kind: 'wall', id: selectedWall.wall_id, field }, p))}
-                  onAddOpening={(kind) => dropOpening(selectedWall.wall_id, kind, null)}
-                  onKind={(kind) => apply(setWallKind(draft, env, selectedWall.wall_id, kind))}
-                  onDelete={() => {
-                    const r = apply(deleteWall(draft, env, selectedWall.wall_id));
-                    if (r.ok) setSelection(null);
-                  }}
-                />
-              )}
-
-              {selectedOpening && (
-                <OpeningPanel
-                  key={selectedOpening.opening.opening_id}
-                  room={room}
-                  wall={selectedOpening.wall}
-                  opening={selectedOpening.opening}
-                  canEdit={canEdit}
-                  onSelect={setSelection}
-                  onKind={(k) => apply(setOpeningKind(draft, env, selectedOpening.opening.opening_id, k))}
-                  onHanding={(hand, swings) => apply(setDoorSwing(draft, env, selectedOpening.opening.opening_id, swingFromHanding(room, hand, swings)))}
-                  onSize={(field, v) => apply(setSize(draft, env, { kind: 'opening', id: selectedOpening.opening.opening_id, field }, v))}
-                  onProvenance={(field, p) => apply(setProvenance(draft, env, { kind: 'opening', id: selectedOpening.opening.opening_id, field }, p))}
-                  onDelete={() => {
-                    const r = apply(deleteOpening(draft, env, selectedOpening.opening.opening_id));
-                    if (r.ok) setSelection(null);
-                  }}
-                />
-              )}
-
-              {multiWalls.length > 1 && (
-                <WallsPanel
-                  key={multiWalls.map((w) => w.wall_id).join()}
-                  room={room}
-                  walls={multiWalls}
-                  canEdit={canEdit}
-                  onSelect={setSelection}
-                  onThickness={(v) => apply(setWallsThickness(draft, env, multiWalls.map((w) => w.wall_id), v))}
-                  onDelete={() => deleteSelected.current()}
-                />
-              )}
-
-              {tool !== 'layout' && !selectedWall && !selectedOpening && multiWalls.length < 2 && (
-                <>
-                  <RoomPanel
-                    key={room.room_id}
-                    room={room}
-                    wallDefaults={draft.wallDefaults}
-                    canEdit={canEdit}
-                    onSelect={setSelection}
-                    onRename={(name) => apply(renameRoom(draft, env, name))}
-                    onCeiling={{
-                      set: (v) => apply(setSize(draft, env, { kind: 'room', field: 'ceiling_height' }, v)),
-                      provenance: (p) => apply(setProvenance(draft, env, { kind: 'room', field: 'ceiling_height' }, p)),
-                    }}
-                    onDefaults={(field, v) => apply(setSize(draft, env, { kind: 'wall-defaults', field }, v))}
-                    onNewRoom={() => {
-                      if (!window.confirm('Start a new room? This one is replaced (download it first to keep it).')) return;
-                      setTimeline(null);
-                      setSelection(null);
-                      setChainStart(null);
-                      setTool('select');
-                    }}
-                  />
-                  <section className={s.card}>
-                    <h2 className={s.cardTitle}>Examples</h2>
-                    <div className={s.row}>
-                      <button className={s.button} disabled={!canEdit} onClick={() => loadExample('kitchen')}>
-                        Load example kitchen
-                      </button>
-                      <button className={s.button} disabled={!canEdit} onClick={() => loadExample('lshape')}>
-                        Load example L-shaped room
-                      </button>
-                    </div>
-                  </section>
-                </>
-              )}
+              <ChecksPanel formatErrors={formatErrors} issues={issues} onSelect={selectAndOpen} />
 
               <MasterCopyPanel
                 job={draft.job}
@@ -578,6 +685,7 @@ export function RoomCapture({ user }: { user: User }) {
                   return r;
                 }}
               />
+              </div>
             </>
           )}
         </aside>

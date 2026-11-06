@@ -2,6 +2,13 @@ import { expect, test, type Page } from '@playwright/test';
 
 const checks = (page: Page) => page.getByRole('region', { name: 'Checks' });
 const wallButtons = (page: Page) => page.getByRole('button', { name: /^Wall [A-Z]+:/ });
+/** The Walls step's tool choice: Select, Room wall or Floating wall. */
+const wallTool = (page: Page, name: 'Select' | 'Room wall' | 'Floating wall') => page.getByRole('group', { name: 'Wall tool' }).getByRole('button', { name, exact: true });
+/** Opens the Openings step and picks Door, Window or Passthrough. */
+async function pickOpening(page: Page, name: 'Door' | 'Window' | 'Passthrough') {
+  await page.getByRole('button', { name: 'Openings', exact: true }).click();
+  await page.getByRole('group', { name: 'Opening type' }).getByRole('button', { name }).click();
+}
 
 async function startRoom(page: Page) {
   await page.goto('/rooms/preview');
@@ -9,18 +16,18 @@ async function startRoom(page: Page) {
   await page.getByRole('textbox', { name: 'Ceiling height' }).fill(`8'`);
   await page.getByRole('button', { name: 'Start room' }).click();
   await expect(page.getByRole('heading', { name: 'Test kitchen', level: 1 })).toBeVisible();
-  await page.getByRole('button', { name: 'Select' }).click();
+  await wallTool(page, 'Select').click();
 }
 
 const DIRECTION = { right: [1, 0], left: [-1, 0], up: [0, -1], down: [0, 1] } as const;
 
 /**
- * Draws one wall the way a person does: with "Draw walls" on, point the mouse the way the
+ * Draws one wall the way a person does: with "Room wall" on, point the mouse the way the
  * wall goes from the current corner, type its length, press Enter. Starts a new run of
  * walls (by clicking the plan) if none is in progress.
  */
 async function typeWall(page: Page, length: string, direction: keyof typeof DIRECTION) {
-  const draw = page.getByRole('button', { name: 'Draw walls' });
+  const draw = wallTool(page, 'Room wall');
   if ((await draw.getAttribute('aria-pressed')) !== 'true') await draw.click();
   const box = (await page.getByTestId('plan').boundingBox())!;
   let corner = await konvaRect(page, '.chain-start');
@@ -44,7 +51,7 @@ async function typeRectangle(page: Page) {
   await typeWall(page, `12'`, 'left');
   await typeWall(page, `10'`, 'down');
   await expect.poll(() => konvaRect(page, '.chain-start')).toBeNull();
-  await page.getByRole('button', { name: 'Select' }).click();
+  await wallTool(page, 'Select').click();
 }
 
 test('shows that it is a preview with a mocked user', async ({ page }) => {
@@ -105,7 +112,7 @@ test('drops a standard window, then the checks react to edits', async ({ page })
 test('drops a standard door by tapping a wall with the door tool', async ({ page }) => {
   await startRoom(page);
   await typeRectangle(page);
-  await page.getByRole('button', { name: 'Add door' }).click();
+  await pickOpening(page, 'Door');
   // Tap the middle of wall A (the bottom wall) on the plan.
   const wall1 = page.locator('canvas');
   await expect(wall1.first()).toBeVisible();
@@ -158,13 +165,13 @@ test('keeps the room after a reload, and undo works', async ({ page }) => {
 
 test('draws walls by tapping the plan', async ({ page }) => {
   await startRoom(page);
-  await page.getByRole('button', { name: 'Draw walls' }).click();
+  await wallTool(page, 'Room wall').click();
   const box = await page.getByTestId('plan').boundingBox();
   if (!box) throw new Error('no plan');
   for (const [x, y] of [[150, 500], [550, 500], [550, 250], [150, 250], [150, 500]] as const) {
     await page.mouse.click(box.x + x, box.y + y);
   }
-  await page.getByRole('button', { name: 'Select' }).click();
+  await wallTool(page, 'Select').click();
   await expect(wallButtons(page)).toHaveCount(4);
   await expect(checks(page).getByText('No problems found')).toBeVisible();
 });
@@ -265,7 +272,7 @@ const konvaRect = (page: Page, selector: string) =>
 test('a window ghost follows the cursor, snaps to a wall, and lands where it showed', async ({ page }) => {
   await startRoom(page);
   await typeRectangle(page);
-  await page.getByRole('button', { name: 'Add window' }).click();
+  await pickOpening(page, 'Window');
   const plan = page.getByTestId('plan');
   const box = (await plan.boundingBox())!;
 
@@ -484,7 +491,7 @@ test('trackpad scroll moves the plan; middle-drag and Space+drag pan; Shift+1 fi
 
 test('while drawing walls, type a length and press Enter', async ({ page }) => {
   await startRoom(page);
-  await page.getByRole('button', { name: 'Draw walls' }).click();
+  await wallTool(page, 'Room wall').click();
   const box = (await page.getByTestId('plan').boundingBox())!;
   await page.mouse.click(box.x + 150, box.y + 450);
   await page.mouse.move(box.x + 400, box.y + 452); // point to the right
@@ -492,7 +499,7 @@ test('while drawing walls, type a length and press Enter', async ({ page }) => {
   await expect.poll(() => konvaRect(page, '.typed-length')).not.toBeNull();
   await page.keyboard.press('Enter');
   await page.keyboard.press('Escape');
-  await page.getByRole('button', { name: 'Select' }).click();
+  await wallTool(page, 'Select').click();
   await expect(page.getByRole('button', { name: /^Wall A: 100 1\/2"/ })).toBeVisible();
 });
 
@@ -541,12 +548,12 @@ test('a wall with a window shows the measurements to and across it, plus the ove
 test('drawing more walls later: the plan holds still and walls start where you click', async ({ page }) => {
   await page.goto('/rooms/preview');
   await page.getByRole('button', { name: /Example kitchen/ }).click();
-  await page.getByRole('button', { name: 'Draw walls' }).click();
+  await wallTool(page, 'Room wall').click();
   const before = (await page.getByTestId('plan').boundingBox())!;
   const c = await centreOf(page, '.wall-3'); // the top wall
   await page.mouse.click(c.x + 40, c.y + 60); // inside the room, away from walls
   const after = (await page.getByTestId('plan').boundingBox())!;
-  expect(after.y).toBe(before.y); // the toolbar didn't grow and push the plan down
+  expect(after.y).toBe(before.y); // nothing above the plan grew and pushed it down
   const start = await centreOf(page, '.chain-start');
   expect(Math.abs(start.y - (c.y + 60))).toBeLessThanOrEqual(3); // within an inch of the click
   expect(Math.abs(start.x - (c.x + 40))).toBeLessThanOrEqual(3);
@@ -555,14 +562,14 @@ test('drawing more walls later: the plan holds still and walls start where you c
 test('a new wall snaps onto the middle of an existing wall', async ({ page }) => {
   await page.goto('/rooms/preview');
   await page.getByRole('button', { name: /Example kitchen/ }).click();
-  await page.getByRole('button', { name: 'Draw walls' }).click();
+  await wallTool(page, 'Room wall').click();
   const c = await centreOf(page, '.wall-3');
   await page.mouse.click(c.x + 40, c.y + 8); // 8 px off wall C
   const start = await centreOf(page, '.chain-start');
   expect(Math.abs(start.y - c.y)).toBeLessThanOrEqual(1); // on the wall
   await page.mouse.click(c.x + 40, c.y + 150);
   await page.keyboard.press('Escape');
-  await page.getByRole('button', { name: 'Select' }).click();
+  await wallTool(page, 'Select').click();
   await expect(wallButtons(page)).toHaveCount(5);
   await expect(checks(page).getByText('No problems found')).toBeVisible(); // a stub wall, not a crossing
 });
@@ -570,13 +577,13 @@ test('a new wall snaps onto the middle of an existing wall', async ({ page }) =>
 test('a floating wall for an island or peninsula: a line, no thickness, no doors', async ({ page }) => {
   await page.goto('/rooms/preview');
   await page.getByRole('button', { name: /Example kitchen/ }).click();
-  await page.getByRole('button', { name: 'Floating wall' }).click();
+  await wallTool(page, 'Floating wall').click();
   const c = await centreOf(page, '.wall-3');
   await page.mouse.click(c.x - 80, c.y + 120);
   await page.mouse.click(c.x + 80, c.y + 120);
   // One line drawn; the tool stops after it.
   await expect.poll(() => konvaRect(page, '.chain-start')).toBeNull();
-  await page.getByRole('button', { name: 'Select' }).click();
+  await wallTool(page, 'Select').click();
   await wallButtons(page).nth(4).click();
   await expect(page.getByRole('group', { name: 'Wall kind' }).getByRole('button', { name: 'Floating wall' })).toHaveAttribute('aria-pressed', 'true');
   await expect(page.getByTestId('value-Thickness')).toHaveCount(0);
@@ -593,7 +600,7 @@ test('drawing near the edge scrolls the plan that way', async ({ page }) => {
   await page.goto('/rooms/preview');
   await page.getByRole('button', { name: /Example kitchen/ }).click();
   const box = (await page.getByTestId('plan').boundingBox())!;
-  await page.getByRole('button', { name: 'Draw walls' }).click();
+  await wallTool(page, 'Room wall').click();
   const b = await centreOf(page, '.wall-2'); // the right wall
   await page.mouse.click(b.x, b.y); // start on wall B
   const before = (await konvaRect(page, '.wall-2'))!.x;

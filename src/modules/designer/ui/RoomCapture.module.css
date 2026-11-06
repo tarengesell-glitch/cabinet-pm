@@ -389,3 +389,200 @@
   composes: chip;
   color: #2b2f33;
 }
+
+/* ---------- The steps (owner, 2026-11-06): an accordion in the side panel ---------- */
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stepItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.step {
+  font: inherit;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text-secondary);
+  text-align: left;
+  cursor: pointer;
+}
+
+.step:hover {
+  background: var(--surface);
+}
+
+.stepOpen {
+  composes: step;
+  background: var(--surface);
+  border-color: var(--accent);
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.stepNum {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+}
+
+.stepNumOpen {
+  composes: stepNum;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.stepNumDone {
+  composes: stepNum;
+  background: var(--accent-tint);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* A step's options open directly under it, tied to it by a line on the left. */
+.stepBody {
+  margin: 4px 0 6px 22px;
+  padding: 12px 12px 12px 14px;
+  border-left: 2px solid var(--accent);
+  border-radius: 0 9px 9px 0;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Panels inside a step don't need their own card frame. */
+.stepBody .card {
+  border: none;
+  padding: 0;
+  background: transparent;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.segmented {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.segmented > button {
+  min-height: 44px;
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.tile {
+  composes: button;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-height: 72px;
+  padding: 8px 4px;
+}
+
+.tileActive {
+  composes: tile;
+  background: var(--accent-tint);
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* Only shown on a phone, where the panel is a bottom sheet. */
+.sheetToggle {
+  display: none;
+}
+
+.sheetBody,
+.sheetBodyFolded {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+@media (max-width: 760px) {
+  .body {
+    flex-direction: column;
+  }
+
+  .planColumn {
+    flex: 1 1 auto;
+    border-right: none;
+    min-height: 0;
+  }
+
+  .panel {
+    flex: none;
+    max-height: 58vh;
+    border-top: 1px solid var(--border);
+    border-radius: 14px 14px 0 0;
+    box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.12);
+    background: var(--background);
+    padding-top: 0;
+  }
+
+  .sheetToggle {
+    font: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    min-height: 48px;
+    padding: 14px 4px 8px;
+    border: none;
+    background: var(--background);
+    color: var(--text-primary);
+    cursor: pointer;
+  }
+
+  .sheetGrip {
+    position: absolute;
+    left: 50%;
+    top: 5px;
+    width: 36px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border);
+    transform: translateX(-50%);
+  }
+
+  .sheetBodyFolded {
+    display: none;
+  }
+}

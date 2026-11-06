@@ -54,7 +54,9 @@ Open it at `/rooms/preview` (`npm run dev`, then http://localhost:3000/rooms/pre
   - "What gets saved", which shows the master copy JSON, with Download and Load.
 
 ## Rough layout: cabinet runs and appliances (2026-11-06)
-**On screen:** the **Cabinets & appliances** tool in the toolbar (`ui/LayoutCanvas.tsx`, `ui/LayoutPanels.tsx`, `ui/layoutEdits.ts`).
+**Steps (round 5):** the right panel is an accordion of steps (`ui/Steps.tsx`): 1 Walls (Select | Room wall | Floating wall), 2 Openings (Door | Window | Passthrough tiles), 3 Cabinets & islands, 4 Appliances. A step's options open under it; picking something on the plan opens its step. Undo and redo sit on the plan with zoom and Fit. On a phone the panel is a bottom sheet. Islands dragged over a floating wall snap onto it (`addIslandOnWall`).
+
+**On screen:** the Cabinets & islands and Appliances steps (`ui/LayoutCanvas.tsx`, `ui/LayoutPanels.tsx`, `ui/layoutEdits.ts`).
 - **Runs:** tap a wall to fill it, or drag along it for part of it. Run ends snap as below; Alt turns snapping off.
 - **Selecting:** click a run to select it, Shift+click to add more. A selected run has end handles and a square depth handle.
 - **Splits:** the divider between split parts has a handle that moves both.

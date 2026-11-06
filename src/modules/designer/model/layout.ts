@@ -845,6 +845,23 @@ export function addIsland(
   return ok(withRoom(draft, env, `Added a ${formatInches(length)} island, ${formatInches(depth)} deep`, replaceWall(r, withRun)));
 }
 
+/**
+ * Makes an island on a floating wall already drawn (owner, 2026-11-06: an island dragged over a
+ * floating wall snaps onto it): one run along the whole wall, centred on it, with a depth from
+ * the island list. Refused if the wall already has cabinets.
+ */
+export function addIslandOnWall(draft: Draft, env: Env, wallId: string, depth: Length, rules: LayoutRules = LAYOUT_RULES): Result<Change> {
+  const r = room(draft);
+  const w = r.walls.find((x) => x.wall_id === wallId);
+  if (!w || w.kind !== 'floating') return refuse('That floating wall no longer exists.');
+  if (w.runs.length > 0) return refuse('That floating wall already has cabinets on it.');
+  if (!rules.islandDepths.includes(depth)) return refuse(`An island is ${rules.islandDepths.map(formatInches).join(', ')} deep.`);
+  const length = wallLength(w);
+  if (length < rules.minRunLength) return refuse(`An island must be at least ${formatInches(rules.minRunLength)} long.`);
+  const run: Run = { run_id: env.newId(), kind: rules.islandRunKind, offset: 0, length, depth };
+  return ok(withRoom(draft, env, `Made a ${formatInches(length)} island on ${wallLabel(r, wallId)}, ${formatInches(depth)} deep`, replaceWall(r, { ...w, runs: [run] })));
+}
+
 /** Moves an island (its floating wall, with everything on it) by dx, dy. */
 export function moveIsland(draft: Draft, env: Env, wallId: string, dx: Length, dy: Length): Result<Change> {
   const r = room(draft);

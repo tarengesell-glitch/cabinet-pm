@@ -10,6 +10,7 @@ import type { TypedSize } from '../model/editor';
 import { RUN_KIND_LABEL, cornerCabinets, findAppliance, findRun, insideSpan, runEnd } from '../model/layout';
 import { LAYOUT_RULES, applianceType } from '../model/layout-rules';
 import { SizeField } from './SizeField';
+import { ApplianceIcon } from './applianceIcons';
 import type { LayoutEdit } from './layoutEdits';
 import s from './RoomCapture.module.css';
 
@@ -37,8 +38,7 @@ export function RunsFrame(props: {
       )
     : [];
   return (
-    <section className={s.card} aria-label="Cabinet runs">
-      <h2 className={s.cardTitle}>Cabinet runs</h2>
+    <section className={s.stack} aria-label="Cabinet runs">
       <p className={s.muted}>Tap a wall to fill it, or drag along a wall for part of it. Drag on the open floor for an island. Select a run to change it.</p>
       <div className={s.row}>
         <button className={s.button} disabled={!canEdit} onClick={props.onAddIsland}>
@@ -168,8 +168,7 @@ export function ApplianceTray(props: {
     window.addEventListener('pointerup', up);
   };
   return (
-    <section className={s.card} aria-label="Appliances">
-      <h2 className={s.cardTitle}>Appliances</h2>
+    <section className={s.stack} aria-label="Appliances">
       <p className={s.muted}>Drag one onto the plan, or tap it and then tap where it goes. Select one on the plan to change it.</p>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 6 }}>
         {LAYOUT_RULES.appliances.map((a) => (
@@ -185,6 +184,7 @@ export function ApplianceTray(props: {
             }}
             style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, padding: '8px 4px', touchAction: 'none' }}
           >
+            <ApplianceIcon id={a.id} />
             <span style={{ fontWeight: 600 }}>{a.name}</span>
             <span style={{ fontSize: 12, opacity: 0.8 }}>{a.widths.map(formatInches).join(' / ')}</span>
           </button>

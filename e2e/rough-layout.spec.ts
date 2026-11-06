@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 
-// The "Cabinets & appliances" tool (DECISIONS 2026-11-06): mark where cabinetry goes and where
+// The "Cabinets & islands" and "Appliances" steps (DECISIONS 2026-11-06): mark where cabinetry goes and where
 // appliances will likely sit, on a room already drawn.
 
 const IN = 64;
@@ -27,7 +27,7 @@ const konva = (page: Page, selector: string) =>
     return w.Konva.stages[0]!.find(sel).map((n) => n.getClientRect());
   }, selector);
 
-/** Starts from the example kitchen with its layout cleared, in the Cabinets & appliances tool. */
+/** Starts from the example kitchen with its layout cleared, with the Cabinets & islands step open. */
 async function bareKitchen(page: Page) {
   await page.goto('/rooms/preview');
   await page.getByRole('button', { name: /Example kitchen/ }).click();
@@ -40,7 +40,7 @@ async function bareKitchen(page: Page) {
     window.localStorage.setItem('cabinet-pm.room-preview.v0', JSON.stringify(raw));
   });
   await page.reload();
-  await page.getByRole('button', { name: 'Cabinets & appliances' }).click();
+  await page.getByRole('button', { name: 'Cabinets & islands' }).click();
 }
 
 /**
@@ -104,6 +104,7 @@ test('split a run, make one part all pantry, and move the divider', async ({ pag
 test('pick a sink in the tray and tap a wall: it is placed with a dishwasher beside it', async ({ page }) => {
   await bareKitchen(page);
   const at = await plotter(page);
+  await page.getByRole('button', { name: 'Appliances', exact: true }).click();
   const tray = page.getByRole('region', { name: 'Appliances' });
   await tray.getByRole('button', { name: /^Sink/ }).click();
   await expect(tray.getByRole('button', { name: /^Sink/ })).toHaveAttribute('aria-pressed', 'true');
@@ -131,6 +132,7 @@ test('drag a fridge from the tray onto a bare wall: a short run goes under it', 
   const at = await plotter(page);
   const p = at(12, 60); // just inside wall D, clear of its door (30"–62" from D's start, at the top)
   const box = (await page.getByTestId('plan').boundingBox())!;
+  await page.getByRole('button', { name: 'Appliances', exact: true }).click();
   await page
     .getByRole('region', { name: 'Appliances' })
     .getByRole('button', { name: /^Fridge/ })
@@ -163,4 +165,61 @@ test('drag on the open floor for an island; Delete removes the selected run, und
   await expect.poll(async () => (await walls(page)).some((w) => w.kind === 'floating')).toBe(false);
   await page.getByRole('button', { name: 'Undo' }).click();
   await expect.poll(async () => (await walls(page)).some((w) => w.kind === 'floating')).toBe(true);
+});
+
+test('the steps: each opens its options right under it, and picking something on the plan opens its step', async ({ page }) => {
+  await bareKitchen(page);
+  // Cabinets & islands is open: its options sit right after its own button, and no other step's do.
+  const steps = page.getByRole('list', { name: 'Steps' });
+  const cabinets = steps.getByRole('button', { name: 'Cabinets & islands' });
+  await expect(cabinets).toHaveAttribute('aria-expanded', 'true');
+  expect(await cabinets.evaluate((b) => b.nextElementSibling?.id)).toBe('step-cabinets');
+  await expect(page.locator('#step-walls')).toHaveCount(0);
+  // Steps already visited show a tick.
+  await expect(steps.getByRole('button', { name: 'Walls' })).toContainText('✓');
+  // Open Walls, choose Select, then click the door on the plan: the Openings step opens with it.
+  await steps.getByRole('button', { name: 'Walls' }).click();
+  await page.getByRole('group', { name: 'Wall tool' }).getByRole('button', { name: 'Select', exact: true }).click();
+  // The door is in wall D (the left wall), 30"–62" from D's start at the top: centred 74" up.
+  const at = await plotter(page);
+  const d = at(0, 74);
+  await page.mouse.click(d.x, d.y);
+  await expect(steps.getByRole('button', { name: 'Openings' })).toHaveAttribute('aria-expanded', 'true');
+  await expect(page.locator('#step-openings').getByRole('heading', { name: /^Door on/ })).toBeVisible();
+});
+
+test('an island dragged over a floating wall snaps onto it, with its size shown while dragging', async ({ page }) => {
+  await bareKitchen(page);
+  const at = await plotter(page);
+  // Draw a 60" floating wall across the middle of the room.
+  await page.getByRole('list', { name: 'Steps' }).getByRole('button', { name: 'Walls' }).click();
+  await page.getByRole('group', { name: 'Wall tool' }).getByRole('button', { name: 'Floating wall', exact: true }).click();
+  let p = at(42, 60);
+  await page.mouse.click(p.x, p.y);
+  p = at(102, 60);
+  await page.mouse.click(p.x, p.y);
+  await expect.poll(async () => (await walls(page)).filter((w) => w.kind === 'floating').length).toBe(1);
+  // Drag a rough box over it in the Cabinets & islands step.
+  await page.getByRole('button', { name: 'Cabinets & islands' }).click();
+  const a = at(50, 47);
+  const b = at(95, 72);
+  await page.mouse.move(a.x, a.y);
+  await page.mouse.down();
+  await page.mouse.move(a.x + 10, a.y + 5, { steps: 3 });
+  await page.mouse.move(b.x, b.y, { steps: 6 });
+  const [label] = await page.evaluate(() => {
+    const w = window as unknown as { Konva: { stages: { find: (s: string) => { text: () => string }[] }[] } };
+    return w.Konva.stages[0]!.find('.island-size').map((n) => n.text());
+  });
+  expect(label).toBe(`60" × 27" deep · on the floating wall`);
+  await page.mouse.up();
+  const floating = (await walls(page)).filter((w) => w.kind === 'floating');
+  expect(floating).toHaveLength(1); // the same wall, not a second one
+  expect(floating[0]!.runs).toEqual([{ run_id: expect.any(String), kind: 'base', offset: 0, length: 60 * IN, depth: 27 * IN }]);
+});
+
+test('the appliance tray shows an icon for every appliance', async ({ page }) => {
+  await bareKitchen(page);
+  await page.getByRole('button', { name: 'Appliances', exact: true }).click();
+  await expect(page.getByRole('region', { name: 'Appliances' }).locator('svg[data-icon]')).toHaveCount(9);
 });

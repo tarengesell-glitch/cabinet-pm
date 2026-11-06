@@ -6,6 +6,7 @@ import type { Length, Point, Result, RunKind } from '@/core/index';
 import { deleteWalls, room as roomOf, type Change, type Draft, type Env } from '../model/editor';
 import {
   addIsland,
+  addIslandOnWall,
   deleteAppliances,
   deleteRuns,
   drawRun,
@@ -39,6 +40,7 @@ export type LayoutEdit =
   | { kind: 'split'; runId: string }
   | { kind: 'delete-runs'; runIds: readonly string[] }
   | { kind: 'island-add'; centre: Point; along: 'x' | 'y'; length: Length; depth: Length }
+  | { kind: 'island-onto-wall'; wallId: string; depth: Length }
   | { kind: 'island-move'; wallId: string; dx: Length; dy: Length }
   | { kind: 'island-resize'; wallId: string; length: Length; depth: Length }
   | { kind: 'appliance-place'; applianceKind: string; wallId: string; centre: number }
@@ -79,6 +81,8 @@ export function applyLayoutEdit(draft: Draft, env: Env, edit: LayoutEdit): Resul
     }
     case 'island-add':
       return addIsland(draft, env, edit.centre, edit.along, edit.length, edit.depth);
+    case 'island-onto-wall':
+      return addIslandOnWall(draft, env, edit.wallId, edit.depth);
     case 'island-move':
       return moveIsland(draft, env, edit.wallId, edit.dx, edit.dy);
     case 'island-resize':

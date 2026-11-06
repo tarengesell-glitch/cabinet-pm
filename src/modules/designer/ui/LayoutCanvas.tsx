@@ -37,6 +37,8 @@ const INCH = 64;
 const WALL_ZONE = 30 * INCH;
 /** Smallest island a drag on the floor makes; anything shorter is treated as a click. */
 const MIN_ISLAND_DRAG = 24 * INCH;
+/** How close (in room units) an island being dragged must come to a floating wall to snap onto it. */
+const ISLAND_SNAP = 10 * INCH;
 
 const ACCENT = '#176b70';
 const DANGER = '#be3d42';
@@ -310,6 +312,15 @@ interface Active {
   at: V;
   moved: boolean;
   shift: boolean;
+  /** Where the pointer is now (room), and the edit it asks for: for the island label. */
+  last?: { p: Point; edit: LayoutEdit | null };
+}
+
+/** While an island is being dragged out: the area dragged, and what it snaps to. */
+export interface IslandHint {
+  readonly from: Point;
+  readonly to: Point;
+  readonly text: string;
 }
 
 export interface LayoutToolArgs {
@@ -466,6 +477,20 @@ export function useLayoutTool(args: LayoutToolArgs) {
         const length = inch(Math.max(dx, dy));
         if (length < MIN_ISLAND_DRAG) return null;
         const depth = nearestIslandDepth(Math.min(dx, dy));
+        // Over a floating wall with nothing on it, running the same way: the island snaps onto
+        // it, centred on the line and the wall's length (owner, 2026-11-06). Alt turns this off.
+        if (!free) {
+          const mid = { x: (p.x + a.start.x) / 2, y: (p.y + a.start.y) / 2 };
+          for (const w of r.walls) {
+            if (w.kind !== 'floating' || w.runs.length > 0) continue;
+            const u = direction(w);
+            if ((Math.abs(u.x) >= Math.abs(u.y)) !== (along === 'x')) continue;
+            const { t, d } = project(r, w, mid);
+            if (Math.abs(d) <= Math.max(ISLAND_SNAP, depth / 2) && t >= -ISLAND_SNAP && t <= wallLength(w) + ISLAND_SNAP) {
+              return { kind: 'island-onto-wall', wallId: w.wall_id, depth };
+            }
+          }
+        }
         return { kind: 'island-add', centre: { x: inch((p.x + a.start.x) / 2), y: inch((p.y + a.start.y) / 2) }, along, length, depth };
       }
     }
@@ -492,7 +517,9 @@ export function useLayoutTool(args: LayoutToolArgs) {
     if (!a.moved && Math.hypot(screen.x - a.at.x, screen.y - a.at.y) <= DRAG_PX) return true;
     a.moved = true;
     const edit = editFor(a, p, free);
+    a.last = { p, edit };
     if (edit) args.onEdit(edit, false);
+    else if (a.pending.mode === 'floor') args.onCancel();
     return true;
   };
 
@@ -526,5 +553,20 @@ export function useLayoutTool(args: LayoutToolArgs) {
     args.onCancel();
   };
 
-  return { down, move, up, cancel, dragging: () => active.current?.moved === true };
+  /** The label and dragged area while an island is being dragged out on the floor. */
+  const islandHint = (): IslandHint | null => {
+    const a = active.current;
+    if (!a || !a.moved || a.pending.mode !== 'floor' || !a.last) return null;
+    const e = a.last.edit;
+    const r = args.baseRoom;
+    const text =
+      e?.kind === 'island-add'
+        ? `${formatInches(e.length)} × ${formatInches(e.depth)} deep`
+        : e?.kind === 'island-onto-wall'
+          ? `${formatInches(wallLength(r.walls.find((w) => w.wall_id === e.wallId) as Wall))} × ${formatInches(e.depth)} deep · on the floating wall`
+          : 'Drag further for an island';
+    return { from: a.start, to: a.last.p, text };
+  };
+
+  return { down, move, up, cancel, islandHint, dragging: () => active.current?.moved === true };
 }

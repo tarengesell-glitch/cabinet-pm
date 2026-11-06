@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { RUN_CHECKS, WALL_CHECKS, examples, runChecks, type Result, type Room, type Wall } from '@/core/index';
-import { commit, loadJob, room, startTimeline, undo, upgradeStoredDraft, type Change, type Draft, type Env } from '../model/editor';
+import { addWall, commit, loadJob, room, startTimeline, undo, upgradeStoredDraft, type Change, type Draft, type Env } from '../model/editor';
 import {
   addIsland,
+  addIslandOnWall,
   cornerCabinets,
   deleteAppliances,
   deleteRuns,
@@ -336,6 +337,20 @@ describe('islands', () => {
     d = unwrap(moveIsland(d, env, island.wall_id, 6 * IN, -12 * IN));
     expect(walls(d).at(-1)!.start_point).toEqual({ x: 42 * IN, y: 48 * IN });
     expect(walls(d).at(-1)!.appliances).toHaveLength(1);
+    expect(passes(d)).toEqual([]);
+  });
+
+  it('an island can be made on a floating wall already drawn, along its whole length', () => {
+    const k = bareKitchen();
+    const env = testEnv();
+    let d = unwrap(addWall(k, env, { x: 40 * IN, y: 60 * IN }, { x: 112 * IN, y: 60 * IN }, null, 'floating'));
+    const wall = walls(d).at(-1)!;
+    d = unwrap(addIslandOnWall(d, env, wall.wall_id, 42 * IN));
+    expect(spans(walls(d).at(-1)!)).toEqual([[0, 72, 'base']]);
+    expect(walls(d).at(-1)!.runs[0]!.depth).toBe(42 * IN);
+    expect(walls(d)).toHaveLength(5); // no second wall
+    expect(addIslandOnWall(d, env, wall.wall_id, 42 * IN)).toEqual({ ok: false, reason: 'That floating wall already has cabinets on it.' });
+    expect(addIslandOnWall(k, env, wallOf(k, 'A').wall_id, 36 * IN).ok).toBe(false); // a room wall is not an island
     expect(passes(d)).toEqual([]);
   });
 

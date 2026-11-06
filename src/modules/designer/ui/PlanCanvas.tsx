@@ -155,6 +155,11 @@ interface Props {
    * Filled in by the plan: an appliance dragged from the tray is at this screen (client) point.
    * `done` is the release. Pointer events, so it works the same with a mouse, a finger or a pen.
    */
+  /** Undo and redo live on the plan, beside zoom and Fit, so they are there on every step. */
+  onUndo: () => void;
+  onRedo: () => void;
+  canUndo: boolean;
+  canRedo: boolean;
   trayDropRef: MutableRefObject<((kind: string, clientX: number, clientY: number, done: boolean) => void) | null>;
 }
 
@@ -869,6 +874,21 @@ export function PlanCanvas(props: Props) {
             handles={layoutActive}
             onLengthLabel={props.onRunLengthLabel}
           />
+          {(() => {
+            // Dragging out an island: the area dragged (dotted) and a label with the size it snaps to.
+            const hint = layoutActive ? layout.islandHint() : null;
+            if (!hint) return null;
+            const a = toScreen(hint.from);
+            const b = toScreen(hint.to);
+            const w = hint.text.length * 6.6 + 16;
+            return (
+              <Group listening={false} name="island-hint">
+                <Rect x={Math.min(a.x, b.x)} y={Math.min(a.y, b.y)} width={Math.abs(b.x - a.x)} height={Math.abs(b.y - a.y)} stroke={MUTED} strokeWidth={1} dash={[4, 4]} />
+                <Rect x={b.x + 12} y={b.y - 30} width={w} height={22} cornerRadius={5} fill="#ffffff" stroke={ACCENT} strokeWidth={1.5} />
+                <Text x={b.x + 20} y={b.y - 25} text={hint.text} fontSize={12} fontStyle="bold" fill={ACCENT} name="island-size" />
+              </Group>
+            );
+          })()}
           {handleWall && (
             <WallHandles
               wall={handleWall}
@@ -961,6 +981,13 @@ export function PlanCanvas(props: Props) {
         <span style={{ fontSize: 12, color: MUTED, background: 'rgba(255,255,255,0.85)', padding: '2px 6px', borderRadius: 6 }} data-testid="zoom-level">
           {Math.round(zoom * 100)}%
         </span>
+        <ZoomButton label="Undo" onClick={props.onUndo} disabled={!props.canUndo}>
+          ↶
+        </ZoomButton>
+        <ZoomButton label="Redo" onClick={props.onRedo} disabled={!props.canRedo}>
+          ↷
+        </ZoomButton>
+        <span style={{ width: 1, height: 22, background: '#e2e7eb', margin: '0 2px' }} aria-hidden="true" />
         <ZoomButton label="Zoom out" onClick={() => zoomAt(1 / 1.25, size.width / 2, size.height / 2)}>
           −
         </ZoomButton>
@@ -977,12 +1004,13 @@ export function PlanCanvas(props: Props) {
 
 type View = ReturnType<typeof fitView>;
 
-function ZoomButton({ label, onClick, children }: { label: string; onClick: () => void; children: React.ReactNode }) {
+function ZoomButton({ label, onClick, children, disabled = false }: { label: string; onClick: () => void; children: React.ReactNode; disabled?: boolean }) {
   return (
     <button
       aria-label={label}
       title={label}
       onClick={onClick}
+      disabled={disabled}
       style={{
         font: 'inherit',
         fontSize: 14,
@@ -992,7 +1020,8 @@ function ZoomButton({ label, onClick, children }: { label: string; onClick: () =
         border: '1px solid #e2e7eb',
         background: '#fff',
         color: '#17212b',
-        cursor: 'pointer',
+        cursor: disabled ? 'default' : 'pointer',
+        opacity: disabled ? 0.4 : 1,
       }}
     >
       {children}

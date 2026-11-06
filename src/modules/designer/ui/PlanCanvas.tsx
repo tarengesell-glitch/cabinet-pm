@@ -4,7 +4,7 @@
  * Room coordinates have Y up (Core's convention); the screen has Y down, so this
  * file flips Y when converting, and nowhere else does.
  */
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react';
 import { Arc, Circle, Group, Layer, Line, Rect, Stage, Text } from 'react-konva';
 import type Konva from 'konva';
 import {
@@ -26,17 +26,26 @@ import {
   wallLetter,
 } from '@/core/index';
 import { findOpening, nearestWall, projectOntoWall, standardOpeningOffset } from '../model/editor';
+import { direction, findAppliance, halfThickness, insideNormal } from '../model/layout';
+import { LayoutShapes, applianceTarget, useLayoutTool } from './LayoutCanvas';
+import { AppliancePopover } from './LayoutPanels';
+import type { LayoutEdit } from './layoutEdits';
 import { lengthText } from './format';
 import { parseSize } from './parseSize';
 import type { TypedSize } from '../model/editor';
 import { STANDARD_SIZES } from '../model/standard-sizes';
 
-/** 'floating' draws a floating wall (island / peninsula), one segment at a time. */
-export type Tool = 'select' | 'draw' | 'floating' | Opening['kind'];
+/**
+ * 'floating' draws a floating wall (island / peninsula), one segment at a time.
+ * 'layout' marks cabinet runs and appliances (owner, 2026-11-06).
+ */
+export type Tool = 'select' | 'draw' | 'floating' | 'layout' | Opening['kind'];
 export type Selection =
   | { kind: 'wall'; id: string }
   | { kind: 'walls'; ids: readonly string[] }
   | { kind: 'opening'; id: string }
+  | { kind: 'runs'; ids: readonly string[] }
+  | { kind: 'appliance'; id: string }
   | null;
 
 /** The walls a selection covers (one, several or none). */
@@ -135,9 +144,22 @@ interface Props {
   /** Set when a chain of walls is being drawn; cleared by the parent to finish. */
   chainStart: Point | null;
   onChainStart: (p: Point | null) => void;
+  /** A rough-layout edit (Cabinets & appliances tool): `done` false previews it, true saves it. */
+  onLayoutEdit: (edit: LayoutEdit, done: boolean) => void;
+  /** An appliance picked in the tray, waiting to be placed (tap, or dropped from a drag). */
+  armed: string | null;
+  onArm: (kind: string | null) => void;
+  /** A run's length label was clicked. */
+  onRunLengthLabel: (runId: string) => void;
+  /**
+   * Filled in by the plan: an appliance dragged from the tray is at this screen (client) point.
+   * `done` is the release. Pointer events, so it works the same with a mouse, a finger or a pen.
+   */
+  trayDropRef: MutableRefObject<((kind: string, clientX: number, clientY: number, done: boolean) => void) | null>;
 }
 
 const roundToInch = (v: number) => Math.round(v / INCH) * INCH;
+const isOpeningTool = (t: Tool): t is Opening['kind'] => t === 'door' || t === 'window' || t === 'passthrough';
 
 /** The view that fits every corner (plus a margin to draw into) in the canvas. */
 function fitView(corners: readonly Point[], size: { width: number; height: number }) {
@@ -403,7 +425,7 @@ export function PlanCanvas(props: Props) {
 
   /** For the door / window / passthrough tools: the wall the ghost snaps to, and where it would land. */
   const openingTarget = (p: Point) => {
-    if (tool === 'select' || tool === 'draw' || tool === 'floating') return null;
+    if (!isOpeningTool(tool)) return null;
     // Doors and windows go only on room walls, never on floating ones.
     const hit = nearestWall({ ...room, walls: room.walls.filter((w) => w.kind === 'room') }, p, GHOST_PX / view.scale);
     if (!hit) return null;
@@ -516,6 +538,14 @@ export function PlanCanvas(props: Props) {
         setDragging(false);
         props.onDragCancel();
       }
+      if (e.key === 'Escape') {
+        layout.cancel();
+        setDragging(false);
+        if (props.armed) {
+          props.onArm(null);
+          props.onDragCancel();
+        }
+      }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -553,7 +583,7 @@ export function PlanCanvas(props: Props) {
 
   const onStageClick = (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
     const p = pointer(e);
-    if (!p) return;
+    if (!p || tool === 'layout') return;
     if (tool === 'select') {
       if (dragged.current) {
         dragged.current = false;
@@ -604,7 +634,7 @@ export function PlanCanvas(props: Props) {
   }
 
   // Door / window / passthrough tools: a ghost follows the cursor and snaps onto walls.
-  const placing = tool !== 'select' && tool !== 'draw' && tool !== 'floating' ? tool : null;
+  const placing = isOpeningTool(tool) ? tool : null;
   const ghost = placing && hover ? openingTarget(hover) : null;
   const cursor = panning
     ? 'grabbing'
@@ -612,6 +642,10 @@ export function PlanCanvas(props: Props) {
       ? 'grab'
       : tool === 'select'
         ? 'default'
+        : tool === 'layout'
+          ? props.armed
+            ? 'copy'
+            : 'crosshair'
         : placing
           ? ghost
             ? 'copy'
@@ -619,6 +653,73 @@ export function PlanCanvas(props: Props) {
               ? 'not-allowed'
               : 'default'
           : 'crosshair';
+
+  // The Cabinets & appliances tool: its own pointer handling (LayoutCanvas.tsx).
+  const layoutSelection = selection?.kind === 'runs' || selection?.kind === 'appliance' ? selection : null;
+  const layout = useLayoutTool({
+    room,
+    baseRoom: props.baseRoom,
+    scale: view.scale,
+    selection: layoutSelection,
+    onSelect: props.onSelect,
+    onEdit: props.onLayoutEdit,
+    onCancel: props.onDragCancel,
+    armed: props.armed,
+    onArmedUsed: () => props.onArm(null),
+    onMessage: props.onDrawError,
+  });
+  const layoutActive = tool === 'layout' && canEdit;
+  /**
+   * Where the selected appliance's pop-up goes: in front of it, on the room side, so it never
+   * covers the appliance or its neighbours along the wall.
+   */
+  const popoverAt = (() => {
+    if (tool !== 'layout' || selection?.kind !== 'appliance' || dragging) return null;
+    const found = findAppliance(room, selection.id);
+    if (!found) return null;
+    const { wall, appliance } = found;
+    const u = direction(wall);
+    const n = insideNormal(room, wall);
+    const t = appliance.offset + appliance.width.value / 2;
+    const d = wall.kind === 'floating' ? 20 * INCH : halfThickness(wall) + 28 * INCH;
+    const front = toScreen({ x: wall.start_point.x + u.x * t + n.x * d, y: wall.start_point.y + u.y * t + n.y * d });
+    // The normal on screen (Y flipped): the pop-up's centre sits that way from the front.
+    const sx = n.x;
+    const sy = -n.y;
+    const cx = front.x + sx * 118;
+    const cy = front.y + sy * 70;
+    return { x: cx, y: cy - 60 };
+  })();
+  /** A screen point inside the plan (from a browser event) as a room point. */
+  const clientToRoom = (clientX: number, clientY: number): Point | null => {
+    const rect = box.current?.getBoundingClientRect();
+    return rect ? toRoom(clientX - rect.left, clientY - rect.top) : null;
+  };
+  /** An appliance picked in the tray follows the pointer as a preview until it is placed. */
+  const previewArmed = (at: Point | null, kind: string | null = props.armed) => {
+    if (!kind || !at) return;
+    const target = applianceTarget(props.baseRoom, at, Math.max(GHOST_PX / view.scale, 12 * INCH));
+    if (target) props.onLayoutEdit({ kind: 'appliance-place', applianceKind: kind, wallId: target.wallId, centre: target.centre }, false);
+    else props.onDragCancel();
+  };
+  props.trayDropRef.current = (kind, clientX, clientY, done) => {
+    const rect = box.current?.getBoundingClientRect();
+    const inside = rect && clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom;
+    const at = inside ? clientToRoom(clientX, clientY) : null;
+    if (!done) {
+      if (at) previewArmed(at, kind);
+      else props.onDragCancel();
+      return;
+    }
+    if (!at) return props.onDragCancel();
+    const target = applianceTarget(props.baseRoom, at, Math.max(GHOST_PX / view.scale, 12 * INCH));
+    if (target) props.onLayoutEdit({ kind: 'appliance-place', applianceKind: kind, wallId: target.wallId, centre: target.centre }, true);
+    else {
+      props.onDragCancel();
+      props.onDrawError('Drop it on or near a wall or an island.');
+    }
+    props.onArm(null);
+  };
 
   return (
     <div
@@ -653,6 +754,12 @@ export function PlanCanvas(props: Props) {
           if (chainStart) props.onChainStart(null);
         }}
         onPointerDown={(e) => {
+          if (layoutActive) {
+            const at = pointer(e);
+            const pos = e.target.getStage()?.getPointerPosition();
+            if (at && pos && layout.down(at, pos, e.evt.shiftKey)) setDragging(!props.armed);
+            return;
+          }
           if (tool !== 'select' || e.target !== e.target.getStage()) return;
           const pos = e.target.getStage()?.getPointerPosition();
           if (!pos) return;
@@ -663,6 +770,11 @@ export function PlanCanvas(props: Props) {
           const at = pointer(e);
           setHover(at);
           lastPointer.current = e.target.getStage()?.getPointerPosition() ?? null;
+          if (layoutActive) {
+            const pos = e.target.getStage()?.getPointerPosition();
+            if (at && pos && !layout.move(at, pos, e.evt.altKey) && props.armed) previewArmed(at);
+            return;
+          }
           if (drag.current && at) {
             const pos = e.target.getStage()?.getPointerPosition();
             if (!drag.current.moved && pos && Math.hypot(pos.x - drag.current.at.x, pos.y - drag.current.at.y) <= DRAG_PX) return;
@@ -677,6 +789,12 @@ export function PlanCanvas(props: Props) {
           setMarquee({ ...marquee, x1: pos.x, y1: pos.y });
         }}
         onPointerUp={(e) => {
+          if (layoutActive) {
+            const at = pointer(e);
+            if (at) layout.up(at, e.evt.altKey);
+            setDragging(false);
+            return;
+          }
           if (drag.current) {
             if (!drag.current.moved) {
               // A press without a drag: just a click (selects what was pressed).
@@ -694,6 +812,11 @@ export function PlanCanvas(props: Props) {
         onPointerLeave={() => {
           setHover(null);
           lastPointer.current = null;
+          if (layoutActive) {
+            layout.cancel();
+            setDragging(false);
+            if (props.armed) props.onDragCancel();
+          }
           if (drag.current) {
             drag.current = null;
             setDragging(false);
@@ -737,6 +860,15 @@ export function PlanCanvas(props: Props) {
               onSelect={props.onSelect}
             />
           ))}
+          <LayoutShapes
+            room={room}
+            toScreen={toScreen}
+            scale={view.scale}
+            selection={layoutSelection}
+            issueIds={issueIds}
+            handles={layoutActive}
+            onLengthLabel={props.onRunLengthLabel}
+          />
           {handleWall && (
             <WallHandles
               wall={handleWall}
@@ -821,6 +953,9 @@ export function PlanCanvas(props: Props) {
             </div>
           )}
         </div>
+      )}
+      {popoverAt && selection?.kind === 'appliance' && (
+        <AppliancePopover room={room} placementId={selection.id} at={popoverAt} canEdit={canEdit} onEdit={(edit) => props.onLayoutEdit(edit, true)} />
       )}
       <div style={{ position: 'absolute', right: 10, bottom: 10, display: 'flex', gap: 6, alignItems: 'center' }}>
         <span style={{ fontSize: 12, color: MUTED, background: 'rgba(255,255,255,0.85)', padding: '2px 6px', borderRadius: 6 }} data-testid="zoom-level">

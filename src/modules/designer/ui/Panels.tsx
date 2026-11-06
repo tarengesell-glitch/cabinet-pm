@@ -407,7 +407,13 @@ export function ChecksPanel({ formatErrors, issues, onSelect }: { formatErrors: 
           <li key={i}>
             <button
               className={s.issue}
-              onClick={() => (issue.ref.kind === 'wall' || issue.ref.kind === 'opening' ? onSelect({ kind: issue.ref.kind, id: issue.ref.id }) : undefined)}
+              onClick={() =>
+                issue.ref.kind === 'wall' || issue.ref.kind === 'opening' || issue.ref.kind === 'appliance'
+                  ? onSelect({ kind: issue.ref.kind, id: issue.ref.id })
+                  : issue.ref.kind === 'run'
+                    ? onSelect({ kind: 'runs', ids: [issue.ref.id] })
+                    : undefined
+              }
             >
               <span>
                 {issue.severity === 'block' ? '⛔ ' : '⚠ '}

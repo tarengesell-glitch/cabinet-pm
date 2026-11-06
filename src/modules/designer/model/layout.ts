@@ -5,9 +5,10 @@
  * plain-language reason (rule 7). Rules (clearances, gaps, standard widths) come from
  * data/layout-rules.json (rule 6).
  *
- * Positions along a wall are measured from its start corner, in 1/64". A run on a room wall
- * stands against the wall's inside face; a run on a floating wall (an island or peninsula)
- * is centred on the line.
+ * Positions along a wall are measured from its start corner (on the wall's centre line, like
+ * doors and windows), in 1/64". A run on a room wall stands against the wall's inside face and
+ * reaches no further than the inside corners; a run on a floating wall (an island or
+ * peninsula) is centred on the line.
  */
 import {
   compareToDistance,
@@ -23,7 +24,7 @@ import {
   type RunKind,
   type Wall,
 } from '@/core/index';
-import { addWall, room, wallLabel, withRoom, type Change, type Draft, type Env } from './editor';
+import { addWall, insideSide, room, wallLabel, withRoom, type Change, type Draft, type Env } from './editor';
 import { LAYOUT_RULES, applianceType, type ApplianceType, type LayoutRules } from './layout-rules';
 
 const ok = (draft: Draft, notices: string[] = []): Result<Change> => ({ ok: true, value: { draft, notices } });
@@ -116,8 +117,62 @@ function square(a: Wall, b: Wall): boolean {
   return ax * bx + ay * by === 0;
 }
 
-const runAtStart = (w: Wall): Run | null => w.runs.find((r) => r.offset === 0) ?? null;
-const runAtEnd = (w: Wall): Run | null => w.runs.find((r) => runEnd(r) >= wallLength(w)) ?? null;
+/** A unit vector, in room coordinates (Y up). */
+export interface Dir {
+  readonly x: number;
+  readonly y: number;
+}
+
+/** Along the wall, start to end. */
+export function direction(w: Wall): Dir {
+  const dx = w.end_point.x - w.start_point.x;
+  const dy = w.end_point.y - w.start_point.y;
+  const len = Math.hypot(dx, dy) || 1;
+  return { x: dx / len, y: dy / len };
+}
+
+/** Square to the wall, pointing into the room (for a floating wall, to its left). */
+export function insideNormal(r: Room, w: Wall): Dir {
+  const u = direction(w);
+  return w.kind === 'room' && insideSide(r) === 'right' ? { x: u.y, y: -u.x } : { x: -u.y, y: u.x };
+}
+
+/** Half a room wall's thickness: its inside face is this far from its centre line. */
+export const halfThickness = (w: Wall): number => (w.kind === 'room' ? (w.thickness?.value ?? 0) / 2 : 0);
+
+/** How far along `w` its inside face meets the inside face of `o` (which shares a corner with it). */
+function insideCornerOffset(r: Room, w: Wall, o: Wall): number | null {
+  const u = direction(w);
+  const v = direction(o);
+  const n = insideNormal(r, w);
+  const m = insideNormal(r, o);
+  const hw = halfThickness(w);
+  const ho = halfThickness(o);
+  // w.start + n·hw + u·t = o.start + m·ho + v·s, solved for t.
+  const dx = o.start_point.x + m.x * ho - (w.start_point.x + n.x * hw);
+  const dy = o.start_point.y + m.y * ho - (w.start_point.y + n.y * hw);
+  const det = -u.x * v.y + u.y * v.x;
+  if (Math.abs(det) < 1e-9) return null;
+  return (dx * -v.y - dy * -v.x) / det;
+}
+
+/**
+ * The stretch of a wall that cabinets can stand along: between the inside corners where its
+ * inside face meets the walls before and after it. A floating wall's whole length.
+ */
+export function insideSpan(r: Room, w: Wall): Span {
+  const len = wallLength(w);
+  if (w.kind === 'floating') return { start: 0, end: len };
+  const { before, after } = neighbours(r, w);
+  const a = before ? insideCornerOffset(r, w, before) : null;
+  const b = after ? insideCornerOffset(r, w, after) : null;
+  const start = a === null ? 0 : Math.max(0, Math.min(len, Math.round(a)));
+  const end = b === null ? len : Math.max(start, Math.min(len, Math.round(b)));
+  return { start, end };
+}
+
+const runAtStart = (r: Room, w: Wall): Run | null => w.runs.find((x) => x.offset <= insideSpan(r, w).start) ?? null;
+const runAtEnd = (r: Room, w: Wall): Run | null => w.runs.find((x) => runEnd(x) >= insideSpan(r, w).end) ?? null;
 
 /** How deep the uppers on a run are: the whole depth for upper-only, else the upper band. */
 export const upperDepth = (r: Run, rules: LayoutRules = LAYOUT_RULES): Length => (r.kind === 'upper' ? r.depth : Math.min(rules.runDepths.upperBand, r.depth));
@@ -127,6 +182,7 @@ export interface CornerCabinet {
   /** The wall whose end is the corner, and the wall that starts there. */
   readonly endingWallId: string;
   readonly startingWallId: string;
+  /** The inside corner, in room coordinates (rounded to 1/64"). */
   readonly corner: Point;
   readonly base: boolean;
   readonly upper: boolean;
@@ -135,13 +191,22 @@ export interface CornerCabinet {
   readonly upperDepths: { readonly ending: Length; readonly starting: Length } | null;
 }
 
+/** The inside corner at the end of a room wall. */
+function insideCorner(r: Room, w: Wall): Point {
+  const u = direction(w);
+  const n = insideNormal(r, w);
+  const t = insideSpan(r, w).end;
+  const h = halfThickness(w);
+  return { x: Math.round(w.start_point.x + u.x * t + n.x * h), y: Math.round(w.start_point.y + u.y * t + n.y * h) };
+}
+
 export function cornerCabinets(r: Room, rules: LayoutRules = LAYOUT_RULES): CornerCabinet[] {
   const out: CornerCabinet[] = [];
   for (const w of r.walls) {
     const { after } = neighbours(r, w);
     if (!after) continue;
-    const a = runAtEnd(w);
-    const b = runAtStart(after);
+    const a = runAtEnd(r, w);
+    const b = runAtStart(r, after);
     if (!a || !b) continue;
     const base = hasBase(a.kind) && hasBase(b.kind);
     const upper = hasUpper(a.kind) && hasUpper(b.kind);
@@ -149,7 +214,7 @@ export function cornerCabinets(r: Room, rules: LayoutRules = LAYOUT_RULES): Corn
     out.push({
       endingWallId: w.wall_id,
       startingWallId: after.wall_id,
-      corner: w.end_point,
+      corner: insideCorner(r, w),
       base,
       upper,
       baseDepths: base ? { ending: a.depth, starting: b.depth } : null,
@@ -174,22 +239,23 @@ export function snapRunEnd(
   const w = r.walls.find((x) => x.wall_id === wallId);
   if (!w) return Math.round(t);
   const len = wallLength(w);
-  const at = Math.round(Math.max(0, Math.min(len, t)));
+  const span = insideSpan(r, w);
+  const at = Math.round(Math.max(span.start, Math.min(span.end, t)));
   if (opts.free) return at;
   const nearest = (cands: readonly number[]) => cands.reduce((best, c) => (Math.abs(c - at) < Math.abs(best - at) ? c : best));
   const { before, after } = neighbours(r, w);
   const maxGap = Math.max(...rules.cornerGaps);
-  const pr = before && square(before, w) ? runAtEnd(before) : null;
-  if (pr && at < pr.depth + maxGap + opts.tolerance) return nearest([0, ...rules.cornerGaps.map((g) => pr.depth + g)]);
-  const nr = after && square(w, after) ? runAtStart(after) : null;
-  if (nr && at > len - nr.depth - maxGap - opts.tolerance) return nearest([len, ...rules.cornerGaps.map((g) => len - nr.depth - g)]);
+  const pr = before && square(before, w) ? runAtEnd(r, before) : null;
+  if (pr && at < span.start + pr.depth + maxGap + opts.tolerance) return nearest([span.start, ...rules.cornerGaps.map((g) => span.start + pr.depth + g)]);
+  const nr = after && square(w, after) ? runAtStart(r, after) : null;
+  if (nr && at > span.end - nr.depth - maxGap - opts.tolerance) return nearest([span.end, ...rules.cornerGaps.map((g) => span.end - nr.depth - g)]);
   const ignore = new Set(opts.ignoreRunIds ?? []);
   const targets = [
-    0,
-    len,
+    span.start,
+    span.end,
     ...w.openings.flatMap((o) => [o.offset.value - rules.openingClearance, o.offset.value + o.width.value + rules.openingClearance]),
     ...w.runs.filter((x) => !ignore.has(x.run_id)).flatMap((x) => [x.offset, runEnd(x)]),
-  ].filter((x) => x >= 0 && x <= len);
+  ].filter((x) => x >= span.start && x <= span.end && x <= len);
   const best = nearest(targets);
   return Math.abs(best - at) <= opts.tolerance ? best : at;
 }
@@ -258,7 +324,7 @@ export function fillWall(draft: Draft, env: Env, wallId: string, rules: LayoutRu
   const r = room(draft);
   const w = r.walls.find((x) => x.wall_id === wallId);
   if (!w) return refuse('That wall no longer exists.');
-  return addPieces(draft, env, w, { start: 0, end: wallLength(w) }, rules, 'Filled', `${capital(wallLabel(r, wallId))} already has cabinets everywhere they can go.`);
+  return addPieces(draft, env, w, insideSpan(r, w), rules, 'Filled', `${capital(wallLabel(r, wallId))} already has cabinets everywhere they can go.`);
 }
 
 /** Drag along a wall: cabinets between two points (already snapped), around doorways and existing runs. */
@@ -266,8 +332,9 @@ export function drawRun(draft: Draft, env: Env, wallId: string, from: Length, to
   const r = room(draft);
   const w = r.walls.find((x) => x.wall_id === wallId);
   if (!w) return refuse('That wall no longer exists.');
-  const len = wallLength(w);
-  const span = { start: Math.max(0, Math.min(from, to)), end: Math.min(len, Math.max(from, to)) };
+  const inside = insideSpan(r, w);
+  const span = { start: Math.max(inside.start, Math.min(from, to)), end: Math.min(inside.end, Math.max(from, to)) };
+  if (span.end <= span.start) return refuse('That stretch is inside a corner.');
   return addPieces(draft, env, w, span, rules, 'Drew', 'That stretch already has cabinets, or is a doorway.');
 }
 
@@ -281,13 +348,14 @@ export function runEndLimits(r: Room, runId: string, end: 'start' | 'end', rules
   const { wall, run } = found;
   const obstacles = [...doorwayZones(wall, rules), ...wall.runs.filter((x) => x !== run).map(runSpan), ...(run.kind === 'pantry' ? windowZones(wall, rules) : [])];
   const inside = wall.appliances.filter((a) => a.offset >= run.offset && applianceEnd(a) <= runEnd(run));
+  const inSpan = insideSpan(r, wall);
   if (end === 'start') {
-    const min = Math.max(0, ...obstacles.filter((o) => o.end <= run.offset).map((o) => o.end));
+    const min = Math.max(inSpan.start, ...obstacles.filter((o) => o.end <= run.offset).map((o) => o.end));
     const max = Math.min(runEnd(run) - rules.minRunLength, ...inside.map((a) => a.offset));
     return { min, max };
   }
   const min = Math.max(run.offset + rules.minRunLength, ...inside.map(applianceEnd));
-  const max = Math.min(wallLength(wall), ...obstacles.filter((o) => o.start >= runEnd(run)).map((o) => o.start));
+  const max = Math.min(inSpan.end, ...obstacles.filter((o) => o.start >= runEnd(run)).map((o) => o.start));
   return { min, max };
 }
 
@@ -488,15 +556,15 @@ export interface AppliancePlan {
 }
 
 function obstaclesFor(r: Room, w: Wall, type: ApplianceType, exclude: ReadonlySet<string>, rules: LayoutRules): Span[] {
-  const len = wallLength(w);
+  const span = insideSpan(r, w);
   const obs: Span[] = [...doorwayZones(w, rules)];
   if (type.keepClearOfWindows) obs.push(...windowSpans(w));
   const { before, after } = neighbours(r, w);
-  const pr = before ? runAtEnd(before) : null;
-  const nr = after ? runAtStart(after) : null;
+  const pr = before ? runAtEnd(r, before) : null;
+  const nr = after ? runAtStart(r, after) : null;
   // The corner square belongs to the corner cabinet.
-  if (pr && hasBase(pr.kind) && runAtStart(w)) obs.push({ start: 0, end: pr.depth });
-  if (nr && hasBase(nr.kind) && runAtEnd(w)) obs.push({ start: len - nr.depth, end: len });
+  if (pr && hasBase(pr.kind) && runAtStart(r, w)) obs.push({ start: span.start, end: span.start + pr.depth });
+  if (nr && hasBase(nr.kind) && runAtEnd(r, w)) obs.push({ start: span.end - nr.depth, end: span.end });
   for (const a of w.appliances) if (!exclude.has(a.placement_id)) obs.push(applianceSpan(a));
   return obs;
 }
@@ -523,7 +591,7 @@ export function planAppliance(
   const w = r.walls.find((x) => x.wall_id === wallId);
   if (!w) return { ok: false, reason: 'That wall no longer exists.' };
   const width = opts.width ?? (type.widths[0] as Length);
-  const len = wallLength(w);
+  const span = insideSpan(r, w);
   const moving = opts.movingId ?? null;
   const existingPartner = moving ? r.walls.flatMap((x) => x.appliances).find((a) => a.paired_with === moving) ?? null : null;
   const partnerType = type.addsBeside ? applianceType(rules, type.addsBeside) : null;
@@ -536,12 +604,12 @@ export function planAppliance(
       for (const win of w.openings.filter((o) => o.kind === 'window')) {
         const wc = win.offset.value + win.width.value / 2;
         if (Math.abs(centre - wc) <= win.width.value / 2 + opts.windowSnap) {
-          const at = freeSpot(wc, width, 0, len, obs);
+          const at = freeSpot(wc, width, span.start, span.end, obs);
           if (at !== null && at === Math.round(wc - width / 2)) return { offset: at, underWindow: true };
         }
       }
     }
-    const at = freeSpot(centre, width, 0, len, obs);
+    const at = freeSpot(centre, width, span.start, span.end, obs);
     return at === null ? null : { offset: at, underWindow: false };
   };
   const besideSpot = (offset: Length, pWidth: Length, prefer: 1 | -1, exclude: ReadonlySet<string>): Length | null => {
@@ -549,7 +617,7 @@ export function planAppliance(
     const obs = [...obstaclesFor(r, w, partnerType, exclude, rules), { start: offset, end: offset + width }];
     for (const side of [prefer, -prefer as 1 | -1]) {
       const start = side === 1 ? offset + width : offset - pWidth;
-      if (start >= 0 && start + pWidth <= len && obs.every((o) => start + pWidth <= o.start || start >= o.end)) return start;
+      if (start >= span.start && start + pWidth <= span.end && obs.every((o) => start + pWidth <= o.start || start >= o.end)) return start;
     }
     return null;
   };
@@ -699,7 +767,8 @@ export function setApplianceWidth(draft: Draft, env: Env, placementId: string, w
   if (!type.widths.includes(width)) return refuse(`A ${type.name.toLowerCase()} comes ${type.widths.map(formatInches).join(' or ')} wide.`);
   if (width === appliance.width.value) return refuse('Nothing changed.');
   const centre = appliance.offset + appliance.width.value / 2;
-  const at = freeSpot(centre, width, 0, wallLength(wall), obstaclesFor(r, wall, type, new Set([placementId]), rules));
+  const inSpan = insideSpan(r, wall);
+  const at = freeSpot(centre, width, inSpan.start, inSpan.end, obstaclesFor(r, wall, type, new Set([placementId]), rules));
   if (at === null) return refuse(`There is no room for a ${formatInches(width)} ${type.name.toLowerCase()} here.`);
   const notices: string[] = [];
   let next: Wall = { ...wall, appliances: wall.appliances.map((a) => (a === appliance ? { ...a, offset: at, width: unmeasured(width) } : a)) };
@@ -720,7 +789,8 @@ export function flipPartner(draft: Draft, env: Env, placementId: string, rules: 
   const onRight = appliance.offset >= applianceEnd(sink);
   const start = onRight ? sink.offset - appliance.width.value : applianceEnd(sink);
   const obs = obstaclesFor(r, wall, type, new Set([placementId]), rules);
-  if (start < 0 || start + appliance.width.value > wallLength(wall) || !obs.every((o) => start + appliance.width.value <= o.start || start >= o.end)) {
+  const inSpan = insideSpan(r, wall);
+  if (start < inSpan.start || start + appliance.width.value > inSpan.end || !obs.every((o) => start + appliance.width.value <= o.start || start >= o.end)) {
     return refuse('There is no room on the other side of the sink.');
   }
   const notices: string[] = [];

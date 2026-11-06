@@ -53,8 +53,20 @@ Open it at `/rooms/preview` (`npm run dev`, then http://localhost:3000/rooms/pre
   - two example rooms;
   - "What gets saved", which shows the master copy JSON, with Download and Load.
 
-## Rough layout: cabinet runs and appliances (model only, 2026-11-06)
-The editing logic for marking where cabinetry and appliances go (DECISIONS 2026-11-06) is in `model/layout.ts`; the screen comes next. Its rules are data in `data/layout-rules.json`, read by `model/layout-rules.ts`, which fails loudly at start-up if the file is bad. Entries marked PROPOSED there are mockup defaults the owner has not confirmed.
+## Rough layout: cabinet runs and appliances (2026-11-06)
+**On screen:** the **Cabinets & appliances** tool in the toolbar (`ui/LayoutCanvas.tsx`, `ui/LayoutPanels.tsx`, `ui/layoutEdits.ts`).
+- **Runs:** tap a wall to fill it, or drag along it for part of it. Run ends snap as below; Alt turns snapping off.
+- **Selecting:** click a run to select it, Shift+click to add more. A selected run has end handles and a square depth handle.
+- **Splits:** the divider between split parts has a handle that moves both.
+- **Corner cabinets:** shown as a square with a cross, one for bases and one for uppers.
+- **Islands:** drag on the open floor for an island (its depth snaps to the list), or press "Add island". Drag an island to move it; its end handle sets its length.
+- **The right side:** the "Cabinet runs" frame holds the selected run's type, length, depth, Split and Delete (an island's depths are buttons). The "Appliances" frame holds the tray: drag one onto the plan, or tap it and then tap the plan. The drag uses pointer events, so it works with a mouse, a finger or a pen.
+- **Appliance options:** a selected appliance's options (width, swap the dishwasher's side, Delete) pop up next to it, on the room side.
+- **Same keys as walls:** Delete, Ctrl/Cmd+Z, Esc, zoom and pan. The rough-layout checks run live with the wall checks.
+
+**Rules** are in `model/layout.ts`.
+- **Positions:** measured along the wall's centre line, like doors and windows.
+- **Where cabinets stand:** against the wall's inside face, and only as far as the inside corners (`insideSpan`). The 3", 6" and 9" corner gaps are measured from there. Its rules are data in `data/layout-rules.json`, read by `model/layout-rules.ts`, which fails loudly at start-up if the file is bad. Entries marked PROPOSED there are mockup defaults the owner has not confirmed.
 - **Runs:** `fillWall` (tap a wall) and `drawRun` (drag along it) go around doorways with 3" clearance and around existing runs. `snapRunEnd` snaps to corners, to 3/6/9" clear of the run on the next wall, 3" clear of openings, and other run ends.
 - **Changing runs:** `setRunEnd`, `setRunLength`, `setRunDepth` and `setRunKind`. Upper only drops the appliances on it and says so; all pantry keeps 3" clear of windows, and that stretch becomes base. `splitRun` cuts at the middle, moving clear of windows and appliances, and `moveJoint` moves the divider between two parts. `deleteRuns` also removes appliances left with no run, and says so.
 - **Corners:** `cornerCabinets` lists the corners where runs meet, base and/or upper. They are shown, not stored.

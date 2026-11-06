@@ -70,9 +70,10 @@ describe('runs', () => {
   it('a tap fills a wall end to end', () => {
     const env = testEnv();
     const d = unwrap(fillWall(bareKitchen(), env, wallOf(bareKitchen(), 'A').wall_id));
-    expect(spans(wallOf(d, 'A'))).toEqual([[0, 144, 'base_upper']]);
+    // Walls are 4 1/2" thick: cabinets reach the inside corners, 2 1/4" in from the corner points.
+    expect(spans(wallOf(d, 'A'))).toEqual([[2.25, 141.75, 'base_upper']]);
     expect(wallOf(d, 'A').runs[0]!.depth).toBe(24 * IN);
-    expect(d.job.history.at(-1)!.summary).toBe('Filled 144" of cabinets on wall A');
+    expect(d.job.history.at(-1)!.summary).toBe('Filled 139 1/2" of cabinets on wall A');
     expect(passes(d)).toEqual([]);
   });
 
@@ -80,8 +81,8 @@ describe('runs', () => {
     const k = bareKitchen();
     const r = fillWall(k, testEnv(), wallOf(k, 'D').wall_id);
     expect(spans(wallOf(unwrap(r), 'D'))).toEqual([
-      [0, 27, 'base_upper'],
-      [65, 120, 'base_upper'],
+      [2.25, 27, 'base_upper'],
+      [65, 117.75, 'base_upper'],
     ]);
     expect(notices(r)).toEqual(['Stopped 3" short of the door.']);
   });
@@ -110,9 +111,10 @@ describe('runs', () => {
     const b = wallOf(d, 'B').wall_id;
     const a = wallOf(d, 'A').wall_id;
     const opts = { tolerance: 2 * IN };
-    expect(snapRunEnd(r, b, 29.5 * IN, opts)).toBe(30 * IN); // 24" run + 6"
-    expect(snapRunEnd(r, b, 26 * IN, opts)).toBe(27 * IN); // + 3"
-    expect(snapRunEnd(r, b, 10 * IN, opts)).toBe(0); // into the corner
+    // Measured from wall A's inside face, 2 1/4" in: its 24" run's front is at 26 1/4".
+    expect(snapRunEnd(r, b, 31 * IN, opts)).toBe(32.25 * IN); // 6" clear
+    expect(snapRunEnd(r, b, 28 * IN, opts)).toBe(29.25 * IN); // 3" clear
+    expect(snapRunEnd(r, b, 10 * IN, opts)).toBe(2.25 * IN); // into the inside corner
     expect(snapRunEnd(r, b, 60 * IN, opts)).toBe(60 * IN); // nothing near
     expect(snapRunEnd(r, a, 46 * IN, { ...opts, ignoreRunIds: wallOf(d, 'A').runs.map((x) => x.run_id) })).toBe(45 * IN); // 3" before the window
     expect(snapRunEnd(r, b, 29.5 * IN, { ...opts, free: true })).toBe(29.5 * IN);
@@ -140,9 +142,9 @@ describe('runs', () => {
     const r = setRunKind(d, env, wallOf(d, 'A').runs.map((x) => x.run_id), 'pantry');
     d = unwrap(r);
     expect(spans(wallOf(d, 'A'))).toEqual([
-      [0, 45, 'pantry'],
+      [2.25, 45, 'pantry'],
       [45, 87, 'base'],
-      [87, 144, 'pantry'],
+      [87, 141.75, 'pantry'],
     ]);
     expect(notices(r)).toEqual(['Pantry stays 3" clear of the window. The part under the window is base cabinets.']);
     expect(passes(d)).toEqual([]);
@@ -168,14 +170,14 @@ describe('runs', () => {
     d = unwrap(splitRun(d, env, wallOf(d, 'A').runs[0]!.run_id));
     // The middle (72") is in front of the window (45"–87" with clearance): the nearer clear edge is 87".
     expect(spans(wallOf(d, 'A'))).toEqual([
-      [0, 87, 'base_upper'],
-      [87, 144, 'base_upper'],
+      [2.25, 87, 'base_upper'],
+      [87, 141.75, 'base_upper'],
     ]);
     d = unwrap(fillWall(d, env, wallOf(d, 'B').wall_id));
     d = unwrap(splitRun(d, env, wallOf(d, 'B').runs[0]!.run_id));
     expect(spans(wallOf(d, 'B'))).toEqual([
-      [0, 60, 'base_upper'],
-      [60, 120, 'base_upper'],
+      [2.25, 60, 'base_upper'],
+      [60, 117.75, 'base_upper'],
     ]);
   });
 
@@ -187,8 +189,8 @@ describe('runs', () => {
     const [left, right] = [...wallOf(d, 'B').runs].sort((a, b) => a.offset - b.offset);
     d = unwrap(moveJoint(d, env, left!.run_id, right!.run_id, 48 * IN));
     expect(spans(wallOf(d, 'B'))).toEqual([
-      [0, 48, 'base_upper'],
-      [48, 120, 'base_upper'],
+      [2.25, 48, 'base_upper'],
+      [48, 117.75, 'base_upper'],
     ]);
     expect(moveJoint(d, env, left!.run_id, right!.run_id, 4 * IN).ok).toBe(false);
   });
@@ -199,16 +201,17 @@ describe('runs', () => {
     let d = unwrap(drawRun(k, env, wallOf(k, 'D').wall_id, 70 * IN, 100 * IN));
     const run = wallOf(d, 'D').runs[0]!;
     expect(runEndLimits(room(d), run.run_id, 'start')).toEqual({ min: 65 * IN, max: 91 * IN });
-    expect(runEndLimits(room(d), run.run_id, 'end')).toEqual({ min: 79 * IN, max: 120 * IN });
-    d = unwrap(setRunEnd(d, env, run.run_id, 'end', 120 * IN));
-    expect(spans(wallOf(d, 'D'))).toEqual([[70, 120, 'base_upper']]);
+    expect(runEndLimits(room(d), run.run_id, 'end')).toEqual({ min: 79 * IN, max: 117.75 * IN });
+    expect(setRunEnd(d, env, run.run_id, 'end', 120 * IN).ok).toBe(false);
+    d = unwrap(setRunEnd(d, env, run.run_id, 'end', 117.75 * IN));
+    expect(spans(wallOf(d, 'D'))).toEqual([[70, 117.75, 'base_upper']]);
     expect(setRunEnd(d, env, run.run_id, 'start', 60 * IN).ok).toBe(false);
     d = unwrap(setRunLength(d, env, run.run_id, 30 * IN));
     expect(spans(wallOf(d, 'D'))).toEqual([[70, 100, 'base_upper']]);
     // Longer than fits after the run: its start moves back instead.
     d = unwrap(setRunLength(d, env, run.run_id, 52 * IN));
-    expect(spans(wallOf(d, 'D'))).toEqual([[68, 120, 'base_upper']]);
-    expect(setRunLength(d, env, run.run_id, 60 * IN)).toEqual({ ok: false, reason: `There is only room for 55" of cabinets here.` });
+    expect(spans(wallOf(d, 'D'))).toEqual([[65.75, 117.75, 'base_upper']]);
+    expect(setRunLength(d, env, run.run_id, 60 * IN)).toEqual({ ok: false, reason: 'There is only room for 52 3/4" of cabinets here.' });
   });
 });
 
@@ -283,7 +286,7 @@ describe('appliances', () => {
     const { d: start, env } = withA();
     let d = unwrap(fillWall(start, env, wallOf(start, 'B').wall_id));
     d = unwrap(placeAppliance(d, env, 'range', wallOf(d, 'B').wall_id, 5 * IN, SNAP));
-    expect(wallOf(d, 'B').appliances[0]!.offset).toBe(24 * IN);
+    expect(wallOf(d, 'B').appliances[0]!.offset).toBe(26.25 * IN); // inside corner (2 1/4") + wall A's 24" run
   });
 
   it('range width toggles between the standard widths only', () => {

@@ -132,6 +132,7 @@ After walls, doors and windows, the person marks where cabinetry goes and where 
 - **Appliance rules:** a sink dropped near a window centres under it. Placing a sink adds a dishwasher right beside it when the plan has none yet; the dishwasher can be moved to the sink's other side and moves with the sink. A fridge gets a full 24"-deep upper above it. An appliance dropped on a bare wall gets a short run under it.
 - **Controls match the wall drawing:** click selects, Shift+click adds, Delete removes, Ctrl/Cmd+Z undoes, Esc cancels, scroll zooms, Space+drag pans, Alt stops snapping, click a length to type it. Run and island options sit in a "Cabinet runs" frame on the right; appliance options pop up next to the appliance.
 - **Still to confirm:** the hood is assumed to match the width of the range or cooktop under it.
+- **Built into the room preview** as the "Cabinets & appliances" tool (2026-11-06). Walls are stored by their centre line, so cabinets stand against the inside face and stop at the inside corners; corner gaps are measured from the inside corner.
 
 ### 2026-11-05: Where the work lives and deploys
 - `main` is the main branch. Netlify deploys the live site from it, so every merge is a deploy.

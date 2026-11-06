@@ -5,7 +5,7 @@
  * - the user and shop are mocked (no sign-in yet), and the screen says so.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { JobSchema, WALL_CHECKS, examples, runChecks, type Opening, type Point, type Result } from '@/core/index';
+import { JobSchema, RUN_CHECKS, WALL_CHECKS, examples, runChecks, type Opening, type Point, type Result, type Room } from '@/core/index';
 import { can, PREVIEW_SHOP, type User } from '@/platform/index';
 import {
   addWall,
@@ -41,6 +41,10 @@ import {
   type Env,
   type Timeline,
 } from '../model/editor';
+import { findAppliance, findRun } from '../model/layout';
+import { LAYOUT_RULES } from '../model/layout-rules';
+import { ApplianceTray, RunsFrame } from './LayoutPanels';
+import { applyLayoutEdit, type LayoutEdit } from './layoutEdits';
 import { ChecksPanel, MasterCopyPanel, OpeningPanel, RoomPanel, StartRoomForm, WallPanel, WallsPanel, KIND_LABEL } from './Panels';
 import { PlanCanvas, selectedWallIds, wallSelection, type Selection, type Tool } from './PlanCanvas';
 import { downloadText, readStored, writeStored } from './storage';
@@ -53,7 +57,39 @@ const TOOL_HINT: Record<Tool, string> = {
   door: 'Move onto a wall and click to place.',
   window: 'Move onto a wall and click to place.',
   passthrough: 'Move onto a wall and click to place.',
+  layout: 'Tap a wall to fill it with cabinets, or drag along it. Drag on the floor for an island. Place appliances from the tray.',
 };
+
+const runIds = (r: Room) => new Set(r.walls.flatMap((w) => w.runs.map((x) => x.run_id)));
+const applianceIds = (r: Room) => new Set(r.walls.flatMap((w) => w.appliances.map((a) => a.placement_id)));
+const sameIds = (a: readonly string[], b: readonly string[]) => a.length === b.length && a.every((x, i) => x === b[i]);
+
+/** What to select after a layout edit is saved: the run or appliance it made, if any. */
+function selectionAfter(edit: LayoutEdit, before: Room, after: Room): Selection | 'keep' {
+  const newRuns = [...runIds(after)].filter((id) => !runIds(before).has(id));
+  const newAppliances = [...applianceIds(after)].filter((id) => !applianceIds(before).has(id));
+  switch (edit.kind) {
+    case 'fill':
+    case 'draw':
+    case 'island-add':
+    case 'split':
+      return newRuns.length > 0 ? { kind: 'runs', ids: [newRuns[newRuns.length - 1] as string] } : 'keep';
+    case 'appliance-place': {
+      // The appliance itself (a sink), not the dishwasher it brought.
+      const placed = newAppliances.find((id) => findAppliance(after, id)?.appliance.kind === edit.applianceKind);
+      return placed ? { kind: 'appliance', id: placed } : 'keep';
+    }
+    case 'appliance-move':
+      return { kind: 'appliance', id: edit.placementId };
+    case 'run-kind':
+      return { kind: 'runs', ids: [...edit.runIds.filter((id) => findRun(after, id)), ...newRuns] };
+    case 'delete-runs':
+    case 'delete-appliances':
+      return null;
+    default:
+      return 'keep';
+  }
+}
 
 export function RoomCapture({ user }: { user: User }) {
   const canView = can(user, 'room.view');
@@ -74,6 +110,10 @@ export function RoomCapture({ user }: { user: User }) {
   /** While a wall handle is dragged: the room with the move applied, not yet saved. */
   const [dragPreview, setDragPreview] = useState<Draft | null>(null);
   const [message, setMessage] = useState<{ kind: 'error' | 'notice'; text: string } | null>(null);
+  /** An appliance picked in the tray, waiting to be placed on the plan. */
+  const [armed, setArmed] = useState<string | null>(null);
+  /** The plan fills this in: where an appliance dragged from the tray is, and its drop. */
+  const trayDropRef = useRef<((kind: string, clientX: number, clientY: number, done: boolean) => void) | null>(null);
 
   // Load what was kept in this browser.
   useEffect(() => {
@@ -117,7 +157,7 @@ export function RoomCapture({ user }: { user: User }) {
     const r = JobSchema.safeParse(draft.job);
     return r.success ? [] : r.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`);
   }, [draft]);
-  const checkRun = useMemo(() => (draft && formatErrors.length === 0 ? runChecks(WALL_CHECKS, draft.job, {}) : null), [draft, formatErrors]);
+  const checkRun = useMemo(() => (draft && formatErrors.length === 0 ? runChecks([...WALL_CHECKS, ...RUN_CHECKS], draft.job, {}) : null), [draft, formatErrors]);
   const issues = checkRun?.issues ?? [];
 
   const doUndo = useCallback(() => setTimeline((t) => (t ? undo(t) : t)), []);
@@ -130,7 +170,11 @@ export function RoomCapture({ user }: { user: User }) {
     const r =
       selection.kind === 'opening'
         ? apply(deleteOpening(draft, env, selection.id))
-        : apply(deleteWalls(draft, env, selectedWallIds(selection)));
+        : selection.kind === 'runs'
+          ? apply(applyLayoutEdit(draft, env, { kind: 'delete-runs', runIds: selection.ids }))
+          : selection.kind === 'appliance'
+            ? apply(applyLayoutEdit(draft, env, { kind: 'delete-appliances', placementIds: [selection.id] }))
+            : apply(deleteWalls(draft, env, selectedWallIds(selection)));
     if (r.ok) setSelection(null);
     else setMessage({ kind: 'error', text: r.reason });
   };
@@ -138,7 +182,10 @@ export function RoomCapture({ user }: { user: User }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const typing = e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement;
-      if (e.key === 'Escape') setChainStart(null);
+      if (e.key === 'Escape') {
+        setChainStart(null);
+        setArmed(null);
+      }
       if (typing || !canEdit) return;
       // The Mac "delete" key sends Backspace.
       if (e.key === 'Delete' || e.key === 'Backspace') {
@@ -163,6 +210,15 @@ export function RoomCapture({ user }: { user: User }) {
       if (findOpening(room, selection.id) === null) setSelection(null);
       return;
     }
+    if (selection.kind === 'appliance') {
+      if (findAppliance(room, selection.id) === null) setSelection(null);
+      return;
+    }
+    if (selection.kind === 'runs') {
+      const still = selection.ids.filter((id) => findRun(room, id) !== null);
+      if (!sameIds(still, selection.ids)) setSelection(still.length > 0 ? { kind: 'runs', ids: still } : null);
+      return;
+    }
     const ids = selectedWallIds(selection);
     const still = ids.filter((id) => room.walls.some((w) => w.wall_id === id));
     if (still.length !== ids.length) setSelection(wallSelection(still));
@@ -182,7 +238,43 @@ export function RoomCapture({ user }: { user: User }) {
   const chooseTool = (t: Tool) => {
     setTool(t);
     setChainStart(null);
+    setArmed(null);
+    setDragPreview(null);
     if (t !== 'select') setSelection(null);
+  };
+
+  /**
+   * A rough-layout edit from the plan or the side frames. While dragging (done = false) it is
+   * only shown; on release it is saved as one undo step, and what it made is selected.
+   */
+  const layoutEdit = (edit: LayoutEdit, done: boolean): Result<Change> | null => {
+    if (!draft) return null;
+    const r = applyLayoutEdit(draft, env, edit);
+    if (!done) {
+      if (r.ok) setDragPreview(r.value.draft);
+      return r;
+    }
+    setDragPreview(null);
+    if (!r.ok) {
+      setMessage({ kind: 'error', text: r.reason });
+      return r;
+    }
+    apply(r);
+    const next = selectionAfter(edit, roomOf(draft), roomOf(r.value.draft));
+    if (next !== 'keep') setSelection(next);
+    return r;
+  };
+
+  /** "Add island": the starting size, in the middle of the room. */
+  const addIslandInMiddle = () => {
+    if (!room) return;
+    const pts = room.walls.filter((w) => w.kind === 'room').flatMap((w) => [w.start_point, w.end_point]);
+    if (pts.length === 0) return setMessage({ kind: 'error', text: 'Draw the room\'s walls first.' });
+    const mid = (vs: number[]) => Math.round((Math.min(...vs) + Math.max(...vs)) / 2 / 64) * 64;
+    layoutEdit(
+      { kind: 'island-add', centre: { x: mid(pts.map((p) => p.x)), y: mid(pts.map((p) => p.y)) }, along: 'x', length: LAYOUT_RULES.islandStartSize.length, depth: LAYOUT_RULES.islandStartSize.depth },
+      true,
+    );
   };
 
   const loadExample = (which: 'kitchen' | 'lshape') => {
@@ -271,7 +363,7 @@ export function RoomCapture({ user }: { user: User }) {
       <div className={s.body}>
         <div className={s.planColumn}>
           <div className={s.toolbar} role="toolbar" aria-label="Tools">
-            {(['select', 'draw', 'floating', 'door', 'window', 'passthrough'] as const).map((t) => (
+            {(['select', 'draw', 'floating', 'door', 'window', 'passthrough', 'layout'] as const).map((t) => (
               <button
                 key={t}
                 className={tool === t ? s.buttonActive : s.button}
@@ -279,7 +371,7 @@ export function RoomCapture({ user }: { user: User }) {
                 aria-pressed={tool === t}
                 onClick={() => chooseTool(t)}
               >
-                {t === 'select' ? 'Select' : t === 'draw' ? 'Draw walls' : t === 'floating' ? 'Floating wall' : `Add ${KIND_LABEL[t].toLowerCase()}`}
+                {t === 'select' ? 'Select' : t === 'draw' ? 'Draw walls' : t === 'floating' ? 'Floating wall' : t === 'layout' ? 'Cabinets & appliances' : `Add ${KIND_LABEL[t].toLowerCase()}`}
               </button>
             ))}
             {chainStart && (
@@ -332,9 +424,14 @@ export function RoomCapture({ user }: { user: User }) {
                   if (!r.ok) setMessage({ kind: 'error', text: r.reason });
                 }}
                 onPickWallForOpening={(wallId, centre) => {
-                  if (!draft || tool === 'select' || tool === 'draw' || tool === 'floating') return;
+                  if (!draft || tool === 'select' || tool === 'draw' || tool === 'floating' || tool === 'layout') return;
                   dropOpening(wallId, tool, centre);
                 }}
+                onLayoutEdit={(edit, done) => void layoutEdit(edit, done)}
+                armed={armed}
+                onArm={setArmed}
+                onRunLengthLabel={(runId) => setSelection({ kind: 'runs', ids: [runId] })}
+                trayDropRef={trayDropRef}
                 onOpeningMove={(openingId, wallId, offset, done) => handleDrag(moveOpening(draft!, env, openingId, offset, wallId), done)}
                 onOpeningResize={(openingId, offset, width, done) => handleDrag(resizeOpening(draft!, env, openingId, offset, width), done)}
                 chainStart={chainStart}
@@ -357,7 +454,29 @@ export function RoomCapture({ user }: { user: User }) {
             />
           ) : (
             <>
-              <ChecksPanel formatErrors={formatErrors} issues={issues} onSelect={(sel) => (setSelection(sel), setTool('select'))} />
+              <ChecksPanel
+                formatErrors={formatErrors}
+                issues={issues}
+                onSelect={(sel) => (setSelection(sel), setTool(sel?.kind === 'runs' || sel?.kind === 'appliance' ? 'layout' : 'select'))}
+              />
+
+              {tool === 'layout' && (
+                <>
+                  <RunsFrame
+                    room={dragPreview ? roomOf(dragPreview) : room}
+                    selectedRunIds={selection?.kind === 'runs' ? selection.ids : []}
+                    canEdit={canEdit}
+                    onEdit={(edit) => layoutEdit(edit, true) ?? { ok: false, reason: 'There is no room yet.' }}
+                    onAddIsland={addIslandInMiddle}
+                  />
+                  <ApplianceTray
+                    armed={armed}
+                    canEdit={canEdit}
+                    onArm={(k) => (setArmed(k), setSelection(null))}
+                    onTrayDrag={(kind, x, y, done) => trayDropRef.current?.(kind, x, y, done)}
+                  />
+                </>
+              )}
 
               {selectedWall && (
                 <WallPanel
@@ -408,7 +527,7 @@ export function RoomCapture({ user }: { user: User }) {
                 />
               )}
 
-              {!selectedWall && !selectedOpening && multiWalls.length < 2 && (
+              {tool !== 'layout' && !selectedWall && !selectedOpening && multiWalls.length < 2 && (
                 <>
                   <RoomPanel
                     key={room.room_id}

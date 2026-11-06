@@ -185,6 +185,8 @@ export function addWall(
     thickness: kind === 'room' ? draft.wallDefaults.thickness : null,
     openings: [],
     obstacles: [],
+    runs: [],
+    appliances: [],
   };
   const length = distanceForDisplay(start, end);
   return ok(
@@ -612,6 +614,13 @@ export function upgradeStoredDraft(data: unknown): { job: unknown; wallDefaults:
   retag(job);
   // Walls saved before floating walls existed are room walls.
   for (const room of job?.rooms ?? []) for (const wall of room.walls ?? []) if (!('kind' in wall)) wall.kind = 'room';
+  // Walls saved before the rough layout existed have no cabinet runs or appliances (schema 1).
+  for (const room of job?.rooms ?? []) for (const wall of room.walls ?? []) {
+    if (!('runs' in wall)) wall.runs = [];
+    if (!('appliances' in wall)) wall.appliances = [];
+  }
+  const j = job as { schema_version?: unknown } | undefined;
+  if (j && j.schema_version === 0) j.schema_version = 1;
   const oldThickness = d.wallDefaults?.thickness as unknown;
   retag(oldThickness);
   if (retagged > 0) notes.push('Your saved room was updated: sizes are now either unmeasured (red) or confirmed (black).');

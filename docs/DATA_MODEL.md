@@ -28,8 +28,13 @@ Core owns no tables. It owns the master copy *format*: Job, Room, Wall, PlacedIt
 - **No wall height (owner, 2026-11-05, BUILD_SPEC OA-11).** Walls are as high as the room's `ceiling_height`.
 - **Wall kind (owner, 2026-11-05, from closet-builder A-21).** Each wall is a `room` wall or a `floating` wall (an invisible wall for an island or peninsula). A floating wall has no thickness (`null`) and no openings or obstacles; cabinets will stand on both of its faces.
 - **Typed wall length (decided 2026-11-05).** A wall keeps `entered_length` (and `length_source_mm`) when its corners had to be rounded to 1/64", which happens on a slanted wall or a length typed in mm. Otherwise both are null, and the corners are the length.
+- **Rough layout: cabinet runs and appliances (owner, 2026-11-06; schema version 1).** Each wall carries:
+  - `runs`: stretches of wall that get cabinetry: `{ run_id, kind, offset, length, depth }`, where `kind` is `base`, `upper`, `base_upper`, `base_upper_pantry` or `pantry`. A run marks where cabinetry goes; it is not cabinets. Offsets and lengths are design choices, so they are plain lengths, not `Measured`. On a room wall the depth runs into the room from the inside face; on a floating wall (island or peninsula) it is the full depth, centred on the line.
+  - `appliances`: where appliances will likely go: `{ placement_id, kind, offset, width, paired_with }`. `kind` is an ID from the appliance-type list (data). `width` is `Measured` and stays `unmeasured` until the appliance is confirmed (OA-4). `paired_with` is the sink a dishwasher was placed beside, or null.
+  - Corner cabinets, the 24" upper above a fridge and the hood over a range or cooktop are worked out from these and the rules; they are not stored.
+  - Islands are floating walls with a run on them (A-21), not a separate shape.
+  - Later, when `appliances` exists: a placement gains a reference to the job's appliance record, whose specs live there; the master copy keeps a copy of the confirmed size it was designed to.
 - **PROPOSED:**
-  - **Appliances in the room.** An appliance placement has a reference to the job's appliance record, its position, its size, and a status (`rough` or `confirmed`). Cabinets fit around it. Its specs live in `appliances`; the master copy keeps a copy of the confirmed size it was designed to.
   - **Price shown live** is calculated from the catalog and is never stored in the master copy. Quotes freeze it (`projects`).
 
 ## catalog

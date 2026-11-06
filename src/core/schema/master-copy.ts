@@ -1,7 +1,8 @@
 /**
- * The master copy format (BUILD_SPEC section 6), room shell only: Job, Room, Wall,
- * Opening, Obstacle. PlacedItem and selections are added by the next Core session,
- * which raises SCHEMA_VERSION. Version 0 is a draft and is not saved anywhere yet.
+ * The master copy format (BUILD_SPEC section 6): Job, Room, Wall, Opening, Obstacle, plus the
+ * rough layout on each wall (cabinet runs and appliance placements, owner 2026-11-06).
+ * PlacedItem and selections are added by a later Core session, which raises SCHEMA_VERSION.
+ * Version 1 is still a draft and is not saved anywhere but the preview's browser storage.
  *
  * Every object is strict: an unknown or missing field is an error, never a default.
  * Fields that may be empty are required and nullable, so "not known" is explicit.
@@ -10,7 +11,7 @@ import { z } from 'zod';
 import { wallLetter } from '../labels';
 import { isLength } from '../units';
 
-export const SCHEMA_VERSION = 0;
+export const SCHEMA_VERSION = 1;
 
 /** A length in base units (1/64 inch). Coordinates may be negative. */
 export const LengthSchema = z.number().refine(isLength, 'must be a whole number of 1/64 inch');
@@ -83,6 +84,46 @@ export const ObstacleSchema = z.strictObject({
 });
 
 /**
+ * What a cabinet run holds (owner, 2026-11-06): base only, upper only, base + upper,
+ * base + upper + pantry, or all pantry. A run marks where cabinetry goes; it is not cabinets.
+ */
+export const RunKindSchema = z.enum(['base', 'upper', 'base_upper', 'base_upper_pantry', 'pantry']);
+
+/**
+ * A stretch of wall that gets cabinets (the rough layout, OA-3). Positions are design choices,
+ * not site measurements, so they are plain lengths rather than Measured.
+ */
+export const RunSchema = z
+  .strictObject({
+    run_id: IdSchema,
+    kind: RunKindSchema,
+    /** Along the wall, from the wall's start corner to the run's near end. */
+    offset: SizeSchema,
+    length: SizeSchema,
+    /**
+     * Front to back. On a room wall, from the wall's inside face into the room. On a floating
+     * wall (an island or peninsula), the cabinetry's full depth, centred on the wall's line.
+     */
+    depth: SizeSchema,
+  })
+  .refine((r) => r.length > 0 && r.depth > 0, { message: 'A cabinet run needs a length and a depth.' });
+
+/**
+ * Where an appliance will likely go (OA-3; DATA_MODEL "Appliances in the room"). Placed along
+ * a wall like an opening. Its width stays unmeasured until the appliance is confirmed (OA-4).
+ */
+export const AppliancePlacementSchema = z.strictObject({
+  placement_id: IdSchema,
+  /** An ID from the list of appliance types (fridge, range, sink…). The list is data. */
+  kind: z.string().min(1),
+  /** Along the wall, from the wall's start corner to the appliance's near edge. */
+  offset: SizeSchema,
+  width: MeasuredSchema,
+  /** The sink a dishwasher was placed beside (owner, 2026-11-06); null for anything else. */
+  paired_with: IdSchema.nullable(),
+});
+
+/**
  * A room wall is a real wall of the room. A floating wall (owner, 2026-10-09, closet-builder
  * A-21; carried over 2026-11-05) is an invisible wall for an island or peninsula: a line with
  * a position and direction, no thickness, not part of the room's outline, which cabinets can
@@ -110,6 +151,10 @@ export const WallSchema = z
   thickness: MeasuredSchema.nullable(),
   openings: z.array(OpeningSchema),
   obstacles: z.array(ObstacleSchema),
+  /** Cabinet runs along this wall, in any order. */
+  runs: z.array(RunSchema),
+  /** Appliances along this wall, in any order. */
+  appliances: z.array(AppliancePlacementSchema),
   })
   .refine((w) => (w.kind === 'room') === (w.thickness !== null), {
     message: 'A room wall needs a thickness; a floating wall has none.',
@@ -176,6 +221,8 @@ export const JobSchema = z
         note(wall.wall_id, `wall ${wallLetter(w)} in "${room.name}"`);
         wall.openings.forEach((o, i) => note(o.opening_id, `opening ${i + 1} on wall ${wallLetter(w)} in "${room.name}"`));
         wall.obstacles.forEach((o, i) => note(o.obstacle_id, `obstacle ${i + 1} on wall ${wallLetter(w)} in "${room.name}"`));
+        wall.runs.forEach((r, i) => note(r.run_id, `cabinet run ${i + 1} on wall ${wallLetter(w)} in "${room.name}"`));
+        wall.appliances.forEach((a, i) => note(a.placement_id, `appliance ${i + 1} (${a.kind}) on wall ${wallLetter(w)} in "${room.name}"`));
       });
     });
   });
@@ -185,6 +232,9 @@ export type Measured = z.infer<typeof MeasuredSchema>;
 export type Opening = z.infer<typeof OpeningSchema>;
 export type Swing = z.infer<typeof SwingSchema>;
 export type Obstacle = z.infer<typeof ObstacleSchema>;
+export type RunKind = z.infer<typeof RunKindSchema>;
+export type Run = z.infer<typeof RunSchema>;
+export type AppliancePlacement = z.infer<typeof AppliancePlacementSchema>;
 export type Wall = z.infer<typeof WallSchema>;
 export type WallKind = z.infer<typeof WallKindSchema>;
 export type Room = z.infer<typeof RoomSchema>;

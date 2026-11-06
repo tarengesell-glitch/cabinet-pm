@@ -33,14 +33,15 @@ Core never throws for bad input. Anything that can be refused returns `{ ok: tru
   The tolerance, grid and step are UI settings that the caller passes in.
 
 ## The master copy (`schema/master-copy.ts`)
-Room shell only for now: Job, Room, Wall, Opening (window, door or passthrough) and Obstacle. PlacedItem and selections come in step 1b-items, which raises `SCHEMA_VERSION`. Version 0 is a draft and is not saved anywhere yet.
+Job, Room, Wall, Opening (window, door or passthrough), Obstacle, and the rough layout on each wall: cabinet runs and appliance placements (schema version 1, owner 2026-11-06). PlacedItem and selections come in step 1b-items, which raises `SCHEMA_VERSION` again. The format is still a draft, saved only in the preview's browser storage.
 - Every object is strict. An unknown or missing field is an error, never a default. "Not known" is an explicit `null`.
 - Each size is `Measured`: `{ value, provenance: 'unmeasured' | 'confirmed', source_mm }`. Two states (owner, 2026-11-05); typing a size never confirms it.
 - A wall is a `room` wall or a `floating` wall (an invisible wall for an island or peninsula: no thickness, no openings; closet-builder A-21). It is two corner points, plus:
   - `entered_length` and `length_source_mm` when the corners were rounded (see above);
   - `length_provenance`;
   - a `Measured` thickness (no height of its own: walls are as high as the ceiling, owner 2026-11-05);
-  - its openings and obstacles, placed by `offset` along the wall from its start corner.
+  - its openings and obstacles, placed by `offset` along the wall from its start corner;
+  - its **cabinet runs** (`base`, `upper`, `base_upper`, `base_upper_pantry` or `pantry`, with `offset`, `length` and `depth`) and **appliance placements** (`kind` from the appliance-type list, `offset`, a `Measured` width, and `paired_with` for a dishwasher beside its sink). Runs mark where cabinetry goes; they are not cabinets. Corner cabinets, the upper over a fridge and hoods are worked out, not stored.
 - IDs are UUIDs, passed in by the caller, and must be unique within the job.
 
 ## Checks (`checks.ts`)
@@ -57,5 +58,16 @@ Room shell only for now: Job, Room, Wall, Opening (window, door or passthrough) 
 | `layout.openings-overlap` | Two openings on one wall overlap (touching is fine) |
 | `layout.walls-cross` | Two walls in a room cross or run over each other |
 
+### Rough-layout checks (`layout/run-checks.ts`, all block)
+Pure geometry. Clearances such as "3\" from a door" are snapping rules kept as data in the designer, not checks.
+| ID | Fails when |
+|---|---|
+| `layout.runs-fit-along-wall` | A cabinet run or appliance runs past the end of its wall |
+| `layout.runs-overlap` | Two runs on one wall overlap (touching is fine) |
+| `layout.runs-clear-doorways` | A run or appliance crosses a door or passthrough (windows are fine) |
+| `layout.appliances-overlap` | Two appliances on one wall overlap |
+| `layout.appliances-on-runs` | An appliance isn't within a run (touching runs count as one stretch) |
+| `layout.appliance-pairs-exist` | A dishwasher points to a sink that isn't in the room |
+
 ## Tests
-`__tests__/` holds unit tests and two example rooms in `fixtures/rooms.ts`: a 12' × 10' kitchen, and an L-shaped laundry with a 45° wall. Both pass every check, and for each check a copy broken for it fails it.
+`__tests__/` holds unit tests and two example rooms in `examples/rooms.ts`: a 12' × 10' kitchen with a rough layout (runs, a sink under the window with its dishwasher, a range), and an L-shaped laundry with a 45° wall. Both pass every check, and for each check a copy broken for it fails it.

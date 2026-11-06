@@ -203,12 +203,22 @@ export function PlanCanvas(props: Props) {
 
   const corners = useMemo(() => room.walls.flatMap((w) => [w.start_point, w.end_point]), [room.walls]);
 
-  // Typing a new length straight onto a wall's length label.
-  const [editingLength, setEditingLength] = useState<{ wallId: string; at: V; text: string; error: string | null } | null>(null);
+  // Typing a new length straight onto a wall's length label; or onto the measurement beside a
+  // door or window, which slides it along the wall keeping its width (owner, 2026-11-06).
+  const [editingLength, setEditingLength] = useState<{ wallId: string; at: V; text: string; error: string | null; gap?: GapEdit } | null>(null);
   const commitLength = () => {
     if (!editingLength) return;
     const size = parseSize(editingLength.text);
     if (!size.ok) return setEditingLength({ ...editingLength, error: size.reason });
+    const gap = editingLength.gap;
+    if (gap) {
+      // The measurement runs from a fixed point (a corner or another opening) to this opening.
+      const offset = gap.side === 'before' ? gap.from + size.value.value : gap.from - size.value.value - gap.width;
+      if (offset < 0) return setEditingLength({ ...editingLength, error: 'That would push it past the end of the wall.' });
+      props.onOpeningMove(gap.openingId, editingLength.wallId, offset, true);
+      setEditingLength(null);
+      return;
+    }
     const r = props.onWallLengthTyped(editingLength.wallId, size.value);
     if (!r.ok) return setEditingLength({ ...editingLength, error: r.reason });
     setEditingLength(null);
@@ -855,6 +865,10 @@ export function PlanCanvas(props: Props) {
               onWallTap={onWallTap}
               selectedOpening={selection?.kind === 'opening' ? selection.id : null}
               issueIds={issueIds}
+              onEditGap={(gap, at, current) => {
+                props.onSelect({ kind: 'opening', id: gap.openingId });
+                setEditingLength({ wallId: wall.wall_id, at, text: formatInches(current), error: null, gap });
+              }}
               onEditLength={(wallId, at) => {
                 const w = room.walls.find((x) => x.wall_id === wallId);
                 if (!w) return;
@@ -943,7 +957,7 @@ export function PlanCanvas(props: Props) {
       {editingLength && (
         <div style={{ position: 'absolute', left: editingLength.at.x - 55, top: editingLength.at.y - 16, width: 110, zIndex: 3 }}>
           <input
-            aria-label="Wall length"
+            aria-label={editingLength.gap ? `Distance to the ${editingLength.gap.kind}` : 'Wall length'}
             autoFocus
             onFocus={(e) => e.target.select()}
             value={editingLength.text}
@@ -1125,6 +1139,8 @@ interface WallShapeProps {
   onWallTap: (wallId: string, additive: boolean) => void;
   /** The wall's length label was clicked: edit it there (screen point of the label). */
   onEditLength: (wallId: string, at: V) => void;
+  /** The measurement beside a door or window was clicked: type a new distance to slide it. */
+  onEditGap: (gap: GapEdit, at: V, current: number) => void;
   /** Pressing on a door/window: may become a drag (screen point where it was pressed). */
   onGrabOpening: (openingId: string, at: V) => void;
 }
@@ -1229,17 +1245,31 @@ function WallShape(props: WallShapeProps) {
           if (box) box.style.cursor = '';
         }}
       />
-      {chain.map(({ start, end }, k) => (
-        <Dimension
-          key={k}
-          name={`wall-${index + 1}-segment-${k + 1}`}
-          a={along(start)}
-          b={along(end)}
-          off={{ x: nx * (h + 10), y: ny * (h + 10) }}
-          text={lengthText({ value: end - start, exact: length.exact || end !== length.value })}
-          colour={DIM}
-        />
-      ))}
+      {chain.map(({ start, end }, k) => {
+        // A measurement that ends at a door or window (or starts where one ends) can be clicked
+        // to type a new distance: the opening slides over, keeping its width.
+        const before = wall.openings.find((o) => o.offset.value === end);
+        const after = before ? undefined : wall.openings.find((o) => o.offset.value + o.width.value === start);
+        const o = before ?? after;
+        const gap: GapEdit | null = o
+          ? { openingId: o.opening_id, kind: o.kind, side: before ? 'before' : 'after', from: before ? start : end, width: o.width.value }
+          : null;
+        const p0 = along(start);
+        const p1 = along(end);
+        const at = { x: (p0.x + p1.x) / 2 + nx * (h + 20), y: (p0.y + p1.y) / 2 + ny * (h + 20) };
+        return (
+          <Dimension
+            key={k}
+            name={`wall-${index + 1}-segment-${k + 1}`}
+            a={p0}
+            b={p1}
+            off={{ x: nx * (h + 10), y: ny * (h + 10) }}
+            text={lengthText({ value: end - start, exact: length.exact || end !== length.value })}
+            colour={gap && selectable && canEdit ? ACCENT : DIM}
+            {...(gap && selectable && canEdit ? { onClick: () => props.onEditGap(gap, at, end - start) } : {})}
+          />
+        );
+      })}
       <Group x={mid.x - nx * (h + 16)} y={mid.y - ny * (h + 16)} listening={false} name={`wall-tag-${letter}`}>
         <Circle radius={10} fill="#ffffff" stroke={ink} strokeWidth={1.5} />
         <Text text={letter} fontSize={11} fontStyle="bold" fill={ink} width={20} height={20} offsetX={10} offsetY={10} align="center" verticalAlign="middle" />
@@ -1345,7 +1375,18 @@ function doorGeometry(s: V, e: V, w: number, swing: Swing) {
 }
 
 /** A dimension line (screen space) from a to b, set off by `off`, with end ticks and a centred label. */
-function Dimension({ a, b, off, text, colour = GHOST, name }: { a: V; b: V; off: V; text: string; colour?: string; name?: string }) {
+/** A measurement beside an opening, being retyped: what it measures from, and which opening moves. */
+interface GapEdit {
+  openingId: string;
+  kind: Opening['kind'];
+  /** 'before': from a fixed point at its start to the opening; 'after': from the opening to a fixed point. */
+  side: 'before' | 'after';
+  /** The fixed point, along the wall. */
+  from: number;
+  width: number;
+}
+
+function Dimension({ a, b, off, text, colour = GHOST, name, onClick }: { a: V; b: V; off: V; text: string; colour?: string; name?: string; onClick?: () => void }) {
   const p = { x: a.x + off.x, y: a.y + off.y };
   const q = { x: b.x + off.x, y: b.y + off.y };
   const len = Math.hypot(q.x - p.x, q.y - p.y);
@@ -1354,8 +1395,29 @@ function Dimension({ a, b, off, text, colour = GHOST, name }: { a: V; b: V; off:
   const upright = angle > 90 || angle < -90 ? angle + 180 : angle;
   const tick = unit(off);
   const mid = { x: (p.x + q.x) / 2, y: (p.y + q.y) / 2 };
+  const click = onClick
+    ? {
+        onClick: (e: Konva.KonvaEventObject<MouseEvent>) => {
+          e.cancelBubble = true;
+          onClick();
+        },
+        onTap: (e: Konva.KonvaEventObject<TouchEvent>) => {
+          e.cancelBubble = true;
+          onClick();
+        },
+        onMouseEnter: (e: Konva.KonvaEventObject<MouseEvent>) => {
+          const box = e.target.getStage()?.container();
+          if (box) box.style.cursor = 'text';
+        },
+        onMouseLeave: (e: Konva.KonvaEventObject<MouseEvent>) => {
+          const box = e.target.getStage()?.container();
+          if (box) box.style.cursor = '';
+        },
+      }
+    : {};
   return (
-    <Group listening={false} {...(name ? { name } : {})}>
+    <Group listening={!!onClick} {...(name ? { name } : {})} {...click}>
+      {onClick && <Line points={[p.x, p.y, q.x, q.y]} stroke="transparent" strokeWidth={1} hitStrokeWidth={22} />}
       <Line points={[p.x, p.y, q.x, q.y]} stroke={colour} strokeWidth={1} />
       {[p, q].map((t, k) => (
         <Line key={k} points={[t.x - tick.x * 5, t.y - tick.y * 5, t.x + tick.x * 5, t.y + tick.y * 5]} stroke={colour} strokeWidth={1} />

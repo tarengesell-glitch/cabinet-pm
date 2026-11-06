@@ -586,3 +586,40 @@
     display: none;
   }
 }
+
+/* ---------- Checks, in the header (owner, 2026-11-06) ---------- */
+.checksMenu {
+  position: relative;
+}
+
+.checksOk {
+  composes: button;
+  color: var(--success);
+  font-weight: 600;
+  border-color: transparent;
+  background: transparent;
+  cursor: default;
+}
+
+.checksBad {
+  composes: button;
+  color: var(--danger);
+  border-color: #f0cfd0;
+  background: #fbeaea;
+  font-weight: 600;
+}
+
+.checksDrop {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 10;
+  width: min(420px, 90vw);
+  max-height: 60vh;
+  overflow: auto;
+  padding: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.16);
+}

@@ -18,6 +18,7 @@ import {
   nearestIslandDepth,
   runEnd,
   runEndLimits,
+  runMoveLimits,
   snapRunEnd,
   sortedRuns,
   subtract,
@@ -37,6 +38,8 @@ const INCH = 64;
 const WALL_ZONE = 30 * INCH;
 /** Smallest island a drag on the floor makes; anything shorter is treated as a click. */
 const MIN_ISLAND_DRAG = 24 * INCH;
+/** How far (screen pixels) a drag from a wall must go before its direction decides what it does. */
+const INTENT_PX = 10;
 /** How close (in room units) an island being dragged must come to a floating wall to snap onto it. */
 const ISLAND_SNAP = 10 * INCH;
 
@@ -314,6 +317,11 @@ interface Active {
   shift: boolean;
   /** Where the pointer is now (room), and the edit it asks for: for the island label. */
   last?: { p: Point; edit: LayoutEdit | null };
+  /**
+   * For a drag that starts at a wall or on a run: decided once the pointer has moved far enough
+   * to tell. Along the wall draws cabinets (or slides the run); out into the room makes an island.
+   */
+  intent?: 'along' | 'island';
 }
 
 /** While an island is being dragged out: the area dragged, and what it snaps to. */
@@ -468,6 +476,28 @@ export function useLayoutTool(args: LayoutToolArgs) {
         if (pend.mode === 'run' && pend.island) {
           return { kind: 'island-move', wallId: w.wall_id, dx: inch(p.x - a.start.x), dy: inch(p.y - a.start.y) };
         }
+        // Which way is the drag going? Decided once, when it has gone far enough to tell.
+        if (!a.intent) {
+          const vx = p.x - a.start.x;
+          const vy = p.y - a.start.y;
+          if (Math.hypot(vx, vy) * args.scale < INTENT_PX) return null;
+          const u = direction(w);
+          const along = Math.abs(vx * u.x + vy * u.y);
+          const across = Math.abs(vx * u.y - vy * u.x);
+          a.intent = across > along ? 'island' : 'along';
+        }
+        if (a.intent === 'island') return editFor({ ...a, pending: { mode: 'floor' } }, p, free);
+        if (pend.mode === 'run') {
+          // Grabbing cabinets and dragging along the wall slides them, keeping their length.
+          const run = w.runs.find((x) => x.run_id === pend.runId);
+          const lim = runMoveLimits(r, pend.runId);
+          if (!run || !lim) return null;
+          const want = run.offset + (project(r, w, p).t - pend.t);
+          const byStart = snap(w.wall_id, want, [run.run_id]);
+          const byEnd = snap(w.wall_id, want + run.length, [run.run_id]) - run.length;
+          const snapped = [byStart, byEnd].filter((x) => x !== Math.round(want)).sort((x, y) => Math.abs(x - want) - Math.abs(y - want))[0] ?? Math.round(want);
+          return { kind: 'run-move', runId: run.run_id, offset: Math.max(lim.min, Math.min(lim.max, snapped)) };
+        }
         return { kind: 'draw', wallId: w.wall_id, from: snap(w.wall_id, pend.t), to: snap(w.wall_id, project(r, w, p).t) };
       }
       case 'floor': {
@@ -519,7 +549,7 @@ export function useLayoutTool(args: LayoutToolArgs) {
     const edit = editFor(a, p, free);
     a.last = { p, edit };
     if (edit) args.onEdit(edit, false);
-    else if (a.pending.mode === 'floor') args.onCancel();
+    else if (a.pending.mode === 'floor' || a.intent === 'island') args.onCancel();
     return true;
   };
 
@@ -556,7 +586,8 @@ export function useLayoutTool(args: LayoutToolArgs) {
   /** The label and dragged area while an island is being dragged out on the floor. */
   const islandHint = (): IslandHint | null => {
     const a = active.current;
-    if (!a || !a.moved || a.pending.mode !== 'floor' || !a.last) return null;
+    if (!a || !a.moved || !a.last) return null;
+    if (a.pending.mode !== 'floor' && a.intent !== 'island') return null;
     const e = a.last.edit;
     const r = args.baseRoom;
     const text =

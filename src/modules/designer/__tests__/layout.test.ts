@@ -13,6 +13,7 @@ import {
   moveAppliance,
   moveIsland,
   moveJoint,
+  moveRun,
   placeAppliance,
   resizeIsland,
   runEndLimits,
@@ -194,6 +195,20 @@ describe('runs', () => {
       [48, 117.75, 'base_upper'],
     ]);
     expect(moveJoint(d, env, left!.run_id, right!.run_id, 4 * IN).ok).toBe(false);
+  });
+
+  it('a run slides along its wall, keeping its length, with its appliances, up to what is beside it', () => {
+    const k = bareKitchen();
+    const env = testEnv();
+    let d = unwrap(drawRun(k, env, wallOf(k, 'C').wall_id, 70 * IN, 100 * IN));
+    d = unwrap(placeAppliance(d, env, 'dishwasher', wallOf(d, 'C').wall_id, 85 * IN, SNAP));
+    const run = wallOf(d, 'C').runs[0]!;
+    const before = wallOf(d, 'C').appliances[0]!.offset;
+    d = unwrap(moveRun(d, env, run.run_id, 80 * IN));
+    expect(spans(wallOf(d, 'C'))).toEqual([[80, 110, 'base_upper']]);
+    expect(wallOf(d, 'C').appliances[0]!.offset).toBe(before + 10 * IN);
+    // Wall C has no door: the run can slide from the inside corner (2 1/4") to 141 3/4" - 30".
+    expect(moveRun(d, env, run.run_id, 120 * IN)).toEqual({ ok: false, reason: 'That run can only slide between 2 1/4" and 111 3/4" from the start of the wall.' });
   });
 
   it('an end handle stops at the wall, doorways and appliances', () => {

@@ -223,3 +223,42 @@ test('the appliance tray shows an icon for every appliance', async ({ page }) =>
   await page.getByRole('button', { name: 'Appliances', exact: true }).click();
   await expect(page.getByRole('region', { name: 'Appliances' }).locator('svg[data-icon]')).toHaveCount(9);
 });
+
+test('a drag that starts at a wall but goes out into the room makes an island, not cabinets along the wall', async ({ page }) => {
+  await bareKitchen(page);
+  const at = await plotter(page);
+  const a = at(60, 20); // within reach of wall A
+  const b = at(96, 80); // out into the room: mostly away from the wall
+  await page.mouse.move(a.x, a.y);
+  await page.mouse.down();
+  for (let i = 1; i <= 30; i++) await page.mouse.move(a.x + ((b.x - a.x) * i) / 30, a.y + ((b.y - a.y) * i) / 30);
+  await page.mouse.up();
+  const w = await walls(page);
+  expect(w[0]!.runs).toEqual([]);
+  expect(w.filter((x) => x.kind === 'floating')).toHaveLength(1);
+});
+
+test('grab cabinets and drag them along the wall: they slide, keeping their length', async ({ page }) => {
+  await bareKitchen(page);
+  const at = await plotter(page);
+  // Draw 40" of cabinets on wall C (the top wall), then grab them and drag 20" along.
+  let a = at(30, 108);
+  let b = at(70, 108);
+  await page.mouse.move(a.x, a.y);
+  await page.mouse.down();
+  for (let i = 1; i <= 20; i++) await page.mouse.move(a.x + ((b.x - a.x) * i) / 20, a.y);
+  await page.mouse.up();
+  const drawn = (await walls(page))[2]!.runs[0]!;
+  expect(drawn.length).toBe(40 * IN);
+  a = at(50, 108);
+  b = at(70, 108);
+  await page.mouse.move(a.x, a.y);
+  await page.mouse.down();
+  for (let i = 1; i <= 20; i++) await page.mouse.move(a.x + ((b.x - a.x) * i) / 20, a.y);
+  await page.mouse.up();
+  const moved = (await walls(page))[2]!.runs;
+  expect(moved).toHaveLength(1);
+  expect(moved[0]!.length).toBe(40 * IN);
+  // Wall C runs right to left, so moving right on screen moves it towards C's start.
+  expect(moved[0]!.offset).toBe(drawn.offset - 20 * IN);
+});

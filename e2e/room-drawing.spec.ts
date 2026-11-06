@@ -630,3 +630,31 @@ test('dragging a wall handle near the edge keeps going as the plan scrolls', asy
   // Without scrolling, reaching the edge would give about 220"; held there, it keeps growing.
   expect(Number(length!.replace(/[^0-9]/g, ''))).toBeGreaterThan(260);
 });
+
+test('click the measurement beside a window and type a distance: it slides over, keeping its width', async ({ page }) => {
+  await page.goto('/rooms/preview');
+  await page.getByRole('button', { name: /Example kitchen/ }).click();
+  await wallTool(page, 'Select').click();
+  const saved = async () => (await page.evaluate(() => JSON.parse(window.localStorage.getItem('cabinet-pm.room-preview.v0')!))).job.rooms[0].walls[0].openings[0];
+  // Wall A: corner → window is 48", the window 36", window → corner 60".
+  const before = await centreOf(page, '.wall-1-segment-1-text');
+  await page.mouse.click(before.x, before.y);
+  await page.getByRole('textbox', { name: 'Distance to the window' }).fill('60');
+  await page.keyboard.press('Enter');
+  await expect.poll(async () => (await saved()).offset.value).toBe(60 * 64);
+  expect((await saved()).width.value).toBe(36 * 64);
+  // The measurement after it: type 24" and the window's far edge sits 24" from the corner.
+  const after = await centreOf(page, '.wall-1-segment-3-text');
+  await page.mouse.click(after.x, after.y);
+  await page.getByRole('textbox', { name: 'Distance to the window' }).fill('24');
+  await page.keyboard.press('Enter');
+  await expect.poll(async () => (await saved()).offset.value).toBe((144 - 24 - 36) * 64);
+  await expect(checks(page).getByText('No problems found')).toBeVisible();
+});
+
+test('the checks sit in the header, and the problem list drops down when one appears', async ({ page }) => {
+  await page.goto('/rooms/preview');
+  await page.getByRole('button', { name: /Example kitchen/ }).click();
+  await expect(page.getByRole('banner').getByRole('region', { name: 'Checks' })).toContainText('No problems found');
+  await expect(page.getByText('What gets saved')).toHaveCount(0);
+});

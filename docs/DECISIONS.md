@@ -140,6 +140,11 @@ After walls, doors and windows, the person marks where cabinetry goes and where 
   - Undo and redo sit on the plan beside zoom and Fit, on every step.
   - Islands show their size while being dragged and snap to the depth list; dragged over a floating wall with nothing on it, an island snaps onto that wall.
   - The appliance tray has line icons. On a phone the panel is a bottom sheet that folds down to see the plan.
+- **Round 6 (owner, 2026-11-06):**
+  - **Dragging fixed.** A drag that starts at a wall now goes the way it's moving: along the wall draws cabinets, out into the room makes an island (it used to try to draw a run of zero length and do nothing). Grabbing cabinets and dragging them along the wall slides them, keeping their length, with their appliances (it used to only extend them).
+  - **Checks sit in the header:** one line ("No problems found" or "N problems"); the list drops down from it and opens by itself when a new problem appears.
+  - **"What gets saved" is removed** from the screen (it was a build-checking tool: the raw master copy, with Download and Load).
+  - **Click the measurement beside a door or window** to type a new distance: the opening slides over, keeping its width.
 - **Built into the room preview** as the "Cabinets & appliances" tool (2026-11-06). Walls are stored by their centre line, so cabinets stand against the inside face and stop at the inside corners; corner gaps are measured from the inside corner.
 
 ### 2026-11-05: Where the work lives and deploys

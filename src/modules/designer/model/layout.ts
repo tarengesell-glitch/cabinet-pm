@@ -334,7 +334,7 @@ export function drawRun(draft: Draft, env: Env, wallId: string, from: Length, to
   if (!w) return refuse('That wall no longer exists.');
   const inside = insideSpan(r, w);
   const span = { start: Math.max(inside.start, Math.min(from, to)), end: Math.min(inside.end, Math.max(from, to)) };
-  if (span.end <= span.start) return refuse('That stretch is inside a corner.');
+  if (span.end <= span.start) return refuse('Drag along the wall to draw cabinets there.');
   return addPieces(draft, env, w, span, rules, 'Drew', 'That stretch already has cabinets, or is a doorway.');
 }
 
@@ -369,6 +369,41 @@ export function setRunEnd(draft: Draft, env: Env, runId: string, end: 'start' | 
   const { wall, run } = found;
   const next: Run = end === 'start' ? { ...run, offset: at, length: runEnd(run) - at } : { ...run, length: at - run.offset };
   return ok(withRoom(draft, env, `Made a run on ${wallLabel(r, wall.wall_id)} ${formatInches(next.length)} long`, replaceWall(r, { ...wall, runs: wall.runs.map((x) => (x === run ? next : x)) })));
+}
+
+/**
+ * Where a run can slide along its wall, keeping its length: between whatever is on each side
+ * of it now (the inside corners, doorways with clearance, other runs, and windows if it is all
+ * pantry). As the smallest and largest offset of its near end.
+ */
+export function runMoveLimits(r: Room, runId: string, rules: LayoutRules = LAYOUT_RULES): { min: Length; max: Length } | null {
+  const found = findRun(r, runId);
+  if (!found) return null;
+  const { wall, run } = found;
+  const span = insideSpan(r, wall);
+  const obstacles = [...doorwayZones(wall, rules), ...wall.runs.filter((x) => x !== run).map(runSpan), ...(run.kind === 'pantry' ? windowZones(wall, rules) : [])];
+  const min = Math.max(span.start, ...obstacles.filter((o) => o.end <= run.offset).map((o) => o.end));
+  const max = Math.min(span.end, ...obstacles.filter((o) => o.start >= runEnd(run)).map((o) => o.start)) - run.length;
+  return { min, max: Math.max(min, max) };
+}
+
+/** Slides a run along its wall, keeping its length; the appliances standing on it go with it. */
+export function moveRun(draft: Draft, env: Env, runId: string, offset: Length, rules: LayoutRules = LAYOUT_RULES): Result<Change> {
+  const r = room(draft);
+  const found = findRun(r, runId);
+  const limits = runMoveLimits(r, runId, rules);
+  if (!found || !limits) return refuse('That cabinet run no longer exists.');
+  if (offset < limits.min || offset > limits.max) return refuse(`That run can only slide between ${formatInches(limits.min)} and ${formatInches(limits.max)} from the start of the wall.`);
+  const { wall, run } = found;
+  const delta = offset - run.offset;
+  if (delta === 0) return refuse('Nothing moved.');
+  const on = new Set(wall.appliances.filter((a) => a.offset >= run.offset && applianceEnd(a) <= runEnd(run)).map((a) => a.placement_id));
+  const next: Wall = {
+    ...wall,
+    runs: wall.runs.map((x) => (x === run ? { ...x, offset } : x)),
+    appliances: wall.appliances.map((a) => (on.has(a.placement_id) ? { ...a, offset: a.offset + delta } : a)),
+  };
+  return ok(withRoom(draft, env, `Moved a run along ${wallLabel(r, wall.wall_id)}`, replaceWall(r, next)));
 }
 
 /** Sets a run's length by moving its far end, or its near end if the far one is blocked. */

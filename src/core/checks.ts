@@ -11,7 +11,7 @@ export type Layer = 'layout' | 'buildability' | 'design_rules' | 'translation_pr
 export type Severity = 'block' | 'warn';
 
 export interface IssueRef {
-  readonly kind: 'job' | 'room' | 'wall' | 'opening' | 'obstacle' | 'item';
+  readonly kind: 'job' | 'room' | 'wall' | 'opening' | 'obstacle' | 'run' | 'appliance' | 'item';
   readonly id: string;
 }
 

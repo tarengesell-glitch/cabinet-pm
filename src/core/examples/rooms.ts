@@ -1,4 +1,4 @@
-// Hand-written example master copies (room shell). Both must pass every wall check.
+// Hand-written example master copies. Both must pass every wall and rough-layout check.
 // Used by Core's tests and loadable in the room preview.
 import { pointFromLengthAndAngle, type Point } from '../geometry';
 import { JobSchema, SCHEMA_VERSION, type Job, type Wall } from '../schema/master-copy';
@@ -18,6 +18,8 @@ function wall(n: number, start: Point, end: Point, extra: Partial<Wall> = {}): W
     thickness: THICKNESS,
     openings: [],
     obstacles: [],
+    runs: [],
+    appliances: [],
     ...extra,
   };
 }
@@ -70,8 +72,21 @@ export function kitchen(): Job {
               height: measured(inch(4, 1, 2)),
             },
           ],
+          // The rough layout: cabinets along the whole wall, the sink centred under the
+          // window and its dishwasher beside it.
+          runs: [{ run_id: id(601), kind: 'base_upper', offset: 0, length: ft(12), depth: inch(24) }],
+          appliances: [
+            { placement_id: id(701), kind: 'sink', offset: inch(50), width: measured(inch(32), 'unmeasured'), paired_with: null },
+            { placement_id: id(702), kind: 'dishwasher', offset: inch(82), width: measured(inch(24), 'unmeasured'), paired_with: id(701) },
+          ],
         }),
-        wall(102, b, c),
+        wall(102, b, c, {
+          runs: [
+            { run_id: id(602), kind: 'base_upper', offset: 0, length: ft(6), depth: inch(24) },
+            { run_id: id(603), kind: 'pantry', offset: ft(6), length: inch(30), depth: inch(24) },
+          ],
+          appliances: [{ placement_id: id(703), kind: 'range', offset: inch(30), width: measured(inch(30), 'unmeasured'), paired_with: null }],
+        }),
         wall(103, c, d),
         wall(104, d, a, {
           openings: [

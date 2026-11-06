@@ -7,4 +7,5 @@ export * from './geometry';
 export * from './schema/master-copy';
 export * from './checks';
 export * from './layout/wall-checks';
+export * from './layout/run-checks';
 export * as examples from './examples/rooms';

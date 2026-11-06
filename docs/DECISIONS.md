@@ -120,6 +120,19 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 - **Room drawing, round 9 (owner, 2026-11-05): edge scrolling.** While drawing walls or dragging a handle, a cursor within 40 px of the plan's edge scrolls the plan that way, faster nearer the edge, as AutoCAD, SketchUp and Figma do. The wall or drag being made follows the cursor. It stops when the cursor moves back in.
 - Room capture is pulled ahead of Phase 5 (BUILD_PLAN). Order: scaffold (1a), then Core walls and openings, then the Designer drawing screen.
 
+### 2026-11-06: Rough layout: cabinet runs and appliances (owner, from the clickable mockup, rounds 1 to 4)
+After walls, doors and windows, the person marks where cabinetry goes and where the appliances will likely sit, in about a minute. It is not placing cabinets: the AI draft (OA-3) fills the runs later. Researched against IKEA, Lowe's, Mozaik AutoFill, Coohom and Archisketch; the owner chose "tap a wall / drag along a wall" for runs and an appliance tray, and dropped layout-shape templates and a work-triangle hint.
+- **Who uses it:** a designer or salesperson on an online call, and the client on their own. It must explain itself and work with a mouse and with touch.
+- **Run types:** base only, upper only, base + upper, base + upper + pantry, all pantry. A run can be split so parts have different types; the two parts share a divider that moves both.
+- **Where runs snap:** run ends stay **3" clear of doors, passthroughs and windows**. Where a run meets the run on the next wall, its end snaps into the corner or **3", 6" or 9" clear** of that run's front.
+- **Corner cabinets:** where runs on two walls meet in the corner, a corner cabinet is needed: base where both have bases, upper where both have uppers. Shown, not stored.
+- **All pantry stays clear of windows:** the stretch in front of a window, plus 3" either side, becomes base cabinets.
+- **Islands:** floating walls (A-21) with a run on them. Island depths: **15", 27", 36", 42", 48"**.
+- **Appliance tray and standard widths:** fridge 36"; range 30" or 36"; cooktop 30" or 36"; wall oven 30"; sink 32"; bar sink 24"; dishwasher 24"; microwave 24"; wine fridge 24". Ranges and cooktops always come with a hood. Appliances are only placed by the person (drag, or tap then tap the plan); nothing drops in on its own.
+- **Appliance rules:** a sink dropped near a window centres under it. Placing a sink adds a dishwasher right beside it when the plan has none yet; the dishwasher can be moved to the sink's other side and moves with the sink. A fridge gets a full 24"-deep upper above it. An appliance dropped on a bare wall gets a short run under it.
+- **Controls match the wall drawing:** click selects, Shift+click adds, Delete removes, Ctrl/Cmd+Z undoes, Esc cancels, scroll zooms, Space+drag pans, Alt stops snapping, click a length to type it. Run and island options sit in a "Cabinet runs" frame on the right; appliance options pop up next to the appliance.
+- **Still to confirm:** the hood is assumed to match the width of the range or cooktop under it.
+
 ### 2026-11-05: Where the work lives and deploys
 - `main` is the main branch. Netlify deploys the live site from it, so every merge is a deploy.
 - **The site is built as plain web pages** (Next.js `output: 'export'` into `out/`), which Netlify serves directly. The first deploy (PR #4) showed Netlify's "Page not found" on `/rooms/preview`. Most likely Netlify's Next.js support didn't handle this Next.js version. Every page today runs in the browser, so no server is needed. `npm run check` now serves `out/` like a static host and opens the pages (`npm run test:static`). Revisit when the first server-side feature arrives (database, sign-in, API): it will need Netlify's Next.js support or another approach.
@@ -150,7 +163,7 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
   - A mocked preview user and preview shop stand in until sign-in and shops exist, and are labelled on screen.
 - **PROPOSED:**
   - the `core/` / `platform/` split, and the master copy stored as versioned JSON with the named writers (ARCHITECTURE);
-  - appliance placements added to the master copy (DATA_MODEL "core"). Dimension provenance was approved on 2026-11-05.
+  - ~~appliance placements added to the master copy (DATA_MODEL "core").~~ Decided 2026-11-06 with the rough layout (see "Decided"). Dimension provenance was approved on 2026-11-05.
 
 ### From the owner's workflow (2026-10-27)
 - **CV-2 More than one colony.** Will each colony have its own Cabinet Vision library (so its own catalog mappings), or will all colonies share one library? And does each have its own prices?

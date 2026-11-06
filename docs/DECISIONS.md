@@ -161,6 +161,10 @@ After walls, doors and windows, the person marks where cabinetry goes and where 
 - **PROPOSED (room preview, 2026-11-05):**
   - The starting permissions are `room.view` and `room.edit` for owner, admin and designer (`src/platform/permissions/roles.json`).
   - A mocked preview user and preview shop stand in until sign-in and shops exist, and are labelled on screen.
+- **PROPOSED (rough layout, 2026-11-06):** mockup defaults the owner used without changing, kept in `src/modules/designer/data/layout-rules.json`:
+  - new runs start as base + upper, 24" deep (upper only 12"); uppers on a base + upper run are drawn 13" deep; island runs start as base only; nothing shorter than 9" is made;
+  - "Add island" makes a 72" × 36" island;
+  - a fridge or wall oven is kept out from in front of a window; a wall oven dropped on a bare wall gets an all-pantry run.
 - **PROPOSED:**
   - the `core/` / `platform/` split, and the master copy stored as versioned JSON with the named writers (ARCHITECTURE);
   - ~~appliance placements added to the master copy (DATA_MODEL "core").~~ Decided 2026-11-06 with the rough layout (see "Decided"). Dimension provenance was approved on 2026-11-05.

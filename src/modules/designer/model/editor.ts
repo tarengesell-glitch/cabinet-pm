@@ -104,7 +104,7 @@ export const typed = (size: TypedSize): Measured => ({ value: size.value, proven
 
 export const room = (draft: Draft): Room => draft.job.rooms[0] as Room;
 
-const withRoom = (draft: Draft, env: Env, summary: string, next: Room): Draft => ({
+export const withRoom = (draft: Draft, env: Env, summary: string, next: Room): Draft => ({
   ...draft,
   job: {
     ...draft.job,

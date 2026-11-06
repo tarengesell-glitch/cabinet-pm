@@ -16,6 +16,7 @@ import {
   moveAppliance,
   moveIsland,
   moveJoint,
+  moveRun,
   placeAppliance,
   resizeIsland,
   setApplianceWidth,
@@ -33,6 +34,7 @@ export type LayoutEdit =
   | { kind: 'fill'; wallId: string }
   | { kind: 'draw'; wallId: string; from: Length; to: Length }
   | { kind: 'run-end'; runId: string; end: 'start' | 'end'; at: Length }
+  | { kind: 'run-move'; runId: string; offset: Length }
   | { kind: 'run-length'; runId: string; length: Length }
   | { kind: 'joint'; leftId: string; rightId: string; at: Length }
   | { kind: 'run-depth'; runIds: readonly string[]; depth: Length }
@@ -57,6 +59,8 @@ export function applyLayoutEdit(draft: Draft, env: Env, edit: LayoutEdit): Resul
       return drawRun(draft, env, edit.wallId, edit.from, edit.to);
     case 'run-end':
       return setRunEnd(draft, env, edit.runId, edit.end, edit.at);
+    case 'run-move':
+      return moveRun(draft, env, edit.runId, edit.offset);
     case 'run-length':
       return setRunLength(draft, env, edit.runId, edit.length);
     case 'joint':

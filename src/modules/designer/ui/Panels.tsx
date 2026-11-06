@@ -1,10 +1,9 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   distanceForDisplay,
   formatInches,
   type Issue,
-  type Job,
   type Measured,
   type Opening,
   type Result,
@@ -395,76 +394,57 @@ export function OpeningPanel({ room, wall, opening, canEdit, onKind, onSize, onP
   );
 }
 
-export function ChecksPanel({ formatErrors, issues, onSelect }: { formatErrors: readonly string[]; issues: readonly Issue[]; onSelect: (sel: Selection) => void }) {
+/**
+ * The checks, up in the header (owner, 2026-11-06): one line that says all is well or how many
+ * problems there are. The list drops down from it, and opens by itself when a new problem appears.
+ * Tapping a problem selects the thing it is about.
+ */
+export function ChecksMenu({ formatErrors, issues, onSelect }: { formatErrors: readonly string[]; issues: readonly Issue[]; onSelect: (sel: Selection) => void }) {
   const total = formatErrors.length + issues.length;
+  const [open, setOpen] = useState(false);
+  const before = useRef(total);
+  useEffect(() => {
+    if (total > before.current) setOpen(true);
+    if (total === 0) setOpen(false);
+    before.current = total;
+  }, [total]);
   return (
-    <section className={s.card} aria-label="Checks">
-      <h2 className={s.cardTitle}>Checks {total > 0 && <span className={s.chipRough}>⚠ {total}</span>}</h2>
-      {total === 0 && <p className={s.ok}>✓ No problems found</p>}
-      <ul className={s.list}>
-        {formatErrors.map((m, i) => (
-          <li key={`f${i}`} className={s.error}>
-            Format: {m}
-          </li>
-        ))}
-        {issues.map((issue, i) => (
-          <li key={i}>
-            <button
-              className={s.issue}
-              onClick={() =>
-                issue.ref.kind === 'wall' || issue.ref.kind === 'opening' || issue.ref.kind === 'appliance'
-                  ? onSelect({ kind: issue.ref.kind, id: issue.ref.id })
-                  : issue.ref.kind === 'run'
-                    ? onSelect({ kind: 'runs', ids: [issue.ref.id] })
-                    : undefined
-              }
-            >
-              <span>
-                {issue.severity === 'block' ? '⛔ ' : '⚠ '}
-                {issue.message}
-              </span>
-            </button>
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-}
-
-export function MasterCopyPanel({ job, onDownload, onLoad }: { job: Job; onDownload: () => void; onLoad: (text: string) => Result<unknown> }) {
-  const [error, setError] = useState<string | null>(null);
-  return (
-    <section className={s.card}>
-      <details>
-        <summary className={s.cardTitle} style={{ cursor: 'pointer' }}>
-          What gets saved (the master copy)
-        </summary>
-        <p className={s.muted}>This is exactly what the system stores for this room. Sizes are whole numbers of 1/64 inch.</p>
-        <pre className={s.json} data-testid="master-copy">
-          {JSON.stringify(job, null, 2)}
-        </pre>
-      </details>
-      <div className={s.row}>
-        <button className={s.button} onClick={onDownload}>
-          Download
-        </button>
-        <label className={s.fileButton}>
-          Load a file…
-          <input
-            type="file"
-            accept="application/json,.json"
-            hidden
-            onChange={async (e) => {
-              const file = e.target.files?.[0];
-              if (!file) return;
-              const r = onLoad(await file.text());
-              setError(r.ok ? null : r.reason);
-              e.target.value = '';
-            }}
-          />
-        </label>
-      </div>
-      {error && <p className={s.error} role="alert">{error}</p>}
-    </section>
+    <div className={s.checksMenu} role="region" aria-label="Checks">
+      <button className={total === 0 ? s.checksOk : s.checksBad} aria-expanded={open} onClick={() => total > 0 && setOpen((o) => !o)}>
+        {total === 0 ? '✓ No problems found' : `⚠ ${total} problem${total > 1 ? 's' : ''} ${open ? '▴' : '▾'}`}
+      </button>
+      {open && total > 0 && (
+        <div className={s.checksDrop}>
+          <ul className={s.list}>
+            {formatErrors.map((m, i) => (
+              <li key={`f${i}`} className={s.error}>
+                Format: {m}
+              </li>
+            ))}
+            {issues.map((issue, i) => (
+              <li key={i}>
+                <button
+                  className={s.issue}
+                  onClick={() => {
+                    const sel: Selection =
+                      issue.ref.kind === 'wall' || issue.ref.kind === 'opening' || issue.ref.kind === 'appliance'
+                        ? { kind: issue.ref.kind, id: issue.ref.id }
+                        : issue.ref.kind === 'run'
+                          ? { kind: 'runs', ids: [issue.ref.id] }
+                          : null;
+                    if (sel) onSelect(sel);
+                  }}
+                >
+                  <span>
+                    {issue.severity === 'block' ? '⛔ ' : '⚠ '}
+                    {issue.message}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
   );
 }

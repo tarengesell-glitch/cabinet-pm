@@ -47,11 +47,12 @@ Open it at `/rooms/preview` (`npm run dev`, then http://localhost:3000/rooms/pre
 - **Two states:** unmeasured walls are pastel red, confirmed walls black. Typing or dragging never confirms a size; the Confirm button does. The plan shows the state by colour only (less is more); the panel says it in words.
 - **Measurements:** a wall with doors or windows shows a chain (corner → opening edge, opening width, … → corner) and the overall length further out. Other walls show only the overall.
 - **Lengths** are shown in inches only (`68 11/16"`). Approximate ones (slanted walls) are rounded to 1/16" and marked ≈.
-- **Live checks:** Core's master copy format check and wall checks run after every change. Tap a problem to select it.
+- **Live checks:** Core's master copy format check, wall checks and rough-layout checks run after every change. They sit in the header as one line; the list drops down from it (and opens by itself when a new problem appears). Tap a problem to select it.
+- **Measurements beside an opening** can be clicked to type a new distance: the door or window slides along, keeping its width.
 - **Also:**
   - undo and redo;
   - two example rooms;
-  - "What gets saved", which shows the master copy JSON, with Download and Load.
+  - (The "What gets saved" panel was removed, owner 2026-11-06.)
 
 ## Rough layout: cabinet runs and appliances (2026-11-06)
 **Steps (round 5):** the right panel is an accordion of steps (`ui/Steps.tsx`): 1 Walls (Select | Room wall | Floating wall), 2 Openings (Door | Window | Passthrough tiles), 3 Cabinets & islands, 4 Appliances. A step's options open under it; picking something on the plan opens its step. Undo and redo sit on the plan with zoom and Fit. On a phone the panel is a bottom sheet. Islands dragged over a floating wall snap onto it (`addIslandOnWall`).

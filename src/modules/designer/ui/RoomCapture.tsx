@@ -47,7 +47,7 @@ import { ApplianceTray, RunsFrame } from './LayoutPanels';
 import { OpeningIcon } from './applianceIcons';
 import { STEP_LABEL, StepList, type StepId } from './Steps';
 import { applyLayoutEdit, type LayoutEdit } from './layoutEdits';
-import { ChecksPanel, MasterCopyPanel, OpeningPanel, RoomPanel, StartRoomForm, WallPanel, WallsPanel, KIND_LABEL } from './Panels';
+import { ChecksMenu, OpeningPanel, RoomPanel, StartRoomForm, WallPanel, WallsPanel, KIND_LABEL } from './Panels';
 import { PlanCanvas, selectedWallIds, wallSelection, type Selection, type Tool } from './PlanCanvas';
 import { downloadText, readStored, writeStored } from './storage';
 import s from './RoomCapture.module.css';
@@ -339,6 +339,7 @@ export function RoomCapture({ user }: { user: User }) {
       <h1 className={s.title}>{room ? room.name : 'Room drawing'}</h1>
       <span className={s.banner}>Preview: saved in this browser only</span>
       {storageProblem && <span className={s.bannerDanger} role="alert">{storageProblem}</span>}
+      {draft && room && <ChecksMenu formatErrors={formatErrors} issues={issues} onSelect={selectAndOpen} />}
       <span className={s.spacer} />
       <span className={s.mockNote}>
         {user.mocked && `${user.name} · `}
@@ -668,23 +669,6 @@ export function RoomCapture({ user }: { user: User }) {
                 }}
               />
 
-              <ChecksPanel formatErrors={formatErrors} issues={issues} onSelect={selectAndOpen} />
-
-              <MasterCopyPanel
-                job={draft.job}
-                onDownload={() => downloadText(`${room.name.replace(/[^\w-]+/g, '-')}.json`, JSON.stringify(draft.job, null, 2))}
-                onLoad={(text) => {
-                  let raw: unknown;
-                  try {
-                    raw = JSON.parse(text);
-                  } catch (error) {
-                    return { ok: false, reason: `That file isn't JSON (${error instanceof Error ? error.message : String(error)}).` };
-                  }
-                  const r = apply(loadJob(raw, null));
-                  if (r.ok) setSelection(null);
-                  return r;
-                }}
-              />
               </div>
             </>
           )}

@@ -133,6 +133,13 @@ After walls, doors and windows, the person marks where cabinetry goes and where 
 - **Controls match the wall drawing:** click selects, Shift+click adds, Delete removes, Ctrl/Cmd+Z undoes, Esc cancels, scroll zooms, Space+drag pans, Alt stops snapping, click a length to type it. Run and island options sit in a "Cabinet runs" frame on the right; appliance options pop up next to the appliance.
 - **Still to confirm:** the hood is assumed to match the width of the range or cooktop under it.
 - **Round 5 fixes (owner, 2026-11-06):** a selected door or window no longer shows its distance from the wall's start (it is placed by dragging, and the plan's measurement chain shows where it is), and a door shows no sill height. The upper corner cabinet is drawn as an L along both walls, as deep as the uppers, matching the base corner's reach.
+- **Round 5: one step-by-step panel (owner, 2026-11-06, from the round 5 mockup).** Researched against Cedreo, Floorplanner, RoomSketcher, IKEA and NN/g: revisitable steps, not a locked wizard.
+  - The top toolbar is gone. The right panel is an accordion of four steps: **1 Walls · 2 Openings · 3 Cabinets & islands · 4 Appliances**. A step's options open directly under it, steps already visited show a tick, and there are no Next or Back buttons.
+  - **Walls:** Select | Room wall | Floating wall (Draw walls and Floating wall merged). **Openings:** Door | Window | Passthrough tiles (the three Add tools merged).
+  - Picking something on the plan opens the step it belongs to, with its options there.
+  - Undo and redo sit on the plan beside zoom and Fit, on every step.
+  - Islands show their size while being dragged and snap to the depth list; dragged over a floating wall with nothing on it, an island snaps onto that wall.
+  - The appliance tray has line icons. On a phone the panel is a bottom sheet that folds down to see the plan.
 - **Built into the room preview** as the "Cabinets & appliances" tool (2026-11-06). Walls are stored by their centre line, so cabinets stand against the inside face and stop at the inside corners; corner gaps are measured from the inside corner.
 
 ### 2026-11-05: Where the work lives and deploys

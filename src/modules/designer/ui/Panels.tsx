@@ -227,7 +227,7 @@ export function WallPanel({ room, wall, canEdit, onSize, onProvenance, onDelete,
             <li key={o.opening_id}>
               <button className={s.listButton} onClick={() => onSelect({ kind: 'opening', id: o.opening_id })}>
                 <span>
-                  {KIND_LABEL[o.kind]} {i + 1}: {formatInches(o.width.value)} wide, {formatInches(o.offset.value)} from the start
+                  {KIND_LABEL[o.kind]} {i + 1}: {formatInches(o.width.value)} wide
                 </span>
               </button>
             </li>
@@ -310,11 +310,15 @@ export function WallsPanel({ room, walls, canEdit, onSelect, onThickness, onDele
   );
 }
 
-const OPENING_FIELDS: { field: OpeningField; label: string }[] = [
-  { field: 'offset', label: 'From wall start' },
+/**
+ * The sizes shown for a selected opening (owner, 2026-11-06): no distance from the wall's start
+ * (where it sits is set by dragging it, and shown in the measurement chain on the plan), and no
+ * sill height for a door, which always starts at the floor.
+ */
+const openingFields = (kind: Opening['kind']): { field: OpeningField; label: string }[] => [
   { field: 'width', label: 'Width' },
   { field: 'height', label: 'Height' },
-  { field: 'sill_height', label: 'Sill height' },
+  ...(kind === 'door' ? [] : [{ field: 'sill_height' as const, label: 'Sill height' }]),
 ];
 
 export function OpeningPanel({ room, wall, opening, canEdit, onKind, onSize, onProvenance, onDelete, onSelect, onHanding }: {
@@ -379,7 +383,7 @@ export function OpeningPanel({ room, wall, opening, canEdit, onKind, onSize, onP
           </div>
         </>
       )}
-      {OPENING_FIELDS.map(({ field, label }) => (
+      {openingFields(opening.kind).map(({ field, label }) => (
         <SizeField key={field} label={label} measured={opening[field]} canEdit={canEdit} onSet={(v) => onSize(field, v)} onProvenance={(p) => onProvenance(field, p)} />
       ))}
       <div className={s.row}>

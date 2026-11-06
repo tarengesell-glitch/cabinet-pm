@@ -121,7 +121,12 @@ test('drops a standard door by tapping a wall with the door tool', async ({ page
   await expect(page.getByRole('heading', { name: /^Door on/ })).toBeVisible();
   await expect(page.getByTestId('value-Width')).toHaveText(`32"`);
   await expect(page.getByTestId('value-Height')).toHaveText(`80"`);
-  await expect(page.getByTestId('value-From wall start')).toHaveText(`56"`); // centred: 72" - 16"
+  // No distance from the wall's start, and no sill height for a door (owner, 2026-11-06).
+  await expect(page.getByTestId('value-From wall start')).toHaveCount(0);
+  await expect(page.getByTestId('value-Sill height')).toHaveCount(0);
+  // It is centred where the wall was tapped: 72" - 16" from the start.
+  const saved = await page.evaluate(() => JSON.parse(window.localStorage.getItem('cabinet-pm.room-preview.v0')!));
+  expect(saved.job.rooms[0].walls[0].openings[0].offset.value).toBe(56 * 64);
 });
 
 test('typing a wall length moves the joined wall across without changing its angle', async ({ page }) => {

@@ -198,27 +198,36 @@ export function LayoutShapes(props: {
     }
   }
 
-  // Corner cabinets, where runs on two walls meet: a square with a cross, as plans show them.
+  // Corner cabinets, where runs on two walls meet. The base corner is a square with a cross, as
+  // plans show it. The upper corner is an L (owner, 2026-11-06): each leg runs along one wall as
+  // far as the base corner reaches, and is as deep as that wall's uppers, with a diagonal.
   for (const c of cornerCabinets(r)) {
     const ending = r.walls.find((w) => w.wall_id === c.endingWallId) as Wall;
     const starting = r.walls.find((w) => w.wall_id === c.startingWallId) as Wall;
     const nE = insideNormal(r, ending);
     const nS = insideNormal(r, starting);
-    for (const [which, depths] of [
-      ['base', c.baseDepths],
-      ['upper', c.upperDepths],
-    ] as const) {
-      if (!depths) continue;
-      const p = c.corner;
-      const q1 = { x: p.x + nS.x * depths.starting, y: p.y + nS.y * depths.starting };
-      const q2 = { x: q1.x + nE.x * depths.ending, y: q1.y + nE.y * depths.ending };
-      const q3 = { x: p.x + nE.x * depths.ending, y: p.y + nE.y * depths.ending };
-      const pts = [p, q1, q2, q3].map(toScreen);
+    const p = c.corner;
+    /** The point `s` along nS (back along the ending wall) and `e` along nE (along the starting wall). */
+    const at = (s: number, e: number): Point => ({ x: p.x + nS.x * s + nE.x * e, y: p.y + nS.y * s + nE.y * e });
+    const line = (pts: Point[]) => pts.map(toScreen).flatMap((v) => [v.x, v.y]);
+    if (c.baseDepths) {
+      const { starting: s, ending: e } = c.baseDepths;
       shapes.push(
-        <Group key={`corner-${c.endingWallId}-${which}`} name={`corner-cabinet corner-${which}`} listening={false}>
-          <Line points={pts.flatMap((v) => [v.x, v.y])} closed stroke={ACCENT} strokeWidth={1.5} fill="rgba(23,107,112,0.12)" />
-          <Line points={[pts[0]!.x, pts[0]!.y, pts[2]!.x, pts[2]!.y]} stroke={ACCENT} strokeWidth={1} />
-          <Line points={[pts[1]!.x, pts[1]!.y, pts[3]!.x, pts[3]!.y]} stroke={ACCENT} strokeWidth={1} />
+        <Group key={`corner-${c.endingWallId}-base`} name="corner-cabinet corner-base" listening={false}>
+          <Line points={line([at(0, 0), at(s, 0), at(s, e), at(0, e)])} closed stroke={ACCENT} strokeWidth={1.5} fill="rgba(23,107,112,0.12)" />
+          <Line points={line([at(0, 0), at(s, e)])} stroke={ACCENT} strokeWidth={1} />
+          <Line points={line([at(s, 0), at(0, e)])} stroke={ACCENT} strokeWidth={1} />
+        </Group>,
+      );
+    }
+    if (c.upperDepths) {
+      const legS = c.baseDepths?.starting ?? LAYOUT_RULES.runDepths.base;
+      const legE = c.baseDepths?.ending ?? LAYOUT_RULES.runDepths.base;
+      const { starting: us, ending: ue } = c.upperDepths;
+      shapes.push(
+        <Group key={`corner-${c.endingWallId}-upper`} name="corner-cabinet corner-upper" listening={false}>
+          <Line points={line([at(0, 0), at(legS, 0), at(legS, ue), at(us, ue), at(us, legE), at(0, legE)])} closed stroke={ACCENT} strokeWidth={2} dash={[6, 3]} fill="rgba(23,107,112,0.10)" />
+          <Line points={line([at(0, 0), at(us, ue)])} stroke={ACCENT} strokeWidth={1} />
         </Group>,
       );
     }

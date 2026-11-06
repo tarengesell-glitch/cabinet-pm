@@ -53,6 +53,19 @@ Open it at `/rooms/preview` (`npm run dev`, then http://localhost:3000/rooms/pre
   - two example rooms;
   - "What gets saved", which shows the master copy JSON, with Download and Load.
 
+## Rough layout: cabinet runs and appliances (model only, 2026-11-06)
+The editing logic for marking where cabinetry and appliances go (DECISIONS 2026-11-06) is in `model/layout.ts`; the screen comes next. Its rules are data in `data/layout-rules.json`, read by `model/layout-rules.ts`, which fails loudly at start-up if the file is bad. Entries marked PROPOSED there are mockup defaults the owner has not confirmed.
+- **Runs:** `fillWall` (tap a wall) and `drawRun` (drag along it) go around doorways with 3" clearance and around existing runs. `snapRunEnd` snaps to corners, to 3/6/9" clear of the run on the next wall, 3" clear of openings, and other run ends.
+- **Changing runs:** `setRunEnd`, `setRunLength`, `setRunDepth` and `setRunKind`. Upper only drops the appliances on it and says so; all pantry keeps 3" clear of windows, and that stretch becomes base. `splitRun` cuts at the middle, moving clear of windows and appliances, and `moveJoint` moves the divider between two parts. `deleteRuns` also removes appliances left with no run, and says so.
+- **Corners:** `cornerCabinets` lists the corners where runs meet, base and/or upper. They are shown, not stored.
+- **Appliances:**
+  - `planAppliance` is the ghost; `placeAppliance` and `moveAppliance` do the drop.
+  - Appliances stay out of doorways and corner squares, and a fridge or wall oven stays out from in front of windows.
+  - A sink near a window centres under it and brings a dishwasher when the room has none; the dishwasher moves with it, `flipPartner` swaps its side, and dragging it away unties it.
+  - Dropping on a bare wall adds a short run.
+  - Also `setApplianceWidth` (standard widths only) and `deleteAppliances`.
+- **Islands:** floating walls (A-21) with one run: `addIsland`, `moveIsland`, `resizeIsland` (depth from the island list). Delete one as a wall.
+
 ## What the preview does not do yet
 - **No database.** The room is kept in this browser only (`localStorage`), and the screen says so. If the browser won't store it, a red banner says the work isn't being kept.
 - **No sign-in.** The user and shop are **mocked** (`PREVIEW_USER`, `PREVIEW_SHOP` in `src/platform/`) and labelled on screen. Permissions are still checked with `can()`.

@@ -1,0 +1,34 @@
+{
+  "source": "Owner (Taren), 2026-11-06, choosing from the clickable layout mockup (rounds 1 to 4) in the Claude Code session that planned this step. Belongs in Shop Settings once that module exists. Entries listed under \"proposed\" were mockup defaults the owner used without changing; they are not yet confirmed.",
+  "proposed": {
+    "default_run_kind": "PROPOSED (2026-11-06): a run made by tapping or dragging along a wall starts as base + upper, as in the mockup.",
+    "island_run_kind": "PROPOSED (2026-11-06): an island's run starts as base only.",
+    "run_depths": "PROPOSED (2026-11-06): base 24\", upper-only 12\", and the 13\" band that shows uppers on a base + upper run; mockup defaults.",
+    "min_run_length": "PROPOSED (2026-11-06): pieces shorter than 9\" are not made; mockup default.",
+    "island_start_size": "PROPOSED (2026-11-06): the \"Add island\" button makes a 72\" x 36\" island, as in the mockup.",
+    "appliance_flags": "PROPOSED (2026-11-06): a fridge or wall oven is kept out from in front of a window; a wall oven dropped on a bare wall gets an all-pantry run. Mockup behaviour the owner did not object to."
+  },
+  "default_run_kind": "base_upper",
+  "island_run_kind": "base",
+  "run_depths": {
+    "base": "24",
+    "upper_only": "12",
+    "upper_band": "13"
+  },
+  "min_run_length": "9",
+  "opening_clearance": "3",
+  "corner_gaps": ["3", "6", "9"],
+  "island_depths": ["15", "27", "36", "42", "48"],
+  "island_start_size": { "length": "72", "depth": "36" },
+  "appliances": [
+    { "id": "fridge", "name": "Fridge", "label": "FRIDGE", "widths": ["36"], "comes_with_hood": false, "keep_clear_of_windows": true, "run_when_alone": "base_upper", "centre_under_window": false, "adds_beside": null, "upper_above_depth": "24" },
+    { "id": "range", "name": "Range + hood", "label": "RANGE", "widths": ["30", "36"], "comes_with_hood": true, "keep_clear_of_windows": false, "run_when_alone": "base", "centre_under_window": false, "adds_beside": null, "upper_above_depth": null },
+    { "id": "cooktop", "name": "Cooktop + hood", "label": "COOKTOP", "widths": ["30", "36"], "comes_with_hood": true, "keep_clear_of_windows": false, "run_when_alone": "base", "centre_under_window": false, "adds_beside": null, "upper_above_depth": null },
+    { "id": "wall_oven", "name": "Wall oven", "label": "OVEN", "widths": ["30"], "comes_with_hood": false, "keep_clear_of_windows": true, "run_when_alone": "pantry", "centre_under_window": false, "adds_beside": null, "upper_above_depth": null },
+    { "id": "sink", "name": "Sink", "label": "SINK", "widths": ["32"], "comes_with_hood": false, "keep_clear_of_windows": false, "run_when_alone": "base", "centre_under_window": true, "adds_beside": "dishwasher", "upper_above_depth": null },
+    { "id": "bar_sink", "name": "Bar sink", "label": "BAR SINK", "widths": ["24"], "comes_with_hood": false, "keep_clear_of_windows": false, "run_when_alone": "base", "centre_under_window": false, "adds_beside": null, "upper_above_depth": null },
+    { "id": "dishwasher", "name": "Dishwasher", "label": "DW", "widths": ["24"], "comes_with_hood": false, "keep_clear_of_windows": false, "run_when_alone": "base", "centre_under_window": false, "adds_beside": null, "upper_above_depth": null },
+    { "id": "microwave", "name": "Microwave", "label": "MW", "widths": ["24"], "comes_with_hood": false, "keep_clear_of_windows": false, "run_when_alone": "base", "centre_under_window": false, "adds_beside": null, "upper_above_depth": null },
+    { "id": "wine_fridge", "name": "Wine fridge", "label": "WINE", "widths": ["24"], "comes_with_hood": false, "keep_clear_of_windows": false, "run_when_alone": "base", "centre_under_window": false, "adds_beside": null, "upper_above_depth": null }
+  ]
+}

@@ -177,6 +177,18 @@ const runAtEnd = (r: Room, w: Wall): Run | null => w.runs.find((x) => runEnd(x) 
 /** How deep the uppers on a run are: the whole depth for upper-only, else the upper band. */
 export const upperDepth = (r: Run, rules: LayoutRules = LAYOUT_RULES): Length => (r.kind === 'upper' ? r.depth : Math.min(rules.runDepths.upperBand, r.depth));
 
+/**
+ * Where the uppers on a base + upper run go (a room wall only): along the run, skipping windows
+ * and the stretch over a fridge (which gets its own deeper upper). A piece left shorter than the
+ * minimum run (e.g. the 3" between a pantry and a window's edge) is not made (owner, 2026-11-07).
+ * Other runs have no upper band: an upper-only run is uppers end to end, the rest have none.
+ */
+export function upperPieces(w: Wall, run: Run, rules: LayoutRules = LAYOUT_RULES): Span[] {
+  if (w.kind !== 'room' || (run.kind !== 'base_upper' && run.kind !== 'base_upper_pantry')) return [];
+  const fridges = w.appliances.filter((a) => (applianceType(rules, a.kind)?.upperAboveDepth ?? null) !== null).map(applianceSpan);
+  return subtract(runSpan(run), [...windowSpans(w), ...fridges]).filter((p) => p.end - p.start >= rules.minRunLength);
+}
+
 /** A corner where runs on two walls meet. Shown, not stored (DECISIONS 2026-11-06). */
 export interface CornerCabinet {
   /** The wall whose end is the corner, and the wall that starts there. */

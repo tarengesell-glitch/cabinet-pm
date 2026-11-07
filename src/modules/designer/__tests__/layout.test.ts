@@ -24,6 +24,7 @@ import {
   setRunLength,
   snapRunEnd,
   splitRun,
+  upperPieces,
 } from '../model/layout';
 import { LAYOUT_RULES, readLayoutRules } from '../model/layout-rules';
 import raw from '../data/layout-rules.json';
@@ -170,6 +171,41 @@ describe('runs', () => {
     expect(wallOf(d, 'A').runs.find((x) => x.run_id === left!.run_id)?.kind).toBe('pantry');
     expect(notices(r)).toEqual(['Pantry stops 3" clear of the window.']);
     expect(passes(d)).toEqual([]);
+  });
+
+  it('pantry on both sides of a window: no 3" upper between the pantry and the window (owner screenshot, 2026-11-07)', () => {
+    const k = bareKitchen();
+    const env = testEnv();
+    let d = unwrap(fillWall(k, env, wallOf(k, 'A').wall_id));
+    // Split into three: up to the window's edge, the window, and after it (window at 48"–84").
+    d = unwrap(splitRun(d, env, wallOf(d, 'A').runs[0]!.run_id));
+    const [left, rest] = [...wallOf(d, 'A').runs].sort((a, b) => a.offset - b.offset);
+    d = unwrap(moveJoint(d, env, left!.run_id, rest!.run_id, 48 * IN));
+    d = unwrap(splitRun(d, env, rest!.run_id));
+    const [, middle, right] = [...wallOf(d, 'A').runs].sort((a, b) => a.offset - b.offset);
+    d = unwrap(moveJoint(d, env, middle!.run_id, right!.run_id, 84 * IN));
+    d = unwrap(setRunKind(d, env, [left!.run_id, right!.run_id], 'pantry'));
+    expect(spans(wallOf(d, 'A'))).toEqual([
+      [2.25, 45, 'pantry'],
+      [45, 87, 'base_upper'],
+      [87, 141.75, 'pantry'],
+    ]);
+    // The base + upper run in front of the window: base all along it, but no uppers in the
+    // 3" either side of the window (too short to be a cabinet), and none over the window.
+    const w = wallOf(d, 'A');
+    const mid = w.runs.find((x) => x.kind === 'base_upper')!;
+    expect(upperPieces(w, mid)).toEqual([]);
+  });
+
+  it('uppers skip windows and leave no piece shorter than the minimum run', () => {
+    const k = bareKitchen();
+    const env = testEnv();
+    let d = unwrap(drawRun(k, env, wallOf(k, 'A').wall_id, 44 * IN, 120 * IN));
+    const w = wallOf(d, 'A');
+    // Window at 48"–84": the 4" before it is too short for an upper; the 36" after it is kept.
+    expect(upperPieces(w, w.runs[0]!).map((p) => [p.start / IN, p.end / IN])).toEqual([[84, 120]]);
+    d = unwrap(setRunKind(d, env, [w.runs[0]!.run_id], 'base'));
+    expect(upperPieces(wallOf(d, 'A'), wallOf(d, 'A').runs[0]!)).toEqual([]);
   });
 
   it('a run that stops at a window edge, made pantry, stops 3" short with nothing after it', () => {

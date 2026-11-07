@@ -120,6 +120,30 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 - **Room drawing, round 9 (owner, 2026-11-05): edge scrolling.** While drawing walls or dragging a handle, a cursor within 40 px of the plan's edge scrolls the plan that way, faster nearer the edge, as AutoCAD, SketchUp and Figma do. The wall or drag being made follows the cursor. It stops when the cursor moves back in.
 - Room capture is pulled ahead of Phase 5 (BUILD_PLAN). Order: scaffold (1a), then Core walls and openings, then the Designer drawing screen.
 
+### 2026-11-07: The cabinet catalog, from the shop's own Cabinet Vision library (owner, library review)
+The colony's Cabinet Vision install (`Solid_11.zip`, catalog "New Catalog") was read and every template put to the owner on a review page. The owner answered the General and "Templates to keep" tabs; the specialty items on the other two tabs are left out for now ("a lot of specialty items which we'll likely end up re-engineering"). Catalog version 1 is built from those answers: `src/modules/catalog/data/catalog-v1.json`, 50 cabinet types.
+- **The library holds templates, not fixed products:** example layouts, sizes and construction that stretch to any width, height and depth. The stored size is only the example.
+- **Width step 1/16".** One cabinet with a left/right (hinge side) choice, not separate left and right items.
+- **Standard sizes:** base height 34 3/4" (the size the shop's library uses most); depths: upper 12", tall 26", vanity 20 3/4". Base depth 23 3/4" is the library's.
+- **Smallest cabinet:** 8" for uppers and door-only base cabinets, 12" for cabinets with drawers (confirms closet-builder HARD-015; replaces an earlier 10").
+- **Door rules (closet-builder, confirmed):** a door over 20" becomes a pair; a door over 48" tall splits into stacked doors; 1/16" edge gap; each door of a pair is 1/8" short of half; ideal door 14–16". **Over 40 1/4" a section splits into two cabinets with three doors** (42" = 28" two-door + 14" one-door), so a cabinet with doors is at most 40 1/4" wide.
+- **Drawers:** the standard top drawer front is 6 13/16" and lines up across cabinets; a single top drawer becomes two side by side when the cabinet is wider than 36". The handle on a door or pull-out below a drawer sits at the height of the middle drawer's handle in a three-drawer bank, not centred.
+- **Shelves are evenly spaced.**
+- **Ends** are a setting on each cabinet: Unfinished beside a wall or cabinet (with a filler at every wall); an open end gets an Applied finished end by default, or a Finished end by request.
+- **Fillers** are cut to fit, a fixed price (not per inch), 3/4" wide by default.
+- **Sink base default:** full-height doors with a skirt front, plywood, cut-out bottom and back, with loose full panels to cover the side the plumbing doesn't use. A false drawer front or a tip-out tray is an upgrade. Vanity sinks follow the same rules; the false drawer front on the vanity sink with side drawers applies to that one only.
+- **Door styles to start:** shaker with a 2 1/4" frame, slim shaker with a 1" frame, slab.
+- **Prices** are per running inch, set later, and kept completely separate from cabinet data.
+- **The angled end cabinets are bases** and get a toe kick like every other base.
+- Removed: the fluted fillers, the accessible cabinets, the medicine cabinet over a false drawer, the hood shelf, the closet wall cabinet, the hair dryer pull-out and the Altima job items.
+- **PROPOSED (this session, not owner-decided):**
+  - Templates that differ only by example size or by door count are one catalog item, because door count follows the width rule (for example "Base 1 Door" and "Base 2 Doors" are one "Base, doors"). Left and right versions are one item with a "Left or right version" choice.
+  - Option codes (`door_style`, `end_left`…) are stable codes rather than UUIDs; item IDs are UUIDs.
+  - Values not known yet are stored as unknown. A cabinet at its standard size passes; any other size in a direction with an unknown limit or step is refused with that reason.
+  - The catalog names its shop with a new ID for "The colony shop" until the platform has a shops table.
+  - The construction rules above (doors, drawers, handles, shelves, sinks) belong to Shop Settings as design rules. They are recorded here and on each item's notes, not yet as rules the software applies.
+  - Buildability checks take one placed cabinet at a time, because the master copy has no placed cabinets until step 1b-items.
+
 ### 2026-11-06: Rough layout: cabinet runs and appliances (owner, from the clickable mockup, rounds 1 to 4)
 After walls, doors and windows, the person marks where cabinetry goes and where the appliances will likely sit, in about a minute. It is not placing cabinets: the AI draft (OA-3) fills the runs later. Researched against IKEA, Lowe's, Mozaik AutoFill, Coohom and Archisketch; the owner chose "tap a wall / drag along a wall" for runs and an appliance tray, and dropped layout-shape templates and a work-triangle hint.
 - **Who uses it:** a designer or salesperson on an online call, and the client on their own. It must explain itself and work with a mouse and with touch.
@@ -191,6 +215,10 @@ After walls, doors and windows, the person marks where cabinetry goes and where 
 - **PROPOSED:**
   - the `core/` / `platform/` split, and the master copy stored as versioned JSON with the named writers (ARCHITECTURE);
   - ~~appliance placements added to the master copy (DATA_MODEL "core").~~ Decided 2026-11-06 with the rough layout (see "Decided"). Dimension provenance was approved on 2026-11-05.
+
+### From the catalog (2026-11-07)
+- **CAT-1 Size limits not known yet.** For most cabinet types the catalog only knows the standard size. Each needs, from the shop: the smallest and largest **height** and **depth**, and the steps they change in; the largest width of drawer-only cabinets; and the width limits of corner cabinets, talls, fillers, panels and shelves. Until then only the standard size passes. `src/modules/catalog/README.md` lists them by item.
+- **CAT-2 Hinge side.** A cabinet whose width makes one door needs a hinge side. Should the hinge side be asked only then (a rule from the door width), or always?
 
 ### From the owner's workflow (2026-10-27)
 - **CV-2 More than one colony.** Will each colony have its own Cabinet Vision library (so its own catalog mappings), or will all colonies share one library? And does each have its own prices?

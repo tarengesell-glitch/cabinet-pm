@@ -108,6 +108,26 @@ test('drag from a corner along the other wall: a run on that wall from the corne
   expect((await walls(page)).filter((w) => w.kind === 'floating')).toEqual([]);
 });
 
+test('pantry either side of a window: no thin upper drawn between the pantry and the window', async ({ page }) => {
+  await bareKitchen(page);
+  // Wall A (window at 48"–84"): pantry, then base + upper in front of the window, then pantry.
+  await page.evaluate((IN) => {
+    const raw = JSON.parse(window.localStorage.getItem('cabinet-pm.room-preview.v0')!);
+    const ids = ['00000000-0000-4000-8000-0000000a0001', '00000000-0000-4000-8000-0000000a0002', '00000000-0000-4000-8000-0000000a0003'];
+    raw.job.rooms[0].walls[0].runs = [
+      { run_id: ids[0], kind: 'pantry', offset: 2.25 * IN, length: 42.75 * IN, depth: 24 * IN },
+      { run_id: ids[1], kind: 'base_upper', offset: 45 * IN, length: 42 * IN, depth: 24 * IN },
+      { run_id: ids[2], kind: 'pantry', offset: 87 * IN, length: 54.75 * IN, depth: 24 * IN },
+    ];
+    window.localStorage.setItem('cabinet-pm.room-preview.v0', JSON.stringify(raw));
+  }, IN);
+  await page.reload();
+  await expect(page.getByTestId('plan')).toBeVisible();
+  await expect.poll(async () => (await konva(page, '.run-pantry')).length).toBe(2);
+  expect(await konva(page, '.run-base_upper')).toHaveLength(1);
+  expect(await konva(page, '.upper-band')).toEqual([]);
+});
+
 test('clicking the open step again folds it away', async ({ page }) => {
   await bareKitchen(page);
   const step = page.getByRole('button', { name: 'Cabinets & islands' });

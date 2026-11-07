@@ -21,10 +21,9 @@ import {
   runMoveLimits,
   snapRunEnd,
   sortedRuns,
-  subtract,
   upperDepth,
+  upperPieces,
   wallLength,
-  windowSpans,
 } from '../model/layout';
 import { LAYOUT_RULES, applianceType } from '../model/layout-rules';
 import type { LayoutEdit } from './layoutEdits';
@@ -117,7 +116,6 @@ export function LayoutShapes(props: {
   const shapes: React.ReactNode[] = [];
 
   for (const w of r.walls) {
-    const fridges = w.appliances.filter((a) => (applianceType(LAYOUT_RULES, a.kind)?.upperAboveDepth ?? null) !== null);
     for (const run of w.runs) {
       const [d0, d1] = depthRange(w, run.depth);
       const c = COLOURS[run.kind];
@@ -137,26 +135,22 @@ export function LayoutShapes(props: {
           listening={false}
         />,
       );
-      // Uppers on a base + upper run: a dashed band at the back, skipping windows and the
-      // stretch over a fridge (which gets its own deeper upper).
-      if ((run.kind === 'base_upper' || run.kind === 'base_upper_pantry') && w.kind === 'room') {
-        const skips = [...windowSpans(w), ...fridges.map((a) => ({ start: a.offset, end: a.offset + a.width.value }))];
-        for (const piece of subtract({ start: run.offset, end: runEnd(run) }, skips)) {
-          shapes.push(
-            <Line
-              key={`up-${run.run_id}-${piece.start}`}
-              name="upper-band"
-              points={band(r, w, piece.start, piece.end, d0, d0 + upperDepth(run), toScreen)}
-              closed
-              fill="#fff6e6"
-              opacity={0.6}
-              stroke={c.stroke}
-              strokeWidth={0.75}
-              dash={[5, 4]}
-              listening={false}
-            />,
-          );
-        }
+      // Uppers on a base + upper run: a dashed band at the back, where upperPieces says.
+      for (const piece of upperPieces(w, run)) {
+        shapes.push(
+          <Line
+            key={`up-${run.run_id}-${piece.start}`}
+            name="upper-band"
+            points={band(r, w, piece.start, piece.end, d0, d0 + upperDepth(run), toScreen)}
+            closed
+            fill="#fff6e6"
+            opacity={0.6}
+            stroke={c.stroke}
+            strokeWidth={0.75}
+            dash={[5, 4]}
+            listening={false}
+          />,
+        );
       }
       const mid = on(r, w, (run.offset + runEnd(run)) / 2, d1 + 7 * INCH);
       const label = `${formatInches(run.length)} · ${RUN_SHORT[run.kind]}`;

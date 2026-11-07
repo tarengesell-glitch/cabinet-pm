@@ -313,6 +313,27 @@ describe('appliances', () => {
     expect(passes(d)).toEqual([]);
   });
 
+  it('a sink dragged over a window can sit off centre; it snaps back only near the centre', () => {
+    const { d: start, env } = withA();
+    let d = unwrap(placeAppliance(start, env, 'sink', wallOf(start, 'A').wall_id, 66 * IN, SNAP));
+    const sinkId = wallOf(d, 'A').appliances.find((a) => a.kind === 'sink')!.placement_id;
+    const sinkAt = (x: Draft) => wallOf(x, 'A').appliances.find((a) => a.kind === 'sink')!.offset / IN;
+    const drag = { ...SNAP, centreSnap: 3 * IN };
+    // The window is 48"-84" (centre 66"); the sink is 32" wide. Dragged 8" left of centre: it stays there.
+    d = unwrap(moveAppliance(d, env, sinkId, wallOf(d, 'A').wall_id, 58 * IN, drag));
+    expect(sinkAt(d)).toBe(42);
+    // Within 3" of the centre: it snaps back to centre, and says so.
+    const r = moveAppliance(d, env, sinkId, wallOf(d, 'A').wall_id, 64 * IN, drag);
+    expect(sinkAt(unwrap(r))).toBe(50);
+    expect(notices(r)).toContain('Centred under the window.');
+    // Alt held (no snapping): exactly where it was dragged.
+    d = unwrap(moveAppliance(d, env, sinkId, wallOf(d, 'A').wall_id, 64 * IN, { ...SNAP, centreSnap: 0 }));
+    expect(sinkAt(d)).toBe(48);
+    // A sink dropped from the tray still centres from anywhere near the window.
+    const placed = unwrap(placeAppliance(start, env, 'sink', wallOf(start, 'A').wall_id, 58 * IN, SNAP));
+    expect(sinkAt(placed)).toBe(50);
+  });
+
   it('a second sink brings no second dishwasher; the dishwasher can swap sides', () => {
     const { d: start, env } = withA();
     let d = unwrap(placeAppliance(start, env, 'sink', wallOf(start, 'A').wall_id, 66 * IN, SNAP));

@@ -235,6 +235,35 @@ test('pick a sink in the tray and tap a wall: it is placed with a dishwasher bes
   await expect.poll(async () => (await walls(page))[0]!.appliances.find((a) => a.kind === 'dishwasher')!.offset).toBe(26 * IN);
 });
 
+test('a sink centred under a window can be dragged off centre', async ({ page }) => {
+  await bareKitchen(page);
+  const at = await plotter(page);
+  await page.getByRole('button', { name: 'Appliances', exact: true }).click();
+  await page.getByRole('region', { name: 'Appliances' }).getByRole('button', { name: /^Sink/ }).click();
+  let p = at(70, 10); // near wall A's window (48"–84")
+  await page.mouse.click(p.x, p.y);
+  await expect.poll(async () => (await walls(page))[0]!.appliances.find((a) => a.kind === 'sink')?.offset).toBe(50 * IN);
+  // Grab the sink at its centre (66") and drag it 10" to the left: it stays there.
+  await page.getByRole('dialog', { name: 'Sink' }).getByRole('button', { name: 'Close' }).click();
+  p = at(66, 12);
+  const to = at(56, 12);
+  await page.mouse.move(p.x, p.y);
+  await page.mouse.down();
+  await page.mouse.move((p.x + to.x) / 2, p.y, { steps: 4 });
+  await page.mouse.move(to.x, to.y, { steps: 4 });
+  await page.mouse.up();
+  await expect.poll(async () => (await walls(page))[0]!.appliances.find((a) => a.kind === 'sink')?.offset).toBe(40 * IN);
+  // Dragged back to near the centre, it snaps to the centre again.
+  p = at(56, 12);
+  const back = at(65, 12);
+  await page.mouse.move(p.x, p.y);
+  await page.mouse.down();
+  await page.mouse.move((p.x + back.x) / 2, p.y, { steps: 4 });
+  await page.mouse.move(back.x, back.y, { steps: 4 });
+  await page.mouse.up();
+  await expect.poll(async () => (await walls(page))[0]!.appliances.find((a) => a.kind === 'sink')?.offset).toBe(50 * IN);
+});
+
 test('drag a fridge from the tray onto a bare wall: a short run goes under it', async ({ page }) => {
   await bareKitchen(page);
   const at = await plotter(page);

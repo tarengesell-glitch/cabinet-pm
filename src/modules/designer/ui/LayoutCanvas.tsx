@@ -39,6 +39,8 @@ const WALL_ZONE = 30 * INCH;
 const MIN_ISLAND_DRAG = 24 * INCH;
 /** How far (screen pixels) a drag from a wall must go before its direction decides what it does. */
 const INTENT_PX = 10;
+/** A sink dragged at least this close to a window's centre snaps to it (more when zoomed out). */
+const CENTRE_SNAP = 3 * INCH;
 /** How close (in room units) an island being dragged must come to a floating wall to snap onto it. */
 const ISLAND_SNAP = 10 * INCH;
 
@@ -447,7 +449,9 @@ export function useLayoutTool(args: LayoutToolArgs) {
     switch (pend.mode) {
       case 'appliance': {
         const target = applianceTarget(r, p, Math.max(WALL_REACH_PX / args.scale, 12 * INCH));
-        return target ? { kind: 'appliance-move', placementId: pend.id, wallId: target.wallId, centre: target.centre } : null;
+        // Dragged, a sink snaps to a window's centre only near it, so it can sit off centre; Alt: never.
+        const centreSnap = free ? 0 : Math.max(CENTRE_SNAP, tol);
+        return target ? { kind: 'appliance-move', placementId: pend.id, wallId: target.wallId, centre: target.centre, centreSnap } : null;
       }
       case 'joint': {
         const w = wallOf(pend.wallId);

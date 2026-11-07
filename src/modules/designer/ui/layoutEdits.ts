@@ -46,7 +46,8 @@ export type LayoutEdit =
   | { kind: 'island-move'; wallId: string; dx: Length; dy: Length }
   | { kind: 'island-resize'; wallId: string; length: Length; depth: Length }
   | { kind: 'appliance-place'; applianceKind: string; wallId: string; centre: number }
-  | { kind: 'appliance-move'; placementId: string; wallId: string; centre: number }
+  /** `centreSnap`: a sink dragged this close to a window's centre centres under it (0: never). */
+  | { kind: 'appliance-move'; placementId: string; wallId: string; centre: number; centreSnap?: Length }
   | { kind: 'appliance-width'; placementId: string; width: Length }
   | { kind: 'appliance-flip'; placementId: string }
   | { kind: 'delete-appliances'; placementIds: readonly string[] };
@@ -94,7 +95,10 @@ export function applyLayoutEdit(draft: Draft, env: Env, edit: LayoutEdit): Resul
     case 'appliance-place':
       return placeAppliance(draft, env, edit.applianceKind, edit.wallId, edit.centre, { windowSnap: WINDOW_SNAP });
     case 'appliance-move':
-      return moveAppliance(draft, env, edit.placementId, edit.wallId, edit.centre, { windowSnap: WINDOW_SNAP });
+      return moveAppliance(draft, env, edit.placementId, edit.wallId, edit.centre, {
+        windowSnap: WINDOW_SNAP,
+        ...(edit.centreSnap !== undefined ? { centreSnap: edit.centreSnap } : {}),
+      });
     case 'appliance-width':
       return setApplianceWidth(draft, env, edit.placementId, edit.width);
     case 'appliance-flip':

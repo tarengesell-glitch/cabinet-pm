@@ -658,7 +658,17 @@ export function planAppliance(
   kind: string,
   wallId: string,
   centre: number,
-  opts: { readonly width?: Length; readonly movingId?: string | null; readonly windowSnap: Length },
+  opts: {
+    readonly width?: Length;
+    readonly movingId?: string | null;
+    /** Dropped this close beyond a window's edge, it centres under the window. */
+    readonly windowSnap: Length;
+    /**
+     * Instead: it centres only when its centre comes this close to the window's centre (a drag,
+     * so it can sit off centre; owner, 2026-11-07). Zero never snaps.
+     */
+    readonly centreSnap?: Length;
+  },
   rules: LayoutRules = LAYOUT_RULES,
 ): Result<AppliancePlan> {
   const type = applianceType(rules, kind);
@@ -678,7 +688,8 @@ export function planAppliance(
     if (type.centreUnderWindow) {
       for (const win of w.openings.filter((o) => o.kind === 'window')) {
         const wc = win.offset.value + win.width.value / 2;
-        if (Math.abs(centre - wc) <= win.width.value / 2 + opts.windowSnap) {
+        const reach = opts.centreSnap !== undefined ? opts.centreSnap : win.width.value / 2 + opts.windowSnap;
+        if (opts.centreSnap !== 0 && Math.abs(centre - wc) <= reach) {
           const at = freeSpot(wc, width, span.start, span.end, obs);
           if (at !== null && at === Math.round(wc - width / 2)) return { offset: at, underWindow: true };
         }
@@ -779,14 +790,17 @@ export function placeAppliance(
   return ok(withRoom(draft, env, `Placed a ${type.name.toLowerCase()} on ${wallLabel(r, wallId)}`, replaceWall(r, next)), dedupe(notices));
 }
 
-/** Moves an appliance along its wall or onto another; a sink's dishwasher comes with it. */
+/**
+ * Moves an appliance along its wall or onto another; a sink's dishwasher comes with it. With
+ * `centreSnap`, a sink centres under a window only when brought that close to its centre.
+ */
 export function moveAppliance(
   draft: Draft,
   env: Env,
   placementId: string,
   wallId: string,
   centre: number,
-  opts: { readonly windowSnap: Length },
+  opts: { readonly windowSnap: Length; readonly centreSnap?: Length },
   rules: LayoutRules = LAYOUT_RULES,
 ): Result<Change> {
   const r = room(draft);
@@ -795,7 +809,7 @@ export function moveAppliance(
   const { appliance } = found;
   const type = applianceType(rules, appliance.kind);
   if (!type) return refuse(`"${appliance.kind}" is not on the list of appliances.`);
-  const planned = planAppliance(r, appliance.kind, wallId, centre, { width: appliance.width.value, movingId: placementId, windowSnap: opts.windowSnap }, rules);
+  const planned = planAppliance(r, appliance.kind, wallId, centre, { width: appliance.width.value, movingId: placementId, windowSnap: opts.windowSnap, ...(opts.centreSnap !== undefined ? { centreSnap: opts.centreSnap } : {}) }, rules);
   if (!planned.ok) return refuse(planned.reason);
   const plan = planned.value;
   const notices: string[] = [];

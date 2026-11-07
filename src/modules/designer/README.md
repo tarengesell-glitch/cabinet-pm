@@ -55,10 +55,10 @@ Open it at `/rooms/preview` (`npm run dev`, then http://localhost:3000/rooms/pre
   - (The "What gets saved" panel was removed, owner 2026-11-06.)
 
 ## Rough layout: cabinet runs and appliances (2026-11-06)
-**Steps (round 5):** the right panel is an accordion of steps (`ui/Steps.tsx`): 1 Walls (Select | Room wall | Floating wall), 2 Openings (Door | Window | Passthrough tiles), 3 Cabinets & islands, 4 Appliances. A step's options open under it; picking something on the plan opens its step. Undo and redo sit on the plan with zoom and Fit. On a phone the panel is a bottom sheet. Islands dragged over a floating wall snap onto it (`addIslandOnWall`).
+**Steps (round 5):** the right panel is an accordion of steps (`ui/Steps.tsx`): 1 Walls (Select | Room wall | Floating wall), 2 Openings (Door | Window | Passthrough tiles), 3 Cabinets & islands, 4 Appliances. A step's options open under it, and clicking the open step folds it; picking something on the plan opens its step. Undo and redo sit on the plan with zoom and Fit. On a phone the panel is a bottom sheet. Islands dragged over a floating wall snap onto it (`addIslandOnWall`).
 
 **On screen:** the Cabinets & islands and Appliances steps (`ui/LayoutCanvas.tsx`, `ui/LayoutPanels.tsx`, `ui/layoutEdits.ts`).
-- **Runs:** tap a wall to fill it, or drag along it for part of it. Run ends snap as below; Alt turns snapping off.
+- **Runs:** tap a wall to fill it, or drag along it for part of it. A drag that starts in a corner goes along whichever of the two walls it follows, from the corner, even when it starts on the other wall's run. Run ends snap as below; Alt turns snapping off.
 - **Selecting:** click a run to select it, Shift+click to add more. A selected run has end handles and a square depth handle.
 - **Splits:** the divider between split parts has a handle that moves both.
 - **Corner cabinets:** shown as a square with a cross, one for bases and one for uppers.
@@ -71,7 +71,7 @@ Open it at `/rooms/preview` (`npm run dev`, then http://localhost:3000/rooms/pre
 - **Positions:** measured along the wall's centre line, like doors and windows.
 - **Where cabinets stand:** against the wall's inside face, and only as far as the inside corners (`insideSpan`). The 3", 6" and 9" corner gaps are measured from there. Its rules are data in `data/layout-rules.json`, read by `model/layout-rules.ts`, which fails loudly at start-up if the file is bad. Entries marked PROPOSED there are mockup defaults the owner has not confirmed.
 - **Runs:** `fillWall` (tap a wall) and `drawRun` (drag along it) go around doorways with 3" clearance and around existing runs. `snapRunEnd` snaps to corners, to 3/6/9" clear of the run on the next wall, 3" clear of openings, and other run ends.
-- **Changing runs:** `setRunEnd`, `setRunLength`, `setRunDepth` and `setRunKind`. Upper only drops the appliances on it and says so; all pantry keeps 3" clear of windows, and that stretch becomes base. `splitRun` cuts at the middle, moving clear of windows and appliances, and `moveJoint` moves the divider between two parts. `deleteRuns` also removes appliances left with no run, and says so.
+- **Changing runs:** `setRunEnd`, `setRunLength`, `setRunDepth` and `setRunKind`. Upper only drops the appliances on it and says so; all pantry keeps 3" clear of windows, and that stretch becomes base; a base sliver shorter than the minimum run at the run's end (from a split at the window's edge) joins the run beyond it, or is left as the gap. `splitRun` cuts at the middle, moving clear of windows and appliances, and `moveJoint` moves the divider between two parts. `deleteRuns` also removes appliances left with no run, and says so.
 - **Corners:** `cornerCabinets` lists the corners where runs meet, base and/or upper. They are shown, not stored.
 - **Appliances:**
   - `planAppliance` is the ghost; `placeAppliance` and `moveAppliance` do the drop.

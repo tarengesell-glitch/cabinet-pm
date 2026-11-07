@@ -152,6 +152,34 @@ describe('runs', () => {
     expect(passes(d)).toEqual([]);
   });
 
+  it('a run split at the window edge, then made pantry: no tiny cabinet; the 3" goes to the run under the window', () => {
+    const k = bareKitchen();
+    const env = testEnv();
+    let d = unwrap(fillWall(k, env, wallOf(k, 'A').wall_id));
+    d = unwrap(splitRun(d, env, wallOf(d, 'A').runs[0]!.run_id));
+    const [left, right] = [...wallOf(d, 'A').runs].sort((a, b) => a.offset - b.offset);
+    // The divider dragged to the window's own edge (48"), not 3" clear of it.
+    d = unwrap(moveJoint(d, env, left!.run_id, right!.run_id, 48 * IN));
+    const r = setRunKind(d, env, [left!.run_id], 'pantry');
+    d = unwrap(r);
+    expect(spans(wallOf(d, 'A'))).toEqual([
+      [2.25, 45, 'pantry'],
+      [45, 141.75, 'base_upper'],
+    ]);
+    // The pantry part keeps the run's id, so it stays selected.
+    expect(wallOf(d, 'A').runs.find((x) => x.run_id === left!.run_id)?.kind).toBe('pantry');
+    expect(notices(r)).toEqual(['Pantry stops 3" clear of the window.']);
+    expect(passes(d)).toEqual([]);
+  });
+
+  it('a run that stops at a window edge, made pantry, stops 3" short with nothing after it', () => {
+    const k = bareKitchen();
+    const env = testEnv();
+    let d = unwrap(drawRun(k, env, wallOf(k, 'A').wall_id, 10 * IN, 48 * IN));
+    d = unwrap(setRunKind(d, env, wallOf(d, 'A').runs.map((x) => x.run_id), 'pantry'));
+    expect(spans(wallOf(d, 'A'))).toEqual([[10, 45, 'pantry']]);
+  });
+
   it('upper only takes the upper-only depth, and back again', () => {
     const k = bareKitchen();
     const env = testEnv();

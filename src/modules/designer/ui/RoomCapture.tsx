@@ -545,6 +545,7 @@ export function RoomCapture({ user }: { user: User }) {
                   dropOpening(wallId, tool, centre);
                 }}
                 onLayoutEdit={(edit, done) => void layoutEdit(edit, done)}
+                onLayoutCommand={(edit) => layoutEdit(edit, true) ?? { ok: false, reason: 'There is no room yet.' }}
                 armed={armed}
                 onArm={setArmed}
                 onRunLengthLabel={(runId) => selectAndOpen({ kind: 'runs', ids: [runId] })}
@@ -643,13 +644,7 @@ export function RoomCapture({ user }: { user: User }) {
                     );
                   if (st === 'cabinets')
                     return (
-                      <RunsFrame
-                        room={dragPreview ? roomOf(dragPreview) : room}
-                        selectedRunIds={selection?.kind === 'runs' ? selection.ids : []}
-                        canEdit={canEdit}
-                        onEdit={(edit) => layoutEdit(edit, true) ?? { ok: false, reason: 'There is no room yet.' }}
-                        onAddIsland={addIslandInMiddle}
-                      />
+                      <RunsFrame canEdit={canEdit} onAddIsland={addIslandInMiddle} />
                     );
                   return (
                     <>

@@ -149,6 +149,8 @@ After walls, doors and windows, the person marks where cabinetry goes and where 
   - **Drag from a corner.** A drag that starts in a corner (where two walls' cabinet zones meet, even on top of the first wall's run) goes along whichever wall it follows, drawing a run on that wall from the corner. It used to make an island whenever the drag went across the wall that was picked first.
   - **No tiny cabinet beside a window.** When a run that stops at (or just past) a window's 3" clearance is made all pantry, the sliver of base left before the window (3" when split at the window's edge) is not made: it joins the run beyond it, already in front of the window, or, with nothing there, is left as the 3" gap. It stays only if an appliance stands on it.
   - **No tiny upper beside a window either** (follow-up, from the owner's screenshot). The base + upper run in front of a window, between two pantries, was still drawing a 3" upper either side of the window. Uppers now skip windows and leave out any piece shorter than the minimum run (9"), the same rule as base pieces. The base cabinets still run the whole length.
+  - **9" minimum run approved** (owner, 2026-11-07): no base or upper piece shorter than 9" is made. No longer PROPOSED.
+  - **Run options pop up on the plan,** next to the selected run, the same way as an appliance's (type, length, depth, Split, Delete; an island's depths). The side panel keeps only the how-to and Add island. The pop-up never covers the selected run; it takes the spot beside it (outside the wall, in front of it, or to the side of the room) that covers the least of the other cabinets and the room. Both pop-ups have a × to close them.
   - **Click an open step to fold it.** Clicking the open step's heading in the right panel closes it.
 - **Built into the room preview** as the "Cabinets & appliances" tool (2026-11-06). Walls are stored by their centre line, so cabinets stand against the inside face and stop at the inside corners; corner gaps are measured from the inside corner.
 
@@ -181,7 +183,7 @@ After walls, doors and windows, the person marks where cabinetry goes and where 
   - The starting permissions are `room.view` and `room.edit` for owner, admin and designer (`src/platform/permissions/roles.json`).
   - A mocked preview user and preview shop stand in until sign-in and shops exist, and are labelled on screen.
 - **PROPOSED (rough layout, 2026-11-06):** mockup defaults the owner used without changing, kept in `src/modules/designer/data/layout-rules.json`:
-  - new runs start as base + upper, 24" deep (upper only 12"); uppers on a base + upper run are drawn 13" deep; island runs start as base only; nothing shorter than 9" is made;
+  - new runs start as base + upper, 24" deep (upper only 12"); uppers on a base + upper run are drawn 13" deep; island runs start as base only;
   - "Add island" makes a 72" × 36" island;
   - a fridge or wall oven is kept out from in front of a window; a wall oven dropped on a bare wall gets an all-pantry run.
 - **PROPOSED:**

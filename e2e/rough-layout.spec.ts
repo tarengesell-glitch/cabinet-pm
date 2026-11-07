@@ -139,15 +139,59 @@ test('clicking the open step again folds it away', async ({ page }) => {
   await expect(step).toHaveAttribute('aria-expanded', 'true');
 });
 
+test('a selected run\'s options pop up next to it on the plan, not in the side panel', async ({ page }) => {
+  await bareKitchen(page);
+  const at = await plotter(page);
+  let p = at(70, 108); // just inside wall C (the top wall)
+  await page.mouse.click(p.x, p.y);
+  const popup = page.getByRole('dialog', { name: 'Run on wall C' });
+  await expect(popup).toBeVisible();
+  // The side panel keeps only the how-to and Add island.
+  const side = page.getByRole('region', { name: 'Cabinet runs' });
+  await expect(side.getByRole('button', { name: 'Split', exact: true })).toHaveCount(0);
+  // It sits next to the run, never over it.
+  const [run] = await konva(page, '.run');
+  const plan = (await page.getByTestId('plan').boundingBox())!;
+  const box = (await popup.boundingBox())!;
+  const apart = (a: { x: number; y: number; width: number; height: number }) =>
+    box.x >= plan.x + a.x + a.width || box.x + box.width <= plan.x + a.x || box.y >= plan.y + a.y + a.height || box.y + box.height <= plan.y + a.y;
+  expect(apart(run!)).toBe(true);
+  // Type a length there.
+  await popup.getByRole('button', { name: 'Edit Length' }).click();
+  await popup.getByRole('textbox', { name: 'Length' }).fill('60');
+  await popup.getByRole('textbox', { name: 'Length' }).press('Enter');
+  await expect.poll(async () => (await walls(page))[2]!.runs[0]!.length).toBe(60 * IN);
+  // The × closes it.
+  await popup.getByRole('button', { name: 'Close' }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  // Shift+click a second run: the pop-up changes both.
+  p = at(132, 30); // just inside wall B: fills it, and selects it
+  await page.mouse.click(p.x, p.y);
+  await expect(page.getByRole('dialog', { name: 'Run on wall B' })).toBeVisible();
+  await page.getByRole('dialog').getByRole('button', { name: 'Close' }).click();
+  p = at(100, 108); // on wall C's 60" run (it kept its right end), clear of the corner square
+  await page.mouse.click(p.x, p.y);
+  await page.keyboard.down('Shift');
+  p = at(132, 30);
+  await page.mouse.click(p.x, p.y);
+  await page.keyboard.up('Shift');
+  const both = page.getByRole('dialog', { name: '2 runs' });
+  await both.getByRole('button', { name: 'Base only' }).click();
+  await expect.poll(async () => (await walls(page)).flatMap((w) => w.runs.map((r) => r.kind))).toEqual(['base', 'base']);
+  // The × closes this one too.
+  await both.getByRole('button', { name: 'Close' }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+});
+
 test('split a run, make one part all pantry, and move the divider', async ({ page }) => {
   await bareKitchen(page);
   const at = await plotter(page);
   const p = at(70, 108); // just inside wall C (the top wall), which has no window
   await page.mouse.click(p.x, p.y);
-  const frame = page.getByRole('region', { name: 'Cabinet runs' });
-  await expect(frame).toContainText('Selected: run on wall C');
-  await frame.getByRole('button', { name: 'Split', exact: true }).click();
-  await frame.getByRole('button', { name: 'All pantry' }).click();
+  // The run's options pop up next to it on the plan, like an appliance's.
+  const popup = page.getByRole('dialog', { name: 'Run on wall C' });
+  await popup.getByRole('button', { name: 'Split', exact: true }).click();
+  await popup.getByRole('button', { name: 'All pantry' }).click();
   await expect.poll(async () => (await walls(page))[2]!.runs.map((r) => r.kind).sort()).toEqual(['base_upper', 'pantry']);
   // The divider has a handle; drag it 12" along the wall.
   const [handle] = await konva(page, '.joint-handle');
@@ -218,8 +262,8 @@ test('drag on the open floor for an island; Delete removes the selected run, und
   await page.mouse.move(a.x + 10, a.y - 5, { steps: 3 });
   await page.mouse.move(b.x, b.y, { steps: 6 });
   await page.mouse.up();
-  const frame = page.getByRole('region', { name: 'Cabinet runs' });
-  await expect(frame).toContainText('Selected: island');
+  const frame = page.getByRole('dialog', { name: 'Island' });
+  await expect(frame).toBeVisible();
   const island = (await walls(page)).find((w) => w.kind === 'floating')!;
   expect(island.runs[0]!.length).toBe(60 * IN);
   expect(island.runs[0]!.depth).toBe(36 * IN); // 35" dragged: the nearest island depth

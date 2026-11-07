@@ -730,6 +730,20 @@ export function planAppliance(
 }
 
 /**
+ * A sink (anything that centres under a window) standing in front of a window but not centred
+ * under it: a yellow notice saying how far off centre it is (owner, 2026-11-07: tell me when it
+ * is NOT centred, not when it is). Null when it is centred, or not in front of a window.
+ */
+export function offCentreNotice(w: Wall, type: ApplianceType, offset: Length, width: Length): string | null {
+  if (!type.centreUnderWindow) return null;
+  const win = windowSpans(w).find((x) => overlaps(x, { start: offset, end: offset + width }));
+  if (!win) return null;
+  const off = Math.abs(offset + width / 2 - (win.start + win.end) / 2);
+  if (off === 0) return null;
+  return `The ${type.name.toLowerCase()} is not centred under the window: it is ${formatInches(Math.round(off))} off centre.`;
+}
+
+/**
  * Makes sure a stretch stands within runs: extends a run that touches or overlaps it, or adds a
  * short run of the given kind. An upper-only run under an appliance becomes base + upper.
  */
@@ -778,7 +792,8 @@ export function placeAppliance(
   const notices: string[] = [];
   const id = env.newId();
   const placed: AppliancePlacement[] = [{ placement_id: id, kind, offset: plan.offset, width: unmeasured(plan.width), paired_with: null }];
-  if (plan.centredUnderWindow) notices.push('Centred under the window.');
+  const offCentre = offCentreNotice(w, type, plan.offset, plan.width);
+  if (offCentre) notices.push(offCentre);
   let next: Wall = { ...w, appliances: [...w.appliances, ...placed] };
   next = ensureRun(env, next, { start: plan.offset, end: plan.offset + plan.width }, type.runWhenAlone, rules, notices);
   if (plan.partner) {
@@ -813,7 +828,8 @@ export function moveAppliance(
   if (!planned.ok) return refuse(planned.reason);
   const plan = planned.value;
   const notices: string[] = [];
-  if (plan.centredUnderWindow) notices.push('Centred under the window.');
+  const offCentre = offCentreNotice(r.walls.find((x) => x.wall_id === wallId) as Wall, type, plan.offset, plan.width);
+  if (offCentre) notices.push(offCentre);
   const partnerId = plan.partner?.existingId ?? null;
   const takeOut = new Set([placementId, ...(partnerId ? [partnerId] : [])]);
   let rr: Room = { ...r, walls: r.walls.map((x) => ({ ...x, appliances: x.appliances.filter((a) => !takeOut.has(a.placement_id)) })) };

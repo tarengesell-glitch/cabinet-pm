@@ -309,7 +309,8 @@ describe('appliances', () => {
     const [sink, dw] = wallOf(d, 'A').appliances;
     expect(sink).toMatchObject({ kind: 'sink', offset: 50 * IN, paired_with: null, width: { value: 32 * IN, provenance: 'unmeasured' } });
     expect(dw).toMatchObject({ kind: 'dishwasher', offset: 82 * IN, paired_with: sink!.placement_id });
-    expect(notices(r)).toEqual(['Centred under the window.', 'Dishwasher added beside the sink. Select it to move it to the other side.']);
+    // Centred: nothing to warn about, so no notice about the window.
+    expect(notices(r)).toEqual(['Dishwasher added beside the sink. Select it to move it to the other side.']);
     expect(passes(d)).toEqual([]);
   });
 
@@ -319,13 +320,19 @@ describe('appliances', () => {
     const sinkId = wallOf(d, 'A').appliances.find((a) => a.kind === 'sink')!.placement_id;
     const sinkAt = (x: Draft) => wallOf(x, 'A').appliances.find((a) => a.kind === 'sink')!.offset / IN;
     const drag = { ...SNAP, centreSnap: 3 * IN };
-    // The window is 48"-84" (centre 66"); the sink is 32" wide. Dragged 8" left of centre: it stays there.
-    d = unwrap(moveAppliance(d, env, sinkId, wallOf(d, 'A').wall_id, 58 * IN, drag));
+    // The window is 48"-84" (centre 66"); the sink is 32" wide. Dragged 8" left of centre: it
+    // stays there, with a (yellow) notice that it is off centre.
+    const off = moveAppliance(d, env, sinkId, wallOf(d, 'A').wall_id, 58 * IN, drag);
+    d = unwrap(off);
     expect(sinkAt(d)).toBe(42);
-    // Within 3" of the centre: it snaps back to centre, and says so.
+    expect(notices(off)).toContain('The sink is not centred under the window: it is 8" off centre.');
+    // Within 3" of the centre: it snaps back to centre, and there is no window notice.
     const r = moveAppliance(d, env, sinkId, wallOf(d, 'A').wall_id, 64 * IN, drag);
     expect(sinkAt(unwrap(r))).toBe(50);
-    expect(notices(r)).toContain('Centred under the window.');
+    expect(notices(r).filter((n) => n.includes('window'))).toEqual([]);
+    // Moved clear of the window altogether: no notice either.
+    const away = moveAppliance(unwrap(r), env, sinkId, wallOf(d, 'A').wall_id, 120 * IN, drag);
+    expect(notices(away).filter((n) => n.includes('window'))).toEqual([]);
     // Alt held (no snapping): exactly where it was dragged.
     d = unwrap(moveAppliance(d, env, sinkId, wallOf(d, 'A').wall_id, 64 * IN, { ...SNAP, centreSnap: 0 }));
     expect(sinkAt(d)).toBe(48);

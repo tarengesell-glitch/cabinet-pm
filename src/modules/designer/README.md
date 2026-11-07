@@ -78,7 +78,7 @@ Open it at `/rooms/preview` (`npm run dev`, then http://localhost:3000/rooms/pre
 - **Appliances:**
   - `planAppliance` is the ghost; `placeAppliance` and `moveAppliance` do the drop.
   - Appliances stay out of doorways and corner squares, and a fridge or wall oven stays out from in front of windows.
-  - A sink dropped near a window centres under it. Dragged, it can sit off centre: it snaps to the window's centre only when brought within 3" of it (more when zoomed out), and never with Alt held. A sink brings a dishwasher when the room has none; the dishwasher moves with it, `flipPartner` swaps its side, and dragging it away unties it.
+  - A sink dropped near a window centres under it. Dragged, it can sit off centre: it snaps to the window's centre only when brought within 3" of it (more when zoomed out), and never with Alt held. A sink in front of a window but not centred under it shows a yellow notice saying how far off centre it is (`offCentreNotice`); a centred one shows none. A sink brings a dishwasher when the room has none; the dishwasher moves with it, `flipPartner` swaps its side, and dragging it away unties it.
   - Dropping on a bare wall adds a short run.
   - Also `setApplianceWidth` (standard widths only) and `deleteAppliances`.
 - **Islands:** floating walls (A-21) with one run: `addIsland`, `moveIsland`, `resizeIsland` (depth from the island list). Delete one as a wall.

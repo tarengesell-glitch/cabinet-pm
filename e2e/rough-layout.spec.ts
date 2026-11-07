@@ -243,6 +243,9 @@ test('a sink centred under a window can be dragged off centre', async ({ page })
   let p = at(70, 10); // near wall A's window (48"–84")
   await page.mouse.click(p.x, p.y);
   await expect.poll(async () => (await walls(page))[0]!.appliances.find((a) => a.kind === 'sink')?.offset).toBe(50 * IN);
+  // Centred: no notice about the window.
+  const notice = page.getByRole('status').filter({ hasText: 'window' });
+  await expect(notice).toHaveCount(0);
   // Grab the sink at its centre (66") and drag it 10" to the left: it stays there.
   await page.getByRole('dialog', { name: 'Sink' }).getByRole('button', { name: 'Close' }).click();
   p = at(66, 12);
@@ -253,6 +256,9 @@ test('a sink centred under a window can be dragged off centre', async ({ page })
   await page.mouse.move(to.x, to.y, { steps: 4 });
   await page.mouse.up();
   await expect.poll(async () => (await walls(page))[0]!.appliances.find((a) => a.kind === 'sink')?.offset).toBe(40 * IN);
+  // Off centre: a yellow notice (a notice, not a red error) says by how much.
+  await expect(notice).toHaveText(/The sink is not centred under the window: it is 10" off centre\./);
+  await expect(notice).toHaveCSS('color', 'rgb(173, 117, 26)');
   // Dragged back to near the centre, it snaps to the centre again.
   p = at(56, 12);
   const back = at(65, 12);
@@ -262,6 +268,7 @@ test('a sink centred under a window can be dragged off centre', async ({ page })
   await page.mouse.move(back.x, back.y, { steps: 4 });
   await page.mouse.up();
   await expect.poll(async () => (await walls(page))[0]!.appliances.find((a) => a.kind === 'sink')?.offset).toBe(50 * IN);
+  await expect(notice).toHaveCount(0);
 });
 
 test('drag a fridge from the tray onto a bare wall: a short run goes under it', async ({ page }) => {

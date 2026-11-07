@@ -120,6 +120,14 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 - **Room drawing, round 9 (owner, 2026-11-05): edge scrolling.** While drawing walls or dragging a handle, a cursor within 40 px of the plan's edge scrolls the plan that way, faster nearer the edge, as AutoCAD, SketchUp and Figma do. The wall or drag being made follows the cursor. It stops when the cursor moves back in.
 - Room capture is pulled ahead of Phase 5 (BUILD_PLAN). Order: scaffold (1a), then Core walls and openings, then the Designer drawing screen.
 
+### 2026-11-07: Design rules from closet-builder (owner: "bring in all the cabinet design rules")
+The owner asked for closet-builder's design rules (layout, spacing, symmetry, aesthetic) to be brought in. They are in `src/modules/shop-settings/data/design-rules.json`: 83 rules, each with its closet-builder ID, the owner's words and date, any lengths, and a status here.
+- **12 confirmed** for this platform, because the owner already confirmed them here: smallest widths (8"/8"/12"), the door rules, the ideal 14–16" door, evenly spaced shelves, the 1/16" width step and 3/4" fillers, ends (applied finished at an open end, filler at a wall), fillers as real parts, the dishwasher touching the sink base, the sink centred under a window, the top drawer line carrying across, and the two sign-off gates (appliances confirmed, site measured).
+- **2 conflict** with decisions made here, which win: closet-builder's corners (the longest run takes the corner, no corner cabinet) and its closet room limits (12" shortest run, 10–36" deep, 48" tallest minimum).
+- **69 are candidates:** carried over but not yet confirmed for this shop. They include the symmetry and alignment preferences and principles (equal widths either side of a focal point, near enough becomes exact, which lines matter most, judge the fronts not the boxes), the 24–32" ideal cabinet width, one cabinet up to 38" rather than two, the 42" maximum, walkways 42–48", islands lining up with runs, the 30" above a cooktop, countertop overhangs, the 3 7/8" toe kick, crowns setting the ceiling gap, and the kitchen and storage defaults.
+- **Not imported:** box construction (the shop's library and software engineer it), pricing, closet configurations and the unverified industry standards. The file lists them with the reason.
+- **PROPOSED (this session, not owner-decided):** closet-builder's own statuses are kept beside the new one, so a rule it had only as PROPOSED or RAW is still visibly unconfirmed. No rule is applied by the software yet; which ones block and which only warn is still S-6.
+
 ### 2026-11-07: The cabinet catalog, from the shop's own Cabinet Vision library (owner, library review)
 The colony's Cabinet Vision install (`Solid_11.zip`, catalog "New Catalog") was read and every template put to the owner on a review page. The owner answered the General and "Templates to keep" tabs; the specialty items on the other two tabs are left out for now ("a lot of specialty items which we'll likely end up re-engineering"). Catalog version 1 is built from those answers: `src/modules/catalog/data/catalog-v1.json`, 50 cabinet types.
 - **The library holds templates, not fixed products:** example layouts, sizes and construction that stretch to any width, height and depth. The stored size is only the example.
@@ -251,7 +259,7 @@ After walls, doors and windows, the person marks where cabinetry goes and where 
   - room geometry, including "floating walls" for islands and peninsulas (its A-21). *Answered for floating walls (owner, 2026-11-05):* the idea is carried over; see "Room drawing, round 8";
   - a 3D view and a wall elevation view;
   - integer-unit handling;
-  - a cabinetry knowledge base (`docs/cabinetry-intelligence/`) that already separates hard design limits from preferences. That is close to the spec's block-vs-warn design rules, and could seed Shop Settings.
+  - a cabinetry knowledge base (`docs/cabinetry-intelligence/`) that already separates hard design limits from preferences. That is close to the spec's block-vs-warn design rules, and could seed Shop Settings. *Answered for the design rules (owner, 2026-11-07):* brought in; see "Design rules from closet-builder".
 
   Should any of these be ported (Phase 4–6), or should this project start clean?
 - **C-2 Look and feel.** closet-builder has an owner-approved design system (Geist and Newsreader fonts, its own tokens, 2026-10-07/08). `docs/ux/UX_BRIEF.md` has a different palette. Which one applies here?

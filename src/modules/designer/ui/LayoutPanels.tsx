@@ -1,8 +1,8 @@
 'use client';
 /**
  * The side frames for the "Cabinets & appliances" tool (owner, 2026-11-06): "Cabinet runs"
- * (how to, Add island, and the selected run's options) and "Appliances" (the tray). Plus the
- * small pop-up next to a selected appliance. Display only: every rule is in model/layout.ts.
+ * (how to, Add island) and "Appliances" (the tray). Plus the pop-ups on the plan next to a
+ * selected run or appliance (owner, 2026-11-07). Display only: every rule is in model/layout.ts.
  */
 import { useRef } from 'react';
 import { formatInches, type Length, type Result, type Room, type RunKind, wallLetter } from '@/core/index';
@@ -17,18 +17,89 @@ import s from './RoomCapture.module.css';
 const RUN_KINDS = Object.keys(RUN_KIND_LABEL) as RunKind[];
 const rough = (value: Length) => ({ value, provenance: 'unmeasured' as const, source_mm: null });
 
-export function RunsFrame(props: {
+export function RunsFrame(props: { canEdit: boolean; onAddIsland: () => void }) {
+  return (
+    <section className={s.stack} aria-label="Cabinet runs">
+      <p className={s.muted}>
+        Tap a wall to fill it, or drag along a wall for part of it. Drag on the open floor for an island. Select a run to change it: its options pop up next to it.
+      </p>
+      <div className={s.row}>
+        <button className={s.button} disabled={!props.canEdit} onClick={props.onAddIsland}>
+          Add island
+        </button>
+      </div>
+    </section>
+  );
+}
+
+/** The run pop-up's size on screen (UI setting): the plan places it from these. */
+export const RUN_POPOVER = { width: 300, height: 360 } as const;
+
+/** A frame that pops up on the plan, next to what it belongs to (a run or an appliance). */
+function PopupFrame(props: {
+  label: string;
+  at: { x: number; y: number };
+  width: number;
+  maxHeight?: number;
+  onClose: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      role="dialog"
+      aria-label={props.label}
+      onPointerDown={(e) => e.stopPropagation()}
+      onWheel={(e) => e.stopPropagation()}
+      style={{
+        position: 'absolute',
+        left: props.at.x,
+        top: props.at.y,
+        zIndex: 4,
+        width: props.width,
+        boxSizing: 'border-box',
+        ...(props.maxHeight ? { maxHeight: props.maxHeight, overflowY: 'auto' as const } : {}),
+        background: '#fff',
+        border: '1px solid #e2e7eb',
+        borderRadius: 8,
+        boxShadow: '0 6px 24px rgba(0,0,0,0.16)',
+        padding: 10,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 8,
+      }}
+    >
+      <button
+        aria-label="Close"
+        onClick={props.onClose}
+        style={{ position: 'absolute', top: 4, right: 4, width: 28, height: 28, border: 'none', background: 'transparent', fontSize: 18, lineHeight: 1, color: '#5b6670', cursor: 'pointer' }}
+      >
+        ×
+      </button>
+      {props.children}
+    </div>
+  );
+}
+
+/**
+ * Options for the selected run(s), shown next to them on the plan (owner, 2026-11-07: the same
+ * way as an appliance's). Type, length, depth, Split and Delete; an island's depths are buttons.
+ */
+export function RunPopover(props: {
   room: Room;
-  selectedRunIds: readonly string[];
+  runIds: readonly string[];
+  /** Top-left corner on the plan, in screen pixels. */
+  at: { x: number; y: number };
+  maxHeight: number;
   canEdit: boolean;
   onEdit: (edit: LayoutEdit) => Result<unknown>;
-  onAddIsland: () => void;
+  onClose: () => void;
 }) {
-  const { room: r, selectedRunIds, canEdit, onEdit } = props;
-  const found = selectedRunIds.map((id) => findRun(r, id)).filter((x): x is NonNullable<typeof x> => x !== null);
+  const { room: r, runIds, canEdit, onEdit } = props;
+  const found = runIds.map((id) => findRun(r, id)).filter((x): x is NonNullable<typeof x> => x !== null);
+  if (found.length === 0) return null;
   const one = found.length === 1 ? found[0] : null;
   const island = one?.wall.kind === 'floating' ? one.wall : null;
-  const sameDepth = found.length > 0 && found.every((f) => f.run.depth === found[0]!.run.depth);
+  const sameDepth = found.every((f) => f.run.depth === found[0]!.run.depth);
   const letter = (wallId: string) => wallLetter(r.walls.findIndex((w) => w.wall_id === wallId));
   const corners = one
     ? cornerCabinets(r).filter(
@@ -37,95 +108,83 @@ export function RunsFrame(props: {
           (c.startingWallId === one.wall.wall_id && one.run.offset <= insideSpan(r, one.wall).start),
       )
     : [];
+  const title = island ? 'Island' : one ? `Run on wall ${letter(one.wall.wall_id)}` : `${found.length} runs`;
   return (
-    <section className={s.stack} aria-label="Cabinet runs">
-      <p className={s.muted}>Tap a wall to fill it, or drag along a wall for part of it. Drag on the open floor for an island. Select a run to change it.</p>
-      <div className={s.row}>
-        <button className={s.button} disabled={!canEdit} onClick={props.onAddIsland}>
-          Add island
-        </button>
+    <PopupFrame label={title} at={props.at} width={RUN_POPOVER.width} maxHeight={props.maxHeight} onClose={props.onClose}>
+      <strong style={{ fontSize: 13 }}>{title}</strong>
+      <div className={s.row} role="group" aria-label="Cabinet type" style={{ gap: 4 }}>
+        {RUN_KINDS.map((k) => (
+          <button
+            key={k}
+            className={found.every((f) => f.run.kind === k) ? s.buttonActive : s.button}
+            aria-pressed={found.every((f) => f.run.kind === k)}
+            disabled={!canEdit}
+            onClick={() => onEdit({ kind: 'run-kind', runIds: found.map((f) => f.run.run_id), runKind: k })}
+          >
+            {RUN_KIND_LABEL[k]}
+          </button>
+        ))}
       </div>
-      {found.length > 0 && (
-        <div className={s.field} aria-label="Selected run">
-          <h3 className={s.fieldLabel} style={{ margin: 0 }}>
-            {island ? 'Selected: island' : one ? `Selected: run on wall ${letter(one.wall.wall_id)}` : `${found.length} runs selected`}
-          </h3>
-          <div className={s.row} role="group" aria-label="Cabinet type">
-            {RUN_KINDS.map((k) => (
+      {one && !island && (
+        <SizeField
+          key={`len-${one.run.run_id}-${one.run.length}`}
+          label="Length"
+          measured={rough(one.run.length)}
+          canEdit={canEdit}
+          onSet={(v: TypedSize) => onEdit({ kind: 'run-length', runId: one.run.run_id, length: v.value })}
+        />
+      )}
+      {island && one && (
+        <>
+          <SizeField
+            key={`ilen-${island.wall_id}-${one.run.length}`}
+            label="Length"
+            measured={rough(one.run.length)}
+            canEdit={canEdit}
+            onSet={(v: TypedSize) => onEdit({ kind: 'island-resize', wallId: island.wall_id, length: v.value, depth: one.run.depth })}
+          />
+          <span className={s.fieldLabel}>Depth</span>
+          <div className={s.row} role="group" aria-label="Island depth" style={{ gap: 4 }}>
+            {LAYOUT_RULES.islandDepths.map((d) => (
               <button
-                key={k}
-                className={found.every((f) => f.run.kind === k) ? s.buttonActive : s.button}
-                aria-pressed={found.every((f) => f.run.kind === k)}
+                key={d}
+                className={one.run.depth === d ? s.buttonActive : s.button}
+                aria-pressed={one.run.depth === d}
                 disabled={!canEdit}
-                onClick={() => onEdit({ kind: 'run-kind', runIds: found.map((f) => f.run.run_id), runKind: k })}
+                onClick={() => onEdit({ kind: 'island-resize', wallId: island.wall_id, length: one.run.length, depth: d })}
               >
-                {RUN_KIND_LABEL[k]}
+                {formatInches(d)}
               </button>
             ))}
           </div>
-          {one && !island && (
-            <SizeField
-              key={`len-${one.run.run_id}-${one.run.length}`}
-              label="Length"
-              measured={rough(one.run.length)}
-              canEdit={canEdit}
-              onSet={(v: TypedSize) => onEdit({ kind: 'run-length', runId: one.run.run_id, length: v.value })}
-            />
-          )}
-          {island && one && (
-            <>
-              <SizeField
-                key={`ilen-${island.wall_id}-${one.run.length}`}
-                label="Length"
-                measured={rough(one.run.length)}
-                canEdit={canEdit}
-                onSet={(v: TypedSize) => onEdit({ kind: 'island-resize', wallId: island.wall_id, length: v.value, depth: one.run.depth })}
-              />
-              <span className={s.fieldLabel}>Depth</span>
-              <div className={s.row} role="group" aria-label="Island depth">
-                {LAYOUT_RULES.islandDepths.map((d) => (
-                  <button
-                    key={d}
-                    className={one.run.depth === d ? s.buttonActive : s.button}
-                    aria-pressed={one.run.depth === d}
-                    disabled={!canEdit}
-                    onClick={() => onEdit({ kind: 'island-resize', wallId: island.wall_id, length: one.run.length, depth: d })}
-                  >
-                    {formatInches(d)}
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
-          {!island && (
-            <SizeField
-              key={`dep-${found.map((f) => f.run.run_id).join()}-${sameDepth ? found[0]!.run.depth : 'mixed'}`}
-              label="Depth"
-              measured={sameDepth ? rough(found[0]!.run.depth) : null}
-              {...(sameDepth ? {} : { display: 'Mixed' })}
-              canEdit={canEdit}
-              onSet={(v: TypedSize) => onEdit({ kind: 'run-depth', runIds: found.map((f) => f.run.run_id), depth: v.value })}
-            />
-          )}
-          {corners.map((c) => (
-            <p key={c.endingWallId} className={s.muted}>
-              Corner cabinet ({c.base && c.upper ? 'base and upper' : c.base ? 'base' : 'upper'}) where walls {letter(c.endingWallId)} and {letter(c.startingWallId)} meet.
-            </p>
-          ))}
-          <div className={s.row}>
-            {one && !island && (
-              <button className={s.button} disabled={!canEdit} onClick={() => onEdit({ kind: 'split', runId: one.run.run_id })}>
-                Split
-              </button>
-            )}
-            <button className={s.buttonDanger} disabled={!canEdit} onClick={() => onEdit({ kind: 'delete-runs', runIds: found.map((f) => f.run.run_id) })}>
-              {island ? 'Delete island' : found.length > 1 ? 'Delete runs' : 'Delete run'}
-            </button>
-          </div>
-          {one && !island && <p className={s.muted}>Split cuts the run in half. Drag the divider to move it.</p>}
-        </div>
+        </>
       )}
-    </section>
+      {!island && (
+        <SizeField
+          key={`dep-${found.map((f) => f.run.run_id).join()}-${sameDepth ? found[0]!.run.depth : 'mixed'}`}
+          label="Depth"
+          measured={sameDepth ? rough(found[0]!.run.depth) : null}
+          {...(sameDepth ? {} : { display: 'Mixed' })}
+          canEdit={canEdit}
+          onSet={(v: TypedSize) => onEdit({ kind: 'run-depth', runIds: found.map((f) => f.run.run_id), depth: v.value })}
+        />
+      )}
+      {corners.map((c) => (
+        <p key={c.endingWallId} className={s.muted}>
+          Corner cabinet ({c.base && c.upper ? 'base and upper' : c.base ? 'base' : 'upper'}) where walls {letter(c.endingWallId)} and {letter(c.startingWallId)} meet.
+        </p>
+      ))}
+      <div className={s.row}>
+        {one && !island && (
+          <button className={s.button} disabled={!canEdit} onClick={() => onEdit({ kind: 'split', runId: one.run.run_id })} title="Cuts the run in half. Drag the divider to move it.">
+            Split
+          </button>
+        )}
+        <button className={s.buttonDanger} disabled={!canEdit} onClick={() => onEdit({ kind: 'delete-runs', runIds: found.map((f) => f.run.run_id) })}>
+          {island ? 'Delete island' : found.length > 1 ? 'Delete runs' : 'Delete run'}
+        </button>
+      </div>
+    </PopupFrame>
   );
 }
 
@@ -202,32 +261,14 @@ export function AppliancePopover(props: {
   at: { x: number; y: number };
   canEdit: boolean;
   onEdit: (edit: LayoutEdit) => void;
+  onClose: () => void;
 }) {
   const found = findAppliance(props.room, props.placementId);
   if (!found) return null;
   const { appliance: a, wall } = found;
   const type = applianceType(LAYOUT_RULES, a.kind);
   return (
-    <div
-      role="dialog"
-      aria-label={type?.name ?? a.kind}
-      onPointerDown={(e) => e.stopPropagation()}
-      style={{
-        position: 'absolute',
-        left: Math.max(6, props.at.x - 110),
-        top: Math.max(6, props.at.y),
-        zIndex: 4,
-        width: 220,
-        background: '#fff',
-        border: '1px solid #e2e7eb',
-        borderRadius: 8,
-        boxShadow: '0 6px 24px rgba(0,0,0,0.16)',
-        padding: 10,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 8,
-      }}
-    >
+    <PopupFrame label={type?.name ?? a.kind} at={{ x: Math.max(6, props.at.x - 110), y: Math.max(6, props.at.y) }} width={220} onClose={props.onClose}>
       <strong style={{ fontSize: 13 }}>{type?.name ?? `Unknown appliance "${a.kind}"`}</strong>
       {type && type.widths.length > 1 ? (
         <div className={s.row} role="group" aria-label="Width">
@@ -259,6 +300,6 @@ export function AppliancePopover(props: {
           Delete
         </button>
       </div>
-    </div>
+    </PopupFrame>
   );
 }

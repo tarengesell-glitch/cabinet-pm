@@ -1,10 +1,9 @@
 {
-  "source": "Owner (Taren), 2026-11-06, choosing from the clickable layout mockup (rounds 1 to 4) in the Claude Code session that planned this step. Belongs in Shop Settings once that module exists. Entries listed under \"proposed\" were mockup defaults the owner used without changing; they are not yet confirmed.",
+  "source": "Owner (Taren), 2026-11-06, choosing from the clickable layout mockup (rounds 1 to 4) in the Claude Code session that planned this step. Belongs in Shop Settings once that module exists. Entries listed under \"proposed\" were mockup defaults the owner used without changing; they are not yet confirmed. min_run_length (9\") was approved by the owner on 2026-11-07, for base and upper pieces.",
   "proposed": {
     "default_run_kind": "PROPOSED (2026-11-06): a run made by tapping or dragging along a wall starts as base + upper, as in the mockup.",
     "island_run_kind": "PROPOSED (2026-11-06): an island's run starts as base only.",
     "run_depths": "PROPOSED (2026-11-06): base 24\", upper-only 12\", and the 13\" band that shows uppers on a base + upper run; mockup defaults.",
-    "min_run_length": "PROPOSED (2026-11-06): pieces shorter than 9\" are not made; mockup default.",
     "island_start_size": "PROPOSED (2026-11-06): the \"Add island\" button makes a 72\" x 36\" island, as in the mockup.",
     "appliance_flags": "PROPOSED (2026-11-06): a fridge or wall oven is kept out from in front of a window; a wall oven dropped on a bare wall gets an all-pantry run. Mockup behaviour the owner did not object to."
   },

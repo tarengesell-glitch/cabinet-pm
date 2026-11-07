@@ -63,8 +63,9 @@ Open it at `/rooms/preview` (`npm run dev`, then http://localhost:3000/rooms/pre
 - **Splits:** the divider between split parts has a handle that moves both.
 - **Corner cabinets:** shown as a square with a cross, one for bases and one for uppers.
 - **Islands:** drag on the open floor for an island (its depth snaps to the list), or press "Add island". Drag an island to move it; its end handle sets its length.
-- **The right side:** the "Cabinet runs" frame holds the selected run's type, length, depth, Split and Delete (an island's depths are buttons). The "Appliances" frame holds the tray: drag one onto the plan, or tap it and then tap the plan. The drag uses pointer events, so it works with a mouse, a finger or a pen.
-- **Appliance options:** a selected appliance's options (width, swap the dishwasher's side, Delete) pop up next to it, on the room side.
+- **Run options:** a selected run's options (type, length, depth, Split, Delete; an island's depths are buttons) pop up next to it on the plan (`RunPopover`). The plan places it beside the run, never over it, choosing the spot that covers the least of the other cabinets and the room. With several runs selected it changes them all. A × closes it.
+- **The right side:** the "Cabinets & islands" step holds the how-to and Add island. The "Appliances" frame holds the tray: drag one onto the plan, or tap it and then tap the plan. The drag uses pointer events, so it works with a mouse, a finger or a pen.
+- **Appliance options:** a selected appliance's options (width, swap the dishwasher's side, Delete) pop up next to it, on the room side, with a × to close.
 - **Same keys as walls:** Delete, Ctrl/Cmd+Z, Esc, zoom and pan. The rough-layout checks run live with the wall checks.
 
 **Rules** are in `model/layout.ts`.

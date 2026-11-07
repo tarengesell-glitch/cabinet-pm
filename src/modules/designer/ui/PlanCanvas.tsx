@@ -26,9 +26,9 @@ import {
   wallLetter,
 } from '@/core/index';
 import { findOpening, nearestWall, projectOntoWall, standardOpeningOffset } from '../model/editor';
-import { direction, findAppliance, halfThickness, insideNormal } from '../model/layout';
+import { direction, findAppliance, findRun, halfThickness, insideNormal, runEnd } from '../model/layout';
 import { LayoutShapes, applianceTarget, useLayoutTool } from './LayoutCanvas';
-import { AppliancePopover } from './LayoutPanels';
+import { AppliancePopover, RUN_POPOVER, RunPopover } from './LayoutPanels';
 import type { LayoutEdit } from './layoutEdits';
 import { lengthText } from './format';
 import { parseSize } from './parseSize';
@@ -146,6 +146,8 @@ interface Props {
   onChainStart: (p: Point | null) => void;
   /** A rough-layout edit (Cabinets & appliances tool): `done` false previews it, true saves it. */
   onLayoutEdit: (edit: LayoutEdit, done: boolean) => void;
+  /** A layout edit from a pop-up on the plan, saved at once; its result shows any refusal there. */
+  onLayoutCommand: (edit: LayoutEdit) => Result<unknown>;
   /** An appliance picked in the tray, waiting to be placed (tap, or dropped from a drag). */
   armed: string | null;
   onArm: (kind: string | null) => void;
@@ -705,6 +707,74 @@ export function PlanCanvas(props: Props) {
     const cy = front.y + sy * 70;
     return { x: cx, y: cy - 60 };
   })();
+  /**
+   * Where the selected run's pop-up goes (owner, 2026-11-07: next to the run, like an
+   * appliance's). It tries beside the run on each side (outside the wall, in front of it, or
+   * either side of an island) and to the left and right of the room, kept on the plan, and takes
+   * the spot that covers the run least, then other cabinets and appliances, then the room, so
+   * the plan stays usable. With
+   * several runs selected, it goes by the last one picked.
+   */
+  const runPopoverAt = (() => {
+    if (tool !== 'layout' || selection?.kind !== 'runs' || selection.ids.length === 0 || dragging) return null;
+    const found = findRun(room, selection.ids[selection.ids.length - 1] as string);
+    if (!found) return null;
+    const { wall, run } = found;
+    const u = direction(wall);
+    const n = insideNormal(room, wall);
+    const h = halfThickness(wall);
+    const at = (t: number, d: number) => toScreen({ x: wall.start_point.x + u.x * t + n.x * d, y: wall.start_point.y + u.y * t + n.y * d });
+    const { width: W, height: H } = RUN_POPOVER;
+    const GAP = 10;
+    const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(Math.max(lo, hi), v));
+    type Box = { x0: number; y0: number; x1: number; y1: number };
+    const boxOf = (pts: { x: number; y: number }[]): Box => ({
+      x0: Math.min(...pts.map((q) => q.x)),
+      y0: Math.min(...pts.map((q) => q.y)),
+      x1: Math.max(...pts.map((q) => q.x)),
+      y1: Math.max(...pts.map((q) => q.y)),
+    });
+    const overlap = (a: Box, b: Box) => Math.max(0, Math.min(a.x1, b.x1) - Math.max(a.x0, b.x0)) * Math.max(0, Math.min(a.y1, b.y1) - Math.max(a.y0, b.y0));
+    const [d0, d1] = wall.kind === 'floating' ? [-run.depth / 2, run.depth / 2] : [h, h + run.depth];
+    const runBox = boxOf([at(run.offset, d0), at(runEnd(run), d0), at(runEnd(run), d1), at(run.offset, d1)]);
+    const roomBox = boxOf(room.walls.flatMap((w) => [toScreen(w.start_point), toScreen(w.end_point)]));
+    // Everything else standing in the room: other runs and appliances, best left uncovered too.
+    const others: Box[] = room.walls.flatMap((w) => {
+      const wu = direction(w);
+      const wn = insideNormal(room, w);
+      const wh = halfThickness(w);
+      const p = (t: number, d: number) => toScreen({ x: w.start_point.x + wu.x * t + wn.x * d, y: w.start_point.y + wu.y * t + wn.y * d });
+      const span = (t0: number, t1: number, depth: number) => {
+        const [e0, e1] = w.kind === 'floating' ? [-depth / 2, depth / 2] : [wh, wh + depth];
+        return boxOf([p(t0, e0), p(t1, e0), p(t1, e1), p(t0, e1)]);
+      };
+      return [
+        ...w.runs.filter((x) => x.run_id !== run.run_id).map((x) => span(x.offset, runEnd(x), x.depth)),
+        ...w.appliances.map((a) => span(a.offset, a.offset + a.width.value, w.runs.find((x) => x.offset <= a.offset && runEnd(x) >= a.offset)?.depth ?? run.depth)),
+      ];
+    });
+    const mid = (run.offset + runEnd(run)) / 2;
+    /** The pop-up placed with its nearest edge just past `edge`, the way `dir` (a screen direction) points. */
+    const beyond = (edge: { x: number; y: number }, dir: { x: number; y: number }) => ({
+      x: edge.x + dir.x * (W / 2 + GAP) - W / 2,
+      y: edge.y + dir.y * (H / 2 + GAP) - H / 2,
+    });
+    const sn = { x: n.x, y: -n.y }; // the inside normal on screen (Y flipped)
+    const back = wall.kind === 'floating' ? d0 : -h;
+    const cy = (runBox.y0 + runBox.y1) / 2 - H / 2;
+    const candidates = [
+      beyond(at(mid, back), { x: -sn.x, y: -sn.y }),
+      beyond(at(mid, d1), sn),
+      { x: roomBox.x1 + GAP, y: cy },
+      { x: roomBox.x0 - GAP - W, y: cy },
+    ].map((c) => ({ x: clamp(c.x, 6, size.width - W - 6), y: clamp(c.y, 6, size.height - H - 6) }));
+    const cost = (c: { x: number; y: number }) => {
+      const b = { x0: c.x, y0: c.y, x1: c.x + W, y1: c.y + H };
+      return overlap(b, runBox) * 1000 + others.reduce((sum, o) => sum + overlap(b, o), 0) * 10 + overlap(b, roomBox);
+    };
+    const best = candidates.reduce((x, y) => (cost(y) < cost(x) ? y : x));
+    return { ...best, maxHeight: size.height - 12 };
+  })();
   /** A screen point inside the plan (from a browser event) as a room point. */
   const clientToRoom = (clientX: number, clientY: number): Point | null => {
     const rect = box.current?.getBoundingClientRect();
@@ -988,8 +1058,19 @@ export function PlanCanvas(props: Props) {
           )}
         </div>
       )}
+      {runPopoverAt && selection?.kind === 'runs' && (
+        <RunPopover
+          room={room}
+          runIds={selection.ids}
+          at={runPopoverAt}
+          maxHeight={runPopoverAt.maxHeight}
+          canEdit={canEdit}
+          onEdit={props.onLayoutCommand}
+          onClose={() => props.onSelect(null)}
+        />
+      )}
       {popoverAt && selection?.kind === 'appliance' && (
-        <AppliancePopover room={room} placementId={selection.id} at={popoverAt} canEdit={canEdit} onEdit={(edit) => props.onLayoutEdit(edit, true)} />
+        <AppliancePopover room={room} placementId={selection.id} at={popoverAt} canEdit={canEdit} onEdit={(edit) => props.onLayoutEdit(edit, true)} onClose={() => props.onSelect(null)} />
       )}
       <div style={{ position: 'absolute', right: 10, bottom: 10, display: 'flex', gap: 6, alignItems: 'center' }}>
         <span style={{ fontSize: 12, color: MUTED, background: 'rgba(255,255,255,0.85)', padding: '2px 6px', borderRadius: 6 }} data-testid="zoom-level">

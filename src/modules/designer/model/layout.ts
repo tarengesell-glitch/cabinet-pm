@@ -479,9 +479,12 @@ export function setRunKind(draft: Draft, env: Env, runIds: readonly string[], ki
   const notices: string[] = [];
   let dropped = 0;
   let splitAtWindow = false;
+  let stoppedShort = false;
   const walls = r.walls.map((w) => {
     if (!w.runs.some((x) => ids.has(x.run_id))) return w;
     let runs: Run[] = [];
+    /** Base pieces left at a run's end that are too short to be a cabinet (see below). */
+    const slivers = new Set<string>();
     for (const run of w.runs) {
       if (!ids.has(run.run_id)) {
         runs.push(run);
@@ -499,7 +502,6 @@ export function setRunKind(draft: Draft, env: Env, runIds: readonly string[], ki
         runs.push({ ...run, kind, depth });
         continue;
       }
-      splitAtWindow = true;
       const parts: { start: Length; end: Length; kind: RunKind }[] = [];
       let cur = run.offset;
       for (const z of [...zones].sort((p, q) => p.start - q.start)) {
@@ -517,7 +519,32 @@ export function setRunKind(draft: Draft, env: Env, runIds: readonly string[], ki
         if (last && last.kind === p.kind) last.end = p.end;
         else merged.push({ ...p });
       }
-      merged.forEach((p, i) => runs.push({ run_id: i === 0 ? run.run_id : env.newId(), kind: p.kind, offset: p.start, length: p.end - p.start, depth }));
+      // The run keeps its id on its (first) pantry part, so it stays selected.
+      const keep = Math.max(0, merged.findIndex((p) => p.kind === 'pantry'));
+      merged.forEach((p, i) => {
+        const id = i === keep ? run.run_id : env.newId();
+        if (merged.length > 1 && p.kind !== 'pantry' && p.end - p.start < rules.minRunLength && (i === 0 || i === merged.length - 1)) slivers.add(id);
+        else if (p.kind !== 'pantry') splitAtWindow = true;
+        runs.push({ run_id: id, kind: p.kind, offset: p.start, length: p.end - p.start, depth });
+      });
+    }
+    // A run that already stopped at (or just inside) a window's clearance leaves only a sliver of
+    // base before the window, e.g. 3" when it was split at the window's edge (owner, 2026-11-07:
+    // no tiny cabinet there). The sliver goes to the run beyond it, which already stands in front
+    // of the window, or, with nothing there, is left as the clearance gap. It stays only if an
+    // appliance stands on it.
+    for (const id of slivers) {
+      const piece = runs.find((x) => x.run_id === id) as Run;
+      stoppedShort = true;
+      const touches = (x: Run) => x !== piece && (runEnd(x) === piece.offset || x.offset === runEnd(piece));
+      const other = runs.find((x) => touches(x) && x.kind !== 'pantry' && hasBase(x.kind));
+      if (other) {
+        runs = runs.filter((x) => x !== piece).map((x) => (x === other ? { ...x, offset: Math.min(x.offset, piece.offset), length: x.length + piece.length } : x));
+        continue;
+      }
+      const standing = w.appliances.some((a) => overlaps(applianceSpan(a), runSpan(piece)));
+      if (standing) splitAtWindow = true;
+      else runs = runs.filter((x) => x !== piece);
     }
     if (kind === 'upper') {
       const onUpper = (a: AppliancePlacement) =>
@@ -532,6 +559,7 @@ export function setRunKind(draft: Draft, env: Env, runIds: readonly string[], ki
   const removedIds = new Set(r.walls.flatMap((w) => w.appliances.map((a) => a.placement_id)).filter((id) => !walls.some((w) => w.appliances.some((a) => a.placement_id === id))));
   const unpaired = walls.map((w) => ({ ...w, appliances: w.appliances.map((a) => (a.paired_with && removedIds.has(a.paired_with) ? { ...a, paired_with: null } : a)) }));
   if (dropped > 0) notices.push(`Removed ${dropped} appliance${dropped > 1 ? 's' : ''} that stood on it: an upper-only run has no base cabinets.`);
+  if (stoppedShort && !splitAtWindow) notices.push(`Pantry stops ${formatInches(rules.openingClearance)} clear of the window.`);
   if (splitAtWindow) notices.push(`Pantry stays ${formatInches(rules.openingClearance)} clear of the window. The part under the window is base cabinets.`);
   return ok(withRoom(draft, env, `Made ${runIds.length === 1 ? 'a run' : `${runIds.length} runs`} ${RUN_KIND_LABEL[kind].toLowerCase()}`, { ...r, walls: unpaired }), notices);
 }

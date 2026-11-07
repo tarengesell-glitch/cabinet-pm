@@ -2,7 +2,7 @@
 /**
  * The room-drawing steps as an accordion in the side panel (owner, 2026-11-06): 1 Walls ·
  * 2 Openings · 3 Cabinets & islands · 4 Appliances. Clicking a step opens its options directly
- * under it; any step can be reopened at any time (not a locked wizard), and steps already
+ * under it, and clicking the open step again folds it away (owner, 2026-11-07); any step can be reopened at any time (not a locked wizard), and steps already
  * visited show a tick.
  */
 import type { ReactNode } from 'react';

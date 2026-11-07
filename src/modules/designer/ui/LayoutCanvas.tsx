@@ -305,9 +305,15 @@ type Pending =
   | { mode: 'joint'; leftId: string; rightId: string; wallId: string }
   | { mode: 'run-end'; runId: string; end: 'start' | 'end'; wallId: string; island: boolean }
   | { mode: 'depth'; runId: string; wallId: string; island: boolean }
-  | { mode: 'run'; runId: string; wallId: string; t: number; island: boolean }
-  | { mode: 'wall'; wallId: string; t: number }
+  | { mode: 'run'; runId: string; wallId: string; t: number; island: boolean; others: readonly WallSpot[] }
+  | { mode: 'wall'; wallId: string; t: number; others: readonly WallSpot[] }
   | { mode: 'floor' };
+
+/** A point near a room wall: which wall, and how far along it. */
+interface WallSpot {
+  readonly wallId: string;
+  readonly t: number;
+}
 
 interface Active {
   pending: Pending;
@@ -408,25 +414,32 @@ export function useLayoutTool(args: LayoutToolArgs) {
         }
       }
     }
-    // A run's band.
-    for (const w of r.walls) {
-      for (const run of w.runs) {
-        const { t, d } = project(r, w, p);
-        const [d0, d1] = depthRange(w, run.depth);
-        if (t >= run.offset && t <= runEnd(run) && d >= d0 - 1 && d <= d1 + 1) return { mode: 'run', runId: run.run_id, wallId: w.wall_id, t, island: w.kind === 'floating' };
-      }
-    }
-    // Near a room wall's inside face: this wall.
-    let best: { wallId: string; t: number; score: number } | null = null;
+    // Every room wall whose cabinet zone holds the point: in a corner that is two walls, and a
+    // drag then goes along whichever one it follows (owner, 2026-11-07).
+    const near: (WallSpot & { score: number })[] = [];
     for (const w of r.walls) {
       if (w.kind !== 'room') continue;
       const { t, d } = project(r, w, p);
       const h = halfThickness(w);
       if (t < 0 || t > wallLength(w) || d < -h - tol || d > h + WALL_ZONE) continue;
-      const score = Math.abs(d - h - 6 * INCH);
-      if (!best || score < best.score) best = { wallId: w.wall_id, t, score };
+      near.push({ wallId: w.wall_id, t, score: Math.abs(d - h - 6 * INCH) });
     }
-    if (best) return { mode: 'wall', wallId: best.wallId, t: best.t };
+    near.sort((x, y) => x.score - y.score);
+    const othersThan = (wallId: string): WallSpot[] => near.filter((x) => x.wallId !== wallId).map(({ wallId: id, t }) => ({ wallId: id, t }));
+    // A run's band.
+    for (const w of r.walls) {
+      for (const run of w.runs) {
+        const { t, d } = project(r, w, p);
+        const [d0, d1] = depthRange(w, run.depth);
+        if (t >= run.offset && t <= runEnd(run) && d >= d0 - 1 && d <= d1 + 1) {
+          const island = w.kind === 'floating';
+          return { mode: 'run', runId: run.run_id, wallId: w.wall_id, t, island, others: island ? [] : othersThan(w.wall_id) };
+        }
+      }
+    }
+    // Near a room wall's inside face: the nearest such wall.
+    const best = near[0];
+    if (best) return { mode: 'wall', wallId: best.wallId, t: best.t, others: othersThan(best.wallId) };
     return { mode: 'floor' };
   };
 
@@ -481,10 +494,25 @@ export function useLayoutTool(args: LayoutToolArgs) {
           const vx = p.x - a.start.x;
           const vy = p.y - a.start.y;
           if (Math.hypot(vx, vy) * args.scale < INTENT_PX) return null;
-          const u = direction(w);
-          const along = Math.abs(vx * u.x + vy * u.y);
-          const across = Math.abs(vx * u.y - vy * u.x);
-          a.intent = across > along ? 'island' : 'along';
+          const follows = (wall: Wall) => {
+            const u = direction(wall);
+            return Math.abs(vx * u.x + vy * u.y) >= Math.abs(vx * u.y - vy * u.x);
+          };
+          if (follows(w)) a.intent = 'along';
+          else {
+            // Across this wall, but along another wall that meets it here (a corner): draw a run
+            // on that wall, starting from the corner, instead of making an island.
+            const other = pend.others.find((o) => {
+              const ow = wallOf(o.wallId);
+              return ow !== undefined && follows(ow);
+            });
+            if (other) {
+              a.pending = { mode: 'wall', wallId: other.wallId, t: other.t, others: [] };
+              a.intent = 'along';
+              return editFor(a, p, free);
+            }
+            a.intent = 'island';
+          }
         }
         if (a.intent === 'island') return editFor({ ...a, pending: { mode: 'floor' } }, p, free);
         if (pend.mode === 'run') {

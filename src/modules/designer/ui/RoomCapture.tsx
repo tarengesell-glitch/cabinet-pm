@@ -584,7 +584,7 @@ export function RoomCapture({ user }: { user: User }) {
               <StepList
                 open={step}
                 visited={visited}
-                onOpen={(st) => openStep(st, stepFor(selection) === st)}
+                onOpen={(st) => (st === step ? openStep(null) : openStep(st, stepFor(selection) === st))}
                 content={(st) => {
                   if (st === 'walls')
                     return (

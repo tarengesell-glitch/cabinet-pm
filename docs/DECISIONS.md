@@ -145,6 +145,10 @@ After walls, doors and windows, the person marks where cabinetry goes and where 
   - **Checks sit in the header:** one line ("No problems found" or "N problems"); the list drops down from it and opens by itself when a new problem appears.
   - **"What gets saved" is removed** from the screen (it was a build-checking tool: the raw master copy, with Download and Load).
   - **Click the measurement beside a door or window** to type a new distance: the opening slides over, keeping its width.
+- **Round 7 (owner, 2026-11-07):**
+  - **Drag from a corner.** A drag that starts in a corner (where two walls' cabinet zones meet, even on top of the first wall's run) goes along whichever wall it follows, drawing a run on that wall from the corner. It used to make an island whenever the drag went across the wall that was picked first.
+  - **No tiny cabinet beside a window.** When a run that stops at (or just past) a window's 3" clearance is made all pantry, the sliver of base left before the window (3" when split at the window's edge) is not made: it joins the run beyond it, already in front of the window, or, with nothing there, is left as the 3" gap. It stays only if an appliance stands on it.
+  - **Click an open step to fold it.** Clicking the open step's heading in the right panel closes it.
 - **Built into the room preview** as the "Cabinets & appliances" tool (2026-11-06). Walls are stored by their centre line, so cabinets stand against the inside face and stop at the inside corners; corner gaps are measured from the inside corner.
 
 ### 2026-11-05: Where the work lives and deploys

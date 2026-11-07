@@ -75,6 +75,50 @@ test('tap two walls: runs to the inside corners and a corner cabinet where they 
   await expect(page.getByRole('region', { name: 'Checks' })).toContainText('No problems found');
 });
 
+test('drag from a corner along the other wall: a run on that wall from the corner, not an island', async ({ page }) => {
+  await bareKitchen(page);
+  const at = await plotter(page);
+  // Cabinets along wall A first, so the corner is covered by wall A's run.
+  let p = at(100, 12);
+  await page.mouse.click(p.x, p.y);
+  await expect.poll(async () => (await walls(page))[0]!.runs.length).toBe(1);
+  // Press in the corner of walls A and B, and drag up along wall B.
+  const from = at(132, 12);
+  const to = at(132, 70);
+  await page.mouse.move(from.x, from.y);
+  await page.mouse.down();
+  await page.mouse.move(from.x, (from.y + to.y) / 2, { steps: 5 });
+  await page.mouse.move(to.x, to.y, { steps: 5 });
+  await page.mouse.up();
+  await expect.poll(async () => (await walls(page))[1]!.runs.length).toBe(1);
+  const all = await walls(page);
+  expect(all[1]!.runs[0]!.offset).toBe(2.25 * IN); // from the inside corner
+  expect(all.filter((w) => w.kind === 'floating')).toEqual([]); // no island
+  expect(all[0]!.runs).toHaveLength(1); // wall A's run is untouched
+  // And from a bare corner (walls C and D, top left), pressed nearer wall C, dragging down
+  // along wall D, short of its door.
+  p = at(12, 112);
+  const end = at(12, 96);
+  await page.mouse.move(p.x, p.y);
+  await page.mouse.down();
+  await page.mouse.move(p.x, (p.y + end.y) / 2, { steps: 5 });
+  await page.mouse.move(end.x, end.y, { steps: 5 });
+  await page.mouse.up();
+  await expect.poll(async () => (await walls(page))[3]!.runs.length).toBe(1);
+  expect((await walls(page)).filter((w) => w.kind === 'floating')).toEqual([]);
+});
+
+test('clicking the open step again folds it away', async ({ page }) => {
+  await bareKitchen(page);
+  const step = page.getByRole('button', { name: 'Cabinets & islands' });
+  await expect(step).toHaveAttribute('aria-expanded', 'true');
+  await step.click();
+  await expect(step).toHaveAttribute('aria-expanded', 'false');
+  await expect(page.getByRole('region', { name: 'Cabinet runs' })).toHaveCount(0);
+  await step.click();
+  await expect(step).toHaveAttribute('aria-expanded', 'true');
+});
+
 test('split a run, make one part all pantry, and move the divider', async ({ page }) => {
   await bareKitchen(page);
   const at = await plotter(page);

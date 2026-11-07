@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Double Island (placeholder line drawing)">
+<rect width="400" height="300" fill="#ffffff"/>
+<g fill="#eef3f3" stroke="#17212b" stroke-width="3" stroke-linejoin="round">
+<path d="M50 40 H350 V90 H100 V260 H50 Z"/>
+<rect x="150" y="135" width="80" height="110"/>
+<rect x="260" y="135" width="80" height="110"/>
+</g>
+<g fill="none" stroke="#687582" stroke-width="8" stroke-linecap="square">
+<path d="M42 32 H358"/>
+<path d="M42 32 V268"/>
+</g>
+</svg>

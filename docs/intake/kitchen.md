@@ -2,6 +2,8 @@
 
 From Taren, 2026-10-27. **Incomplete**: more is coming. The original lives in the owner's Notion page "Image selector workflow". This session couldn't open it, so the outline below is recorded from what was pasted.
 
+Built as a preview on 2026-11-07: the data is in `src/modules/intake/data/kitchen.json`, and how the outline was read is in `docs/DECISIONS.md` (2026-11-07, kitchen intake preview).
+
 These questions, options, images and conditions are **data** (CLAUDE.md rule 6). They are seeded from this file, not written into code. The answers feed AI Design as the customer's design desires (BUILD_SPEC OA-3). Specific picks (colours, handles, inserts) become selections in the master copy.
 
 "Fidelity" is the kind of image shown for the choice: a line drawing or a photorealistic image.

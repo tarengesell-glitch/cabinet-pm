@@ -7,6 +7,7 @@ describe('can()', () => {
   it('grants what the role data grants', () => {
     expect(can(user(['designer']), 'room.edit')).toBe(true);
     expect(can(PREVIEW_USER, 'room.view')).toBe(true);
+    expect(can(PREVIEW_USER, 'intake.answer')).toBe(true);
   });
   it('fails closed for unknown roles and no roles', () => {
     expect(can(user(['visitor']), 'room.view')).toBe(false);

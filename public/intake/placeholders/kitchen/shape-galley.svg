@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Galley (placeholder line drawing)">
+<rect width="400" height="300" fill="#ffffff"/>
+<g fill="#eef3f3" stroke="#17212b" stroke-width="3" stroke-linejoin="round">
+<rect x="60" y="40" width="280" height="50"/>
+<rect x="60" y="210" width="280" height="50"/>
+</g>
+<g fill="none" stroke="#687582" stroke-width="8" stroke-linecap="square">
+<path d="M50 32 H350"/>
+<path d="M50 268 H350"/>
+</g>
+</svg>

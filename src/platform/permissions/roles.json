@@ -1,8 +1,23 @@
 {
-  "source": "PROPOSED 2026-11-05 (docs/DECISIONS.md): starting permissions for the room preview. Roles are owner, admin and designer (decided 2026-10-24); which role gets which permission waits for the owner's yes.",
+  "source": "PROPOSED 2026-11-05 (docs/DECISIONS.md): starting permissions for the room preview. Roles are owner, admin and designer (decided 2026-10-24); which role gets which permission waits for the owner's yes. 2026-11-07: intake.view and intake.answer added for the kitchen intake preview, same three roles, also PROPOSED.",
   "roles": {
-    "owner": ["room.view", "room.edit"],
-    "admin": ["room.view", "room.edit"],
-    "designer": ["room.view", "room.edit"]
+    "owner": [
+      "room.view",
+      "room.edit",
+      "intake.view",
+      "intake.answer"
+    ],
+    "admin": [
+      "room.view",
+      "room.edit",
+      "intake.view",
+      "intake.answer"
+    ],
+    "designer": [
+      "room.view",
+      "room.edit",
+      "intake.view",
+      "intake.answer"
+    ]
   }
 }

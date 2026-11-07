@@ -1,0 +1,862 @@
+{
+  "source": "Owner (Taren), 2026-10-27: the kitchen image selector outline, recorded in docs/intake/kitchen.md (incomplete; more is coming). Wording of prompts, the order, and how conditions are read are PROPOSED in docs/DECISIONS.md (2026-11-07, visual intake).",
+  "room_type": "kitchen",
+  "images_note": "Every image is a placeholder until real photos and drawings are supplied (BUILD_PLAN 7b). The colour-tone swatch shades are placeholders only, not real colours.",
+  "sections": [
+    {
+      "id": "shape",
+      "label": "Shape"
+    },
+    {
+      "id": "feel",
+      "label": "Feel"
+    },
+    {
+      "id": "material",
+      "label": "Material"
+    },
+    {
+      "id": "colour_tone",
+      "label": "Colour tone"
+    },
+    {
+      "id": "door_style",
+      "label": "Door style"
+    },
+    {
+      "id": "colours",
+      "label": "Colours"
+    },
+    {
+      "id": "handles",
+      "label": "Handles"
+    },
+    {
+      "id": "island",
+      "label": "Island"
+    },
+    {
+      "id": "trim",
+      "label": "Trim"
+    },
+    {
+      "id": "inserts",
+      "label": "Inserts"
+    },
+    {
+      "id": "interiors",
+      "label": "Interiors"
+    },
+    {
+      "id": "drawers",
+      "label": "Drawers"
+    }
+  ],
+  "option_sets": {
+    "shape": [
+      {
+        "id": "galley",
+        "label": "Galley",
+        "image": {
+          "src": "/intake/placeholders/kitchen/shape-galley.svg",
+          "placeholder": true
+        }
+      },
+      {
+        "id": "l_shape_island",
+        "label": "L-Shape with Island",
+        "image": {
+          "src": "/intake/placeholders/kitchen/shape-l-island.svg",
+          "placeholder": true
+        }
+      },
+      {
+        "id": "peninsula",
+        "label": "Peninsula",
+        "image": {
+          "src": "/intake/placeholders/kitchen/shape-peninsula.svg",
+          "placeholder": true
+        }
+      },
+      {
+        "id": "u_shape",
+        "label": "U Shape",
+        "image": {
+          "src": "/intake/placeholders/kitchen/shape-u.svg",
+          "placeholder": true
+        }
+      },
+      {
+        "id": "double_island",
+        "label": "Double Island",
+        "image": {
+          "src": "/intake/placeholders/kitchen/shape-double-island.svg",
+          "placeholder": true
+        }
+      }
+    ],
+    "ceiling_height": [
+      {
+        "id": "ceiling_7ft",
+        "label": "7'",
+        "image": "placeholder"
+      },
+      {
+        "id": "ceiling_8ft",
+        "label": "8'",
+        "image": "placeholder"
+      },
+      {
+        "id": "ceiling_10ft",
+        "label": "10'",
+        "image": "placeholder"
+      }
+    ],
+    "cabinet_height": [
+      {
+        "id": "cabinet_7ft",
+        "label": "7'",
+        "image": "placeholder"
+      },
+      {
+        "id": "cabinet_8ft",
+        "label": "8'",
+        "image": "placeholder"
+      },
+      {
+        "id": "cabinet_10ft",
+        "label": "10'",
+        "image": "placeholder"
+      },
+      {
+        "id": "cabinet_to_ceiling",
+        "label": "To the ceiling",
+        "image": "placeholder"
+      }
+    ],
+    "feel": [
+      {
+        "id": "ultra_modern",
+        "label": "Ultra modern",
+        "image": "placeholder"
+      },
+      {
+        "id": "modern",
+        "label": "Modern",
+        "image": "placeholder"
+      },
+      {
+        "id": "transitional",
+        "label": "Transitional",
+        "image": "placeholder"
+      },
+      {
+        "id": "country",
+        "label": "Country",
+        "image": "placeholder"
+      },
+      {
+        "id": "classic",
+        "label": "Classic",
+        "image": "placeholder"
+      }
+    ],
+    "material": [
+      {
+        "id": "solid_painted",
+        "label": "Solid painted",
+        "image": "placeholder"
+      },
+      {
+        "id": "wood_grain",
+        "label": "Wood grain",
+        "image": "placeholder"
+      }
+    ],
+    "colour_tone": [
+      {
+        "id": "door_white__counter_white",
+        "label": "White doors, white counter",
+        "image": "placeholder",
+        "shades": [
+          "#f4f3ef",
+          "#f7f7f5"
+        ]
+      },
+      {
+        "id": "door_white__counter_medium",
+        "label": "White doors, medium counter",
+        "image": "placeholder",
+        "shades": [
+          "#f4f3ef",
+          "#a9a39a"
+        ]
+      },
+      {
+        "id": "door_white__counter_dark",
+        "label": "White doors, dark counter",
+        "image": "placeholder",
+        "shades": [
+          "#f4f3ef",
+          "#33302d"
+        ]
+      },
+      {
+        "id": "door_light_medium__counter_white",
+        "label": "Light-medium doors, white counter",
+        "image": "placeholder",
+        "shades": [
+          "#d9c7a7",
+          "#f7f7f5"
+        ]
+      },
+      {
+        "id": "door_light_medium__counter_medium",
+        "label": "Light-medium doors, medium counter",
+        "image": "placeholder",
+        "shades": [
+          "#d9c7a7",
+          "#a9a39a"
+        ]
+      },
+      {
+        "id": "door_light_medium__counter_dark",
+        "label": "Light-medium doors, dark counter",
+        "image": "placeholder",
+        "shades": [
+          "#d9c7a7",
+          "#33302d"
+        ]
+      },
+      {
+        "id": "door_dark_medium__counter_white",
+        "label": "Dark-medium doors, white counter",
+        "image": "placeholder",
+        "shades": [
+          "#8a6a4b",
+          "#f7f7f5"
+        ]
+      },
+      {
+        "id": "door_dark_medium__counter_medium",
+        "label": "Dark-medium doors, medium counter",
+        "image": "placeholder",
+        "shades": [
+          "#8a6a4b",
+          "#a9a39a"
+        ]
+      },
+      {
+        "id": "door_dark_medium__counter_dark",
+        "label": "Dark-medium doors, dark counter",
+        "image": "placeholder",
+        "shades": [
+          "#8a6a4b",
+          "#33302d"
+        ]
+      },
+      {
+        "id": "door_dark__counter_white",
+        "label": "Dark doors, white counter",
+        "image": "placeholder",
+        "shades": [
+          "#3b2f28",
+          "#f7f7f5"
+        ]
+      },
+      {
+        "id": "door_dark__counter_medium",
+        "label": "Dark doors, medium counter",
+        "image": "placeholder",
+        "shades": [
+          "#3b2f28",
+          "#a9a39a"
+        ]
+      },
+      {
+        "id": "door_dark__counter_dark",
+        "label": "Dark doors, dark counter",
+        "image": "placeholder",
+        "shades": [
+          "#3b2f28",
+          "#33302d"
+        ]
+      }
+    ],
+    "door_style": [
+      {
+        "id": "ultra_modern",
+        "label": "Ultra modern",
+        "image": "placeholder"
+      },
+      {
+        "id": "modern",
+        "label": "Modern",
+        "image": "placeholder"
+      },
+      {
+        "id": "transitional",
+        "label": "Transitional",
+        "image": "placeholder"
+      },
+      {
+        "id": "country",
+        "label": "Country",
+        "image": "placeholder"
+      },
+      {
+        "id": "classic",
+        "label": "Classic",
+        "image": "placeholder"
+      }
+    ],
+    "hardware": [
+      {
+        "id": "all_handles",
+        "label": "All handles",
+        "image": "placeholder"
+      },
+      {
+        "id": "all_knobs",
+        "label": "All knobs",
+        "image": "placeholder"
+      },
+      {
+        "id": "handles_drawers_knobs_doors",
+        "label": "Handles on drawers, knobs on doors",
+        "image": "placeholder"
+      }
+    ],
+    "door_handle_position": [
+      {
+        "id": "vertical",
+        "label": "Vertical",
+        "image": "placeholder"
+      },
+      {
+        "id": "horizontal",
+        "label": "Horizontal",
+        "image": "placeholder"
+      }
+    ],
+    "drawer_hardware_position": [
+      {
+        "id": "centred",
+        "label": "Centred",
+        "image": "placeholder"
+      },
+      {
+        "id": "near_top",
+        "label": "Closer to the top",
+        "image": "placeholder"
+      }
+    ],
+    "yes_no": [
+      {
+        "id": "yes",
+        "label": "Yes",
+        "image": "placeholder"
+      },
+      {
+        "id": "no",
+        "label": "No",
+        "image": "placeholder"
+      }
+    ],
+    "island_side_panel": [
+      {
+        "id": "waterfall_stone",
+        "label": "Waterfall stone",
+        "image": "placeholder"
+      },
+      {
+        "id": "detailed_short_panel",
+        "label": "Detailed short panel",
+        "image": "placeholder"
+      },
+      {
+        "id": "detailed_long_panel",
+        "label": "Detailed long panel",
+        "image": "placeholder"
+      }
+    ],
+    "light_valance": [
+      {
+        "id": "valance",
+        "label": "A light valance",
+        "image": "placeholder"
+      },
+      {
+        "id": "hidden",
+        "label": "Hidden",
+        "image": "placeholder"
+      }
+    ],
+    "corner_insert": [
+      {
+        "id": "double_shelf",
+        "label": "Double shelf",
+        "image": "placeholder"
+      },
+      {
+        "id": "lazy_susan",
+        "label": "Lazy Susan",
+        "image": "placeholder"
+      }
+    ],
+    "interiors": [
+      {
+        "id": "white",
+        "label": "White",
+        "image": "placeholder"
+      },
+      {
+        "id": "prestige_maple",
+        "label": "Prestige maple",
+        "image": "placeholder"
+      },
+      {
+        "id": "tafisa_matching",
+        "label": "Tafisa matching",
+        "image": "placeholder"
+      }
+    ],
+    "drawer_level": [
+      {
+        "id": "minimum",
+        "label": "Minimum",
+        "image": "placeholder",
+        "description": "Least expensive, least functional. Drawers along the tops of all base cabinets, one bank of four drawers (cutlery, utensils, towels) and one bank of three for pots and pans."
+      },
+      {
+        "id": "moderate",
+        "label": "Moderate",
+        "image": "placeholder",
+        "description": "A balance of cost and function. About 60–70% of base cabinets are drawer banks: two banks of four, the rest banks of three."
+      },
+      {
+        "id": "maximum",
+        "label": "Maximum",
+        "image": "placeholder",
+        "description": "Most expensive, most functional. Drawers in every base cabinet.",
+        "shows_price": true
+      }
+    ]
+  },
+  "questions": [
+    {
+      "id": "shape",
+      "section": "shape",
+      "label": "Shape",
+      "prompt": "What shape is the kitchen?",
+      "kind": "single",
+      "fidelity": "line_drawing",
+      "options": "shape"
+    },
+    {
+      "id": "ceiling_height",
+      "section": "shape",
+      "label": "Ceiling height",
+      "prompt": "How high is the ceiling?",
+      "kind": "single",
+      "fidelity": null,
+      "options": "ceiling_height"
+    },
+    {
+      "id": "cabinet_height",
+      "section": "shape",
+      "label": "Cabinet height",
+      "prompt": "How high should the cabinets go?",
+      "kind": "single",
+      "fidelity": null,
+      "options": "cabinet_height"
+    },
+    {
+      "id": "feel",
+      "section": "feel",
+      "label": "Feel",
+      "prompt": "Which kitchen feels most like you?",
+      "kind": "single",
+      "fidelity": "photo_no_counters",
+      "options": "feel"
+    },
+    {
+      "id": "material",
+      "section": "material",
+      "label": "Material",
+      "prompt": "Painted or wood grain?",
+      "kind": "single",
+      "fidelity": null,
+      "options": "material"
+    },
+    {
+      "id": "colour_tone",
+      "section": "colour_tone",
+      "label": "Colour tone",
+      "prompt": "Pick a colour tone for doors and counter.",
+      "kind": "single",
+      "fidelity": "photo",
+      "options": "colour_tone"
+    },
+    {
+      "id": "door_style",
+      "section": "door_style",
+      "label": "Door style",
+      "prompt": "Which door style?",
+      "kind": "single",
+      "fidelity": "photo_no_counters",
+      "options": "door_style"
+    },
+    {
+      "id": "door_colour",
+      "section": "colours",
+      "label": "Door colour",
+      "prompt": "Pick the door colour.",
+      "kind": "pending",
+      "fidelity": "photo",
+      "waiting_on": "The standard colours for each tone haven't been supplied yet (question IK-3)."
+    },
+    {
+      "id": "counter_colour",
+      "section": "colours",
+      "label": "Counter colour",
+      "prompt": "Pick the counter colour.",
+      "kind": "pending",
+      "fidelity": "photo",
+      "waiting_on": "The standard colours for each tone haven't been supplied yet (question IK-3)."
+    },
+    {
+      "id": "hardware",
+      "section": "handles",
+      "label": "Handles or knobs",
+      "prompt": "Handles, knobs, or both?",
+      "kind": "single",
+      "fidelity": null,
+      "options": "hardware"
+    },
+    {
+      "id": "handle_selection",
+      "section": "handles",
+      "label": "Handle",
+      "prompt": "Pick the handle: style, size and finish.",
+      "kind": "pending",
+      "fidelity": null,
+      "show_if": [
+        {
+          "question": "hardware",
+          "any_of": [
+            "all_handles",
+            "handles_drawers_knobs_doors"
+          ]
+        }
+      ],
+      "waiting_on": "The list of handles hasn't been supplied yet (question IK-8)."
+    },
+    {
+      "id": "knob_selection",
+      "section": "handles",
+      "label": "Knob",
+      "prompt": "Pick the knob: style and finish.",
+      "kind": "pending",
+      "fidelity": null,
+      "show_if": [
+        {
+          "question": "hardware",
+          "any_of": [
+            "all_knobs",
+            "handles_drawers_knobs_doors"
+          ]
+        }
+      ],
+      "waiting_on": "The list of knobs hasn't been supplied yet (question IK-8)."
+    },
+    {
+      "id": "door_handle_position",
+      "section": "handles",
+      "label": "Handles on doors",
+      "prompt": "Which way do door handles run?",
+      "kind": "single",
+      "fidelity": null,
+      "options": "door_handle_position",
+      "show_if": [
+        {
+          "question": "hardware",
+          "any_of": [
+            "all_handles"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "drawer_hardware_position",
+      "section": "handles",
+      "label": "On drawers",
+      "prompt": "Where do they sit on drawers?",
+      "kind": "single",
+      "fidelity": null,
+      "options": "drawer_hardware_position",
+      "show_if": [
+        {
+          "question": "hardware",
+          "any_of": [
+            "all_handles",
+            "all_knobs",
+            "handles_drawers_knobs_doors"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "island_offset",
+      "section": "island",
+      "label": "Island colour",
+      "prompt": "Should the island be a different colour?",
+      "kind": "single",
+      "fidelity": null,
+      "options": "yes_no",
+      "show_if": [
+        {
+          "question": "shape",
+          "any_of": [
+            "l_shape_island",
+            "double_island"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "island_material",
+      "section": "island",
+      "label": "Island material",
+      "prompt": "Island: painted or wood grain?",
+      "kind": "single",
+      "fidelity": null,
+      "options": "material",
+      "show_if": [
+        {
+          "question": "shape",
+          "any_of": [
+            "l_shape_island",
+            "double_island"
+          ]
+        },
+        {
+          "question": "island_offset",
+          "any_of": [
+            "yes"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "island_colour_tone",
+      "section": "island",
+      "label": "Island colour tone",
+      "prompt": "Island: pick a colour tone.",
+      "kind": "single",
+      "fidelity": "photo",
+      "options": "colour_tone",
+      "show_if": [
+        {
+          "question": "shape",
+          "any_of": [
+            "l_shape_island",
+            "double_island"
+          ]
+        },
+        {
+          "question": "island_offset",
+          "any_of": [
+            "yes"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "island_door_style",
+      "section": "island",
+      "label": "Island door style",
+      "prompt": "Island: which door style?",
+      "kind": "single",
+      "fidelity": "photo_no_counters",
+      "options": "door_style",
+      "show_if": [
+        {
+          "question": "shape",
+          "any_of": [
+            "l_shape_island",
+            "double_island"
+          ]
+        },
+        {
+          "question": "island_offset",
+          "any_of": [
+            "yes"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "island_colours",
+      "section": "island",
+      "label": "Island colours",
+      "prompt": "Island: pick door, panel and counter colours.",
+      "kind": "pending",
+      "fidelity": "photo",
+      "show_if": [
+        {
+          "question": "shape",
+          "any_of": [
+            "l_shape_island",
+            "double_island"
+          ]
+        },
+        {
+          "question": "island_offset",
+          "any_of": [
+            "yes"
+          ]
+        }
+      ],
+      "waiting_on": "The standard colours for each tone haven't been supplied yet (question IK-3)."
+    },
+    {
+      "id": "island_back_panel",
+      "section": "island",
+      "label": "Island back panel",
+      "prompt": "Pick the island's back panel detail.",
+      "kind": "pending",
+      "fidelity": null,
+      "show_if": [
+        {
+          "question": "shape",
+          "any_of": [
+            "l_shape_island",
+            "double_island"
+          ]
+        }
+      ],
+      "waiting_on": "The back panel details haven't been supplied yet (question IK-8)."
+    },
+    {
+      "id": "island_side_panel",
+      "section": "island",
+      "label": "Island side panels",
+      "prompt": "Pick the island's side panel detail.",
+      "kind": "single",
+      "fidelity": null,
+      "options": "island_side_panel",
+      "show_if": [
+        {
+          "question": "shape",
+          "any_of": [
+            "l_shape_island",
+            "double_island"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "top_trim",
+      "section": "trim",
+      "label": "Top trim",
+      "prompt": "Pick the top trim: style and colour.",
+      "kind": "pending",
+      "fidelity": null,
+      "waiting_on": "The top trim styles and colours haven't been supplied yet (question IK-8)."
+    },
+    {
+      "id": "light_valance",
+      "section": "trim",
+      "label": "Light valance",
+      "prompt": "A light valance, or hidden?",
+      "kind": "single",
+      "fidelity": null,
+      "options": "light_valance"
+    },
+    {
+      "id": "light_valance_style",
+      "section": "trim",
+      "label": "Valance style",
+      "prompt": "Pick the light valance: style and colour.",
+      "kind": "pending",
+      "fidelity": null,
+      "show_if": [
+        {
+          "question": "light_valance",
+          "any_of": [
+            "valance"
+          ]
+        }
+      ],
+      "waiting_on": "The light valance styles and colours haven't been supplied yet (question IK-8)."
+    },
+    {
+      "id": "corner_insert",
+      "section": "inserts",
+      "label": "Corner cabinets",
+      "prompt": "What goes in the corner cabinets?",
+      "kind": "single",
+      "fidelity": null,
+      "options": "corner_insert"
+    },
+    {
+      "id": "organizers",
+      "section": "inserts",
+      "label": "Organizers",
+      "prompt": "Which organizers, and how many?",
+      "kind": "counts",
+      "fidelity": null,
+      "items": [
+        {
+          "id": "cutlery",
+          "label": "Cutlery"
+        },
+        {
+          "id": "utility",
+          "label": "Utility"
+        },
+        {
+          "id": "spice",
+          "label": "Spice"
+        },
+        {
+          "id": "tray",
+          "label": "Tray"
+        }
+      ]
+    },
+    {
+      "id": "garbage_recycling",
+      "section": "inserts",
+      "label": "Garbage & recycling",
+      "prompt": "How many cabinets for garbage and recycling?",
+      "kind": "counts",
+      "fidelity": null,
+      "items": [
+        {
+          "id": "cabinets",
+          "label": "Garbage & recycling cabinets"
+        }
+      ]
+    },
+    {
+      "id": "interiors",
+      "section": "interiors",
+      "label": "Interiors",
+      "prompt": "Which cabinet interior?",
+      "kind": "single",
+      "fidelity": null,
+      "options": "interiors"
+    },
+    {
+      "id": "drawer_level",
+      "section": "drawers",
+      "label": "Drawers",
+      "prompt": "How many drawers?",
+      "kind": "single",
+      "fidelity": null,
+      "options": "drawer_level"
+    }
+  ]
+}

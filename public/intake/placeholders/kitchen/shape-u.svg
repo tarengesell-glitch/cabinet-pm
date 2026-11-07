@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="U Shape (placeholder line drawing)">
+<rect width="400" height="300" fill="#ffffff"/>
+<g fill="#eef3f3" stroke="#17212b" stroke-width="3" stroke-linejoin="round">
+<path d="M50 40 H350 V260 H300 V90 H100 V260 H50 Z"/>
+</g>
+<g fill="none" stroke="#687582" stroke-width="8" stroke-linecap="square">
+<path d="M42 268 V32 H358 V268"/>
+</g>
+</svg>

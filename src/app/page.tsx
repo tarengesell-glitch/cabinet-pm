@@ -10,6 +10,10 @@ export default function HomePage() {
           <Link href="/rooms/preview">Room drawing</Link>: draw walls, add doors and windows, type exact sizes and see the
           checks live.
         </li>
+        <li>
+          <Link href="/intake/preview">Kitchen intake</Link>: the picture-by-picture questions about shape, style, colours,
+          handles and more (placeholder images for now).
+        </li>
       </ul>
     </main>
   );

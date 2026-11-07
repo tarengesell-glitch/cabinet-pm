@@ -120,6 +120,20 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 - **Room drawing, round 9 (owner, 2026-11-05): edge scrolling.** While drawing walls or dragging a handle, a cursor within 40 px of the plan's edge scrolls the plan that way, faster nearer the edge, as AutoCAD, SketchUp and Figma do. The wall or drag being made follows the cursor. It stops when the cursor moves back in.
 - Room capture is pulled ahead of Phase 5 (BUILD_PLAN). Order: scaffold (1a), then Core walls and openings, then the Designer drawing screen.
 
+### 2026-11-07: The kitchen intake preview (owner asked for the intake flow with placeholder images)
+- Built from `docs/intake/kitchen.md` as data (`src/modules/intake/data/kitchen.json`). Try it at `/intake/preview`. Images are placeholders and are labelled as such.
+- Questions the outline names but whose options aren't supplied yet show "Options not supplied yet", and can only be flagged for follow-up or skipped. These are door, counter and island colours (IK-3); handle, knob, island back panel, top trim and valance styles (IK-8). Nothing is made up.
+- Answers are saved in this browser only until jobs exist, as the room preview does. New permissions `intake.view` and `intake.answer` go to owner, admin and designer (PROPOSED, like the room ones).
+- **PROPOSED, how the outline was read** (owner to confirm or change; each is one line in the data file):
+  - "If there's an island" means the shape is "L-Shape with Island" or "Double Island". Peninsula is not an island.
+  - The island's material, colour tone, door style and colours are asked only when "offsetting colour" is yes. Back and side panel details are asked for every island.
+  - Colour tone is one question with 12 choices (4 door tones × 3 counter tones).
+  - "Which way do door handles run" is asked only for "All handles": knobs have no direction, and with "handles on drawers, knobs on doors" the doors have knobs. "Where do they sit on drawers" is asked for all three.
+  - Light valance is first "a light valance, or hidden"; style and colour follow only for a valance.
+  - Organizers and garbage/recycling are counts (0 means no), with no upper limit.
+  - The corner cabinet question is asked for every shape, galley included (see IK-9).
+  - Prompt wording and the order of questions follow the outline.
+
 ### 2026-11-07: The cabinet catalog, from the shop's own Cabinet Vision library (owner, library review)
 The colony's Cabinet Vision install (`Solid_11.zip`, catalog "New Catalog") was read and every template put to the owner on a review page. The owner answered the General and "Templates to keep" tabs; the specialty items on the other two tabs are left out for now ("a lot of specialty items which we'll likely end up re-engineering"). Catalog version 1 is built from those answers: `src/modules/catalog/data/catalog-v1.json`, 50 cabinet types.
 - **The library holds templates, not fixed products:** example layouts, sizes and construction that stretch to any width, height and depth. The stored size is only the example.
@@ -229,6 +243,8 @@ After walls, doors and windows, the person marks where cabinetry goes and where 
 - **PO-1 Automatic ordering.** Who places the orders (you or the colony), which suppliers, and how does each take orders (email, portal, API)? Do "materials" mean sheet goods sent to the colony?
 - **MSG-1 Channels.** Which email (Gmail?), which texting service, and which meeting tool's transcripts? Do reminders go by text, email or both?
 - **IK-1 to IK-7** Kitchen intake questions, in `docs/intake/kitchen.md`.
+- **IK-8** Which handles (style, size, finish), knobs (style, finish), island back panel details, top trims and light valance styles are offered? Their questions wait on these lists.
+- **IK-9** Should the corner cabinet question be skipped for a galley kitchen (no corners)?
 
 ### From the spec (section 11)
 - **S-1** Which Cabinet Vision versions do target shops run, and does ORDX behave the same across them?

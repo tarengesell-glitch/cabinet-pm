@@ -79,7 +79,7 @@ One module per session, in this order (PROPOSED):
 | # | Module | Notes |
 |---|---|---|
 | 7a | `projects` | Customers, jobs, quotes priced from the catalog, payment status (PAY-1) |
-| 7b | `intake` | The image selector, seeded from `docs/intake/`. Needs real photos per option |
+| 7b | `intake` | The image selector, seeded from `docs/intake/`. Needs real photos per option. **Started 2026-11-08:** a preview at `/intake` with placeholder pictures, before the room drawing (`src/modules/intake/README.md`) |
 | 7c | `appliances` | Rough, then confirmed specs |
 | 7d | `site-measure` | Verified measurements with provenance; tablet and phone (SM-1) |
 | 7e | `approvals` | Client sign-off on an exact version, with a frozen snapshot |

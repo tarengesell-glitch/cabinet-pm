@@ -1,0 +1,11 @@
+{
+  "source": "Owner, 2026-11-08 (prototype review): organizers default to 1 each; trim and valance colours are match primary, match secondary (only when one is picked) or other, from the standard colours. The upper limit of 4 is a stand-in (IK-12).",
+  "counts": [
+    { "id": "0", "label": "None" }, { "id": "1", "label": "1" }, { "id": "2", "label": "2" }, { "id": "3", "label": "3" }, { "id": "4", "label": "4" }
+  ],
+  "trim_colours": [
+    { "id": "primary", "label": "Match primary colour" },
+    { "id": "secondary", "label": "Match secondary colour", "when": { "key": "secondary_colour_mode", "in": ["add"] } },
+    { "id": "other", "label": "Other" }
+  ]
+}

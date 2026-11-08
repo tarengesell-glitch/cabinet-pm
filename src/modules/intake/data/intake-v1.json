@@ -1,0 +1,315 @@
+{
+  "source": "Owner (Taren): the kitchen outline of 2026-10-27 (docs/intake/kitchen.md) and the clickable prototype reviews of 2026-11-07/08 (https://claude.ai/artifact/MW4uLq1CX3qvoejeeaPadW, versions 1 to 8). Options marked \"sample\" are stand-ins the owner has not supplied yet; each sample list names its open question in docs/intake/kitchen.md.",
+  "version": 1,
+  "primary_room": { "id": "kitchen", "label": "Kitchen" },
+  "notes": {
+    "IK-1": "Feel and door style list the same five names. Is door style a separate pick, with photos of real doors filtered by the feel?",
+    "IK-3": "What are the standard colours under each tone? The ones here are stand-ins, with one set for painted and one for wood grain.",
+    "IK-4": "Cabinet height 7', 8', 10': is that the top of the uppers measured from the floor?",
+    "IK-5": "Minimum: \"along the tops of all base cabinets\" means one drawer over doors in every base. Is that right?",
+    "IK-6": "Is \"Prestige maple\" a supplier product, and is \"Tafisa matching\" the interior matching the Tafisa door colour?",
+    "IK-7": "Each room type gets its own inserts. The ones shown are placeholders until the owner fills them in.",
+    "IK-8": "If the secondary colour goes on the island, does it replace the island cabinet colour, or is it for island panels and accents?",
+    "IK-9": "The handle and knob styles, sizes and finishes here are stand-ins. What is the real hardware list?",
+    "IK-10": "The outline gives no options for the island back panel. What are they? And what is the difference between a short and a long detailed side panel?",
+    "IK-11": "The outline gives no styles for top trim and light valance. What are they?",
+    "IK-12": "What is the most of each organizer, and of garbage slide-outs, a client can ask for? These stop at 4.",
+    "IK-13": "Coordinate and contrast suggestions will come from a preset design database that doesn't exist yet. These are generated stand-ins.",
+    "IK-14": "The drawer cost comes from live pricing, which is not connected yet. It never shows a made-up number."
+  },
+  "room_types": {
+    "source": "Owner, 2026-11-08 (prototype review): the room list. Each type can be added once per job.",
+    "types": [
+      { "id": "main_bath", "label": "Main bath", "inserts": "bath" },
+      { "id": "ensuite_bath", "label": "Ensuite bath", "inserts": "bath" },
+      { "id": "powder_room", "label": "Powder room", "inserts": "bath" },
+      { "id": "mudroom", "label": "Mudroom", "inserts": "mudroom" },
+      { "id": "laundry_room", "label": "Laundry room", "inserts": "laundry" },
+      { "id": "main_bath_2", "label": "Main bath 2", "inserts": "bath" },
+      { "id": "basement_bath", "label": "Basement bath", "inserts": "bath" },
+      { "id": "basement_bath_2", "label": "Basement bath 2", "inserts": "bath" },
+      { "id": "main_bedroom_closet", "label": "Main bedroom closet", "inserts": "closet" },
+      { "id": "office_1", "label": "Office 1", "inserts": "office" },
+      { "id": "office_2", "label": "Office 2", "inserts": "office" },
+      { "id": "entertainment_centre_1", "label": "Entertainment centre 1", "inserts": "entertainment" },
+      { "id": "entertainment_centre_2", "label": "Entertainment centre 2", "inserts": "entertainment" },
+      { "id": "bar", "label": "Bar", "inserts": "bar" }
+    ]
+  },
+  "insert_sets": {
+    "source": "SAMPLE (owner, 2026-11-08: \"Please create placeholders relevant to each room\"; the owner fills in the real lists later, IK-7).",
+    "sets": {
+      "bath": [["vanity_drawer_organizer", "Vanity drawer organizer"], ["pull_out_hamper", "Pull-out hamper"], ["tilt_out_sink_tray", "Tilt-out sink tray"], ["linen_tower", "Linen tower"], ["grooming_pull_out", "Grooming pull-out"]],
+      "laundry": [["pull_out_hamper", "Pull-out hamper"], ["ironing_board_pull_out", "Ironing board pull-out"], ["broom_utility_cabinet", "Broom and utility cabinet"], ["hanging_rod", "Hanging rod"], ["drying_rack_pull_out", "Pull-out drying rack"]],
+      "mudroom": [["bench_with_cubbies", "Bench with cubbies"], ["locker_cabinets", "Locker cabinets"], ["coat_hook_panels", "Coat hook panels"], ["boot_tray_drawer", "Boot tray drawer"], ["charging_drawer", "Charging drawer"]],
+      "closet": [["double_hanging", "Double hanging section"], ["long_hanging", "Long hanging section"], ["shoe_shelves", "Shoe shelves"], ["drawer_bank", "Drawer bank"], ["jewelry_tray", "Jewelry tray insert"], ["valet_rod", "Valet rod"]],
+      "office": [["file_drawer", "File drawer"], ["keyboard_tray", "Keyboard tray"], ["printer_pull_out", "Printer pull-out"], ["cable_management", "Cable management"], ["open_bookshelves", "Open bookshelves"]],
+      "entertainment": [["media_console_drawers", "Media console drawers"], ["av_component_shelves", "AV component shelves"], ["cable_management", "Cable management"], ["open_display_shelves", "Open display shelves"], ["closed_storage", "Closed storage cabinets"]],
+      "bar": [["wine_rack", "Wine rack"], ["stemware_rack", "Stemware rack"], ["bottle_pull_out", "Bottle pull-out"], ["beverage_fridge_space", "Space for a beverage fridge"], ["glass_front_uppers", "Glass-front uppers"]]
+    }
+  },
+  "basis_options": {
+    "source": "Owner, 2026-11-08: match the primary room, coordinate with it, contrast with it, or start from scratch. From the third room on, matching an earlier room is the recommended path, and coordinate and contrast use a room the client picks.",
+    "match": { "label": "Match the {target}", "desc": "The same design choices, adjusted to suit this room." },
+    "coordinate_primary": { "label": "Coordinate with the {primary}", "desc": "Similar but slightly different. Pick from suggested designs." },
+    "contrast_primary": { "label": "Contrast with the {primary}", "desc": "A deliberate contrast. Pick from suggested designs." },
+    "coordinate_other": { "label": "Coordinate with another room", "desc": "Similar but slightly different. Pick the room, then a suggested design." },
+    "contrast_other": { "label": "Contrast with another room", "desc": "A deliberate contrast. Pick the room, then a suggested design." },
+    "own": { "label": "Its own design", "desc": "Copied from the {unlinked}, no longer linked." },
+    "scratch": { "label": "Start from scratch", "desc": "Answer the design questions fresh for this room." }
+  },
+  "steps": [
+    {
+      "id": "room_type", "section": "Room", "rooms": "other", "notes": ["IK-7"],
+      "q": "Which room is next?",
+      "fields": [{ "key": "room_type", "type": "chips", "short": "Room", "source": "room_types" }]
+    },
+    {
+      "id": "basis", "section": "Room", "rooms": "other",
+      "q": [{ "when": { "room": "second" }, "text": "How should this {room} relate to the {primary}?" }, { "text": "Which room should this {room} match?" }],
+      "help": [{ "when": { "room": "second" }, "text": "You can change any of this later." }, { "text": "Matching an earlier room is the usual choice." }],
+      "fields": [
+        { "key": "design_basis", "type": "cards", "short": "Design", "source": "basis", "min": "220px" },
+        { "key": "basis_room", "type": "chips", "label": "Which room?", "short": "Based on", "source": "earlier_rooms", "indent": true,
+          "when": { "all": [{ "key": "design_basis", "in": ["coordinate", "contrast"] }, { "room": "third_on" }] } }
+      ]
+    },
+    {
+      "id": "preset", "section": "Room", "rooms": "other", "notes": ["IK-13"],
+      "when": { "key": "design_basis", "in": ["coordinate", "contrast"] },
+      "q": [{ "when": { "key": "design_basis", "in": ["contrast"] }, "text": "Pick a contrasting design" }, { "text": "Pick a coordinating design" }],
+      "help": "Based on your {basis_room}. Each is adjusted to suit this room.",
+      "fields": [{ "key": "design_preset", "type": "image", "short": "Suggestion", "source": "presets", "art": "preset", "fidelity": "photo", "aspect": "8/5", "min": "220px", "sample": true }]
+    },
+    {
+      "id": "shape", "section": "Shape", "rooms": "primary",
+      "q": "Which layout is closest to your kitchen?", "help": "Pick the closest match. We measure the real room later.",
+      "fields": [{ "key": "shape", "type": "image", "short": "Layout", "art": "plan", "fidelity": "line", "min": "180px", "options": [
+        { "id": "galley", "label": "Galley", "desc": "Two parallel runs" },
+        { "id": "l_shape_island", "label": "L-shape with island", "desc": "Two walls plus an island", "island": true },
+        { "id": "peninsula", "label": "Peninsula", "desc": "A run that juts into the room" },
+        { "id": "u_shape", "label": "U-shape", "desc": "Three walls of cabinets" },
+        { "id": "double_island", "label": "Double island", "desc": "One wall plus two islands", "island": true }
+      ] }]
+    },
+    {
+      "id": "heights", "section": "Heights", "rooms": "all", "notes": ["IK-4"],
+      "q": "How tall are the ceiling and the cabinets?", "help": "Rough is fine. These are confirmed at the site measure.",
+      "fields": [
+        { "key": "ceiling_height", "type": "chips", "label": "Ceiling height", "options": [
+          { "id": "match_primary", "label": "Match the {primary} ({primary_answer:ceiling_height})", "when": { "all": [{ "room": "other" }, { "primary_answered": "ceiling_height" }] } },
+          { "id": "7ft", "label": "7′" }, { "id": "8ft", "label": "8′" }, { "id": "10ft", "label": "10′" }, { "id": "other", "label": "Other height" }
+        ] },
+        { "key": "ceiling_height_entered", "type": "height", "short": "Ceiling (entered)", "indent": true, "in_summary": false, "when": { "key": "ceiling_height", "in": ["other"] } },
+        { "key": "cabinet_height", "type": "chips", "label": "Cabinet height", "options": [
+          { "id": "7ft", "label": "7′" }, { "id": "8ft", "label": "8′" }, { "id": "10ft", "label": "10′" }, { "id": "to_ceiling", "label": "To the ceiling" }
+        ] }
+      ]
+    },
+    {
+      "id": "feel", "section": "Feel", "rooms": "design", "notes": ["IK-1"],
+      "q": [{ "when": { "room": "primary" }, "text": "Which kitchen feels most like you?" }, { "text": "Which look feels most like you?" }],
+      "help": "Go with your gut. This guides the rest of the choices.",
+      "fields": [{ "key": "feel", "type": "image", "short": "Feel", "art": "feel", "fidelity": "photo", "aspect": "8/5", "min": "220px", "options": [
+        { "id": "ultra_modern", "label": "Ultra modern", "desc": "Flat, handleless, minimal", "door_name": "flat handleless" },
+        { "id": "modern", "label": "Modern", "desc": "Clean slab doors, slim pulls", "door_name": "slab" },
+        { "id": "transitional", "label": "Transitional", "desc": "Slim frames, soft lines", "door_name": "slim shaker" },
+        { "id": "country", "label": "Country", "desc": "Framed doors, warm details", "door_name": "shaker" },
+        { "id": "classic", "label": "Classic", "desc": "Raised panels and crown", "door_name": "raised panel" }
+      ] }]
+    },
+    {
+      "id": "material", "section": "Material", "rooms": "design",
+      "q": "Painted or wood grain?",
+      "fields": [{ "key": "material", "type": "image", "short": "Material", "art": "material", "fidelity": "photo", "aspect": "4/5", "min": "200px", "options": [
+        { "id": "painted", "label": "Solid painted", "desc": "One smooth, even colour" },
+        { "id": "wood", "label": "Wood grain", "desc": "Visible natural grain" }
+      ] }]
+    },
+    {
+      "id": "tone", "section": "Colour tone", "rooms": "design", "notes": ["IK-3"],
+      "q": "Pick a colour mood for doors and counters",
+      "help": [
+        { "when": { "all": [{ "answered": "material" }, { "answered": "feel" }] }, "text": "Showing {material} {feel_door} options, based on your earlier answers." },
+        { "text": "Door tone and counter tone together. You choose exact colours later." }
+      ],
+      "fields": [{ "key": "colour_tone", "type": "image", "short": "Colour tone", "art": "tone", "fidelity": "photo", "aspect": "8/5", "min": "190px", "source": "tones" }]
+    },
+    {
+      "id": "door", "section": "Door style", "rooms": "design", "notes": ["IK-1"],
+      "q": "Which door style do you like?",
+      "fields": [{ "key": "door_style", "type": "image", "short": "Door style", "art": "door", "fidelity": "photo", "aspect": "4/5", "min": "160px", "options": [
+        { "id": "ultra_modern", "label": "Ultra modern" }, { "id": "modern", "label": "Modern" }, { "id": "transitional", "label": "Transitional" },
+        { "id": "country", "label": "Country" }, { "id": "classic", "label": "Classic" }
+      ] }]
+    },
+    {
+      "id": "colours", "section": "Colours", "rooms": "design", "notes": ["IK-3", "IK-8"], "preview": true,
+      "q": "Choose your colours", "help": "Your cabinet colour is the primary colour. Everything else matches it unless you change it.",
+      "fields": [
+        { "key": "cabinet_colour", "type": "swatch", "label": "Cabinets", "sub": "Primary colour", "short": "Cabinets", "source": "tone_doors" },
+        { "key": "base_colour_mode", "type": "chips", "label": "Base cabinets", "default": "match", "options": [
+          { "id": "match", "label": "Match cabinets" }, { "id": "own", "label": "Different colour" }
+        ] },
+        { "key": "base_colour", "type": "swatch", "short": "Base colour", "ask": "a base cabinet colour", "source": "all_doors", "indent": true, "when": { "key": "base_colour_mode", "in": ["own"] } },
+        { "key": "island_colour_mode", "type": "chips", "label": "Island cabinets", "when": { "island": true },
+          "default": [{ "when": { "key": "base_colour_mode", "in": ["own"] }, "value": "base" }, { "value": "cabinets" }],
+          "options": [
+            { "id": "cabinets", "label": "Match cabinets" },
+            { "id": "base", "label": "Match base cabinets", "when": { "key": "base_colour_mode", "in": ["own"] } },
+            { "id": "own", "label": "Own colour" }
+          ] },
+        { "key": "island_colour", "type": "swatch", "short": "Island colour", "ask": "an island colour", "source": "all_doors", "indent": true,
+          "when": { "all": [{ "island": true }, { "key": "island_colour_mode", "in": ["own"] }] } },
+        { "key": "counter_colour", "type": "swatch", "label": "Counter", "source": "tone_counters" },
+        { "key": "secondary_colour_mode", "type": "chips", "label": "Secondary colour", "default": "none", "options": [
+          { "id": "none", "label": "No secondary colour" }, { "id": "add", "label": "Add a secondary colour" }
+        ] },
+        { "key": "secondary_colour", "type": "swatch", "short": "Secondary", "ask": "a secondary colour", "source": "all_doors", "indent": true, "when": { "key": "secondary_colour_mode", "in": ["add"] } },
+        { "key": "secondary_areas", "type": "multi", "label": "Where does it go?", "short": "Secondary on", "indent": true, "when": { "key": "secondary_colour_mode", "in": ["add"] },
+          "options": [{ "id": "island", "label": "Island", "when": { "any": [{ "island": true }, { "copied": true }] } }, { "id": "other", "label": "Other" }] },
+        { "key": "secondary_where", "type": "text", "label": "Where else?", "short": "Other area", "ask": "where else the secondary colour goes", "indent": true,
+          "placeholder": "For example: the hutch, or the open shelves",
+          "when": { "all": [{ "key": "secondary_colour_mode", "in": ["add"] }, { "key": "secondary_areas", "has": "other" }] } }
+      ]
+    },
+    {
+      "id": "hardware", "section": "Handles", "rooms": "design",
+      "q": "Handles, knobs, or both?",
+      "fields": [{ "key": "hardware", "type": "image", "short": "Type", "art": "hardware", "fidelity": "photo", "aspect": "4/3", "min": "180px", "options": [
+        { "id": "handles", "label": "Handles only", "door": "handle", "drawer": "handle" },
+        { "id": "knobs", "label": "Knobs only", "door": "knob", "drawer": "knob" },
+        { "id": "handles_doors_knobs_drawers", "label": "Handles on doors, knobs on drawers", "door": "handle", "drawer": "knob" },
+        { "id": "knobs_doors_handles_drawers", "label": "Knobs on doors, handles on drawers", "door": "knob", "drawer": "handle" }
+      ] }]
+    },
+    {
+      "id": "handle", "section": "Handles", "rooms": "design", "notes": ["IK-9"],
+      "when": { "key": "hardware", "in": ["handles", "handles_doors_knobs_drawers", "knobs_doors_handles_drawers"] },
+      "q": "Choose your handle",
+      "fields": [
+        { "key": "handle_style", "type": "image", "label": "Style", "short": "Handle", "art": "handle", "fidelity": "photo", "aspect": "8/5", "size": "sm", "sample": true, "options": [
+          { "id": "bar", "label": "Bar pull" }, { "id": "edge", "label": "Edge pull" }, { "id": "cup", "label": "Cup pull" }, { "id": "arch", "label": "Arch pull" }
+        ] },
+        { "key": "handle_size", "type": "chips", "label": "Size", "short": "Handle size", "sample": true, "options": [
+          { "id": "3in", "label": "3″" }, { "id": "5in", "label": "5″" }, { "id": "6_25in", "label": "6 ¼″" }, { "id": "12in", "label": "12″" }
+        ] },
+        { "key": "handle_finish", "type": "swatch", "label": "Finish", "short": "Handle finish", "sample": true, "source": "finishes" }
+      ]
+    },
+    {
+      "id": "knob", "section": "Handles", "rooms": "design", "notes": ["IK-9"],
+      "when": { "key": "hardware", "in": ["knobs", "handles_doors_knobs_drawers", "knobs_doors_handles_drawers"] },
+      "q": "Choose your knob",
+      "fields": [
+        { "key": "knob_style", "type": "image", "label": "Style", "short": "Knob", "art": "knob", "fidelity": "photo", "aspect": "8/5", "size": "sm", "sample": true, "options": [
+          { "id": "round", "label": "Round" }, { "id": "square", "label": "Square" }, { "id": "t_bar", "label": "T-bar" }, { "id": "mushroom", "label": "Mushroom" }
+        ] },
+        { "key": "knob_finish", "type": "swatch", "label": "Finish", "short": "Knob finish", "sample": true, "source": "finishes" }
+      ]
+    },
+    {
+      "id": "hardware_position", "section": "Handles", "rooms": "design",
+      "q": "Where should they sit?",
+      "fields": [
+        { "key": "handle_position_doors", "type": "image", "label": "Handles on doors", "art": "door_position", "fidelity": "photo", "aspect": "4/5", "size": "sm",
+          "when": { "key": "hardware", "in": ["handles", "handles_doors_knobs_drawers"] },
+          "options": [{ "id": "vertical", "label": "Vertical" }, { "id": "horizontal", "label": "Horizontal" }] },
+        { "key": "handle_position_drawers", "type": "image", "label": "On drawers", "art": "drawer_position", "fidelity": "photo", "aspect": "8/5", "size": "sm",
+          "options": [{ "id": "centred", "label": "Centred" }, { "id": "near_top", "label": "Closer to the top" }] }
+      ]
+    },
+    {
+      "id": "island_panels", "section": "Island", "rooms": "primary", "notes": ["IK-10"], "when": { "island": true },
+      "q": "How should the island panels look?",
+      "fields": [
+        { "key": "island_back_panel", "type": "image", "label": "Back panel", "art": "back_panel", "fidelity": "photo", "aspect": "5/3", "size": "sm", "sample": true, "options": [
+          { "id": "flat", "label": "Flat panel" }, { "id": "door_panels", "label": "Matching door panels" }, { "id": "shiplap", "label": "Shiplap" }
+        ] },
+        { "key": "island_side_panel", "type": "image", "label": "Side panel", "art": "side_panel", "fidelity": "photo", "aspect": "5/3", "size": "sm", "options": [
+          { "id": "waterfall_stone", "label": "Waterfall stone" }, { "id": "detailed_short", "label": "Detailed short panel" }, { "id": "detailed_long", "label": "Detailed long panel" }
+        ] }
+      ]
+    },
+    {
+      "id": "top_trim", "section": "Trim", "rooms": "design", "notes": ["IK-11"],
+      "q": "What goes along the top of the cabinets?",
+      "fields": [
+        { "key": "top_trim_style", "type": "image", "label": "Top trim style", "short": "Top trim", "art": "top_trim", "fidelity": "photo", "aspect": "10/3", "size": "sm", "min": "220px", "sample": true, "options": [
+          { "id": "flat_band", "label": "Flat band" }, { "id": "crown", "label": "Crown" }, { "id": "stepped_crown", "label": "Stepped crown" }
+        ] },
+        { "key": "top_trim_colour", "type": "chips", "label": "Colour", "short": "Top trim colour", "source": "trim_colours" },
+        { "key": "top_trim_colour_other", "type": "swatch", "label": "Pick from the standard colours", "short": "Top trim other", "ask": "a top trim colour", "source": "all_doors", "indent": true,
+          "when": { "key": "top_trim_colour", "in": ["other"] } }
+      ]
+    },
+    {
+      "id": "valance", "section": "Trim", "rooms": "design", "notes": ["IK-11"],
+      "q": "Light valance under the uppers", "help": "A valance hides the under-cabinet lights.",
+      "fields": [
+        { "key": "light_valance", "type": "image", "label": "Style", "short": "Valance", "art": "valance", "fidelity": "photo", "aspect": "10/3", "size": "sm", "min": "220px", "sample": true, "options": [
+          { "id": "flat", "label": "Flat" }, { "id": "shaped", "label": "Shaped" }, { "id": "hidden", "label": "Hidden" }
+        ] },
+        { "key": "light_valance_colour", "type": "chips", "label": "Colour", "short": "Valance colour", "source": "trim_colours",
+          "when": { "key": "light_valance", "not_in": ["hidden"] } },
+        { "key": "light_valance_colour_other", "type": "swatch", "label": "Pick from the standard colours", "short": "Valance other", "ask": "a valance colour", "source": "all_doors", "indent": true,
+          "when": { "all": [{ "key": "light_valance", "not_in": ["hidden"] }, { "key": "light_valance_colour", "in": ["other"] }] } }
+      ]
+    },
+    {
+      "id": "corner", "section": "Inserts", "rooms": "primary",
+      "q": "What goes in the corner cabinets?",
+      "fields": [{ "key": "corner_insert", "type": "image", "short": "Corners", "art": "corner", "fidelity": "line", "aspect": "1/1", "size": "sm", "options": [
+        { "id": "double_shelf", "label": "Double shelf", "desc": "Fixed shelves, lowest cost" },
+        { "id": "lazy_susan", "label": "Lazy Susan", "desc": "Spinning shelves, easy reach" }
+      ] }]
+    },
+    {
+      "id": "organizers", "section": "Inserts", "rooms": "primary", "notes": ["IK-12"],
+      "q": "Which drawer organizers do you want?", "help": "Each one starts at 1. Change any you want more or none of.",
+      "fields": [
+        { "key": "cutlery_organizers", "type": "count", "label": "Cutlery organizer", "short": "Cutlery", "default": "1", "source": "counts" },
+        { "key": "utility_organizers", "type": "count", "label": "Utility organizer", "short": "Utility", "default": "1", "source": "counts" },
+        { "key": "spice_organizers", "type": "count", "label": "Spice organizer", "short": "Spice", "default": "1", "source": "counts" },
+        { "key": "tray_organizers", "type": "count", "label": "Tray organizer", "short": "Tray", "default": "1", "source": "counts" }
+      ]
+    },
+    {
+      "id": "garbage", "section": "Inserts", "rooms": "primary", "notes": ["IK-12"],
+      "q": "Do you want garbage and recycling pull-outs?",
+      "fields": [
+        { "key": "garbage_recycling", "type": "chips", "short": "Garbage pull-outs", "ask": "yes or no", "options": [{ "id": "yes", "label": "Yes" }, { "id": "no", "label": "No" }] },
+        { "key": "garbage_location", "type": "chips", "label": "Where should they go?", "short": "Location", "when": { "key": "garbage_recycling", "in": ["yes"] },
+          "options": [{ "id": "under_sink", "label": "Under the sink" }, { "id": "dedicated_cabinet", "label": "A dedicated cabinet" }] },
+        { "key": "garbage_slide_outs", "type": "chips", "label": "How many slide-outs?", "short": "Slide-outs", "when": { "key": "garbage_recycling", "in": ["yes"] },
+          "options": [{ "id": "1", "label": "1" }, { "id": "2", "label": "2" }, { "id": "3", "label": "3" }, { "id": "4", "label": "4" }] }
+      ]
+    },
+    {
+      "id": "room_inserts", "section": "Inserts", "rooms": "other", "notes": ["IK-7"],
+      "q": "Which {room} inserts do you want?", "help": "Choose how many of each. Leave None for any you don’t need.",
+      "fields": []
+    },
+    {
+      "id": "interiors", "section": "Interiors", "rooms": "design", "notes": ["IK-6"],
+      "q": "What colour should the cabinet insides be?",
+      "fields": [{ "key": "interiors", "type": "image", "short": "Interiors", "art": "interior", "fidelity": "photo", "aspect": "5/4", "min": "180px", "options": [
+        { "id": "white", "label": "White" }, { "id": "prestige_maple", "label": "Prestige maple" }, { "id": "tafisa_matching", "label": "Tafisa matching", "desc": "Matches your cabinet colour" }
+      ] }]
+    },
+    {
+      "id": "drawers", "section": "Drawers", "rooms": "primary", "notes": ["IK-5", "IK-14"],
+      "q": "How many drawers?", "help": "Drawers are easier to use than doors, and cost more.",
+      "fields": [{ "key": "drawer_level", "type": "image", "short": "Drawers", "art": "drawers", "fidelity": "photo", "aspect": "40/11", "min": "260px", "options": [
+        { "id": "minimum", "label": "Minimum", "desc": "Least cost. A drawer on top of every base cabinet, one bank of 4 drawers and one bank of 3 for pots and pans." },
+        { "id": "moderate", "label": "Moderate", "desc": "A balance. About 60–70% of base cabinets are drawer banks: two banks of 4, the rest banks of 3." },
+        { "id": "maximum", "label": "Maximum", "desc": "Most useful. Drawers in every base cabinet.", "price_note": true }
+      ] }]
+    },
+    {
+      "id": "review", "section": "Review", "rooms": "all", "review": true,
+      "q": "Here is your {room} so far", "help": "Check your choices. Tap Change to go back to any of them.",
+      "fields": []
+    }
+  ]
+}

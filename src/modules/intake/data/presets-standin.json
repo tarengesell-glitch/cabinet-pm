@@ -1,0 +1,16 @@
+{
+  "source": "STAND-IN for the preset design database (owner, 2026-11-08: coordinate and contrast suggestions are \"pulled from a preset database\"; IK-13). Each suggestion is worked out from the room it is based on, until the database exists.",
+  "tone_order": ["white", "light_medium", "dark_medium", "dark"],
+  "sister_style": { "ultra_modern": "modern", "modern": "ultra_modern", "transitional": "country", "country": "transitional", "classic": "transitional" },
+  "contrast_style": { "ultra_modern": "classic", "modern": "country", "transitional": "ultra_modern", "country": "modern", "classic": "modern" },
+  "coordinate": [
+    { "id": "softer_shade", "label": "Softer shade", "desc": "Same door, the next colour in your tone.", "change": "next_colour" },
+    { "id": "sister_door", "label": "Sister door style", "desc": "Your colours on a sister door style.", "change": "sister_style" },
+    { "id": "neighbouring_tone", "label": "Neighbouring tone", "desc": "Same door, one tone lighter or darker.", "change": "neighbour_tone" }
+  ],
+  "contrast": [
+    { "id": "light_and_dark", "label": "Light and dark", "desc": "Your door style in the opposite tone.", "change": "opposite_tone" },
+    { "id": "other_material", "label": "Paint and wood", "desc": "Your colours in the other material.", "change": "other_material" },
+    { "id": "opposite_style", "label": "Opposite style", "desc": "A contrasting door style in the opposite tone.", "change": "opposite_style" }
+  ]
+}

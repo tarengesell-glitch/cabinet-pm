@@ -98,7 +98,7 @@
       "fields": [
         { "key": "ceiling_height", "type": "chips", "label": "Ceiling height", "options": [
           { "id": "match_primary", "label": "Match the {primary} ({primary_answer:ceiling_height})", "when": { "all": [{ "room": "other" }, { "primary_answered": "ceiling_height" }] } },
-          { "id": "7ft", "label": "7′" }, { "id": "8ft", "label": "8′" }, { "id": "10ft", "label": "10′" }, { "id": "other", "label": "Other height" }
+          { "id": "7ft", "label": "7′", "feet": 7 }, { "id": "8ft", "label": "8′", "feet": 8 }, { "id": "10ft", "label": "10′", "feet": 10 }, { "id": "other", "label": "Other height" }
         ] },
         { "key": "ceiling_height_entered", "type": "height", "short": "Ceiling (entered)", "indent": true, "in_summary": false, "when": { "key": "ceiling_height", "in": ["other"] } },
         { "key": "cabinet_height", "type": "chips", "label": "Cabinet height", "options": [

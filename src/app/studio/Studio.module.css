@@ -1,0 +1,263 @@
+/* The design studio's frame, from the owner's Kitchen Studio prototype (DECISIONS C-2). */
+.flow {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  height: 100vh;
+  height: 100dvh;
+  background: var(--paper);
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 10px max(16px, env(safe-area-inset-right, 0px)) 10px max(16px, env(safe-area-inset-left, 0px));
+  border-bottom: 1px solid var(--rule);
+}
+
+.back {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.back:hover {
+  background: var(--track);
+}
+
+.title {
+  min-width: 0;
+}
+
+.name {
+  font: 400 22px/1.15 var(--display);
+  letter-spacing: -0.01em;
+}
+
+.who,
+.whoShort {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.whoShort {
+  display: none;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  flex-wrap: wrap;
+}
+
+.stepWrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: 500 12.5px var(--body);
+  color: var(--muted);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.step:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.stepDone {
+  composes: step;
+}
+
+.dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font: 500 12px var(--mono);
+  border: 1px solid var(--rule);
+  background: var(--paper);
+  color: var(--muted);
+  flex: none;
+  transition: 0.2s var(--ease);
+}
+
+.step[aria-current='step'] {
+  color: var(--ink);
+}
+
+.step[aria-current='step'] .dot {
+  background: var(--navy);
+  color: #fff;
+  border-color: var(--navy);
+  box-shadow: 0 0 0 4px var(--gold-glow);
+}
+
+.stepDone .dot {
+  background: var(--gold-soft);
+  color: var(--navy);
+  border-color: var(--gold);
+}
+
+.line,
+.lineDone {
+  width: 22px;
+  height: 1px;
+  background: var(--rule);
+}
+
+.lineDone {
+  background: var(--navy);
+}
+
+.rooms {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px max(16px, env(safe-area-inset-left, 0px));
+  border-bottom: 1px solid var(--rule);
+  background: var(--surface);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.roomsLabel {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  margin-right: 4px;
+  flex: none;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex: none;
+  height: 30px;
+  padding: 0 12px 0 5px;
+  border-radius: 999px;
+  border: 1px solid var(--rule);
+  background: var(--paper);
+  font: 500 13px var(--body);
+  color: var(--ink);
+  cursor: pointer;
+  transition: border-color 0.15s var(--ease), box-shadow 0.15s var(--ease);
+}
+
+.chip:hover {
+  border-color: var(--rule-strong);
+}
+
+.chipDone {
+  composes: chip;
+}
+
+.chipDot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font: 500 10.5px var(--mono);
+  background: var(--track);
+  color: var(--muted);
+}
+
+.chipDone .chipDot {
+  background: var(--gold-soft);
+  color: var(--navy);
+}
+
+.chip[aria-current='true'] {
+  border-color: var(--navy);
+  box-shadow: 0 0 0 3px var(--gold-glow);
+}
+
+.chip[aria-current='true'] .chipDot {
+  background: var(--navy);
+  color: #fff;
+}
+
+.body {
+  min-height: 0;
+  overflow: auto;
+}
+
+.bodyFixed {
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.bodyFixed > :last-child {
+  flex: 1;
+  min-height: 0;
+}
+
+.alert {
+  margin: 8px 16px;
+  padding: 8px 12px;
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--error);
+  border-radius: 12px;
+  color: var(--error);
+  font-size: 13px;
+}
+
+@media (max-width: 760px) {
+  .top {
+    gap: 8px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+
+  .name {
+    font-size: 18px;
+  }
+
+  .who {
+    display: none;
+  }
+
+  .whoShort {
+    display: block;
+  }
+
+  .stepper {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .rooms {
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+
+  .stepName {
+    display: none;
+  }
+
+  .step[aria-current='step'] .stepName {
+    display: inline;
+  }
+}

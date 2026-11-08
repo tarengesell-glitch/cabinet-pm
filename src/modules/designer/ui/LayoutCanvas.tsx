@@ -26,6 +26,7 @@ import {
   wallLength,
 } from '../model/layout';
 import { LAYOUT_RULES, applianceType } from '../model/layout-rules';
+import { ERROR, INK as THEME_INK, NAVY, NAVY_FILL, NAVY_FILL_LIGHT } from './theme';
 import type { LayoutEdit } from './layoutEdits';
 
 /** UI settings (not business values): touch targets and snapping reach, in screen pixels. */
@@ -44,9 +45,9 @@ const CENTRE_SNAP = 3 * INCH;
 /** How close (in room units) an island being dragged must come to a floating wall to snap onto it. */
 const ISLAND_SNAP = 10 * INCH;
 
-const ACCENT = '#176b70';
-const DANGER = '#be3d42';
-const INK = '#17212b';
+const ACCENT = NAVY;
+const DANGER = ERROR;
+const INK = THEME_INK;
 const COLOURS: Record<RunKind, { fill: string; stroke: string }> = {
   base: { fill: '#e6cfa8', stroke: '#a8824c' },
   upper: { fill: '#fff6e6', stroke: '#a8824c' },
@@ -215,7 +216,7 @@ export function LayoutShapes(props: {
       const { starting: s, ending: e } = c.baseDepths;
       shapes.push(
         <Group key={`corner-${c.endingWallId}-base`} name="corner-cabinet corner-base" listening={false}>
-          <Line points={line([at(0, 0), at(s, 0), at(s, e), at(0, e)])} closed stroke={ACCENT} strokeWidth={1.5} fill="rgba(23,107,112,0.12)" />
+          <Line points={line([at(0, 0), at(s, 0), at(s, e), at(0, e)])} closed stroke={ACCENT} strokeWidth={1.5} fill={NAVY_FILL} />
           <Line points={line([at(0, 0), at(s, e)])} stroke={ACCENT} strokeWidth={1} />
           <Line points={line([at(s, 0), at(0, e)])} stroke={ACCENT} strokeWidth={1} />
         </Group>,
@@ -227,7 +228,7 @@ export function LayoutShapes(props: {
       const { starting: us, ending: ue } = c.upperDepths;
       shapes.push(
         <Group key={`corner-${c.endingWallId}-upper`} name="corner-cabinet corner-upper" listening={false}>
-          <Line points={line([at(0, 0), at(legS, 0), at(legS, ue), at(us, ue), at(us, legE), at(0, legE)])} closed stroke={ACCENT} strokeWidth={2} dash={[6, 3]} fill="rgba(23,107,112,0.10)" />
+          <Line points={line([at(0, 0), at(legS, 0), at(legS, ue), at(us, ue), at(us, legE), at(0, legE)])} closed stroke={ACCENT} strokeWidth={2} dash={[6, 3]} fill={NAVY_FILL_LIGHT} />
           <Line points={line([at(0, 0), at(us, ue)])} stroke={ACCENT} strokeWidth={1} />
         </Group>,
       );

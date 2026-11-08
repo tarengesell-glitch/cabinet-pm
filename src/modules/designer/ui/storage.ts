@@ -7,12 +7,18 @@ import type { Draft } from '../model/editor';
 
 const KEY = 'cabinet-pm.room-preview.v0';
 
+/**
+ * Where a room is kept. The room preview keeps its one room under the old key; inside the
+ * design studio each room of the design choices has its own (the room's ID from the intake).
+ */
+export const storageKey = (roomKey: string | null): string => (roomKey === null ? KEY : `${KEY}.room.${roomKey}`);
+
 export type Stored = { kind: 'none' } | { kind: 'found'; raw: string; data: unknown } | { kind: 'unreadable'; raw: string; reason: string };
 
-export function readStored(): Stored | { kind: 'unavailable'; reason: string } {
+export function readStored(key: string = KEY): Stored | { kind: 'unavailable'; reason: string } {
   let raw: string | null;
   try {
-    raw = window.localStorage.getItem(KEY);
+    raw = window.localStorage.getItem(key);
   } catch (error) {
     return { kind: 'unavailable', reason: describe(error) };
   }
@@ -25,10 +31,10 @@ export function readStored(): Stored | { kind: 'unavailable'; reason: string } {
 }
 
 /** Returns null when saved, or the reason it could not be saved. */
-export function writeStored(draft: Draft | null): string | null {
+export function writeStored(draft: Draft | null, key: string = KEY): string | null {
   try {
-    if (draft === null) window.localStorage.removeItem(KEY);
-    else window.localStorage.setItem(KEY, JSON.stringify(draft));
+    if (draft === null) window.localStorage.removeItem(key);
+    else window.localStorage.setItem(key, JSON.stringify(draft));
     return null;
   } catch (error) {
     return describe(error);

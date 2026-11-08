@@ -1,0 +1,64 @@
+/*
+ * The design tokens for every screen (DECISIONS C-2, answered 2026-11-08: the owner chose the
+ * look of the Kitchen Studio prototype, which is closet-builder's owner-approved design system:
+ * navy to act or show "you are here", gold for selected only, Newsreader for headings and Geist
+ * for everything else). Light only, by owner choice; every colour is set explicitly.
+ * Imported once, by the app's root layout. Modules use these variables and add no palettes of their own.
+ */
+:root {
+  --navy: #1a3045;
+  --navy-hover: #24405a;
+  --gold: #d4b57f;
+  --gold-soft: #e7d6b4;
+  --gold-glow: rgba(212, 181, 127, 0.35);
+  --ink: #18181b;
+  --muted: #71717a;
+  --faint: #a1a1aa;
+  --rule: #e4e4e7;
+  --rule-strong: #d4d4d8;
+  --paper: #ffffff;
+  --surface: #fafafa;
+  --track: #f4f4f5;
+  --error: #b91c1c;
+  --error-tint: #fdeeee;
+  --ok: #15803d;
+  --warn: #b45309;
+  --warn-tint: #fff7e8;
+  --display: 'Newsreader', 'Iowan Old Style', Georgia, serif;
+  --body: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --ambient: 0 1px 2px rgba(24, 24, 27, 0.04);
+  --raised: 0 1px 2px rgba(24, 24, 27, 0.04), 0 12px 24px -10px rgba(24, 24, 27, 0.16);
+  --selected-ring: inset 0 0 0 1.5px var(--gold), inset 0 0 22px rgba(212, 181, 127, 0.3), 0 0 0 4px rgba(212, 181, 127, 0.16);
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--surface);
+  color: var(--ink);
+  font: 14px/1.45 var(--body);
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--navy);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { buildDefinition, DEFINITION, type Definition } from '../model/definition';
 import { heightLength, Intake, startIntake, type IntakeState } from '../model/engine';
-import { intakeHandover } from '../model/handover';
+import { intakeHandover, roughCeiling } from '../model/handover';
 import intakeData from '../data/intake-v1.json';
 import coloursData from '../data/colours.json';
 import listsData from '../data/lists.json';
@@ -399,5 +399,34 @@ describe('linked rooms', () => {
     x.pick('door_style', 'classic');
     x.resolve('all');
     expect([1, 2].map((i) => x.inRoom(i, () => x.effKey('door_style')))).toEqual(['classic', 'classic']);
+  });
+});
+
+describe('the rough ceiling height handed to the room drawing (IK-17)', () => {
+  it('turns a picked height into an exact length, and refuses when there is none yet', () => {
+    const { x, s } = fresh();
+    expect(roughCeiling(def, s, 'kitchen-room').ok).toBe(false);
+    x.pick('ceiling_height', '8ft');
+    expect(roughCeiling(def, s, 'kitchen-room')).toEqual({ ok: true, value: 96 * 64 });
+    expect(roughCeiling(def, s, 'no-such-room').ok).toBe(false);
+  });
+
+  it('uses a typed height, and refuses one that is not on a 1/64 inch mark', () => {
+    const { x, s } = fresh();
+    x.pick('ceiling_height', 'other');
+    x.type('ceiling_height_entered', '9', 'ft');
+    x.type('ceiling_height_entered', '6.3', 'in');
+    expect(roughCeiling(def, s, 'kitchen-room').ok).toBe(false);
+    x.type('ceiling_height_entered', '6.5', 'in');
+    expect(roughCeiling(def, s, 'kitchen-room')).toEqual({ ok: true, value: 114.5 * 64 });
+  });
+
+  it('follows the kitchen when a later room matches it', () => {
+    const { x, s } = fresh();
+    answerRoom(x, { ...KITCHEN, ceiling_height: '10ft' });
+    x.finish();
+    x.addRoom('r2');
+    x.pick('ceiling_height', 'match_primary');
+    expect(roughCeiling(def, s, 'r2')).toEqual({ ok: true, value: 120 * 64 });
   });
 });

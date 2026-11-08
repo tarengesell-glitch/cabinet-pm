@@ -4,7 +4,7 @@
  * saw it. Only questions that apply to the room are included, and an unanswered one is left
  * out, never filled in (rule 7). `complete` says whether every question that applies is answered.
  */
-import type { Length } from '@/core/index';
+import { fromInches, refuse, type Length, type Result } from '@/core/index';
 import type { Definition } from './definition';
 import { heightLength, Intake, type IntakeState } from './engine';
 
@@ -58,4 +58,33 @@ export function intakeHandover(def: Definition, state: IntakeState): RoomHandove
       };
     }),
   );
+}
+
+/**
+ * The room's rough ceiling height from the intake, as an exact length, for the room drawing to
+ * start from (DECISIONS IK-17, 2026-11-08). "Match the kitchen" follows the first room. Returns a
+ * refusal with the reason when there is no usable answer yet; it never guesses a height (rule 7).
+ */
+export function roughCeiling(def: Definition, state: IntakeState, roomId: string): Result<Length> {
+  const i = state.rooms.findIndex((r) => r.id === roomId);
+  if (i < 0) return refuse('That room is not in the design choices.');
+  const x = new Intake(def, state);
+  const ceiling = def.fields.get('ceiling_height');
+  const entered = def.fields.get('ceiling_height_entered');
+  if (!ceiling || !entered) return refuse('The design choices have no ceiling height question.');
+  const read = (k: number): Result<Length> =>
+    x.inRoom(k, () => {
+      const v = x.eff(ceiling);
+      if (v === undefined) return refuse(`The ${x.roomName(k).toLowerCase()} has no ceiling height yet.`);
+      if (v === 'match_primary') return k === 0 ? refuse('The first room cannot match itself.') : read(0);
+      if (v === 'other') {
+        const typed = x.eff(entered);
+        if (typeof typed !== 'object' || typed === null || Array.isArray(typed)) return refuse(`The ${x.roomName(k).toLowerCase()}'s ceiling height hasn't been typed yet.`);
+        return heightLength(typed as { ft: string; in: string });
+      }
+      const option = x.options(ceiling).find((o) => o.id === v);
+      if (!option?.def?.feet) return refuse(`The ceiling height "${String(v)}" has no length in the intake data.`);
+      return fromInches(option.def.feet * 12);
+    });
+  return read(i);
 }

@@ -258,7 +258,7 @@ test('a sink centred under a window can be dragged off centre', async ({ page })
   await expect.poll(async () => (await walls(page))[0]!.appliances.find((a) => a.kind === 'sink')?.offset).toBe(40 * IN);
   // Off centre: a yellow notice (a notice, not a red error) says by how much.
   await expect(notice).toHaveText(/The sink is not centred under the window: it is 10" off centre\./);
-  await expect(notice).toHaveCSS('color', 'rgb(173, 117, 26)');
+  await expect(notice).toHaveCSS('color', 'rgb(180, 83, 9)'); // the design system's warning colour (#b45309), not its red
   // Dragged back to near the centre, it snaps to the centre again.
   p = at(56, 12);
   const back = at(65, 12);

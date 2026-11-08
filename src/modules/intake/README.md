@@ -43,7 +43,9 @@ It was built from the owner's clickable prototype, reviewed over eight rounds (h
 - **A review per room** lists every answer with Change links and anything missing. Finish is refused while anything is missing.
 - **Preview limits, shown on screen:** answers are kept in this browser only, the user is mocked, and the pictures are placeholders. A storage failure is shown and stays until it is resolved.
 
-## Files
+## In the design studio (2026-11-08)
+The app's design studio (`/studio`) shows this screen as its first step (DECISIONS "The design studio"). There it gets a `flow` link: the studio shows the rooms and steps, decides which room is on screen, and is told of every change. A finished room offers "Add another room" or "Start laying out room dimensions". The look is the owner's Kitchen Studio prototype (DECISIONS C-2): gold rings and a check on picked cards, serif questions, round colour swatches.
+
 - `data/intake-v1.json`: the steps, questions, options, conditions, room types, insert placeholders and notes. Conditions are data (`{ "key": …, "in": […] }` and so on), not code.
 - `data/colours.json`: SAMPLE colours per tone (painted and wood grain), counter colours and hardware finishes (IK-3, IK-9).
 - `data/lists.json`: the counts (None to 4) and the trim colour choices.
@@ -56,11 +58,13 @@ It was built from the owner's clickable prototype, reviewed over eight rounds (h
 ## Public API (`contract.ts`)
 - `INTAKE_DEFINITION`: the checked questions (or the reason they can't load).
 - `startIntake(def, roomId)` and the `IntakeState` type.
+- `roughCeiling(def, state, roomId)`: the room's rough ceiling height as an exact length, for the room drawing to start from (IK-17). "Match the kitchen" follows the kitchen; no answer is refused with the reason.
+- `loadIntakeState()`: the answers kept in this browser, for the studio.
 - `intakeHandover(def, state)`: one record per room, with its `room_type`, `name`, `complete`, `design_from` and `answers`. Each answer carries the option ID and its label as the client saw it, or a count, the picked IDs and labels, typed text, or a length in the base unit. Only questions that apply are included. An unanswered question is left out, never filled in.
 
 ## Not yet
 - **AI Design's intake shape is out of date.** `ai-design` (`model/intake.ts`) was written from the 2026-10-27 outline. It expects `door_colour`, an island yes/no and separate island material, tone and door style. The owner has since replaced these with the colours step (cabinets, base, island, counter, secondary), four hardware combinations, and garbage location and slide-outs. Most other codes match. AI Design needs updating to read `intakeHandover` (DECISIONS IK-15).
 - Answer statuses beyond "selected" (not sure, skipped, needs follow-up, confirmed; DATA_MODEL "intake") are not offered yet.
-- The intake's rough ceiling height is not passed to the room drawing. The room drawing asks for its own, and the master copy wins (P1).
+- The rough ceiling height starts the room drawing only inside the studio; `/rooms/preview` still asks for its own. After that the master copy wins (P1).
 - Answers live in this browser until the platform store exists. The tables `intake_questions`, `intake_options` and `intake_answers` come with it.
 - Permissions reuse `room.view` and `room.edit` (PROPOSED; DECISIONS IK-16).

@@ -12,6 +12,7 @@ import { LAYOUT_RULES, applianceType } from '../model/layout-rules';
 import { SizeField } from './SizeField';
 import { ApplianceIcon } from './applianceIcons';
 import type { LayoutEdit } from './layoutEdits';
+import { MUTED, RULE } from './theme';
 import s from './RoomCapture.module.css';
 
 const RUN_KINDS = Object.keys(RUN_KIND_LABEL) as RunKind[];
@@ -59,9 +60,9 @@ function PopupFrame(props: {
         boxSizing: 'border-box',
         ...(props.maxHeight ? { maxHeight: props.maxHeight, overflowY: 'auto' as const } : {}),
         background: '#fff',
-        border: '1px solid #e2e7eb',
-        borderRadius: 8,
-        boxShadow: '0 6px 24px rgba(0,0,0,0.16)',
+        border: `1px solid ${RULE}`,
+        borderRadius: 12,
+        boxShadow: '0 1px 2px rgba(24,24,27,0.04), 0 12px 24px -10px rgba(24,24,27,0.16)',
         padding: 10,
         display: 'flex',
         flexDirection: 'column',
@@ -71,7 +72,7 @@ function PopupFrame(props: {
       <button
         aria-label="Close"
         onClick={props.onClose}
-        style={{ position: 'absolute', top: 4, right: 4, width: 28, height: 28, border: 'none', background: 'transparent', fontSize: 18, lineHeight: 1, color: '#5b6670', cursor: 'pointer' }}
+        style={{ position: 'absolute', top: 4, right: 4, width: 28, height: 28, border: 'none', background: 'transparent', fontSize: 18, lineHeight: 1, color: MUTED, cursor: 'pointer' }}
       >
         ×
       </button>

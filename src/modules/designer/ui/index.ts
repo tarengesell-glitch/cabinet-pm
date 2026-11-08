@@ -1,2 +1,2 @@
 // The Designer's screens, for the app to place on pages.
-export { RoomCapture } from './RoomCapture';
+export { RoomCapture, type StudioRoom } from './RoomCapture';

@@ -16,22 +16,50 @@ import { lookOf, optionPicture, scene, elevation } from './pictures';
 import { loadState, saveState } from './storage';
 import s from './Intake.module.css';
 
+/**
+ * When the intake sits inside the design studio (the app's job flow), the studio shows the rooms
+ * and the steps, and decides which room is on screen.
+ */
+export interface IntakeFlowLink {
+  /** The room the studio has on screen, by ID; null leaves it to the intake. */
+  readonly roomId: string | null;
+  /** Called after every change, with the whole state (read it through `intakeHandover`). */
+  readonly onChange: (state: IntakeState) => void;
+  /** "Start laying out room dimensions". Returns null when it went ahead, or the reason it can't. */
+  readonly onDraw: () => string | null;
+}
+
 export interface IntakeScreenProps {
   readonly user: User;
-  /** Where the client goes after the intake: the room drawing. */
+  /** Where the client goes after the intake when it stands alone: the room drawing. */
   readonly next: { readonly href: string; readonly label: string };
+  readonly flow?: IntakeFlowLink;
 }
 
 /** IDs for rooms. Not part of any translation, so a random ID is fine here. */
 const newId = (): string => (typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `room-${Date.now()}-${Math.round(Math.random() * 1e9)}`);
 
-function Picture({ markup, photo, aspect }: { markup: string; photo: boolean; aspect?: string | undefined }) {
+function Picture({ markup, photo, aspect, placeholder }: { markup: string; photo: boolean; aspect?: string | undefined; placeholder?: boolean }) {
   return (
     <span className={photo ? s.artPhoto : s.art} style={aspect ? { aspectRatio: aspect } : undefined}>
       <span className={s.svg} dangerouslySetInnerHTML={{ __html: markup }} />
+      {placeholder && (
+        <span className={s.ph} aria-hidden="true">
+          Placeholder
+        </span>
+      )}
     </span>
   );
 }
+
+/** The check shown on a picked card. */
+const Check = () => (
+  <span className={s.check} aria-hidden="true">
+    <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M2.5 6.2l2.3 2.3 4.7-5" />
+    </svg>
+  </span>
+);
 
 export function IntakeScreen(props: IntakeScreenProps) {
   if (!DEFINITION.ok) {
@@ -57,7 +85,7 @@ export function IntakeScreen(props: IntakeScreenProps) {
   return <IntakeFlow {...props} def={DEFINITION.value} />;
 }
 
-function IntakeFlow({ user, next, def }: IntakeScreenProps & { def: Definition }) {
+function IntakeFlow({ user, next, flow, def }: IntakeScreenProps & { def: Definition }) {
   const canEdit = can(user, 'room.edit');
   const [state, setState] = useState<IntakeState | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
@@ -105,6 +133,24 @@ function IntakeFlow({ user, next, def }: IntakeScreenProps & { def: Definition }
   }, [state, saveHeld]);
 
   const x = useMemo(() => (state ? new Intake(def, state) : null), [def, state]);
+
+  // Inside the studio: tell it about every change, and follow the room it puts on screen.
+  const onChange = flow?.onChange;
+  useEffect(() => {
+    if (state && onChange) onChange(state);
+  }, [state, onChange]);
+  const stateRef = useRef(state);
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
+  const wantedRoom = flow?.roomId ?? null;
+  const hasState = state !== null;
+  useEffect(() => {
+    const now = stateRef.current;
+    if (!wantedRoom || !now) return;
+    const i = now.rooms.findIndex((r) => r.id === wantedRoom);
+    if (i >= 0 && i !== now.room) act((y) => y.switchRoom(i));
+  }, [wantedRoom, hasState, act]);
 
   const goNext = useCallback(() => act((y) => void y.next()), [act]);
 
@@ -159,7 +205,8 @@ function IntakeFlow({ user, next, def }: IntakeScreenProps & { def: Definition }
     pickRef.current = pick;
   }, [pick]);
 
-  if (!x || !state) return <div className={s.screen}><p className={s.loading}>Loading the intake…</p></div>;
+  const screen = flow ? s.embedded : s.screen;
+  if (!x || !state) return <div className={screen}><p className={s.loading}>Loading the intake…</p></div>;
 
   const { steps, index, step } = x.current();
   const fields = x.fields(step);
@@ -169,7 +216,7 @@ function IntakeFlow({ user, next, def }: IntakeScreenProps & { def: Definition }
   const help = x.text(step.help);
 
   const tabs =
-    state.rooms.length > 1 ? (
+    state.rooms.length > 1 && !flow ? (
       <div className={s.tabs} role="tablist" aria-label="Rooms">
         {state.rooms.map((r, i) => (
           <button key={r.id} role="tab" aria-selected={i === state.room} className={s.tab} onClick={() => act((y) => y.switchRoom(i))}>
@@ -181,11 +228,11 @@ function IntakeFlow({ user, next, def }: IntakeScreenProps & { def: Definition }
     ) : null;
 
   return (
-    <div className={s.screen}>
+    <div className={screen}>
       <header className={s.header}>
-        <span className={s.brand}>Design choices</span>
+        {!flow && <span className={s.brand}>Design choices</span>}
         <span className={s.pill}>Preview: saved in this browser only · placeholder pictures</span>
-        {user.mocked && <span className={s.pill}>{user.name}</span>}
+        {user.mocked && !flow && <span className={s.pill}>{user.name}</span>}
         <span className={s.spacer} />
         <button className={s.ghost} aria-pressed={notes} onClick={() => setNotes((n) => !n)}>
           Open questions
@@ -248,6 +295,7 @@ function IntakeFlow({ user, next, def }: IntakeScreenProps & { def: Definition }
               finishError={finishError}
               canEdit={canEdit}
               next={next}
+              onDraw={flow?.onDraw ?? null}
               onGo={(id) => act((y) => y.go(id))}
               onFinish={() => {
                 const r = new Intake(def, JSON.parse(JSON.stringify(state)) as IntakeState).finish();
@@ -287,8 +335,7 @@ function IntakeFlow({ user, next, def }: IntakeScreenProps & { def: Definition }
 function Preview({ markup, wide }: { markup: string; wide?: boolean }) {
   return (
     <div className={wide ? s.previewWide : s.preview}>
-      <Picture markup={markup} photo aspect="8/5" />
-      <span className={s.ph} aria-hidden="true">Placeholder</span>
+      <Picture markup={markup} photo aspect="8/5" placeholder />
     </div>
   );
 }
@@ -340,8 +387,8 @@ function Field(props: {
       <div className={f.size ? s.tilesSm : s.tiles} style={{ ['--min' as string]: f.min ?? (f.size ? '150px' : '200px') }}>
         {os.map((o, k) => (
           <button key={o.id} className={f.type === 'cards' ? s.card : s.tile} aria-pressed={v === o.id} disabled={!canEdit} onClick={() => onPick(f.key, o.id)}>
-            {f.type === 'image' && <Picture markup={optionPicture(x, f, o)} photo={f.fidelity === 'photo'} aspect={f.aspect} />}
-            {f.type === 'image' && <span className={s.ph} aria-hidden="true">Placeholder</span>}
+            <Check />
+            {f.type === 'image' && <Picture markup={optionPicture(x, f, o)} photo={f.fidelity === 'photo'} aspect={f.aspect} placeholder />}
             {single && k < 9 && <span className={s.key} aria-hidden="true">{k + 1}</span>}
             <span className={s.tl}>
               {o.rec && <span className={s.rec}>Recommended</span>}
@@ -461,6 +508,8 @@ function Review(props: {
   canEdit: boolean;
   finishError: string | null;
   next: IntakeScreenProps['next'];
+  /** Inside the studio: moves on to the room drawing (or says why it can't). */
+  onDraw: (() => string | null) | null;
   onGo: (id: string) => void;
   onFinish: () => void;
   onAddRoom: () => void;
@@ -525,6 +574,8 @@ function Review(props: {
     );
   }
   const room = x.state.rooms[x.roomIndex];
+  // Each room type can be added once per job (owner, 2026-11-08).
+  const roomsLeft = props.canEdit && x.def.intake.room_types.types.some((t) => !x.state.rooms.some((r) => r.answers['room_type'] === t.id));
   return (
     <>
       <Preview markup={scene(x)} wide />
@@ -547,20 +598,7 @@ function Review(props: {
       )}
       <div className={s.review}>{cards}</div>
       {room?.done && missing.length === 0 ? (
-        <div className={s.done}>
-          <b>{x.roomName()} finished.</b>
-          <p>These answers go to the design as the client’s wishes. In this preview they are kept in this browser only.</p>
-          <div className={s.acts}>
-            <a className={s.primaryLink} href={props.next.href}>
-              {props.next.label} ›
-            </a>
-            {props.canEdit && (
-              <button className={s.btn} onClick={props.onAddRoom}>
-                Add another room
-              </button>
-            )}
-          </div>
-        </div>
+        <Between x={x} canAdd={roomsLeft} next={props.next} onDraw={props.onDraw} onAddRoom={props.onAddRoom} />
       ) : (
         <div className={s.acts}>
           <button className={s.primary} disabled={missing.length > 0 || !props.canEdit} onClick={props.onFinish}>
@@ -606,5 +644,55 @@ function LinkedRooms({ x, onChoose }: { x: Intake; onChoose: (c: 'all' | 'one' |
         </button>
       </div>
     </div>
+  );
+}
+
+/** A finished room: what's next, as two big choices (from the owner's Kitchen Studio prototype). */
+function Between(props: { x: Intake; canAdd: boolean; next: IntakeScreenProps['next']; onDraw: (() => string | null) | null; onAddRoom: () => void }) {
+  const { x } = props;
+  const [drawError, setDrawError] = useState<string | null>(null);
+  const count = x.state.rooms.length;
+  const drawIcon = (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+      <path d="M4 4h16v16H4z" />
+      <path d="M4 9h5v11M14 4v6h6" />
+    </svg>
+  );
+  const drawNote = `Draw ${count === 1 ? 'the room' : `all ${count} rooms`}: walls, doors and windows, cabinet runs and appliances.`;
+  return (
+    <section className={s.between} aria-label="What's next">
+      <h2 className={s.doneTitle}>{x.roomName()} finished.</h2>
+      <p className={s.doneText}>These answers go to the design as the client’s wishes. Add every room in this project first, or start drawing.</p>
+      <div className={s.nextCards}>
+        {props.canAdd && (
+          <button className={s.nextCard} onClick={props.onAddRoom}>
+            <span className={s.nextIc} aria-hidden="true">
+              +
+            </span>
+            <span className={s.nextName}>Add another room</span>
+            <span className={s.nextNote}>Bath, mudroom, laundry, closet, office and more. Match, coordinate, contrast or start from scratch.</span>
+          </button>
+        )}
+        {props.onDraw ? (
+          <button className={s.nextCardPrimary} onClick={() => setDrawError(props.onDraw?.() ?? null)}>
+            <span className={s.nextIc}>{drawIcon}</span>
+            <span className={s.nextName}>Start laying out room dimensions</span>
+            <span className={s.nextNote}>{drawNote}</span>
+          </button>
+        ) : (
+          <a className={s.nextCardPrimary} href={props.next.href}>
+            <span className={s.nextIc}>{drawIcon}</span>
+            <span className={s.nextName}>{props.next.label} ›</span>
+            <span className={s.nextNote}>{drawNote}</span>
+          </a>
+        )}
+      </div>
+      {drawError && (
+        <p className={s.alert} role="alert" style={{ margin: 0 }}>
+          {drawError}
+        </p>
+      )}
+      <p className={s.why}>In this preview the answers are kept in this browser only.</p>
+    </section>
   );
 }

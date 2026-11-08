@@ -58,12 +58,14 @@ function BackToRoom({ onSelect }: { onSelect: (sel: Selection) => void }) {
   );
 }
 
-export function StartRoomForm({ canEdit, onStart, onExample }: {
+export function StartRoomForm({ canEdit, onStart, onExample, initialName = '' }: {
   canEdit: boolean;
   onStart: (input: { name: string; ceiling: TypedSize }) => Result<unknown>;
   onExample: (which: 'kitchen' | 'lshape') => void;
+  /** The room's name from the design choices, inside the design studio. */
+  initialName?: string;
 }) {
-  const [name, setName] = useState('');
+  const [name, setName] = useState(initialName);
   const [texts, setTexts] = useState({ ceiling: '' });
   const [errors, setErrors] = useState<Partial<Record<keyof typeof texts | 'name' | 'form', string>>>({});
   const submit = () => {

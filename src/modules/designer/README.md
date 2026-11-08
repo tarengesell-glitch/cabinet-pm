@@ -83,6 +83,11 @@ Open it at `/rooms/preview` (`npm run dev`, then http://localhost:3000/rooms/pre
   - Also `setApplianceWidth` (standard widths only) and `deleteAppliances`.
 - **Islands:** floating walls (A-21) with one run: `addIsland`, `moveIsland`, `resizeIsland` (depth from the island list). Delete one as a wall.
 
+## In the design studio (2026-11-08)
+The app's design studio (`/studio`) shows the room drawing as its second step, one drawing per room of the design choices (DECISIONS "The design studio"). `RoomCapture` takes a `studio` room: its key (the intake's room ID, also where the drawing is kept), its name, and the rough ceiling height. A room with no drawing yet starts at once from those, ceiling unmeasured. The studio's header shows the job, rooms and mocked user, so the drawing's own header drops the title. `roomDrawingStatus(key)` (contract) tells the studio how far each room has got.
+
+The controls and behaviour are unchanged. The look follows the owner's Kitchen Studio prototype (DECISIONS C-2): the shared tokens, gold for what is selected, navy for handles, drawing and "you are here". The plan's colours are in `ui/theme.ts`, because the canvas can't read CSS variables.
+
 ## What the preview does not do yet
 - **No database.** The room is kept in this browser only (`localStorage`), and the screen says so. If the browser won't store it, a red banner says the work isn't being kept.
 - **No sign-in.** The user and shop are **mocked** (`PREVIEW_USER`, `PREVIEW_SHOP` in `src/platform/`) and labelled on screen. Permissions are still checked with `can()`.

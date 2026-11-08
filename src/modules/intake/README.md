@@ -59,7 +59,8 @@ The app's design studio (`/studio`) shows this screen as its first step (DECISIO
 - `INTAKE_DEFINITION`: the checked questions (or the reason they can't load).
 - `startIntake(def, roomId)` and the `IntakeState` type.
 - `roughCeiling(def, state, roomId)`: the room's rough ceiling height as an exact length, for the room drawing to start from (IK-17). "Match the kitchen" follows the kitchen; no answer is refused with the reason.
-- `loadIntakeState()`: the answers kept in this browser, for the studio.
+- `loadIntakeState(job?)`: the answers kept in this browser, for the studio. Each demo client's job keeps its own; without a job, the preview job's.
+- `roomLook(def, state, roomId)` and `roomSummary(def, state, roomId)`: a room's look (colours, door style, hardware) and its answers in words, for the customize screens.
 - `intakeHandover(def, state)`: one record per room, with its `room_type`, `name`, `complete`, `design_from` and `answers`. Each answer carries the option ID and its label as the client saw it, or a count, the picked IDs and labels, typed text, or a length in the base unit. Only questions that apply are included. An unanswered question is left out, never filled in.
 
 ## Not yet

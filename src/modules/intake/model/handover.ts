@@ -88,3 +88,24 @@ export function roughCeiling(def: Definition, state: IntakeState, roomId: string
     });
   return read(i);
 }
+
+/**
+ * A room's answers in words, as the review lists them ("Door style: Shaker"), for other screens
+ * to show (the design studio's customize screen). Only answered questions that apply are listed.
+ */
+export function roomSummary(def: Definition, state: IntakeState, roomId: string): { label: string; value: string }[] {
+  const i = state.rooms.findIndex((r) => r.id === roomId);
+  if (i < 0) return [];
+  const x = new Intake(def, state);
+  return x.inRoom(i, () => {
+    const carried = x.carried();
+    const fields = [...x.steps().flatMap((s) => (s.review ? [] : x.fields(s))), ...(carried?.fields ?? [])];
+    const out: { label: string; value: string }[] = [];
+    for (const f of fields) {
+      if (f.in_summary === false) continue;
+      const value = x.label(f);
+      if (value) out.push({ label: f.short ?? f.label ?? f.key, value });
+    }
+    return out;
+  });
+}

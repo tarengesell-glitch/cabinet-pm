@@ -2,11 +2,14 @@ import { expect, test } from '@playwright/test';
 
 // Checks the built files exactly as Netlify serves them (out/, no Next.js server).
 
-test('the home page loads and links to the room drawing', async ({ page }) => {
+test('the start page is Today, and Clients and a client page load', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Cabinet design platform');
-  await page.getByRole('link', { name: 'Room drawing' }).click();
-  await expect(page.getByRole('heading', { name: 'Start a room' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Today' })).toHaveAttribute('aria-current', 'page');
+  await page.getByRole('link', { name: 'Clients' }).click();
+  await page.getByRole('link', { name: /Priya Raman/ }).click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Priya Raman');
+  await page.goto('/clients/c3');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Tom & Erin Beaulieu');
 });
 
 test('the design choices load at /intake (with or without a trailing slash)', async ({ page }) => {

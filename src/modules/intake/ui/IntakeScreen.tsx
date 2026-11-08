@@ -27,6 +27,8 @@ export interface IntakeFlowLink {
   readonly onChange: (state: IntakeState) => void;
   /** "Start laying out room dimensions". Returns null when it went ahead, or the reason it can't. */
   readonly onDraw: () => string | null;
+  /** The job whose answers these are; each job keeps its own. */
+  readonly job?: string | null;
 }
 
 export interface IntakeScreenProps {
@@ -86,6 +88,7 @@ export function IntakeScreen(props: IntakeScreenProps) {
 }
 
 function IntakeFlow({ user, next, flow, def }: IntakeScreenProps & { def: Definition }) {
+  const job = flow?.job ?? null;
   const canEdit = can(user, 'room.edit');
   const [state, setState] = useState<IntakeState | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
@@ -97,7 +100,7 @@ function IntakeFlow({ user, next, flow, def }: IntakeScreenProps & { def: Defini
   const advance = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    const loaded = loadState();
+    const loaded = loadState(job);
     if (loaded.kind === 'found') setState(loaded.state);
     else {
       setState(startIntake(def, newId()));
@@ -109,7 +112,7 @@ function IntakeFlow({ user, next, flow, def }: IntakeScreenProps & { def: Defini
     return () => {
       if (advance.current) clearTimeout(advance.current);
     };
-  }, [def]);
+  }, [def, job]);
 
   /** Every change: work on a copy, keep the result, save it. */
   const act = useCallback(
@@ -129,8 +132,8 @@ function IntakeFlow({ user, next, flow, def }: IntakeScreenProps & { def: Defini
   useEffect(() => {
     if (!state || !changed.current || saveHeld) return;
     changed.current = false;
-    setProblem(saveState(state));
-  }, [state, saveHeld]);
+    setProblem(saveState(state, job));
+  }, [state, saveHeld, job]);
 
   const x = useMemo(() => (state ? new Intake(def, state) : null), [def, state]);
 
@@ -149,10 +152,26 @@ function IntakeFlow({ user, next, flow, def }: IntakeScreenProps & { def: Defini
     const now = stateRef.current;
     if (!wantedRoom || !now) return;
     const i = now.rooms.findIndex((r) => r.id === wantedRoom);
-    if (i >= 0 && i !== now.room) act((y) => y.switchRoom(i));
+    if (i >= 0 && i !== now.room) switchTo.current(i);
   }, [wantedRoom, hasState, act]);
 
   const goNext = useCallback(() => act((y) => void y.next()), [act]);
+  /**
+   * Switches rooms. A step waiting to move on by itself (just answered) moves on first, so it
+   * belongs to the room it was answered in, not the one switched to.
+   */
+  const switchTo = useRef((i: number) => act((y) => y.switchRoom(i)));
+  useEffect(() => {
+    switchTo.current = (i: number) => {
+      const pending = advance.current !== null;
+      if (advance.current) clearTimeout(advance.current);
+      advance.current = null;
+      act((y) => {
+        if (pending) y.next();
+        y.switchRoom(i);
+      });
+    };
+  }, [act]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -196,7 +215,12 @@ function IntakeFlow({ user, next, flow, def }: IntakeScreenProps & { def: Defini
       const fields = after.state.pending ? [] : after.fields(step);
       const auto = fields.length === 1 && fields[0]?.key === key && ['image', 'cards', 'chips', 'swatch'].includes(fields[0].type) && after.missing(step) === null && !after.state.rooms[after.roomIndex]?.peek;
       if (advance.current) clearTimeout(advance.current);
-      if (auto) advance.current = setTimeout(goNext, 260);
+      advance.current = null;
+      if (auto)
+        advance.current = setTimeout(() => {
+          advance.current = null;
+          goNext();
+        }, 260);
     },
     [x, canEdit, act, def, goNext],
   );
@@ -219,7 +243,7 @@ function IntakeFlow({ user, next, flow, def }: IntakeScreenProps & { def: Defini
     state.rooms.length > 1 && !flow ? (
       <div className={s.tabs} role="tablist" aria-label="Rooms">
         {state.rooms.map((r, i) => (
-          <button key={r.id} role="tab" aria-selected={i === state.room} className={s.tab} onClick={() => act((y) => y.switchRoom(i))}>
+          <button key={r.id} role="tab" aria-selected={i === state.room} className={s.tab} onClick={() => switchTo.current(i)}>
             {x.roomName(i)}
             {r.done && x.roomComplete(i) ? ' ✓' : ''}
           </button>
@@ -244,7 +268,7 @@ function IntakeFlow({ user, next, flow, def }: IntakeScreenProps & { def: Defini
               if (!resetArmed) return setResetArmed(true);
               setResetArmed(false);
               const fresh = startIntake(def, newId());
-              setProblem(saveState(fresh));
+              setProblem(saveState(fresh, job));
               setSaveHeld(false);
               setState(fresh);
             }}

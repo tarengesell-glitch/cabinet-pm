@@ -55,6 +55,8 @@ Full Product Catalog with versions and the editor for it; **automatic** catalog 
 
 **Exit:** designers produce jobs that pass the gate and import cleanly.
 
+**Placeholders built early (2026-11-08):** the customize screens (settings pane and 3D view) on a placeholder layout, so the flow can be tried end to end. They are to be rebuilt on the master copy once Core has placed cabinets (1b-items). See DECISIONS "Placeholder office screens, AI design and customize".
+
 **Pulled forward (2026-11-05):** room capture (walls, doors, windows on react-konva) is built early, right after the scaffold (1a): Core walls and openings first, then the Designer drawing screen. See DECISIONS "2026-11-05".
 
 Before this phase: a UX session that turns `docs/ux/UX_BRIEF.md` into screen specs and design tokens (C-2 must be decided). Then:
@@ -65,6 +67,8 @@ Before this phase: a UX session that turns `docs/ux/UX_BRIEF.md` into screen spe
 - the ready-to-send gate screen with the four push conditions.
 
 ## Phase 6: AI Design
+
+A placeholder stands in for this step in the design studio until it is built: an animation and a fixed recipe, no AI (DECISIONS 2026-11-08).
 
 **Exit:** AI drafts pass validation and need only light designer edits on typical jobs.
 

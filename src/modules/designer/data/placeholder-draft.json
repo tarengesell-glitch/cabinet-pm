@@ -1,0 +1,56 @@
+{
+  "source": "PLACEHOLDER for the AI design step, from the owner's Kitchen Studio prototype (https://claude.ai/artifact/Tkd2r8vTUswCs3ioJnGjqg, 2026-11-08; owner: \"a placeholder AI design animation (with no actual AI design)\"). None of these numbers are the shop's: the AI designer will choose cabinets from the shop's design rules and catalog instead (OA-3). Cabinet types and their heights and depths come from the catalog.",
+  "fill": {
+    "note": "The prototype's recipe: split each stretch into equal cabinets no wider than the largest width, in whole steps, and give what is left to a filler.",
+    "largest_width": "36",
+    "width_step": "3"
+  },
+  "cabinets": {
+    "note": "Catalog codes the placeholder uses, by job.",
+    "base": "base_doors",
+    "base_by_drawer_level": {
+      "minimum": {
+        "most": "base_drawer_doors",
+        "narrow": "base_doors",
+        "narrow_below": "15",
+        "one_bank_of_3": "base_3_drawers",
+        "one_bank_of_4": "base_4_drawers"
+      },
+      "moderate": {
+        "banks": [
+          "base_4_drawers",
+          "base_3_drawers"
+        ],
+        "every_third": "base_drawer_doors"
+      },
+      "maximum": {
+        "all": "base_3_drawers"
+      }
+    },
+    "base_filler": "base_filler",
+    "pantry": "tall_pantry",
+    "sink": "sink_base",
+    "dishwasher": "dishwasher_opening",
+    "wall_oven": "tall_oven",
+    "corner_lazy_susan": "corner_base",
+    "corner_other": "blind_corner_base",
+    "garbage": "garbage_pullout",
+    "upper": "upper_doors",
+    "upper_over_fridge": "upper_no_shelf",
+    "upper_corner": "upper_corner_90",
+    "upper_filler": "wall_filler"
+  },
+  "visual": {
+    "note": "For drawing the 3D view only (visual approximation, BUILD_SPEC 5.5); never sent to the shop.",
+    "toe_kick_height": "4",
+    "counter_thickness": "1 1/2",
+    "counter_overhang": "1",
+    "upper_bottom": "54",
+    "appliances": {
+      "note": "Rough appliance shapes for the 3D view only, from the prototype; real sizes come from confirmed appliance specs (OA-4).",
+      "fridge_height": "70",
+      "fridge_depth": "28",
+      "range_depth": "26"
+    }
+  }
+}

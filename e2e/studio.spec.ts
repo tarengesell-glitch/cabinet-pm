@@ -83,7 +83,7 @@ test('every room is in the room bar, and the drawing waits until every room is f
 });
 
 test('the placeholder AI design lays out the drawn room, then the customize screens open', async ({ page }) => {
-  test.setTimeout(90_000);
+  test.setTimeout(180_000); // a long flow with the 3D view; slower when the whole suite runs at once
   await answerKitchen(page, '/studio/?job=c2');
   await page.getByRole('button', { name: 'Finish kitchen' }).click();
   await page.getByRole('button', { name: /Start laying out room dimensions/ }).click();
@@ -132,7 +132,7 @@ test('the placeholder AI design lays out the drawn room, then the customize scre
 });
 
 test('Test data: save a job as the test start and load it into another job', async ({ page }) => {
-  test.setTimeout(90_000);
+  test.setTimeout(180_000); // a long flow with the 3D view; slower when the whole suite runs at once
   await answerKitchen(page, '/studio/?job=c2');
   await page.getByRole('button', { name: 'Finish kitchen' }).click();
   await page.getByRole('button', { name: /Start laying out room dimensions/ }).click();

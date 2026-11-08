@@ -1,0 +1,7 @@
+{
+  "source": "Settings the design-rule checks need beyond design-rules.json. Every length the checks use comes from design-rules.json; this file only names things in the master copy.",
+  "sink_kinds": {
+    "value": ["sink"],
+    "source": "Owner, 2026-11-06 and 2026-11-07 (DECISIONS \"Rough layout\"): a sink dropped near a window centres under it, and a sink in front of a window but off centre gets a notice. The bar sink is not centred under windows in the rough layout, so it is not listed."
+  }
+}

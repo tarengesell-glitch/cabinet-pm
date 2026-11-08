@@ -11,3 +11,13 @@ export {
   type RuleKind,
   type RuleStatus,
 } from './model/design-rules';
+export {
+  CHECKED_RULE_IDS,
+  type CheckedRuleId,
+  DESIGN_RULE_CHECKS,
+  DESIGN_RULE_CHECK_SETTINGS,
+  type DesignRuleCheckSettings,
+  buildDesignRuleChecks,
+  designRuleCheckId,
+  readCheckSettings,
+} from './model/design-rule-checks';

@@ -247,6 +247,16 @@ After walls, doors and windows, the person marks where cabinetry goes and where 
 - **CAT-1 Size limits not known yet.** For most cabinet types the catalog only knows the standard size. Each needs, from the shop: the smallest and largest **height** and **depth**, and the steps they change in; the largest width of drawer-only cabinets; and the width limits of corner cabinets, talls, fillers, panels and shelves. Until then only the standard size passes. `src/modules/catalog/README.md` lists them by item.
 - **CAT-2 Hinge side.** A cabinet whose width makes one door needs a hinge side. Should the hinge side be asked only then (a rule from the door width), or always?
 
+### From the design-rule checks (2026-11-08)
+Three confirmed rules are now checked in the design tool (HARD-014, PREF-011 and PREF-023; see `src/modules/shop-settings/README.md`). These need a number before they can be checked; until then they are not checked at all:
+- **DR-1 Islands lining up (PREF-012).** How close must an island's end be to a wall run's end before it should line up exactly? (closet-builder's Q-023.)
+- **DR-2 Fixtures in line (PREF-013).** How far apart can an island sink and a back-wall range be and still count as "roughly in line"?
+- **DR-3 Island fixture centred (PREF-014).** How far off the island's centre can a sink or cooktop be and still count as "roughly centred"? Does one "near enough" distance serve DR-1 to DR-3 and PRIN-006, or is each its own?
+- **DR-4 Walkways (PREF-011).** Today they are measured from cabinet front to cabinet front, only between runs that face each other. Should they be measured from the countertop edge instead? And should the 36" and 42" minimums also apply between cabinets and a bare wall, for example an island 30" from a wall with no cabinets?
+- **PROPOSED (this session, not owner-decided):**
+  - HARD-014 is checked as "an all-pantry run stands in front of a window", from the owner's rough-layout rule (2026-11-06). Only actual overlap counts; the 3" clearance stays a drawing rule in the designer.
+  - PREF-023 flags any sink in front of a window that is not exactly centred, the owner's own notice rule (2026-11-07). Only `sink` counts, not the bar sink.
+
 ### From the owner's workflow (2026-10-27)
 - **CV-2 More than one colony.** Will each colony have its own Cabinet Vision library (so its own catalog mappings), or will all colonies share one library? And does each have its own prices?
 - **SM-1 Measuring after sign-off.** The client signs off on a design drawn from rough dimensions; the site measure may then change sizes. The earlier plan (2026-10-24) said small within-tolerance differences are absorbed without client re-approval or repricing. Does that still hold? If so, what tolerance? Above it, does the client re-sign?

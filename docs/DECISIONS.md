@@ -120,6 +120,13 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 - **Room drawing, round 9 (owner, 2026-11-05): edge scrolling.** While drawing walls or dragging a handle, a cursor within 40 px of the plan's edge scrolls the plan that way, faster nearer the edge, as AutoCAD, SketchUp and Figma do. The wall or drag being made follows the cursor. It stops when the cursor moves back in.
 - Room capture is pulled ahead of Phase 5 (BUILD_PLAN). Order: scaffold (1a), then Core walls and openings, then the Designer drawing screen.
 
+### 2026-11-08: Look and feel (owner, chat: "implement the UX/UI rules of the artifact from the closet-builder repo")
+Answers C-2. closet-builder's owner-approved design system (its `docs/design-system/`, 2026-10-07/08, and the approved configurator mockup) applies here, in place of the palette that was in `docs/ux/UX_BRIEF.md`.
+- **What applies:** the tokens (navy `#1A3045` for actions and "you are here", gold `#D4B57F` only for selected and active, zinc neutrals), the three typefaces (Newsreader headings, Geist UI, Geist Mono numbers), the radii, shadows, selected-card and hover-card looks, and the 0.22 s motion. Values are in UX_BRIEF Part 4 and in code in `src/core/design-system/`.
+- **Kept from this project:** the meaning colours (green, amber, red), the room plan's pastel-red and black walls (owner, 2026-11-05), "less is more" and "familiar, not custom".
+- **Restyled without changing behaviour** (closet-builder's own redesign rule): the design choices and the room drawing keep every control, label and step; only their colours, type and shadows change. The browser tests pass unchanged.
+- **Not carried over:** closet-builder's 3D studio, floors and veneer photos. They wait for R-1 (photorealistic viewing).
+
 ### 2026-11-08: Design rules reviewed (owner, design rules review page and chat, 2026-11-07/08)
 The owner answered every carried-over design rule on a review page (https://claude.ai/artifact/7vv6Emc6tQgevJ3Pt2Sp8L). The answers are in `src/modules/shop-settings/data/design-rules.json`, each in the rule's note with its date. 82 rules remain: **78 confirmed, 4 declined**, none left unanswered.
 - **How the rules are used (owner, 2026-11-07):** the AI designer gets the confirmed rules, the room's walls and cabinet runs, and the client's intake preferences, and drafts the best-fit design and layout. It needs no stop-or-warn setting. That setting matters only in the design tool, when a designer's own change breaks a rule. Broken preferences go on **a running list of design preferences that could be improved**. This replaces S-6's "block or warn" framing.
@@ -318,7 +325,7 @@ Three confirmed rules are now checked in the design tool (HARD-014, PREF-011 and
   - a cabinetry knowledge base (`docs/cabinetry-intelligence/`) that already separates hard design limits from preferences. That is close to the spec's block-vs-warn design rules, and could seed Shop Settings. *Answered for the design rules (owner, 2026-11-07):* brought in; see "Design rules from closet-builder".
 
   Should any of these be ported (Phase 4–6), or should this project start clean?
-- **C-2 Look and feel.** closet-builder has an owner-approved design system (Geist and Newsreader fonts, its own tokens, 2026-10-07/08). `docs/ux/UX_BRIEF.md` has a different palette. Which one applies here?
+- ~~**C-2 Look and feel.**~~ Answered 2026-11-08: closet-builder's design system applies. See "2026-11-08: Look and feel" under Decided.
 - **C-3** closet-builder decisions (its `docs/architecture.md` Part 1, 2026-10-08 to 10-10) that differ from this plan. Each needs a yes or no here:
   - **Price list:** one price list, priced per inch by cabinet type, plus % adjustments and flat add-ons (A-1, A-7). Compare E-3.
   - ~~Shops~~ Answered (OA-1): a Hutterite colony. Is it the same Biesse shop closet-builder was written for?

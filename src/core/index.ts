@@ -9,3 +9,4 @@ export * from './checks';
 export * from './layout/wall-checks';
 export * from './layout/run-checks';
 export * as examples from './examples/rooms';
+export * from './design-system/tokens';

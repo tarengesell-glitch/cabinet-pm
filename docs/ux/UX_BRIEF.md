@@ -5,7 +5,7 @@ Master brief for establishing the visual UX/UI specification. If anything here c
 > **Updated 2026-10-27 for the Cabinet Vision build spec.**
 > - Parts 1, 5 and 6 now describe the v1 screens.
 > - The screens from the earlier Mozaik-based plan are kept under "Later screens", and are reused by the v1 screens where the owner's 2026-10-27 workflow confirmed them.
-> - The colour tokens in Part 4 are not settled: closet-builder has an owner-approved design system that may apply instead (DECISIONS C-2).
+> - **Updated 2026-11-08 (DECISIONS C-2):** Part 4 now uses closet-builder's owner-approved design system. It replaces the earlier palette.
 > - UX work starts before Phase 5 (`docs/BUILD_PLAN.md`).
 
 > **Owner rule (2026-11-05): familiar, not custom.** For anything about drawing, navigating or editing a plan, first research how the most-used apps do it: Cabinet Vision, 2020 Design, Mozaik, Chief Architect, AutoCAD, Revit, SketchUp and Figma. Follow the common convention, and record the source in `docs/ux/INDUSTRY_REVIEW.md` or `docs/DECISIONS.md`. Cabinet designers should feel at home, not have to learn our way.
@@ -78,32 +78,45 @@ Links: help.typeform.com picture-choice article; pro.houzz.com selections help; 
 
 **Style.** Calm, precise, premium productivity tool fit for client presentations. Linear restraint plus Typeform/Houzz photographic selection. No construction-software clutter, saturated colours, decorative gradients or heavy borders.
 
-**Colour tokens** (adjust only for accessibility):
+**Source (owner, 2026-11-08, DECISIONS C-2).** closet-builder's design system applies: a bright, architectural light mode that feels like a premium furniture showroom, not software. Its owner-approved source is closet-builder `docs/design-system/` (`style-guide.md`, `tokens.md`, `components.md`; approved 2026-10-07/08), and the approved mockup is its `reference/cabinet-configurator.html`. In code the tokens live once, in `src/core/design-system/` (`tokens.css` for screens, `tokens.ts` for canvases). `tools/__tests__/design-tokens.test.ts` fails if the table below and the code drift apart.
 
-| Token | Value | Use |
-|---|---|---|
-| background | #F7F8FA | app background |
-| surface | #FFFFFF | panels, cards |
-| surface-subtle | #F1F4F5 | hover, secondary |
-| text-primary | #17212B | headings, labels |
-| text-secondary | #687582 | metadata |
-| border | #E2E7EB | separation |
-| accent | #176B70 | primary actions, selection |
-| accent-tint | #E6F2F1 | selected card |
-| success | #16805D | verified |
-| warning | #AD751A | needs attention |
-| danger | #BE3D42 | blocked, error |
-| focus | #2563EB | keyboard focus |
+**Colour tokens** (adjust only for accessibility). Source: **owner** = approved in closet-builder; **assumed** = accepted with its mockup, not separately confirmed.
 
-Status never relies on colour alone; always icon and/or text. *Exception (owner, 2026-11-05):* on the room plan, a wall's colour alone shows its state, because markers there were clutter: pastel red = unmeasured, black = confirmed, as in CAD programs. The panel for a selected wall says it in words. Two states only; typing a size never confirms it. Provide dark-mode values later; structure tokens to allow it.
+| Token | Value | Use | Source |
+|---|---|---|---|
+| navy | #1A3045 | Actions and "you are here": primary buttons, the open step or tab, a pressed switch, the logo tile | owner |
+| navy-hover | #24405A | Primary button hover | assumed |
+| gold | #D4B57F | **Only** selected and active states: selected card border and glow, the check badge's tick, the current step's ring | owner |
+| gold-soft | #E7D6B4 | Card hover inner edge, finished steps, soft pills | owner |
+| ink | #18181B | Text and headings | owner |
+| muted | #71717A | Secondary text, hints, labels | owner |
+| rule | #E4E4E7 | Borders and dividers | owner |
+| paper | #FFFFFF | Panels, cards, the top bar | owner |
+| surface | #FAFAFA | The page behind cards; soft fills | owner |
+| error | #B91C1C | A refusal, and its field's border; blocked | assumed |
+| success | #16805D | Verified, passed | assumed (kept from the earlier brief) |
+| warning | #AD751A | To check, assumed, sample | assumed (kept from the earlier brief) |
 
-**Type.** Inter or Geist. Page title 24–28, screen question 26–32, section 18–20, body 14–16, metadata 12–13, client selection labels 16–18. Semibold for emphasis.
+**Two brand colours with jobs.** Gold means selected: never for decoration, a hover alone or a plain action. Navy means act, or "you are here". **Meaning colours** (green verified, amber to check, red missing or refused) are never decorative.
 
-**Geometry.** Spacing 4/8/12/16/24/32. Card radius 12, image choice card 14–16, button 8–10. Page padding 24–32. Top bar ~60, sidebar ~232, detail drawer 360–420, selection summary 280–320. Subtle shadows only.
+Status never relies on colour alone; always icon and/or text. *Exception (owner, 2026-11-05):* on the room plan, a wall's colour alone shows its state, because markers there were clutter: pastel red = unmeasured, black = confirmed, as in CAD programs. These two wall colours stay as they are. The panel for a selected wall says it in words. Two states only; typing a size never confirms it. Provide dark-mode values later; structure tokens to allow it.
+
+**Type.** Three typefaces with jobs, bundled from npm (no font host):
+- **Newsreader** (display, weight 400–500): page and step headings, names (the company, clients, rooms). 34 px page headings, 30–36 px a step's question, 22 px a screen's room name, 17–22 px sections and cards.
+- **Geist** (UI): every label, button, field and sentence. 13–14 px body (15–16 px client selection labels), 12–12.5 px hints, 11 px uppercase labels with 0.12em spacing.
+- **Geist Mono**, tabular figures: typed measurements and dimension readouts (13–13.5 px).
+
+**Geometry.** Spacing 4/8/12/16/24/32. Radii: 8 px buttons and fields; 10–12 px tiles and thumbnails; 14 px cards and panels; pills fully round. Page padding 24–32. Top bar ~60, sidebar ~232, detail drawer 360–420, selection summary 280–320.
+- **Shadows:** ambient `0 1px 2px rgba(24,24,27,.04)` on everything that sits on the page; raised `0 12px 24px -10px rgba(24,24,27,.16)` on hover and for ask-first panels.
+- **Selected card:** a gold border with an inner gold glow and a 4 px soft gold halo, lifted 2 px, with a navy check badge with a gold tick.
+- **Hover card (not selected):** lifted 2 px, a gold-soft inner edge and the raised shadow.
+- **Focus:** 2 px navy outline, 2–3 px offset.
 
 **Icons.** Lucide. Labels on critical actions.
 
-**Motion.** 100–180 ms, respect reduced motion, nothing decorative.
+**Motion.** Hover lift and glow 0.22 s `cubic-bezier(.2,.8,.2,1)`; nothing decorative. `prefers-reduced-motion` removes lifts and transitions.
+
+**Not carried over from closet-builder (yet).** Its 3D studio (sunlight, floors by closet room type), the four veneer photos and their grading, and the mockup's sliders, stepper and Back/Continue flow. The 3D and photo parts belong with photorealistic viewing, which is still open (DECISIONS R-1). Measurements stay typed, never sliders, as in closet-builder.
 
 **Responsive.** Desktop baseline. Collapse secondary panels before shrinking the workspace. Presentation mode prioritises images. Tablet split views; phone full-width plan with bottom sheets. No horizontal scrolling for core tasks.
 

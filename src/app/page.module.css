@@ -1,0 +1,28 @@
+/* Home page, in the design tokens (src/core/design-system/tokens.css). */
+.main {
+  padding: 32px;
+  max-width: 640px;
+  font-size: 14px;
+  line-height: 1.55;
+}
+.title {
+  font-family: var(--ds-font-display);
+  font-weight: 400;
+  font-size: 34px;
+  letter-spacing: -0.01em;
+  margin: 0 0 8px;
+}
+.lead {
+  color: var(--ds-muted);
+}
+.steps {
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.steps a {
+  color: var(--ds-navy);
+  font-weight: 500;
+  text-underline-offset: 3px;
+}

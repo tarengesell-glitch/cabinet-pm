@@ -1,11 +1,12 @@
 import Link from 'next/link';
+import styles from './page.module.css';
 
 export default function HomePage() {
   return (
-    <main style={{ fontFamily: 'system-ui, sans-serif', padding: 32, maxWidth: 640 }}>
-      <h1>Cabinet design platform</h1>
-      <p>Early preview. A design goes through these steps, in this order:</p>
-      <ol>
+    <main className={styles.main}>
+      <h1 className={styles.title}>Cabinet design platform</h1>
+      <p className={styles.lead}>Early preview. A design goes through these steps, in this order:</p>
+      <ol className={styles.steps}>
         <li>
           <Link href="/intake">Design choices</Link>: the client picks the layout, look, colours, hardware and inserts for each room, one
           question at a time with pictures.

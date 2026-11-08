@@ -1,0 +1,75 @@
+/* The design tokens (DECISIONS C-2, owner 2026-11-08: closet-builder's design system applies).
+   Values: closet-builder docs/design-system/tokens.md. Same values as tokens.ts and docs/ux/UX_BRIEF.md Part 4;
+   tools/__tests__/design-tokens.test.ts fails if they drift. Loaded once, by src/app/layout.tsx.
+   Never hard-code a colour a token covers. */
+:root {
+  --ds-navy: #1a3045;
+  --ds-navy-hover: #24405a;
+  --ds-gold: #d4b57f;
+  --ds-gold-soft: #e7d6b4;
+  --ds-ink: #18181b;
+  --ds-muted: #71717a;
+  --ds-rule: #e4e4e7;
+  --ds-paper: #ffffff;
+  --ds-surface: #fafafa;
+  --ds-error: #b91c1c;
+  --ds-success: #16805d;
+  --ds-warning: #ad751a;
+
+  /* Soft tints of the meaning colours, for notice backgrounds (assumed). */
+  --ds-error-tint: #fdf2f2;
+  /* A card's border on hover (zinc-300), from the approved mockup's picture card. */
+  --ds-rule-strong: #d4d4d8;
+  --ds-warning-tint: #fbf3e4;
+
+  --ds-font-display: "Newsreader Variable", "Iowan Old Style", Georgia, serif;
+  --ds-font-body: "Geist Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --ds-font-mono: "Geist Mono Variable", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --ds-radius-button: 8px;
+  --ds-radius-tile: 10px;
+  --ds-radius-card: 14px;
+
+  --ds-shadow-ambient: 0 1px 2px rgba(24, 24, 27, 0.04);
+  --ds-shadow-raised: 0 1px 2px rgba(24, 24, 27, 0.04), 0 12px 24px -10px rgba(24, 24, 27, 0.16);
+  /* Selected card: gold border, inner gold glow, 4 px soft gold halo (closet-builder tokens.md "Selected card"). */
+  --ds-shadow-selected: inset 0 0 0 1.5px #d4b57f, inset 0 0 22px rgba(212, 181, 127, 0.3), 0 0 0 4px rgba(212, 181, 127, 0.16),
+    0 14px 28px -14px rgba(26, 48, 69, 0.22);
+  /* Hover card (not selected): gold-soft inner edge plus the raised shadow. */
+  --ds-shadow-hover: inset 0 0 0 1px #e7d6b4, inset 0 0 14px rgba(212, 181, 127, 0.16), 0 12px 24px -12px rgba(228, 228, 231, 0.9),
+    0 4px 10px -4px rgba(26, 48, 69, 0.1);
+  --ds-focus-ring: 0 0 0 3px rgba(212, 181, 127, 0.35);
+
+  --ds-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ds-duration: 0.22s;
+
+  color-scheme: light;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--ds-surface);
+  color: var(--ds-ink);
+  font-family: var(--ds-font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2 {
+  text-wrap: balance;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ds-navy);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}

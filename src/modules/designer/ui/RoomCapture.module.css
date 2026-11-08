@@ -1,17 +1,19 @@
-/* Colours from docs/ux/UX_BRIEF.md "Colour tokens". The full design system waits for DECISIONS C-2. */
+/* Colours, type and shadows from the design tokens (src/core/design-system/tokens.css; DECISIONS C-2).
+   The local names map onto them so the rules below stay as they were. Gold only for selected states. */
 .screen {
-  --background: #f7f8fa;
-  --surface: #ffffff;
-  --surface-subtle: #f1f4f5;
-  --text-primary: #17212b;
-  --text-secondary: #687582;
-  --border: #e2e7eb;
-  --accent: #176b70;
-  --accent-tint: #e6f2f1;
-  --success: #16805d;
-  --warning: #ad751a;
-  --danger: #be3d42;
-  --focus: #2563eb;
+  --background: var(--ds-surface);
+  --surface: var(--ds-paper);
+  --surface-subtle: var(--ds-surface);
+  --text-primary: var(--ds-ink);
+  --text-secondary: var(--ds-muted);
+  --border: var(--ds-rule);
+  --accent: var(--ds-navy);
+  --success: var(--ds-success);
+  --warning: var(--ds-warning);
+  --danger: var(--ds-error);
+  --focus: var(--ds-navy);
+  --danger-tint: var(--ds-error-tint);
+  --danger-rule: color-mix(in srgb, var(--ds-error) 25%, white);
 
   display: flex;
   flex-direction: column;
@@ -19,7 +21,7 @@
   min-height: 560px;
   background: var(--background);
   color: var(--text-primary);
-  font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--ds-font-body);
   font-size: 14px;
 }
 
@@ -39,8 +41,11 @@
 }
 
 .title {
-  font-size: 16px;
-  font-weight: 600;
+  font-family: var(--ds-font-display);
+  font-size: 22px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
   margin: 0;
 }
 
@@ -59,7 +64,7 @@
 
 .bannerDanger {
   composes: banner;
-  background: #fbeaea;
+  background: var(--danger-tint);
   color: var(--danger);
 }
 
@@ -129,7 +134,8 @@
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: var(--ds-radius-card);
+  box-shadow: var(--ds-shadow-ambient);
   padding: 12px 14px;
   display: flex;
   flex-direction: column;
@@ -163,11 +169,13 @@
   font-size: 13px;
   padding: 6px 11px;
   min-height: 34px;
-  border-radius: 7px;
+  border-radius: var(--ds-radius-button);
   border: 1px solid var(--border);
   background: var(--surface);
   color: var(--text-primary);
+  box-shadow: var(--ds-shadow-ambient);
   cursor: pointer;
+  transition: background var(--ds-duration) var(--ds-ease), box-shadow var(--ds-duration) var(--ds-ease), border-color var(--ds-duration) var(--ds-ease);
 }
 
 .button:hover:not(:disabled) {
@@ -181,9 +189,10 @@
 
 .buttonActive {
   composes: button;
-  background: var(--accent-tint);
-  border-color: var(--accent);
-  color: var(--accent);
+  background: var(--surface);
+  border-color: var(--ds-gold);
+  color: var(--text-primary);
+  box-shadow: var(--ds-shadow-selected);
   font-weight: 600;
 }
 
@@ -191,11 +200,11 @@
   composes: button;
   background: var(--accent);
   border-color: var(--accent);
-  color: #fff;
+  color: var(--ds-paper);
 }
 
 .buttonPrimary:hover:not(:disabled) {
-  background: #135a5e;
+  background: var(--ds-navy-hover);
 }
 
 .buttonDanger {
@@ -217,6 +226,7 @@
 }
 
 .fieldValue {
+  font-family: var(--ds-font-mono);
   font-size: 15px;
   font-variant-numeric: tabular-nums;
 }
@@ -227,7 +237,7 @@
   padding: 6px 9px;
   min-height: 34px;
   border: 1px solid var(--border);
-  border-radius: 7px;
+  border-radius: var(--ds-radius-button);
   background: var(--surface);
   color: var(--text-primary);
   min-width: 0;
@@ -292,7 +302,7 @@
 
 .issue {
   composes: listButton;
-  border-color: #f0cfd0;
+  border-color: var(--danger-rule);
   color: var(--danger);
   white-space: normal;
   line-height: 1.35;
@@ -305,7 +315,7 @@
 }
 
 .json {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--ds-font-mono);
   font-size: 11px;
   background: var(--surface-subtle);
   border-radius: 6px;
@@ -361,16 +371,16 @@
   padding: 8px 10px 8px 12px;
   border-radius: 8px;
   font-size: 13px;
-  background: #fbf4e8;
-  border: 1px solid #ecd9b4;
+  background: var(--ds-warning-tint);
+  border: 1px solid color-mix(in srgb, var(--ds-warning) 30%, white);
   color: var(--warning);
-  box-shadow: 0 2px 8px rgba(23, 33, 43, 0.08);
+  box-shadow: var(--ds-shadow-raised);
 }
 
 .toastError {
   composes: toast;
-  background: #fbeeee;
-  border-color: #efcfd0;
+  background: var(--danger-tint);
+  border-color: var(--danger-rule);
   color: var(--danger);
 }
 
@@ -415,7 +425,7 @@
   min-height: 44px;
   padding: 8px 10px;
   border: 1px solid transparent;
-  border-radius: 9px;
+  border-radius: var(--ds-radius-tile);
   background: transparent;
   color: var(--text-secondary);
   text-align: left;
@@ -446,17 +456,19 @@
   background: var(--surface);
 }
 
+/* The open step: navy with a gold ring, as closet-builder's stepper. */
 .stepNumOpen {
   composes: stepNum;
   background: var(--accent);
   border-color: var(--accent);
-  color: #fff;
+  color: var(--ds-paper);
+  box-shadow: var(--ds-focus-ring);
 }
 
 .stepNumDone {
   composes: stepNum;
-  background: var(--accent-tint);
-  border-color: var(--accent);
+  background: var(--ds-gold-soft);
+  border-color: var(--ds-gold);
   color: var(--accent);
 }
 
@@ -513,9 +525,10 @@
 
 .tileActive {
   composes: tile;
-  background: var(--accent-tint);
-  border-color: var(--accent);
-  color: var(--accent);
+  background: var(--surface);
+  border-color: var(--ds-gold);
+  color: var(--text-primary);
+  box-shadow: var(--ds-shadow-selected);
   font-weight: 600;
 }
 
@@ -604,8 +617,8 @@
 .checksBad {
   composes: button;
   color: var(--danger);
-  border-color: #f0cfd0;
-  background: #fbeaea;
+  border-color: var(--danger-rule);
+  background: var(--danger-tint);
   font-weight: 600;
 }
 
@@ -620,6 +633,6 @@
   padding: 10px;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 10px;
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.16);
+  border-radius: var(--ds-radius-card);
+  box-shadow: var(--ds-shadow-raised);
 }

@@ -5,7 +5,7 @@
  * selected run or appliance (owner, 2026-11-07). Display only: every rule is in model/layout.ts.
  */
 import { useRef } from 'react';
-import { formatInches, type Length, type Result, type Room, type RunKind, wallLetter } from '@/core/index';
+import { COLORS, formatInches, type Length, type Result, type Room, type RunKind, wallLetter } from '@/core/index';
 import type { TypedSize } from '../model/editor';
 import { RUN_KIND_LABEL, cornerCabinets, findAppliance, findRun, insideSpan, runEnd } from '../model/layout';
 import { LAYOUT_RULES, applianceType } from '../model/layout-rules';
@@ -58,8 +58,8 @@ function PopupFrame(props: {
         width: props.width,
         boxSizing: 'border-box',
         ...(props.maxHeight ? { maxHeight: props.maxHeight, overflowY: 'auto' as const } : {}),
-        background: '#fff',
-        border: '1px solid #e2e7eb',
+        background: COLORS.paper,
+        border: `1px solid ${COLORS.rule}`,
         borderRadius: 8,
         boxShadow: '0 6px 24px rgba(0,0,0,0.16)',
         padding: 10,
@@ -71,7 +71,7 @@ function PopupFrame(props: {
       <button
         aria-label="Close"
         onClick={props.onClose}
-        style={{ position: 'absolute', top: 4, right: 4, width: 28, height: 28, border: 'none', background: 'transparent', fontSize: 18, lineHeight: 1, color: '#5b6670', cursor: 'pointer' }}
+        style={{ position: 'absolute', top: 4, right: 4, width: 28, height: 28, border: 'none', background: 'transparent', fontSize: 18, lineHeight: 1, color: COLORS.muted, cursor: 'pointer' }}
       >
         ×
       </button>

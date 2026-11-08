@@ -7,7 +7,7 @@
  */
 import { useRef } from 'react';
 import { Circle, Group, Line, Rect, Text } from 'react-konva';
-import { formatInches, type AppliancePlacement, type Point, type Room, type Run, type RunKind, type Wall } from '@/core/index';
+import { COLORS, formatInches, type AppliancePlacement, type Point, type Room, type Run, type RunKind, type Wall } from '@/core/index';
 import {
   cornerCabinets,
   direction,
@@ -44,9 +44,10 @@ const CENTRE_SNAP = 3 * INCH;
 /** How close (in room units) an island being dragged must come to a floating wall to snap onto it. */
 const ISLAND_SNAP = 10 * INCH;
 
-const ACCENT = '#176b70';
-const DANGER = '#be3d42';
-const INK = '#17212b';
+// Design tokens (src/core/design-system). The run fills below are drawing colours with their own meaning.
+const ACCENT = COLORS.navy;
+const DANGER = COLORS.error;
+const INK = COLORS.ink;
 const COLOURS: Record<RunKind, { fill: string; stroke: string }> = {
   base: { fill: '#e6cfa8', stroke: '#a8824c' },
   upper: { fill: '#fff6e6', stroke: '#a8824c' },
@@ -165,7 +166,7 @@ export function LayoutShapes(props: {
           y={sp.y}
           text={label}
           fontSize={font}
-          fill={isSel ? ACCENT : '#5b6670'}
+          fill={isSel ? ACCENT : COLORS.muted}
           fontStyle={isSel ? 'bold' : 'normal'}
           rotation={upright(toScreen(w.start_point), toScreen(w.end_point))}
           offsetX={label.length * 2.9}

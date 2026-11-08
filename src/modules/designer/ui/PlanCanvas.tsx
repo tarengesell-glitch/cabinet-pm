@@ -8,6 +8,7 @@ import { useEffect, useMemo, useRef, useState, type MutableRefObject } from 'rea
 import { Arc, Circle, Group, Layer, Line, Rect, Stage, Text } from 'react-konva';
 import type Konva from 'konva';
 import {
+  COLORS,
   directionOf,
   distanceForDisplay,
   formatInches,
@@ -94,12 +95,12 @@ const GHOST_PX = 40;
 /** How far you can zoom out from / in to the fitted view. */
 const MIN_ZOOM = 0.25;
 const MAX_ZOOM = 12;
-const GHOST = '#176b70';
+const GHOST = COLORS.navy;
 /** Dimension lines: thin and quieter than walls, as in drafting. */
-const DIM = '#5b6670';
+const DIM = COLORS.muted;
 /** A floating wall (island / peninsula): a thin dashed line, no thickness, no status colour. */
-const FLOATING = '#5b6670';
-const MUTED = '#687582';
+const FLOATING = COLORS.muted;
+const MUTED = COLORS.muted;
 
 /**
  * Two wall states (owner, 2026-11-05): unmeasured walls are a soft pastel red, a "fail loudly"
@@ -108,8 +109,9 @@ const MUTED = '#687582';
 const FILL: Record<Provenance, string> = { unmeasured: '#eeb8ba', confirmed: '#2b2f33' };
 /** Label text: darker than the fill so it stays readable on white. */
 const TEXT: Record<Provenance, string> = { unmeasured: '#b0575b', confirmed: '#2b2f33' };
-const ACCENT = '#176b70';
-const DANGER = '#be3d42';
+// Design tokens (src/core/design-system). The two wall colours above stay as the owner set them.
+const ACCENT = COLORS.navy;
+const DANGER = COLORS.error;
 
 interface Props {
   /** The room as drawn: during a handle drag, a preview of the move. */
@@ -1047,7 +1049,7 @@ export function PlanCanvas(props: Props) {
               padding: '4px 6px',
               borderRadius: 6,
               border: `1.5px solid ${editingLength.error ? DANGER : ACCENT}`,
-              color: '#17212b',
+              color: COLORS.ink,
               background: '#fff',
             }}
           />
@@ -1082,7 +1084,7 @@ export function PlanCanvas(props: Props) {
         <ZoomButton label="Redo" onClick={props.onRedo} disabled={!props.canRedo}>
           ↷
         </ZoomButton>
-        <span style={{ width: 1, height: 22, background: '#e2e7eb', margin: '0 2px' }} aria-hidden="true" />
+        <span style={{ width: 1, height: 22, background: COLORS.rule, margin: '0 2px' }} aria-hidden="true" />
         <ZoomButton label="Zoom out" onClick={() => zoomAt(1 / 1.25, size.width / 2, size.height / 2)}>
           −
         </ZoomButton>
@@ -1112,9 +1114,9 @@ function ZoomButton({ label, onClick, children, disabled = false }: { label: str
         minWidth: 34,
         height: 34,
         borderRadius: 7,
-        border: '1px solid #e2e7eb',
+        border: `1px solid ${COLORS.rule}`,
         background: '#fff',
-        color: '#17212b',
+        color: COLORS.ink,
         cursor: disabled ? 'default' : 'pointer',
         opacity: disabled ? 0.4 : 1,
       }}
@@ -1360,7 +1362,7 @@ function WallShape(props: WallShapeProps) {
         const e = along(o.offset.value + o.width.value);
         const isSel = selectedOpening === o.opening_id;
         const bad = issueIds.has(o.opening_id);
-        const stroke = bad ? DANGER : isSel ? ACCENT : '#17212b';
+        const stroke = bad ? DANGER : isSel ? ACCENT : COLORS.ink;
         const sel = select({ kind: 'opening', id: o.opening_id });
         const w = o.width.value * scale;
         const draggable = selectable && canEdit;

@@ -20,7 +20,7 @@ Before any work, read:
 - `docs/DECISIONS.md`;
 - `docs/BUILD_PLAN.md`.
 
-For any UI work, also read `docs/ux/UX_BRIEF.md`. For anything touching the adapter, also read `docs/cabinet-vision/FORMAT_REFERENCE.md`.
+For any UI work, also read `docs/ux/UX_BRIEF.md`. All frontend work follows `docs/ux/`, and uses the design tokens in `src/core/design-system/` (never a hard-coded colour a token covers). Prefer visual direct manipulation over text-heavy forms, use meaningful representative images during development, and validate key screens with interactive previews. For anything touching the adapter, also read `docs/cabinet-vision/FORMAT_REFERENCE.md`.
 
 When docs disagree, `docs/BUILD_SPEC.md` wins. Then the "Decided" list in `docs/DECISIONS.md`. Anything marked PROPOSED is not authority. Say so when you find a conflict.
 

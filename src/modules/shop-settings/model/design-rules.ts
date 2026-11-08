@@ -4,7 +4,7 @@
  * filled in. The owner reviewed them on 2026-11-07/08: each says whether it is confirmed for
  * this platform, declined, or still a candidate, and (when confirmed) what the design tool
  * does when a designer's own change breaks it. The AI designer reads every confirmed rule.
- * No rule is applied by the software yet.
+ * Three are checked in the design tool (design-rule-checks.ts); the rest wait for placed cabinets.
  */
 import { z } from 'zod';
 import { parseImperial, type Length } from '@/core/index';

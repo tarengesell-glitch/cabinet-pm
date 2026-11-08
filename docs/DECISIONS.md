@@ -120,6 +120,18 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 - **Room drawing, round 9 (owner, 2026-11-05): edge scrolling.** While drawing walls or dragging a handle, a cursor within 40 px of the plan's edge scrolls the plan that way, faster nearer the edge, as AutoCAD, SketchUp and Figma do. The wall or drag being made follows the cursor. It stops when the cursor moves back in.
 - Room capture is pulled ahead of Phase 5 (BUILD_PLAN). Order: scaffold (1a), then Core walls and openings, then the Designer drawing screen.
 
+### 2026-11-08: The design studio (owner: "the design choices flow seems to work well, so let's integrate that into the actual code", Kitchen Studio prototype, https://claude.ai/artifact/Tkd2r8vTUswCs3ioJnGjqg)
+- **C-2 answered: the look is the prototype's**, which is closet-builder's owner-approved design system: navy (#1A3045) to act or show "you are here", gold (#D4B57F) for what is selected, Newsreader for headings, Geist for everything else, light only. The owner asked for "the more polished UI of the artifact". The tokens live once, in `src/platform/design-system/tokens.css`; the palette in `docs/ux/UX_BRIEF.md` Part 4 is replaced. The owner's wall colours (pastel red unmeasured, black confirmed) stay.
+- **The design studio (`/studio`)** puts one job's steps in a row along the top: Design choices · Room drawing · AI design · Customize, with the job's rooms as chips under them, as in the prototype. Clicking a room chip switches rooms in either step.
+  - Design choices come first. **Room drawing opens only when every room's choices are finished** (the prototype's rule). A finished room offers "Add another room" or "Start laying out room dimensions".
+  - **AI design and Customize are shown but can't be opened** ("Not built yet"); the prototype's mocked AI draft and 3D customizer are not carried over.
+  - **The room drawing is the live tool**, with all its controls and behaviour, restyled to the prototype's look. The owner: "implement the functionality, controls, and UX of the live room drawing tool, but with the more polished UI of the artifact". The prototype's own drawing code is not used.
+  - **Each room of the design choices has its own drawing**, kept in this browser under that room's ID. The standalone pages `/intake` and `/rooms/preview` still work on their own.
+- **IK-17 answered from the prototype: the intake's rough ceiling height starts the room drawing.** A studio room with no drawing yet starts at once, named as in the design choices, with that ceiling height marked unmeasured (no "Start a room" form). "Match the kitchen" follows the kitchen. The app passes the height through the contracts (`roughCeiling` in intake, `StudioRoom` in designer), so the dependency table is unchanged. The heights are data: each ceiling option in `intake-v1.json` records its feet.
+- **PROPOSED (this session, not owner-decided):**
+  - a room counts as drawn (✓ in the room bar) once it has room walls and cabinet runs and no problems;
+  - the job in the studio is a single preview job (no projects or clients yet), labelled as such with the mocked user and shop.
+
 ### 2026-11-08: Design rules reviewed (owner, design rules review page and chat, 2026-11-07/08)
 The owner answered every carried-over design rule on a review page (https://claude.ai/artifact/7vv6Emc6tQgevJ3Pt2Sp8L). The answers are in `src/modules/shop-settings/data/design-rules.json`, each in the rule's note with its date. 82 rules remain: **78 confirmed, 4 declined**, none left unanswered.
 - **How the rules are used (owner, 2026-11-07):** the AI designer gets the confirmed rules, the room's walls and cabinet runs, and the client's intake preferences, and drafts the best-fit design and layout. It needs no stop-or-warn setting. That setting matters only in the design tool, when a designer's own change breaks a rule. Broken preferences go on **a running list of design preferences that could be improved**. This replaces S-6's "block or warn" framing.
@@ -292,7 +304,7 @@ Three confirmed rules are now checked in the design tool (HARD-014, PREF-011 and
 ### From the visual intake build (2026-11-08)
 - **IK-15 AI Design reads an older intake shape.** `ai-design` (`model/intake.ts`) was written from the 2026-10-27 outline, before the prototype reviews. It expects `door_colour`, an island yes/no and separate island material, tone and door style. The owner replaced these with the colours step (cabinets, base, island, counter, secondary), four hardware combinations, and garbage location and slide-outs. Most other question codes match. AI Design needs a session to read the intake's `intakeHandover` instead. This session stayed inside `intake` (rule 1).
 - **IK-16 Intake permissions.** The intake uses `room.view` and `room.edit` for now. Should it have its own (for example `intake.view`, `intake.edit`), and should clients answering on their own get only those?
-- **IK-17 Ceiling height in two places.** The intake asks for a rough ceiling height and the room drawing asks again. Should the intake's answer fill in the room drawing's starting value? The room drawing can't read the intake today (ARCHITECTURE: `designer` may not import `intake`), so this needs the app to pass it, or a change to the dependency table.
+- ~~**IK-17 Ceiling height in two places.**~~ Answered 2026-11-08 (see "The design studio"). The intake asks for a rough ceiling height and the room drawing asks again. Should the intake's answer fill in the room drawing's starting value? The room drawing can't read the intake today (ARCHITECTURE: `designer` may not import `intake`), so this needs the app to pass it, or a change to the dependency table.
 
 ### From the spec (section 11)
 - **S-1** Which Cabinet Vision versions do target shops run, and does ORDX behave the same across them?
@@ -318,7 +330,7 @@ Three confirmed rules are now checked in the design tool (HARD-014, PREF-011 and
   - a cabinetry knowledge base (`docs/cabinetry-intelligence/`) that already separates hard design limits from preferences. That is close to the spec's block-vs-warn design rules, and could seed Shop Settings. *Answered for the design rules (owner, 2026-11-07):* brought in; see "Design rules from closet-builder".
 
   Should any of these be ported (Phase 4–6), or should this project start clean?
-- **C-2 Look and feel.** closet-builder has an owner-approved design system (Geist and Newsreader fonts, its own tokens, 2026-10-07/08). `docs/ux/UX_BRIEF.md` has a different palette. Which one applies here?
+- ~~**C-2 Look and feel.**~~ Answered 2026-11-08: the prototype's look, closet-builder's design system (see "The design studio"). closet-builder has an owner-approved design system (Geist and Newsreader fonts, its own tokens, 2026-10-07/08). `docs/ux/UX_BRIEF.md` has a different palette. Which one applies here?
 - **C-3** closet-builder decisions (its `docs/architecture.md` Part 1, 2026-10-08 to 10-10) that differ from this plan. Each needs a yes or no here:
   - **Price list:** one price list, priced per inch by cabinet type, plus % adjustments and flat add-ons (A-1, A-7). Compare E-3.
   - ~~Shops~~ Answered (OA-1): a Hutterite colony. Is it the same Biesse shop closet-builder was written for?

@@ -78,6 +78,8 @@ Links: help.typeform.com picture-choice article; pro.houzz.com selections help; 
 
 **Style.** Calm, precise, premium productivity tool fit for client presentations. Linear restraint plus Typeform/Houzz photographic selection. No construction-software clutter, saturated colours, decorative gradients or heavy borders.
 
+> **Replaced (owner, 2026-11-08, DECISIONS C-2):** the tokens below are superseded by the Kitchen Studio prototype's look (closet-builder's design system: navy, gold, Newsreader and Geist), kept in `src/platform/design-system/tokens.css`. The table stays for the record.
+
 **Colour tokens** (adjust only for accessibility):
 
 | Token | Value | Use |

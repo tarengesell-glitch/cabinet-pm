@@ -5,7 +5,7 @@
  * - the user and shop are mocked (no sign-in yet), and the screen says so.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { JobSchema, RUN_CHECKS, WALL_CHECKS, examples, runChecks, type Opening, type Point, type Result, type Room } from '@/core/index';
+import { JobSchema, RUN_CHECKS, WALL_CHECKS, examples, runChecks, type Length, type Opening, type Point, type Result, type Room } from '@/core/index';
 import { can, PREVIEW_SHOP, type User } from '@/platform/index';
 import {
   addWall,
@@ -49,7 +49,7 @@ import { STEP_LABEL, StepList, type StepId } from './Steps';
 import { applyLayoutEdit, type LayoutEdit } from './layoutEdits';
 import { ChecksMenu, OpeningPanel, RoomPanel, StartRoomForm, WallPanel, WallsPanel, KIND_LABEL } from './Panels';
 import { PlanCanvas, selectedWallIds, wallSelection, type Selection, type Tool } from './PlanCanvas';
-import { downloadText, readStored, writeStored } from './storage';
+import { downloadText, readStored, storageKey, writeStored } from './storage';
 import s from './RoomCapture.module.css';
 
 const TOOL_HINT: Record<Tool, string> = {
@@ -104,7 +104,26 @@ function selectionAfter(edit: LayoutEdit, before: Room, after: Room): Selection 
   }
 }
 
-export function RoomCapture({ user }: { user: User }) {
+/**
+ * A room of the design choices, when the drawing sits inside the design studio. The studio's
+ * header shows the job and the rooms; each room is kept on its own.
+ */
+export interface StudioRoom {
+  /** The room's ID in the design choices; it is also where its drawing is kept. */
+  readonly key: string;
+  readonly name: string;
+  /** The rough ceiling height from the design choices (unmeasured), or null when there is none. */
+  readonly ceiling: Length | null;
+  /** Called after every saved change, so the studio can update its room list. */
+  readonly onChange?: () => void;
+}
+
+export function RoomCapture({ user, studio }: { user: User; studio?: StudioRoom }) {
+  const key = storageKey(studio?.key ?? null);
+  const onStudioChange = studio?.onChange;
+  /** A studio room with no drawing yet starts at once, from its name and rough ceiling height. */
+  const startWith = studio && studio.ceiling !== null ? { name: studio.name, ceiling: studio.ceiling } : null;
+  const startRef = useRef(startWith);
   const canView = can(user, 'room.view');
   const canEdit = can(user, 'room.edit');
 
@@ -137,7 +156,7 @@ export function RoomCapture({ user }: { user: User }) {
 
   // Load what was kept in this browser.
   useEffect(() => {
-    const stored = readStored();
+    const stored = readStored(key);
     if (stored.kind === 'unavailable') setStorageProblem(`This browser won't keep your work (${stored.reason}).`);
     else if (stored.kind === 'unreadable') setUnreadable({ raw: stored.raw, reason: stored.reason });
     else if (stored.kind === 'found') {
@@ -147,16 +166,25 @@ export function RoomCapture({ user }: { user: User }) {
         setTimeline(startTimeline(r.value.draft));
         if (upgraded.notes.length) setMessage({ kind: 'notice', text: upgraded.notes.join(' ') });
       } else setUnreadable({ raw: stored.raw, reason: r.reason });
+    } else if (stored.kind === 'none' && startRef.current) {
+      // The ceiling height is the rough one from the design choices: unmeasured until confirmed.
+      const r = startRoom(env, { name: startRef.current.name, shopId: PREVIEW_SHOP.id, ceiling: { value: startRef.current.ceiling, source_mm: null } });
+      if (r.ok) {
+        setTimeline(startTimeline(r.value.draft));
+        setWallTool('draw');
+        setTool('draw');
+      } else setMessage({ kind: 'error', text: r.reason });
     }
     setLoaded(true);
-  }, []);
+  }, [key, env]);
 
   // Keep it in this browser after every change.
   useEffect(() => {
     if (!loaded || unreadable) return;
-    const problem = writeStored(timeline?.present ?? null);
+    const problem = writeStored(timeline?.present ?? null, key);
     setStorageProblem(problem ? `Your work is NOT being kept in this browser (${problem}). Download it to keep it.` : null);
-  }, [timeline, loaded, unreadable]);
+    onStudioChange?.();
+  }, [timeline, loaded, unreadable, key, onStudioChange]);
 
   const apply = useCallback(
     (result: Result<Change>): Result<Change> => {
@@ -249,9 +277,10 @@ export function RoomCapture({ user }: { user: User }) {
     if (still.length !== ids.length) setSelection(wallSelection(still));
   }, [room, selection]);
 
+  const screen = studio ? s.embedded : s.screen;
   if (!canView) {
     return (
-      <div className={s.screen}>
+      <div className={screen}>
         <div className={s.blocked}>
           <h1 className={s.title}>You don&apos;t have permission to see rooms</h1>
           <p className={s.muted}>Ask an owner or admin for the “room.view” permission.</p>
@@ -336,24 +365,26 @@ export function RoomCapture({ user }: { user: User }) {
 
   const header = (
     <header className={s.header}>
-      <h1 className={s.title}>{room ? room.name : 'Room drawing'}</h1>
+      {!studio && <h1 className={s.title}>{room ? room.name : 'Room drawing'}</h1>}
       <span className={s.banner}>Preview: saved in this browser only</span>
       {storageProblem && <span className={s.bannerDanger} role="alert">{storageProblem}</span>}
       {draft && room && <ChecksMenu formatErrors={formatErrors} issues={issues} onSelect={selectAndOpen} />}
       <span className={s.spacer} />
-      <span className={s.mockNote}>
+      {/* Inside the studio, its header says the user and shop are mocked. */}
+      {!studio && <span className={s.mockNote}>
         {user.mocked && `${user.name} · `}
         {PREVIEW_SHOP.name}
         {!canEdit && ' · read-only'}
-      </span>
+      </span>}
+      {studio && !canEdit && <span className={s.mockNote}>Read-only</span>}
     </header>
   );
 
-  if (!loaded) return <div className={s.screen}>{header}</div>;
+  if (!loaded) return <div className={screen}>{header}</div>;
 
   if (unreadable) {
     return (
-      <div className={s.screen}>
+      <div className={screen}>
         {header}
         <div className={s.blocked}>
           <h2 className={s.title}>The room saved in this browser can&apos;t be read</h2>
@@ -490,7 +521,7 @@ export function RoomCapture({ user }: { user: User }) {
     ) : null;
 
   return (
-    <div className={s.screen}>
+    <div className={screen}>
       {header}
       <div className={s.body}>
         <div className={s.planColumn}>
@@ -563,6 +594,7 @@ export function RoomCapture({ user }: { user: User }) {
           {!draft || !room ? (
             <StartRoomForm
               canEdit={canEdit}
+              initialName={studio?.name ?? ''}
               onExample={loadExample}
               onStart={(input) => {
                 const r = apply(startRoom(env, { ...input, shopId: PREVIEW_SHOP.id }));

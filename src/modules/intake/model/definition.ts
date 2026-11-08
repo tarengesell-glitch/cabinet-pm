@@ -56,6 +56,8 @@ const OptionSchema = z.strictObject({
   /** Hardware options: what goes on doors and on drawers. */
   door: z.enum(['handle', 'knob']).optional(),
   drawer: z.enum(['handle', 'knob']).optional(),
+  /** Height options: the height this option stands for, in whole feet (the label says it). */
+  feet: z.number().int().positive().optional(),
   /** Shows that the cost comes from live pricing (not connected yet, IK-14). */
   price_note: z.literal(true).optional(),
 });

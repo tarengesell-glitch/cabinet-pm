@@ -6,7 +6,8 @@
   "statuses": {
     "confirmed": "The owner has confirmed it for this platform (see docs/DECISIONS.md, with the date in the note).",
     "candidate": "Carried over from closet-builder. Not yet confirmed for this platform or this shop. Needs the owner's yes before the software uses it.",
-    "conflicts": "Disagrees with something the owner decided for this platform. This platform's decision wins; kept here so the difference is visible."
+    "conflicts": "Disagrees with something the owner decided for this platform. This platform's decision wins; kept here so the difference is visible.",
+    "declined": "The owner said no. Kept so it is not carried over again; neither the AI designer nor the design tool uses it."
   },
   "kinds": {
     "hard": "No design may break it. Would block (spec: a shop may promote a rule to block; which block by default is open question S-6).",
@@ -26,8 +27,15 @@
       "says": "Each run claims its length along the wall plus its depth and room for fronts and handles. No other run may enter that space. Facing runs in a galley too narrow for both are reported, not overlapped.",
       "source": "Physical necessity; closet-builder HARD-001.",
       "closet_builder_status": "IMPLEMENTED",
-      "here": { "status": "candidate", "note": "Corner handling differs here (see CB-FACT-31). The overlap part is plain geometry." },
-      "related": ["CB-FACT-31", "PRIN-003"]
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: Yes. \"However, keep in mind that corner cabinets will intersect each other. The tool wouldn't even allow it to be drawn otherwise\""
+      },
+      "related": [
+        "CB-FACT-31",
+        "PRIN-003"
+      ],
+      "design_tool": "not_drawable"
     },
     {
       "id": "HARD-002",
@@ -37,19 +45,11 @@
       "says": "A run is never longer than its wall allows. A room edit that shortens a wall shortens its runs, and the screen says so.",
       "source": "Physical necessity; closet-builder HARD-002.",
       "closet_builder_status": "IMPLEMENTED",
-      "here": { "status": "candidate", "note": "The designer's rough layout already keeps runs on their wall." }
-    },
-    {
-      "id": "HARD-003",
-      "kind": "hard",
-      "topic": "room",
-      "title": "Room and run limits",
-      "says": "A run is no taller than its ceiling less the gap (see CB-FACT-48); runs are at least 48\" tall; runs are 10\" to 36\" deep; toe kicks are no taller than 8\"; no run goes on a wall with less than 12\" free, including the filler or end panel at each end.",
-      "lengths": { "min_run_height": "48", "min_run_depth": "10", "max_run_depth": "36", "max_toe_kick": "8", "min_wall_space": "12" },
-      "source": "Owner, 2026-09-29 and 2026-09-30 (closet-builder shop fact 39).",
-      "closet_builder_status": "IMPLEMENTED",
-      "here": { "status": "conflicts", "note": "Written for closet runs. Here the owner approved a 9\" shortest run (2026-11-07), base runs are 34 3/4\" tall, and islands can be 42\" or 48\" deep. Only the 8\" toe kick cap and the ceiling gap may still apply." },
-      "related": ["CB-FACT-48"]
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: Yes. \"The tool should not even allow cabinets to ever run into walls, that's a physical impossibility. The tool wouldn't even allow it to be drawn otherwise\""
+      },
+      "design_tool": "not_drawable"
     },
     {
       "id": "HARD-004",
@@ -59,7 +59,11 @@
       "says": "In a row each cabinet starts exactly where the one before it ends. With the fillers and end panels, the cabinets fill the run exactly.",
       "source": "Owner (closet-builder shop facts 1, 25).",
       "closet_builder_status": "IMPLEMENTED",
-      "here": { "status": "candidate", "note": "" }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: Yes. \"The tool wouldn't even allow it to be drawn otherwise\""
+      },
+      "design_tool": "not_drawable"
     },
     {
       "id": "HARD-005",
@@ -70,7 +74,10 @@
       "applies_when": "Kitchen",
       "source": "Owner, 2026-10-04: \"A dishwasher always has to be immediately next to a sink cabinet.\" Answer to Q-007: \"B\".",
       "closet_builder_status": "APPROVED",
-      "here": { "status": "confirmed", "note": "Matches the rough layout (owner, 2026-11-06): placing a sink adds a dishwasher right beside it, and it moves with the sink." }
+      "here": {
+        "status": "confirmed",
+        "note": "Matches the rough layout (owner, 2026-11-06): placing a sink adds a dishwasher right beside it, and it moves with the sink."
+      }
     },
     {
       "id": "HARD-006",
@@ -81,8 +88,14 @@
       "applies_when": "A cabinet sits over a fridge",
       "source": "Owner dictation, 2026-10-04: \"perfectly centered on the fridge. That is non-negotiable.\"",
       "closet_builder_status": "PROPOSED",
-      "here": { "status": "candidate", "note": "" },
-      "related": ["PREF-009"]
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-07: Yes."
+      },
+      "related": [
+        "PREF-009"
+      ],
+      "design_tool": "error"
     },
     {
       "id": "HARD-007",
@@ -93,8 +106,17 @@
       "applies_when": "A range or cooktop",
       "source": "Owner dictation, 2026-10-04: \"They all need to be perfectly centered over top of the cooktop or stove. That is non-negotiable.\"",
       "closet_builder_status": "PROPOSED",
-      "here": { "status": "candidate", "note": "Still to confirm here: the hood is assumed to match the range width (DECISIONS, rough layout)." },
-      "related": ["HARD-008", "HARD-009", "PRIN-001", "PREF-019"]
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-07: Yes."
+      },
+      "related": [
+        "HARD-008",
+        "HARD-009",
+        "PRIN-001",
+        "PREF-019"
+      ],
+      "design_tool": "error"
     },
     {
       "id": "HARD-008",
@@ -102,12 +124,20 @@
       "topic": "clearance",
       "title": "30\" clear above the cooking surface",
       "says": "Combustible cabinetry above a cooktop or range is at least 30\" above the cooking surface. The building code's reductions and its exemptions for hoods and microwaves are not verified.",
-      "lengths": { "min_above_cooktop": "30" },
+      "lengths": {
+        "min_above_cooktop": "30"
+      },
       "applies_when": "Cabinetry above a cooktop or range, Manitoba",
       "source": "Owner, 2026-10-04, answer to Q-005: \"30\". Code reference (unverified): NBC 2020 Art. 9.10.22.2, M.R. 78/2023.",
       "closet_builder_status": "APPROVED (value); code details PROPOSED",
-      "here": { "status": "candidate", "note": "" },
-      "open": ["Read the code article itself to confirm 30\" is at least what it requires."]
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: Yes. \"Still applies to the visual tool, and to the measurements we'll send to CV via [the CAD import file]. The tool wouldn't even allow it to be drawn\""
+      },
+      "open": [
+        "Read the code article itself to confirm 30\" is at least what it requires."
+      ],
+      "design_tool": "not_drawable"
     },
     {
       "id": "HARD-009",
@@ -118,7 +148,11 @@
       "applies_when": "Cabinetry near a cooktop, Manitoba",
       "source": "Owner dictation, 2026-10-04 (asked for the code setback as a rule). NBC Art. 9.10.22.3, unverified.",
       "closet_builder_status": "PROPOSED",
-      "here": { "status": "candidate", "note": "Value not verified; not usable yet." }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: Yes. \"Still applies to the visual tool, and to the measurements we'll send to CV via [the CAD import file]. The tool wouldn't even allow it to be drawn\""
+      },
+      "design_tool": "not_drawable"
     },
     {
       "id": "HARD-010",
@@ -128,7 +162,10 @@
       "says": "Placeholder appliances are fine while designing. Sign-off and sending to production wait until every appliance's and fixture's specs are confirmed and the cabinetry meets their installation requirements.",
       "source": "Owner dictation, 2026-10-04.",
       "closet_builder_status": "PROPOSED",
-      "here": { "status": "confirmed", "note": "Same as the spec's push condition \"appliances confirmed\" (OA-5)." }
+      "here": {
+        "status": "confirmed",
+        "note": "Same as the spec's push condition \"appliances confirmed\" (OA-5)."
+      }
     },
     {
       "id": "HARD-011",
@@ -136,11 +173,20 @@
       "topic": "countertop",
       "title": "Countertop into an appliance opening: at most 1/4\", equal both sides",
       "says": "Where a countertop ends at an appliance or fixture opening, it projects 0 to 1/4\" from each side, never more, and the two sides are exactly equal. The usual 1\" overhang does not apply there. Example: a 31\" opening for a slide-in range gives a 30 1/2\" counter opening.",
-      "lengths": { "max_projection_into_opening": "1/4" },
+      "lengths": {
+        "max_projection_into_opening": "1/4"
+      },
       "source": "Owner, 2026-10-05 (\"approve the rest\"); \"critically important\".",
       "closet_builder_status": "APPROVED",
-      "here": { "status": "candidate", "note": "" },
-      "related": ["PREF-008"]
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: Yes, with a change. \"Consider the stone fabricator and the shop one and the same. This really only applies to Free standing ranges. It's a constraint that the tool wouldn't even allow to be drawn otherwise\""
+      },
+      "related": [
+        "PREF-008"
+      ],
+      "design_tool": "not_drawable",
+      "applies_when": "Freestanding ranges only (owner review, 2026-11-08)"
     },
     {
       "id": "HARD-012",
@@ -150,7 +196,10 @@
       "says": "A design may use preliminary measurements, and a quote may use the homeowner's or a blueprint's. Sign-off and production need verified site measurements, recording who verified them and when (us, a contractor, the designer or the homeowner).",
       "source": "Owner, 2026-10-05: \"Final sign-off and sending to production should not be allowed without verified site measurements.\" Q-019: \"We just have to confirm who and when.\"",
       "closet_builder_status": "APPROVED",
-      "here": { "status": "confirmed", "note": "Same as the spec's push condition \"site measured\" (OA-5). Who may verify is not yet decided here." }
+      "here": {
+        "status": "confirmed",
+        "note": "Same as the spec's push condition \"site measured\" (OA-5). Who may verify is not yet decided here."
+      }
     },
     {
       "id": "HARD-013",
@@ -160,8 +209,15 @@
       "says": "Doors, drawers, roll-outs, corner hardware and appliance doors complete their movement without hitting cabinetry, handles, walls, appliances, room doors or each other. Handles count. No clearance distance is invented: it comes from the real hardware and appliance.",
       "source": "Owner, 2026-10-05, answer to Q-017: \"A\".",
       "closet_builder_status": "APPROVED",
-      "here": { "status": "candidate", "note": "" },
-      "related": ["PRIN-003", "PREF-024"]
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: Yes. \"The storage, kitchen and clearance rules are confirmed as true. The tool wouldn't even allow it to be drawn\""
+      },
+      "related": [
+        "PRIN-003",
+        "PREF-024"
+      ],
+      "design_tool": "not_drawable"
     },
     {
       "id": "HARD-014",
@@ -171,7 +227,11 @@
       "says": "Walls, bump-outs, columns, doors, windows, soffits, plumbing, electrical, HVAC and hood ducts that affect fit or use are constraints when known.",
       "source": "Owner, 2026-10-05: \"Yes\" (to a research suggestion).",
       "closet_builder_status": "APPROVED",
-      "here": { "status": "candidate", "note": "Doors, windows and passthroughs are already in the room drawing." }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: Yes."
+      },
+      "design_tool": "error"
     },
     {
       "id": "HARD-015",
@@ -179,10 +239,17 @@
       "topic": "sizing",
       "title": "Smallest cabinet widths",
       "says": "By outside width: an upper at least 8\"; a base with only doors at least 8\"; a cabinet with drawers at least 12\".",
-      "lengths": { "min_upper": "8", "min_door_base": "8", "min_drawer_cabinet": "12" },
+      "lengths": {
+        "min_upper": "8",
+        "min_door_base": "8",
+        "min_drawer_cabinet": "12"
+      },
       "source": "Owner, 2026-10-05 (closet-builder shop fact 47).",
       "closet_builder_status": "APPROVED",
-      "here": { "status": "confirmed", "note": "Confirmed in the library review, 2026-11-07 (DECISIONS)." }
+      "here": {
+        "status": "confirmed",
+        "note": "Confirmed in the library review, 2026-11-07 (DECISIONS)."
+      }
     },
     {
       "id": "HARD-016",
@@ -190,10 +257,16 @@
       "topic": "sizing",
       "title": "No cabinet wider than 42\"",
       "says": "A cabinet is never more than 42\" wide. Up to 38\" one cabinet is preferred to two (PREF-025).",
-      "lengths": { "max_cabinet_width": "42" },
+      "lengths": {
+        "max_cabinet_width": "42"
+      },
       "source": "Owner, 2026-10-05: \"Not totally hard and firm. 42 is the hard and firm\".",
       "closet_builder_status": "APPROVED",
-      "here": { "status": "candidate", "note": "Fits this platform's door rule: over 40 1/4\" a cabinet with doors splits into two (DECISIONS 2026-11-07), so 42\" can only matter for cabinets without doors. Whether it covers every type was open (Q-058)." }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-07: Yes."
+      },
+      "design_tool": "suggestion"
     },
     {
       "id": "PREF-001",
@@ -201,11 +274,21 @@
       "topic": "sizing",
       "title": "Cabinets 24\" to 32\" wide",
       "says": "When a run is divided into cabinets, make as many as possible 24\" to 32\" wide. The ideal for looks and for sheet yield.",
-      "lengths": { "ideal_min": "24", "ideal_max": "32" },
+      "lengths": {
+        "ideal_min": "24",
+        "ideal_max": "32"
+      },
       "source": "Owner, 2026-09-28 (shop fact 25); 2026-10-05: \"24-32 box cases are ideal\".",
       "closet_builder_status": "APPROVED",
-      "here": { "status": "candidate", "note": "" },
-      "related": ["PREF-016", "PREF-017"]
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-07: Yes."
+      },
+      "related": [
+        "PREF-016",
+        "PREF-017"
+      ],
+      "design_tool": "suggestion"
     },
     {
       "id": "PREF-002",
@@ -213,10 +296,16 @@
       "topic": "sizing",
       "title": "Few cabinets over 36\"",
       "says": "As few cabinets as possible over 36\" wide. Loses to PREF-025 up to 38\".",
-      "lengths": { "avoid_over": "36" },
+      "lengths": {
+        "avoid_over": "36"
+      },
       "source": "Owner, 2026-09-28 (shop fact 25).",
       "closet_builder_status": "APPROVED",
-      "here": { "status": "candidate", "note": "" }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-07: Yes."
+      },
+      "design_tool": "suggestion"
     },
     {
       "id": "PREF-003",
@@ -224,10 +313,16 @@
       "topic": "sizing",
       "title": "Avoid cabinets under 12\"",
       "says": "Avoid cabinets narrower than 12\". An aim, not a limit (the limits are HARD-015).",
-      "lengths": { "avoid_under": "12" },
+      "lengths": {
+        "avoid_under": "12"
+      },
       "source": "Owner, 2026-09-28 (shop fact 25); aim, not limit: answer to Q-035, 2026-10-05.",
       "closet_builder_status": "APPROVED",
-      "here": { "status": "candidate", "note": "" }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-07: Yes."
+      },
+      "design_tool": "suggestion"
     },
     {
       "id": "PREF-004",
@@ -237,8 +332,15 @@
       "says": "Cabinet widths across a run look balanced, but cabinet size comes first: 80\" of cabinets is 32 + 32 + 16, not three of 26 5/8. A 90\" run is two 3/4\" fillers and three 29 1/2\" cabinets. ASSUMED order of trying (read from those examples): equal cabinets if they land in 24–32\"; then full 32s plus one; then the most even split, wider ones at both ends; an odd one at the right end.",
       "source": "Owner, 2026-09-28 (shop fact 25: \"fairly symmetrical\" and the two examples). The order of trying is assumed.",
       "closet_builder_status": "APPROVED (aim); method assumed",
-      "here": { "status": "candidate", "note": "" },
-      "related": ["CB-FACT-25", "PREF-021"]
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-07: Yes."
+      },
+      "related": [
+        "CB-FACT-25",
+        "PREF-021"
+      ],
+      "design_tool": "suggestion"
     },
     {
       "id": "PREF-005",
@@ -246,11 +348,19 @@
       "topic": "storage",
       "title": "Shoe and boot shelf spacing",
       "says": "Flat shoe shelves 8\" apart, the first 7\" up; boots 16\".",
-      "lengths": { "shoe_spacing": "8", "first_shoe_shelf": "7", "boot_spacing": "16" },
+      "lengths": {
+        "shoe_spacing": "8",
+        "first_shoe_shelf": "7",
+        "boot_spacing": "16"
+      },
       "applies_when": "Closets and mudrooms",
       "source": "Owner accepted published closet guides, 2026-09-28 (shop fact 28).",
       "closet_builder_status": "APPROVED",
-      "here": { "status": "candidate", "note": "" }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: Yes. \"The storage, kitchen and clearance rules are confirmed as true.\""
+      },
+      "design_tool": "suggestion"
     },
     {
       "id": "PREF-006",
@@ -261,8 +371,14 @@
       "strength": "unclear",
       "source": "Owner dictation, 2026-10-04.",
       "closet_builder_status": "RAW",
-      "here": { "status": "candidate", "note": "" },
-      "open": ["How close is close? Is one bank enough?"]
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: Yes. \"The storage, kitchen and clearance rules are confirmed as true.\""
+      },
+      "open": [
+        "How close is close? Is one bank enough?"
+      ],
+      "design_tool": "suggestion"
     },
     {
       "id": "PREF-007",
@@ -273,7 +389,11 @@
       "strength": "very strong, not hard",
       "source": "Owner dictation, 2026-10-04: \"a very, very strong preference, but not a hard rule\"; confirmed 2026-10-05.",
       "closet_builder_status": "PROPOSED",
-      "here": { "status": "candidate", "note": "Ties in with the kitchen intake's drawer level (docs/intake/kitchen.md)." }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: Yes. \"The storage, kitchen and clearance rules are confirmed as true.\""
+      },
+      "design_tool": "suggestion"
     },
     {
       "id": "PREF-008",
@@ -281,11 +401,19 @@
       "topic": "countertop",
       "title": "Countertop overhangs 1\"",
       "says": "Counters overhang 1\" past a finished end and 1\" past the face of a door or drawer front. Not at an appliance opening (HARD-011).",
-      "lengths": { "overhang": "1" },
+      "lengths": {
+        "overhang": "1"
+      },
       "source": "Owner dictation, 2026-10-04 (\"a standard\").",
       "closet_builder_status": "RAW",
-      "here": { "status": "candidate", "note": "" },
-      "related": ["HARD-011"]
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: Yes. \"Consider the stone fabricator and the shop one and the same.\""
+      },
+      "related": [
+        "HARD-011"
+      ],
+      "design_tool": "suggestion"
     },
     {
       "id": "PREF-009",
@@ -295,8 +423,15 @@
       "says": "The cabinet over a fridge is deep enough that its door face is flush with the front of the fridge panel beside it.",
       "source": "Owner dictation, 2026-10-04.",
       "closet_builder_status": "RAW",
-      "here": { "status": "candidate", "note": "This platform's rough layout gives a fridge a 24\"-deep upper (2026-11-06). Compatible, but the exact depth follows the panel." },
-      "related": ["HARD-006", "PREF-029"]
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: Yes. \"The storage, kitchen and clearance rules are confirmed as true.\""
+      },
+      "related": [
+        "HARD-006",
+        "PREF-029"
+      ],
+      "design_tool": "suggestion"
     },
     {
       "id": "PREF-010",
@@ -307,8 +442,13 @@
       "strength": "strong",
       "source": "Owner, 2026-10-05: \"a bonus/strong preference, not a rule\".",
       "closet_builder_status": "APPROVED",
-      "here": { "status": "candidate", "note": "" },
-      "related": ["CON-005"]
+      "here": {
+        "status": "declined",
+        "note": "Owner review, 2026-11-08: No."
+      },
+      "related": [
+        "CON-005"
+      ]
     },
     {
       "id": "PREF-011",
@@ -316,12 +456,23 @@
       "topic": "clearance",
       "title": "Walkways 42\" to 48\"",
       "says": "Under 36\": breaks a very strong minimum. 36\" to 42\": possible, below preferred. 42\" to 48\": preferred. Over 48\": breaks a very strong maximum.",
-      "lengths": { "strong_min": "36", "preferred_min": "42", "preferred_max": "48" },
+      "lengths": {
+        "strong_min": "36",
+        "preferred_min": "42",
+        "preferred_max": "48"
+      },
       "strength": "very strong, not hard",
       "source": "Owner, 2026-10-05 (\"approve the rest\").",
       "closet_builder_status": "APPROVED",
-      "here": { "status": "candidate", "note": "" },
-      "related": ["PRIN-005", "PRIN-013"]
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: Yes. \"The storage, kitchen and clearance rules are confirmed as true.\""
+      },
+      "related": [
+        "PRIN-005",
+        "PRIN-013"
+      ],
+      "design_tool": "suggestion"
     },
     {
       "id": "PREF-012",
@@ -332,8 +483,14 @@
       "strength": "strong",
       "source": "Owner, 2026-10-05: \"Islands should be sized and positioned to line up with other runs of cabinetry.\"",
       "closet_builder_status": "APPROVED",
-      "here": { "status": "candidate", "note": "" },
-      "open": ["What distance counts as close (Q-023)."]
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-07: Yes."
+      },
+      "open": [
+        "What distance counts as close (Q-023)."
+      ],
+      "design_tool": "suggestion"
     },
     {
       "id": "PREF-013",
@@ -344,7 +501,11 @@
       "strength": "very strong",
       "source": "Owner, 2026-10-05.",
       "closet_builder_status": "APPROVED",
-      "here": { "status": "candidate", "note": "" }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-07: Yes."
+      },
+      "design_tool": "suggestion"
     },
     {
       "id": "PREF-014",
@@ -355,7 +516,11 @@
       "strength": "extremely strong, \"almost a hard constraint\", but not hard",
       "source": "Owner, 2026-10-05.",
       "closet_builder_status": "APPROVED",
-      "here": { "status": "candidate", "note": "" }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-07: Yes."
+      },
+      "design_tool": "suggestion"
     },
     {
       "id": "PREF-015",
@@ -365,7 +530,11 @@
       "says": "1 set the run's ends; 2 set aside fillers and end panels; 3 lock confirmed appliance and fixture openings; 4 lock cabinets with deliberate widths; 5 share the remaining space; 6 recheck the total.",
       "source": "Research synthesis; owner, 2026-10-05: \"Yes\".",
       "closet_builder_status": "APPROVED",
-      "here": { "status": "candidate", "note": "" }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-07: Yes."
+      },
+      "design_tool": "none"
     },
     {
       "id": "PREF-016",
@@ -373,10 +542,17 @@
       "topic": "sizing",
       "title": "Acceptable cabinet widths 12\" to 36\"",
       "says": "12–36\" is acceptable; 24–32\" is ideal (PREF-001).",
-      "lengths": { "acceptable_min": "12", "acceptable_max": "36" },
+      "lengths": {
+        "acceptable_min": "12",
+        "acceptable_max": "36"
+      },
       "source": "Owner, 2026-10-05, answer to Q-050: \"Yes\".",
       "closet_builder_status": "APPROVED",
-      "here": { "status": "candidate", "note": "" }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-07: Yes."
+      },
+      "design_tool": "suggestion"
     },
     {
       "id": "PREF-017",
@@ -384,10 +560,19 @@
       "topic": "sizing",
       "title": "Ideal door width 14\" to 16\"",
       "says": "Each visible door: ideal 14–16\"; backup 12–14\" and 16–20\". Drawer fronts have no ideal width (the cabinet width decides). A 30\" two-door cabinet is judged on its two 14 7/8\" doors.",
-      "lengths": { "ideal_min": "14", "ideal_max": "16", "backup_min": "12", "backup_max": "20" },
+      "lengths": {
+        "ideal_min": "14",
+        "ideal_max": "16",
+        "backup_min": "12",
+        "backup_max": "20"
+      },
       "source": "Owner, 2026-10-05, answers to Q-037, Q-051, Q-052.",
       "closet_builder_status": "APPROVED",
-      "here": { "status": "confirmed", "note": "\"Ideal door 14–16\"\" confirmed in the library review, 2026-11-07 (DECISIONS). The backup bands are not yet confirmed here." }
+      "here": {
+        "status": "confirmed",
+        "note": "\"Ideal door 14–16\"\" confirmed in the library review, 2026-11-07 (DECISIONS). The backup bands are not yet confirmed here."
+      },
+      "design_tool": "suggestion"
     },
     {
       "id": "PREF-018",
@@ -398,7 +583,11 @@
       "strength": "strong",
       "source": "Owner, 2026-10-05 (A-03, A-04).",
       "closet_builder_status": "PROPOSED",
-      "here": { "status": "confirmed", "note": "In part: the 6 13/16\" top drawer lines up across cabinets (DECISIONS 2026-11-07)." }
+      "here": {
+        "status": "confirmed",
+        "note": "In part: the 6 13/16\" top drawer lines up across cabinets (DECISIONS 2026-11-07)."
+      },
+      "design_tool": "suggestion"
     },
     {
       "id": "PREF-019",
@@ -409,8 +598,16 @@
       "strength": "strong",
       "source": "Owner, 2026-10-05 (A-07, A-08).",
       "closet_builder_status": "PROPOSED",
-      "here": { "status": "candidate", "note": "" },
-      "related": ["HARD-007", "PRIN-009", "PRIN-006"]
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-07: Yes."
+      },
+      "related": [
+        "HARD-007",
+        "PRIN-009",
+        "PRIN-006"
+      ],
+      "design_tool": "suggestion"
     },
     {
       "id": "PREF-020",
@@ -421,7 +618,11 @@
       "strength": "strong",
       "source": "Owner, 2026-10-05 (A-13 to A-15).",
       "closet_builder_status": "PROPOSED",
-      "here": { "status": "candidate", "note": "" }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-07: Yes."
+      },
+      "design_tool": "suggestion"
     },
     {
       "id": "PREF-021",
@@ -432,7 +633,11 @@
       "strength": "a scored penalty",
       "source": "Owner, 2026-10-05: \"Correct; this should create a penalty.\"",
       "closet_builder_status": "PROPOSED",
-      "here": { "status": "candidate", "note": "" }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-07: Yes."
+      },
+      "design_tool": "suggestion"
     },
     {
       "id": "PREF-022",
@@ -442,7 +647,11 @@
       "says": "Calm or contemporary designs suit fewer, wider fronts. Traditional or detailed designs can suit more, smaller divisions.",
       "source": "Owner, 2026-10-05 (A-21).",
       "closet_builder_status": "PROPOSED",
-      "here": { "status": "candidate", "note": "" }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: Yes."
+      },
+      "design_tool": "suggestion"
     },
     {
       "id": "PREF-023",
@@ -453,7 +662,11 @@
       "strength": "strong",
       "source": "Owner, 2026-10-05 (A-22, A-23).",
       "closet_builder_status": "PROPOSED",
-      "here": { "status": "confirmed", "note": "The centring part is in the rough layout (owner, 2026-11-06): a sink dropped near a window centres under it, with a notice when it isn't." }
+      "here": {
+        "status": "confirmed",
+        "note": "The centring part is in the rough layout (owner, 2026-11-06): a sink dropped near a window centres under it, with a notice when it isn't."
+      },
+      "design_tool": "suggestion"
     },
     {
       "id": "PREF-024",
@@ -464,7 +677,11 @@
       "strength": "very strong beside a cooktop or sink; a weaker bonus beside prep areas; not hard",
       "source": "Owner, 2026-10-05 (A-29; Q-038).",
       "closet_builder_status": "APPROVED",
-      "here": { "status": "candidate", "note": "This platform has one cabinet with a hinge-side choice; this would set its default." }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: Yes. \"The storage, kitchen and clearance rules are confirmed as true.\""
+      },
+      "design_tool": "suggestion"
     },
     {
       "id": "PREF-025",
@@ -472,10 +689,16 @@
       "topic": "sizing",
       "title": "Up to 38\", one cabinet beats two narrow ones",
       "says": "Where the space could be one cabinet up to about 38\" or two of half that, one is better. Beats PREF-002 up to 38\". Never over 42\" (HARD-016).",
-      "lengths": { "one_cabinet_up_to": "38" },
+      "lengths": {
+        "one_cabinet_up_to": "38"
+      },
       "source": "Owner, 2026-10-05: \"Yes. up to 38\" a single 38\" box is preferential to two 19\" boxes\".",
       "closet_builder_status": "APPROVED",
-      "here": { "status": "candidate", "note": "" }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-07: Yes."
+      },
+      "design_tool": "suggestion"
     },
     {
       "id": "PREF-026",
@@ -486,7 +709,11 @@
       "strength": "very strong, not hard",
       "source": "Owner, 2026-10-05 (storage session S-01, S-15).",
       "closet_builder_status": "PROPOSED",
-      "here": { "status": "candidate", "note": "" }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: Yes. \"The storage, kitchen and clearance rules are confirmed as true.\""
+      },
+      "design_tool": "suggestion"
     },
     {
       "id": "PREF-027",
@@ -497,7 +724,11 @@
       "strength": "very strong default",
       "source": "Owner, 2026-10-05: \"Very strong preference. Include both by default.\"",
       "closet_builder_status": "PROPOSED",
-      "here": { "status": "candidate", "note": "" }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: Yes. \"The storage, kitchen and clearance rules are confirmed as true.\""
+      },
+      "design_tool": "suggestion"
     },
     {
       "id": "PREF-028",
@@ -508,7 +739,11 @@
       "strength": "strong",
       "source": "Owner, 2026-10-05 (S-05).",
       "closet_builder_status": "PROPOSED",
-      "here": { "status": "candidate", "note": "" }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: Yes. \"The storage, kitchen and clearance rules are confirmed as true.\""
+      },
+      "design_tool": "suggestion"
     },
     {
       "id": "PREF-029",
@@ -519,7 +754,11 @@
       "strength": "default; its place is a strong default",
       "source": "Owner, 2026-10-05 (S-07, S-08).",
       "closet_builder_status": "PROPOSED",
-      "here": { "status": "candidate", "note": "" }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: Yes. \"The storage, kitchen and clearance rules are confirmed as true.\""
+      },
+      "design_tool": "suggestion"
     },
     {
       "id": "PREF-030",
@@ -530,7 +769,11 @@
       "strength": "default; its place is very strong",
       "source": "Owner, 2026-10-05 (S-09, S-10).",
       "closet_builder_status": "PROPOSED",
-      "here": { "status": "candidate", "note": "" }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: Yes. \"The storage, kitchen and clearance rules are confirmed as true.\""
+      },
+      "design_tool": "suggestion"
     },
     {
       "id": "PREF-031",
@@ -541,7 +784,11 @@
       "strength": "very strong",
       "source": "Owner, 2026-10-05 (S-11).",
       "closet_builder_status": "PROPOSED",
-      "here": { "status": "candidate", "note": "" }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: Yes. \"The storage, kitchen and clearance rules are confirmed as true.\""
+      },
+      "design_tool": "suggestion"
     },
     {
       "id": "PREF-032",
@@ -552,7 +799,11 @@
       "strength": "default",
       "source": "Owner, 2026-10-05: \"Yes, include it by default. We will need to select a default system.\"",
       "closet_builder_status": "PROPOSED",
-      "here": { "status": "candidate", "note": "" }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: Yes. \"The storage, kitchen and clearance rules are confirmed as true.\""
+      },
+      "design_tool": "suggestion"
     },
     {
       "id": "PREF-033",
@@ -563,7 +814,11 @@
       "strength": "default",
       "source": "Owner, 2026-10-05: \"Yes definitely by default\".",
       "closet_builder_status": "PROPOSED",
-      "here": { "status": "candidate", "note": "More relevant here than in closet-builder: this platform uses corner cabinets." }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: Yes. \"The storage, kitchen and clearance rules are confirmed as true.\""
+      },
+      "design_tool": "suggestion"
     },
     {
       "id": "PREF-034",
@@ -574,7 +829,10 @@
       "strength": "strong, not hard",
       "source": "Owner, 2026-10-05 (S-16).",
       "closet_builder_status": "PROPOSED",
-      "here": { "status": "candidate", "note": "Depends on what the shop's library can build." }
+      "here": {
+        "status": "declined",
+        "note": "Owner review, 2026-11-08: No. \"Forget about this for the visual tool. I'm not sure how we'll program this parametrically.\""
+      }
     },
     {
       "id": "PREF-035",
@@ -584,7 +842,11 @@
       "says": "A folding surface (very strong); somewhere to hang or air-dry clothes (strong); laundry products stored by the machines (strong).",
       "source": "Owner, 2026-10-05 (S-20, S-21, S-23).",
       "closet_builder_status": "PROPOSED",
-      "here": { "status": "candidate", "note": "" }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: Yes. \"The storage, kitchen and clearance rules are confirmed as true.\""
+      },
+      "design_tool": "suggestion"
     },
     {
       "id": "PREF-036",
@@ -594,7 +856,11 @@
       "says": "A bench with shoe storage (very strong); small-item storage for keys, gloves and mail (strong); exposed hooks (moderate, never at the cost of the design).",
       "source": "Owner, 2026-10-05 (S-25 to S-27).",
       "closet_builder_status": "PROPOSED",
-      "here": { "status": "candidate", "note": "" }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: Yes. \"The storage, kitchen and clearance rules are confirmed as true.\""
+      },
+      "design_tool": "suggestion"
     },
     {
       "id": "PREF-037",
@@ -604,7 +870,11 @@
       "says": "Top to bottom: a shelf over the hanging if there is room; open hanging with a rod; drawers at the bottom. Doors only if there is room to open them. A recommendation, not a rule.",
       "source": "Owner, 2026-10-05 (S-29; Q-056).",
       "closet_builder_status": "PROPOSED",
-      "here": { "status": "candidate", "note": "" }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: Yes. \"The storage, kitchen and clearance rules are confirmed as true.\""
+      },
+      "design_tool": "suggestion"
     },
     {
       "id": "PRIN-001",
@@ -614,7 +884,11 @@
       "says": "When the building code and a manufacturer's installation manual give different clearances, follow the stricter.",
       "source": "Owner dictation, 2026-10-04: \"I want the stricter one to decide.\"",
       "closet_builder_status": "PROPOSED",
-      "here": { "status": "candidate", "note": "" }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: Yes. \"The storage, kitchen and clearance rules are confirmed as true.\""
+      },
+      "design_tool": "none"
     },
     {
       "id": "PRIN-002",
@@ -624,7 +898,11 @@
       "says": "When an appliance's spec sheet and installation guide disagree, use the installation guide.",
       "source": "Owner dictation, 2026-10-04: \"go for the installation guide.\"",
       "closet_builder_status": "PROPOSED",
-      "here": { "status": "candidate", "note": "" }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: Yes. \"The storage, kitchen and clearance rules are confirmed as true.\""
+      },
+      "design_tool": "none"
     },
     {
       "id": "PRIN-003",
@@ -634,7 +912,11 @@
       "says": "Doors, fronts, finished panels, countertops, handles and appliances stand beyond the cabinet, so they decide the real clearance.",
       "source": "Research synthesis; owner, 2026-10-05: \"Yes\".",
       "closet_builder_status": "APPROVED",
-      "here": { "status": "candidate", "note": "" }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: Yes. \"The storage, kitchen and clearance rules are confirmed as true.\""
+      },
+      "design_tool": "none"
     },
     {
       "id": "PRIN-004",
@@ -644,7 +926,11 @@
       "says": "Fillers and end panels are their own items with their own space, not space hidden in a cabinet width.",
       "source": "Research synthesis; owner, 2026-10-05: \"Yes\".",
       "closet_builder_status": "APPROVED",
-      "here": { "status": "confirmed", "note": "Fillers are their own catalog item here, cut to fit (DECISIONS 2026-11-07)." }
+      "here": {
+        "status": "confirmed",
+        "note": "Fillers are their own catalog item here, cut to fit (DECISIONS 2026-11-07)."
+      },
+      "design_tool": "none"
     },
     {
       "id": "PRIN-005",
@@ -654,7 +940,11 @@
       "says": "When walkway width and alignment or centring pull against each other, the AI suggests the trade-off and explains it, and the designer decides. Narrowed by PRIN-013 for lining up.",
       "source": "Owner, 2026-10-05, answer to Q-021: \"C\".",
       "closet_builder_status": "APPROVED",
-      "here": { "status": "candidate", "note": "" }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: Yes. \"The storage, kitchen and clearance rules are confirmed as true.\""
+      },
+      "design_tool": "none"
     },
     {
       "id": "PRIN-006",
@@ -664,8 +954,14 @@
       "says": "When things that read as a pair or a shared line nearly match, close the gap. A small miss is worse than an exact match or a clearly deliberate offset. 17 7/8 | FOCAL | 18 1/8 becomes 18 | FOCAL | 18.",
       "source": "Owner, 2026-10-05 (A-09, A-12).",
       "closet_builder_status": "PROPOSED",
-      "here": { "status": "candidate", "note": "" },
-      "open": ["The tolerance for \"near\" (Q-039)."]
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-07: Yes."
+      },
+      "open": [
+        "The tolerance for \"near\" (Q-039)."
+      ],
+      "design_tool": "none"
     },
     {
       "id": "PRIN-007",
@@ -675,7 +971,11 @@
       "says": "Uppers and bases may use different widths; their ordinary seams needn't line up. Related edges (run ends, appliance, window and tall-cabinet edges) should. Three 24\" uppers over two 36\" bases is fine.",
       "source": "Owner, 2026-10-05 (A-10, A-11).",
       "closet_builder_status": "PROPOSED",
-      "here": { "status": "candidate", "note": "" }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-07: Yes."
+      },
+      "design_tool": "none"
     },
     {
       "id": "PRIN-008",
@@ -685,7 +985,11 @@
       "says": "Most important first: 1 focal appliance and hood centrelines; 2 window and sink axes; 3 the outer ends of a composition; 4 tall and upper top lines; 5 major drawer and front lines; 6 large panel and end lines; 7 ordinary seams.",
       "source": "Owner, 2026-10-05: \"Correct\" (A-28).",
       "closet_builder_status": "PROPOSED",
-      "here": { "status": "candidate", "note": "" }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-07: Yes."
+      },
+      "design_tool": "none"
     },
     {
       "id": "PRIN-009",
@@ -695,7 +999,11 @@
       "says": "Equal cabinet widths aren't enough; the visible doors and drawer fronts should balance and repeat. 18 | 24 | 36 FOCAL | 24 | 18 is symmetrical in cabinets; 14 | 28 | 36 FOCAL | 28 | 14 is better; 28 | 14 | 36 FOCAL | 14 | 28 is preferred (every door 13 7/8\").",
       "source": "Owner, 2026-10-05 (A-18, A-30).",
       "closet_builder_status": "PROPOSED",
-      "here": { "status": "candidate", "note": "" }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-07: Yes."
+      },
+      "design_tool": "none"
     },
     {
       "id": "PRIN-010",
@@ -705,7 +1013,11 @@
       "says": "A room can hold several compositions (a symmetrical range wall, an asymmetrical sink wall, a symmetrical island). A wider element may set a hierarchy on purpose. Asymmetry from function or design is fine; unexplained near-pairs are not.",
       "source": "Owner, 2026-10-05 (A-19, A-24, A-26).",
       "closet_builder_status": "PROPOSED",
-      "here": { "status": "candidate", "note": "" }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-07: Yes."
+      },
+      "design_tool": "none"
     },
     {
       "id": "PRIN-011",
@@ -715,7 +1027,11 @@
       "says": "Don't chase symmetry at the cost of storage, appliance use, clearances, plumbing or the right cabinet type. Hard rules always win.",
       "source": "Owner, 2026-10-05 (A-25).",
       "closet_builder_status": "PROPOSED",
-      "here": { "status": "candidate", "note": "" }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-07: Yes."
+      },
+      "design_tool": "none"
     },
     {
       "id": "PRIN-012",
@@ -725,7 +1041,11 @@
       "says": "Front alignment, rhythm, heights and focal symmetry can only be judged in the wall (front) view, not the plan.",
       "source": "Owner, 2026-10-05 (A-27).",
       "closet_builder_status": "PROPOSED",
-      "here": { "status": "candidate", "note": "" }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: Yes."
+      },
+      "design_tool": "none"
     },
     {
       "id": "PRIN-013",
@@ -733,10 +1053,16 @@
       "topic": "clearance",
       "title": "Lining up beats a wider walkway, but not below 36\"",
       "says": "When lining up and walkway width can't both be met, lining up wins as long as the walkway stays over 36\".",
-      "lengths": { "walkway_floor": "36" },
+      "lengths": {
+        "walkway_floor": "36"
+      },
       "source": "Owner, 2026-10-05: \"Lining up should win, while keeping a walkway larger than 36\"\".",
       "closet_builder_status": "APPROVED",
-      "here": { "status": "candidate", "note": "" }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: Yes. \"The storage, kitchen and clearance rules are confirmed as true.\""
+      },
+      "design_tool": "none"
     },
     {
       "id": "PRIN-014",
@@ -746,7 +1072,11 @@
       "says": "Reason from the task to what is stored to where it goes: cookware by the cooktop, cutlery by the dishwasher, spices by the cooking, garbage by prep and cleanup. Never add an insert just to fill leftover space.",
       "source": "Owner, 2026-10-05 (storage session).",
       "closet_builder_status": "PROPOSED",
-      "here": { "status": "candidate", "note": "" }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: Yes. \"The storage, kitchen and clearance rules are confirmed as true.\""
+      },
+      "design_tool": "none"
     },
     {
       "id": "PRIN-015",
@@ -756,7 +1086,11 @@
       "says": "A feature is in a basic design by default only if an experienced designer would be surprised to see it missing. Nice-to-haves are optional and never added automatically.",
       "source": "Owner, 2026-10-05 (storage session).",
       "closet_builder_status": "PROPOSED",
-      "here": { "status": "candidate", "note": "" }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: Yes. \"The storage, kitchen and clearance rules are confirmed as true.\""
+      },
+      "design_tool": "none"
     },
     {
       "id": "PRIN-016",
@@ -766,7 +1100,11 @@
       "says": "Rules name the function (\"cutlery organisation\", \"corner access\"); the catalog maps it to a product.",
       "source": "Chat synthesis, 2026-10-05; not the owner's words.",
       "closet_builder_status": "PROPOSED",
-      "here": { "status": "candidate", "note": "" }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: Yes. \"The storage, kitchen and clearance rules are confirmed as true.\""
+      },
+      "design_tool": "none"
     },
     {
       "id": "CB-FACT-10",
@@ -776,7 +1114,11 @@
       "says": "An applied end panel matching the doors goes on any cabinet end with no wall and no cabinet beside it. A filler goes at a wall end.",
       "source": "Owner, 2026-09-26 and 2026-09-28 (shop fact 10).",
       "closet_builder_status": "APPROVED",
-      "here": { "status": "confirmed", "note": "Same as this platform's ends decision (2026-11-07): Applied finished end at an open end by default, Unfinished with a filler at a wall." }
+      "here": {
+        "status": "confirmed",
+        "note": "Same as this platform's ends decision (2026-11-07): Applied finished end at an open end by default, Unfinished with a filler at a wall."
+      },
+      "design_tool": "none"
     },
     {
       "id": "CB-FACT-16",
@@ -784,10 +1126,19 @@
       "topic": "fronts",
       "title": "Door sizes and splits",
       "says": "1/16\" from each outside edge; each door of a pair is 1/8\" less than half the cabinet; one door up to 20\" wide, then a pair; one door up to 48\" tall, then two stacked. Under a countertop the door top is 1/4\" down from the cabinet top; otherwise flush.",
-      "lengths": { "edge_gap": "1/16", "max_single_door_width": "20", "max_door_height": "48", "below_countertop": "1/4" },
+      "lengths": {
+        "edge_gap": "1/16",
+        "max_single_door_width": "20",
+        "max_door_height": "48",
+        "below_countertop": "1/4"
+      },
       "source": "Owner, 2026-09-26 (shop fact 16); 1/4\" under a counter reconfirmed 2026-10-05.",
       "closet_builder_status": "APPROVED",
-      "here": { "status": "confirmed", "note": "Confirmed in the library review, 2026-11-07, except the 1/4\" drop under a countertop, which is not yet confirmed here." }
+      "here": {
+        "status": "confirmed",
+        "note": "Confirmed in the library review, 2026-11-07, except the 1/4\" drop under a countertop, which is not yet confirmed here. Owner review, 2026-11-08: \"Keep these measurements for drawing in the visual tool, but the shop's library is the authority: if its numbers differ, the library wins.\""
+      },
+      "design_tool": "none"
     },
     {
       "id": "CB-A-05",
@@ -795,10 +1146,15 @@
       "topic": "fronts",
       "title": "Gaps between fronts are 1/8\"",
       "says": "1/8\" between a pair of doors, stacked doors and drawer fronts; with 1/16\" at each outside edge, neighbouring cabinets' fronts are 1/8\" apart too. Each cabinet's paired doors are equal width. Fronts that share a plane stay in it.",
-      "lengths": { "front_gap": "1/8" },
+      "lengths": {
+        "front_gap": "1/8"
+      },
       "source": "Owner, 2026-10-05: \"Door gaps should always be 1/8\"\"; paired doors equal and fronts in one plane: \"Hard rule\" (A-01, A-05, A-06).",
       "closet_builder_status": "APPROVED",
-      "here": { "status": "candidate", "note": "Follows from the confirmed door rule (CB-FACT-16)." }
+      "here": {
+        "status": "declined",
+        "note": "Owner review, 2026-11-08: No. \"These are construction rules. We will not set our own construction rules in this tool, rather we will use the CV and shop construction rules\""
+      }
     },
     {
       "id": "CB-FACT-13",
@@ -806,10 +1162,16 @@
       "topic": "spacing",
       "title": "Shelves evenly spaced, no opening under 6\"",
       "says": "Adjustable shelves in a space are spaced evenly, and no opening between them may be less than 6\".",
-      "lengths": { "min_shelf_opening": "6" },
+      "lengths": {
+        "min_shelf_opening": "6"
+      },
       "source": "Owner, 2026-09-26 (shop fact 13).",
       "closet_builder_status": "APPROVED",
-      "here": { "status": "confirmed", "note": "\"Shelves are evenly spaced\" confirmed 2026-11-07. The 6\" minimum opening is not yet confirmed here." }
+      "here": {
+        "status": "confirmed",
+        "note": "\"Shelves are evenly spaced\" confirmed 2026-11-07. The 6\" minimum opening is not yet confirmed here. Owner review, 2026-11-08: \"Keep these measurements for drawing in the visual tool, but the shop's library is the authority: if its numbers differ, the library wins.\""
+      },
+      "design_tool": "none"
     },
     {
       "id": "CB-FACT-25",
@@ -817,10 +1179,17 @@
       "topic": "layout",
       "title": "Dividing a run into cabinets",
       "says": "The run length is fixed. Each end gives up 3/4\" to a filler (at a wall) or an applied finished end (open end). The rest is divided into cabinets by outside width on 1/16\" steps, with the aims PREF-001 to PREF-004. Making one cabinet wider makes the others narrower.",
-      "lengths": { "end_allowance": "3/4", "width_step": "1/16" },
+      "lengths": {
+        "end_allowance": "3/4",
+        "width_step": "1/16"
+      },
       "source": "Owner, 2026-09-28 (shop fact 25).",
       "closet_builder_status": "APPROVED",
-      "here": { "status": "confirmed", "note": "The 1/16\" width step and 3/4\" fillers are confirmed here (2026-11-07). The splitting aims are candidates (see PREF-001 to PREF-004)." }
+      "here": {
+        "status": "confirmed",
+        "note": "The 1/16\" width step and 3/4\" fillers are confirmed here (2026-11-07). The splitting aims are candidates (see PREF-001 to PREF-004)."
+      },
+      "design_tool": "suggestion"
     },
     {
       "id": "CB-FACT-31",
@@ -828,10 +1197,17 @@
       "topic": "layout",
       "title": "Corners: the longest run takes the corner",
       "says": "The longest run goes to the end of its wall; the run on the next wall stops about 10\" short of its fronts, with an end panel. No corner cabinet.",
-      "lengths": { "corner_stop": "10" },
+      "lengths": {
+        "corner_stop": "10"
+      },
       "source": "Owner, 2026-09-28 (shop fact 31), for closets.",
       "closet_builder_status": "APPROVED",
-      "here": { "status": "conflicts", "note": "This platform uses corner cabinets where runs meet (owner, 2026-11-06), with run ends 0\", 3\", 6\" or 9\" clear of the other run." }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: \"This is only in relation to how opposing runs of closet cabinets should snap when dragging cabinet runs during the wall and cabinet layout drawing step\". Kitchen corners still use corner cabinets (2026-11-06)."
+      },
+      "applies_when": "Closet cabinet runs facing each other, while a run is being dragged in the wall and cabinet layout step",
+      "design_tool": "none"
     },
     {
       "id": "CB-FACT-44",
@@ -839,10 +1215,15 @@
       "topic": "sizing",
       "title": "Toe kick 3 7/8\" tall",
       "says": "The standard toe kick is 3 7/8\" tall everywhere (better yield from a 48\" sheet).",
-      "lengths": { "toe_kick": "3 7/8" },
+      "lengths": {
+        "toe_kick": "3 7/8"
+      },
       "source": "Owner, 2026-10-04, answer to Q-004: \"A\" (shop fact 44).",
       "closet_builder_status": "APPROVED",
-      "here": { "status": "candidate", "note": "This shop's library toe kicks are not known yet; base height here is 34 3/4\"." }
+      "here": {
+        "status": "declined",
+        "note": "Owner review, 2026-11-07: No. \"Use the toe kick height from the CV 11 library from the shop\""
+      }
     },
     {
       "id": "CB-FACT-45",
@@ -850,10 +1231,16 @@
       "topic": "ends",
       "title": "Upgrade: 1 1/2\" fillers and finished ends",
       "says": "An optional room-wide upgrade makes every filler and finished end 1 1/2\" thick (one sheet-good panel, not solid wood). Each such run end then sets aside 1 1/2\" instead of 3/4\".",
-      "lengths": { "upgrade_thickness": "1 1/2" },
+      "lengths": {
+        "upgrade_thickness": "1 1/2"
+      },
       "source": "Owner, 2026-10-04 and 2026-10-05 (shop fact 45).",
       "closet_builder_status": "APPROVED",
-      "here": { "status": "candidate", "note": "" }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: Yes. \"This is a visual upgrade that our tool will have. We will map it to a construction rule in the CV shop library.\""
+      },
+      "design_tool": "none"
     },
     {
       "id": "CB-FACT-48",
@@ -861,10 +1248,23 @@
       "topic": "room",
       "title": "Crown moulding sets the gap above the cabinets",
       "says": "With a crown, the cabinet top is exactly the crown's size below the ceiling (height set from the ceiling down). With no crown, any height, but never closer than 1\" to the ceiling. Placeholder crowns: 2\", 3\", 4\", 5\", 6\".",
-      "lengths": { "min_ceiling_gap": "1", "crown_sizes": ["2", "3", "4", "5", "6"] },
+      "lengths": {
+        "min_ceiling_gap": "1",
+        "crown_sizes": [
+          "2",
+          "3",
+          "4",
+          "5",
+          "6"
+        ]
+      },
       "source": "Owner, 2026-10-06 (shop fact 48): \"Cabinets will be spaced anywhere from 1-6\" away from the ceiling depending on what crown mould is specified.\"",
       "closet_builder_status": "APPROVED",
-      "here": { "status": "candidate", "note": "" }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: Yes. \"Yes, this will be the case when we set a ceiling height + cabinets to ceiling + a crown selection.\""
+      },
+      "design_tool": "error"
     },
     {
       "id": "CON-005",
@@ -874,8 +1274,14 @@
       "says": "The fronts of one cabinet are always cut from grain-matched, continuous sections of the sheet, for every grained or patterned material. \"Non-negotiable.\"",
       "source": "Owner, 2026-10-05 (shop fact 46; Q-020: \"A\").",
       "closet_builder_status": "APPROVED",
-      "here": { "status": "candidate", "note": "A production matter for the shop; recorded so the design can promise it." },
-      "related": ["PREF-010"]
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: Yes. \"Fronts in our visual tool should be grain matched. And yes the shop will set its cutlist to do this in CV.\""
+      },
+      "related": [
+        "PREF-010"
+      ],
+      "design_tool": "none"
     },
     {
       "id": "DOC-001",
@@ -885,7 +1291,10 @@
       "says": "The stone templater measures on site. Our countertop drawings show overall sizes, finished, unfinished and wall edges, and where fixtures and appliances go. They don't replace the field template.",
       "source": "Owner, 2026-10-05 (\"approve the rest\").",
       "closet_builder_status": "APPROVED",
-      "here": { "status": "candidate", "note": "" }
+      "here": {
+        "status": "candidate",
+        "note": ""
+      }
     },
     {
       "id": "OPT-001",
@@ -895,7 +1304,11 @@
       "says": "A dedicated pot-lid organiser is an optional upgrade, never added automatically.",
       "source": "Owner, 2026-10-05: \"a nice optional upgrade\".",
       "closet_builder_status": "APPROVED",
-      "here": { "status": "candidate", "note": "" }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: Yes. \"The storage, kitchen and clearance rules are confirmed as true.\""
+      },
+      "design_tool": "none"
     },
     {
       "id": "OPT-002",
@@ -905,7 +1318,11 @@
       "says": "Useful but optional, never added automatically.",
       "source": "Owner, 2026-10-05 (S-24).",
       "closet_builder_status": "APPROVED",
-      "here": { "status": "candidate", "note": "" }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: Yes. \"The storage, kitchen and clearance rules are confirmed as true.\""
+      },
+      "design_tool": "none"
     },
     {
       "id": "REJ-001",
@@ -915,15 +1332,49 @@
       "says": "None of these is added by default.",
       "source": "Owner, 2026-10-05: \"No\" / \"This doesn't require anything in our system.\"",
       "closet_builder_status": "REJECTED",
-      "here": { "status": "candidate", "note": "" }
+      "here": {
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: Yes. \"The storage, kitchen and clearance rules are confirmed as true.\""
+      },
+      "design_tool": "none"
     }
   ],
   "not_imported": [
-    { "what": "Box construction: frameless build, joinery, backs and grooves, board thicknesses, edge banding, shelf pins, hinges and boring, drawer slides, rods and accessory drilling, the ladder toe kick's parts (shop facts 0–9, 11, 12, 14, 18, 20–23, 26, 29, 33)", "why": "Engineering. This platform does not engineer cabinets; the shop's own library and software do." },
-    { "what": "Filler painting (CON-002) and 5/8\" door material (CON-003)", "why": "Finishing and material details for the shop; not design rules." },
-    { "what": "Prices, lead time, quote changes (shop facts 34–36)", "why": "Pricing is per running inch and kept separate (DECISIONS 2026-11-07)." },
-    { "what": "Closet configurations: two-door with divider, drawers to 30\", highboy to 48\", rod heights (shop facts 27, 32, 42, 43)", "why": "Closet-specific; several values were assumed, not owner-stated." },
-    { "what": "Industry standards EXT-001 to EXT-008 (AWI, NAAWS)", "why": "Unverified fallbacks only; none was checked against the standard's text." },
-    { "what": "Open questions, measurement uncertainty and raw session notes", "why": "Not rules. Still in closet-builder docs/cabinetry-intelligence/ for reference." }
-  ]
+    {
+      "what": "Box construction: frameless build, joinery, backs and grooves, board thicknesses, edge banding, shelf pins, hinges and boring, drawer slides, rods and accessory drilling, the ladder toe kick's parts (shop facts 0–9, 11, 12, 14, 18, 20–23, 26, 29, 33)",
+      "why": "Engineering. This platform does not engineer cabinets; the shop's own library and software do."
+    },
+    {
+      "what": "Filler painting (CON-002) and 5/8\" door material (CON-003)",
+      "why": "Finishing and material details for the shop; not design rules."
+    },
+    {
+      "what": "Prices, lead time, quote changes (shop facts 34–36)",
+      "why": "Pricing is per running inch and kept separate (DECISIONS 2026-11-07)."
+    },
+    {
+      "what": "Closet configurations: two-door with divider, drawers to 30\", highboy to 48\", rod heights (shop facts 27, 32, 42, 43)",
+      "why": "Closet-specific; several values were assumed, not owner-stated."
+    },
+    {
+      "what": "Industry standards EXT-001 to EXT-008 (AWI, NAAWS)",
+      "why": "Unverified fallbacks only; none was checked against the standard's text."
+    },
+    {
+      "what": "Open questions, measurement uncertainty and raw session notes",
+      "why": "Not rules. Still in closet-builder docs/cabinetry-intelligence/ for reference."
+    },
+    {
+      "what": "HARD-003 · closet room and run limits",
+      "why": "Owner review, 2026-11-08: \"Delete this rule, it's convoluted\"."
+    }
+  ],
+  "design_tool": {
+    "how_used": "Owner, 2026-11-07: the AI designer gets the confirmed rules, the room's walls and cabinet runs, and the client's intake preferences, and drafts the best-fit design and layout from them. The design_tool setting only matters in the design tool, when a designer's own change breaks a rule.",
+    "not_drawable": "The design tool won't let it be drawn (owner, 2026-11-08).",
+    "error": "Shown as an error the designer must fix.",
+    "suggestion": "Shown on the running list of design preferences that could be improved (owner, 2026-11-07). Every confirmed preference is here.",
+    "none": "Nothing to check in the design tool: guidance for the AI designer, or how the tool draws things.",
+    "unset": "A confirmed hard rule with no setting yet (design_tool left out)."
+  }
 }

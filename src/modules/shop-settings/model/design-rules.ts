@@ -1,17 +1,22 @@
 /**
  * Design rules carried over from closet-builder (owner, 2026-11-07): data with a recorded
  * source (rule 6), in data/design-rules.json. A bad data file fails loudly; nothing is
- * filled in. No rule is applied by the software yet: each one says whether the owner has
- * confirmed it for this platform, or whether it is still a candidate or a conflict.
+ * filled in. The owner reviewed them on 2026-11-07/08: each says whether it is confirmed for
+ * this platform, declined, or still a candidate, and (when confirmed) what the design tool
+ * does when a designer's own change breaks it. The AI designer reads every confirmed rule.
+ * No rule is applied by the software yet.
  */
 import { z } from 'zod';
 import { parseImperial, type Length } from '@/core/index';
 import raw from '../data/design-rules.json';
 
 export const RULE_KINDS = ['hard', 'preference', 'principle', 'front_rule', 'documentation', 'optional', 'rejected'] as const;
-export const RULE_STATUSES = ['confirmed', 'candidate', 'conflicts'] as const;
+export const RULE_STATUSES = ['confirmed', 'candidate', 'conflicts', 'declined'] as const;
+/** What the design tool does when a designer's own change breaks a confirmed rule. */
+export const DESIGN_TOOL_ACTIONS = ['not_drawable', 'error', 'suggestion', 'none'] as const;
 export type RuleKind = (typeof RULE_KINDS)[number];
 export type RuleStatus = (typeof RULE_STATUSES)[number];
+export type DesignToolAction = (typeof DESIGN_TOOL_ACTIONS)[number];
 
 const Text = z.string().min(1);
 const RuleSchema = z.strictObject({
@@ -26,6 +31,7 @@ const RuleSchema = z.strictObject({
   source: Text,
   closet_builder_status: Text,
   here: z.strictObject({ status: z.enum(RULE_STATUSES), note: z.string() }),
+  design_tool: z.enum(DESIGN_TOOL_ACTIONS).optional(),
   related: z.array(Text).optional(),
   open: z.array(Text).optional(),
 });
@@ -34,7 +40,8 @@ const FileSchema = z.strictObject({
   imported_on: Text,
   requested_by: Text,
   caution: Text,
-  statuses: z.strictObject({ confirmed: Text, candidate: Text, conflicts: Text }),
+  statuses: z.strictObject({ confirmed: Text, candidate: Text, conflicts: Text, declined: Text }),
+  design_tool: z.strictObject({ how_used: Text, not_drawable: Text, error: Text, suggestion: Text, none: Text, unset: Text }),
   kinds: z.strictObject(Object.fromEntries(RULE_KINDS.map((k) => [k, Text])) as Record<RuleKind, typeof Text>),
   rules: z.array(RuleSchema).min(1),
   not_imported: z.array(z.strictObject({ what: Text, why: Text })),
@@ -58,6 +65,11 @@ export interface DesignRule {
   /** Its status on this platform. Only "confirmed" rules may be used without asking the owner. */
   readonly status: RuleStatus;
   readonly note: string;
+  /**
+   * What the design tool does when a designer's own change breaks it; null when not set.
+   * Only confirmed rules have one: every confirmed preference is a suggestion (owner, 2026-11-07).
+   */
+  readonly designTool: DesignToolAction | null;
   readonly related: readonly string[];
   readonly open: readonly string[];
 }
@@ -93,6 +105,12 @@ export function readDesignRules(data: unknown): { ok: true; value: DesignRules }
     if (r.here.status !== 'candidate' && r.here.note.trim() === '') {
       problems.push(`${r.id} is "${r.here.status}" but does not say why`);
     }
+    if (r.design_tool !== undefined && r.here.status !== 'confirmed') {
+      problems.push(`${r.id} has a design tool setting but is not confirmed`);
+    }
+    if (r.here.status === 'confirmed' && r.kind === 'preference' && r.design_tool !== 'suggestion') {
+      problems.push(`${r.id} is a confirmed preference, so the design tool shows it as a suggestion`);
+    }
     const lengths = Object.fromEntries(
       Object.entries(r.lengths ?? {}).map(([name, v]) => [
         name,
@@ -112,6 +130,7 @@ export function readDesignRules(data: unknown): { ok: true; value: DesignRules }
       closetBuilderStatus: r.closet_builder_status,
       status: r.here.status,
       note: r.here.note,
+      designTool: r.design_tool ?? null,
       related: r.related ?? [],
       open: r.open ?? [],
     };

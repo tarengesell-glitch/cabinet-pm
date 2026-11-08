@@ -120,6 +120,25 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 - **Room drawing, round 9 (owner, 2026-11-05): edge scrolling.** While drawing walls or dragging a handle, a cursor within 40 px of the plan's edge scrolls the plan that way, faster nearer the edge, as AutoCAD, SketchUp and Figma do. The wall or drag being made follows the cursor. It stops when the cursor moves back in.
 - Room capture is pulled ahead of Phase 5 (BUILD_PLAN). Order: scaffold (1a), then Core walls and openings, then the Designer drawing screen.
 
+### 2026-11-08: Design rules reviewed (owner, design rules review page and chat, 2026-11-07/08)
+The owner answered every carried-over design rule on a review page (https://claude.ai/artifact/7vv6Emc6tQgevJ3Pt2Sp8L). The answers are in `src/modules/shop-settings/data/design-rules.json`, each in the rule's note with its date. 82 rules remain: **77 confirmed, 4 declined, 1 unanswered** (DOC-001, stone countertop drawings).
+- **How the rules are used (owner, 2026-11-07):** the AI designer gets the confirmed rules, the room's walls and cabinet runs, and the client's intake preferences, and drafts the best-fit design and layout. It needs no stop-or-warn setting. That setting matters only in the design tool, when a designer's own change breaks a rule. Broken preferences go on **a running list of design preferences that could be improved**. This replaces S-6's "block or warn" framing.
+- **Design tool, per rule:**
+  - **Won't let it be drawn (7):** runs overlapping (corner cabinets intersect by design), runs past their wall, gaps between cabinets, the cooktop clearances, the countertop into an appliance opening, anything that opens hitting something. Owner: "The tool wouldn't even allow it to be drawn".
+  - **Error to fix (4):** cabinet over the fridge centred on it, whatever is over a cooktop centred on it, known site conditions, crown setting the ceiling gap.
+  - **Suggestion (36):** every confirmed preference, including the 42" maximum width (HARD-016).
+- **Construction stays with the shop's library** (owner: "We will not set our own construction rules in this tool, rather we will use the CV and shop construction rules"). Declined: the 1/8" gap rule as our own rule (CB-A-05) and the 3 7/8" toe kick (use the library's). Door gaps and shelf spacing (CB-FACT-16, CB-FACT-13) are kept for drawing in the visual tool, but the library is the authority: if its numbers differ, the library wins.
+- **Visual options mapped to the library:** the 1 1/2" fillers and ends upgrade is a visual upgrade in this tool, mapped to a construction rule in the shop's library. Fronts are drawn grain-matched, and the shop sets its cut list to match.
+- **Other answers:**
+  - the cooktop clearances apply to the visual tool and to the measurements sent to Cabinet Vision;
+  - the stone fabricator and the shop count as one, so the countertop rules stand. The 1/4" projection into an appliance opening applies only to freestanding ranges;
+  - crowns set the gap when a ceiling height, cabinets to the ceiling and a crown are chosen;
+  - the storage, kitchen and clearance preferences are confirmed as true.
+- **Declined:** grain carrying across connected cabinets (PREF-010) and U-shaped vanity drawers (PREF-034: "I'm not sure how we'll program this parametrically").
+- **Conflicts settled:**
+  - closet-builder's room and run limits are deleted ("it's convoluted");
+  - its corner rule now covers only how facing closet runs snap when a run is dragged in the layout step. Kitchen corners keep corner cabinets.
+
 ### 2026-11-07: Design rules from closet-builder (owner: "bring in all the cabinet design rules")
 The owner asked for closet-builder's design rules (layout, spacing, symmetry, aesthetic) to be brought in. They are in `src/modules/shop-settings/data/design-rules.json`: 83 rules, each with its closet-builder ID, the owner's words and date, any lengths, and a status here.
 - **12 confirmed** for this platform, because the owner already confirmed them here: smallest widths (8"/8"/12"), the door rules, the ideal 14–16" door, evenly spaced shelves, the 1/16" width step and 3/4" fillers, ends (applied finished at an open end, filler at a wall), fillers as real parts, the dishwasher touching the sink base, the sink centred under a window, the top drawer line carrying across, and the two sign-off gates (appliances confirmed, site measured).
@@ -244,7 +263,7 @@ After walls, doors and windows, the person marks where cabinetry goes and where 
 - **S-3** Which read-back source is most reliable: ORDX export, SQL database, or reports? If it's the database or files on the shop's computer, do we need a small helper app there?
 - **S-4** Is there a Cabinet Vision or Cyncly partner program with documentation or support? Licensing and terms must be reviewed before Phase 3.
 - ~~**S-5**~~ = U-1, answered 2026-11-05.
-- **S-6** Which design rules block and which only warn, by default?
+- ~~**S-6** Which design rules block and which only warn, by default?~~ Answered for the design rules (owner, 2026-11-08): each confirmed rule says whether the design tool won't let it be drawn, shows an error, or adds a suggestion; see "Design rules reviewed". The AI designer just follows them. Still open: the push gate's own conditions are separate (OA-5).
 
 ### Earlier plan features: keep, defer or drop?
 - **E-1 Room states.** Mostly answered by OA-5: the push needs sign-off, appliances, measure and payment, tracked as separate gate conditions. Still open: are these tracked per room or per job? Is invoicing tracked here or only in accounting?

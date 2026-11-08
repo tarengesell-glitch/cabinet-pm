@@ -3,8 +3,8 @@
  * The colours of the feel pictures below are part of the placeholder pictures, not business
  * values: real photos replace them (BUILD_PLAN 7b).
  */
-import type { FieldDef } from '../model/definition';
-import { Intake, type Answer, type Option } from '../model/engine';
+import type { Definition, FieldDef } from '../model/definition';
+import { Intake, type Answer, type IntakeState, type Option } from '../model/engine';
 import { backPanel, corner, doorClose, elevation, hardwareClose, interior, islandScene, plan, sidePanel, unitClose, type Look } from './art';
 
 const NEUTRAL_DOOR = '#DAD6CE';
@@ -141,3 +141,15 @@ export function optionPicture(x: Intake, f: FieldDef, o: Option): string {
 }
 
 export { elevation };
+
+/**
+ * A room's look (colours, door style, hardware) for other screens to draw with: the design
+ * studio's 3D view. Unchosen things come back in the neutral placeholder colours, as in the
+ * pictures. Null when the room is not in the design choices.
+ */
+export function roomLook(def: Definition, state: IntakeState, roomId: string): Look | null {
+  const i = state.rooms.findIndex((r) => r.id === roomId);
+  if (i < 0) return null;
+  const x = new Intake(def, state);
+  return x.inRoom(i, () => lookOf(x));
+}

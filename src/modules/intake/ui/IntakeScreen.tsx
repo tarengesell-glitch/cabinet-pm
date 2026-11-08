@@ -27,6 +27,8 @@ export interface IntakeFlowLink {
   readonly onChange: (state: IntakeState) => void;
   /** "Start laying out room dimensions". Returns null when it went ahead, or the reason it can't. */
   readonly onDraw: () => string | null;
+  /** The job whose answers these are; each job keeps its own. */
+  readonly job?: string | null;
 }
 
 export interface IntakeScreenProps {
@@ -86,6 +88,7 @@ export function IntakeScreen(props: IntakeScreenProps) {
 }
 
 function IntakeFlow({ user, next, flow, def }: IntakeScreenProps & { def: Definition }) {
+  const job = flow?.job ?? null;
   const canEdit = can(user, 'room.edit');
   const [state, setState] = useState<IntakeState | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
@@ -97,7 +100,7 @@ function IntakeFlow({ user, next, flow, def }: IntakeScreenProps & { def: Defini
   const advance = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    const loaded = loadState();
+    const loaded = loadState(job);
     if (loaded.kind === 'found') setState(loaded.state);
     else {
       setState(startIntake(def, newId()));
@@ -109,7 +112,7 @@ function IntakeFlow({ user, next, flow, def }: IntakeScreenProps & { def: Defini
     return () => {
       if (advance.current) clearTimeout(advance.current);
     };
-  }, [def]);
+  }, [def, job]);
 
   /** Every change: work on a copy, keep the result, save it. */
   const act = useCallback(
@@ -129,8 +132,8 @@ function IntakeFlow({ user, next, flow, def }: IntakeScreenProps & { def: Defini
   useEffect(() => {
     if (!state || !changed.current || saveHeld) return;
     changed.current = false;
-    setProblem(saveState(state));
-  }, [state, saveHeld]);
+    setProblem(saveState(state, job));
+  }, [state, saveHeld, job]);
 
   const x = useMemo(() => (state ? new Intake(def, state) : null), [def, state]);
 
@@ -244,7 +247,7 @@ function IntakeFlow({ user, next, flow, def }: IntakeScreenProps & { def: Defini
               if (!resetArmed) return setResetArmed(true);
               setResetArmed(false);
               const fresh = startIntake(def, newId());
-              setProblem(saveState(fresh));
+              setProblem(saveState(fresh, job));
               setSaveHeld(false);
               setState(fresh);
             }}

@@ -140,7 +140,7 @@ The writer is a pure function: (master copy version + mapping snapshot) → file
 - Added for this spec, each chosen when its phase arrives:
   - an XML/file library for the writer and reader, once the ORDX format reference exists (Phase 0–1);
   - react-konva for the 2D room drawing (walls, doors, windows), decided 2026-11-05 and pulled ahead of Phase 5;
-  - three.js / react-three-fiber for the 3D editor view (Phase 5);
+  - three.js / react-three-fiber for the 3D editor view (Phase 5). three.js was installed on 2026-11-08 for the placeholder customize view, without react-three-fiber;
   - the Claude API, server-side only, for AI Design (Phase 6).
 
 ## Getting data back out of Cabinet Vision (automatically, OA-6)

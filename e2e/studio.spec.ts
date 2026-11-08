@@ -9,20 +9,21 @@ test.beforeEach(async ({ page }) => {
   await page.evaluate(() => window.localStorage.clear());
 });
 
-test('the start page opens the design studio', async ({ page }) => {
-  await page.goto('/');
-  await page.getByRole('link', { name: /Open the design studio/ }).click();
-  await expect(page).toHaveURL(/\/studio\/?$/);
+test('a client page starts that client’s design in the studio', async ({ page }) => {
+  await page.goto('/clients/c1/');
+  await page.getByRole('link', { name: 'Start a design' }).first().click();
+  await expect(page).toHaveURL(/\/studio\/\?job=c1$/);
+  await expect(page.getByText('Whitfield design')).toBeVisible();
   await expect(question(page)).toHaveText('Which layout is closest to your kitchen?');
 });
 
-test('the steps: design choices first; the drawing waits for them; AI design and Customize are not built yet', async ({ page }) => {
+test('the steps: design choices first; each later step says what it waits for', async ({ page }) => {
   await page.goto('/studio');
   await expect(step(page, 'Design choices')).toHaveAttribute('aria-current', 'step');
   await expect(step(page, 'Room drawing')).toBeDisabled();
   await expect(step(page, 'AI design')).toBeDisabled();
-  await expect(step(page, 'AI design')).toHaveAttribute('title', 'Not built yet.');
-  await expect(step(page, 'Customize')).toBeDisabled();
+  await expect(step(page, 'AI design')).toHaveAttribute('title', 'Finish the design choices for kitchen first.');
+  await expect(step(page, 'Customize')).toHaveAttribute('title', 'Run the AI design step first.');
   await expect(page.getByText(/Preview job · kept in this browser · Preview user \(mocked/)).toBeVisible();
 });
 
@@ -78,4 +79,53 @@ test('every room is in the room bar, and the drawing waits until every room is f
   await expect(page.getByRole('textbox', { name: 'Room name' })).toHaveValue('Kitchen');
   await roomBar(page).getByRole('button', { name: /Main bath/ }).click();
   await expect(page.getByRole('textbox', { name: 'Room name' })).toHaveValue('Main bath');
+});
+
+test('the placeholder AI design lays out the drawn room, then the customize screens open', async ({ page }) => {
+  test.setTimeout(90_000);
+  await answerKitchen(page, '/studio/?job=c2');
+  await page.getByRole('button', { name: 'Finish kitchen' }).click();
+  await page.getByRole('button', { name: /Start laying out room dimensions/ }).click();
+  await expect(step(page, 'AI design')).toBeDisabled();
+  await page.getByRole('button', { name: 'Load example kitchen' }).click();
+  await expect(roomBar(page).getByRole('button', { name: /Kitchen/ })).toHaveText('✓Kitchen');
+
+  await step(page, 'AI design').click();
+  await expect(page.getByText(/This animation stands in for the AI design step. No AI model is called/)).toBeVisible();
+  // When every room is laid out, it moves on by itself.
+  await expect(step(page, 'Customize')).toHaveAttribute('aria-current', 'step', { timeout: 15_000 });
+  await expect(page.getByTestId('stage-3d').locator('canvas')).toBeVisible();
+  await expect(page.getByText('Live pricing not connected yet')).toBeVisible();
+  const toReview = page.getByText(/^\d+ placements to review$/);
+  await expect(toReview).toBeVisible();
+
+  // Pick a base cabinet from its run; it is marked as placed by the placeholder until approved.
+  await page.getByRole('tab', { name: 'Run' }).click();
+  await page.locator('button[aria-label^="Base"]').first().click();
+  await page.getByRole('tab', { name: 'Cabinet' }).click();
+  await expect(page.getByText('Placed by the placeholder')).toBeVisible();
+  await page.getByRole('button', { name: 'Approve', exact: true }).click();
+  await expect(page.getByText('Reviewed', { exact: true })).toBeVisible();
+
+  // Its type comes from the catalog, and stays within its kind.
+  await page.getByRole('radiogroup', { name: 'Cabinet type' }).getByRole('radio', { name: 'Base, 4 drawers' }).click();
+  await expect(page.getByRole('heading', { name: 'Base, 4 drawers' })).toBeVisible();
+
+  // A width the cabinet beside it can't give is refused with the reason.
+  await page.getByRole('textbox', { name: 'Width' }).fill('400');
+  await page.getByRole('button', { name: 'Apply' }).click();
+  await expect(page.getByText(/can grow by that much at most/)).toBeVisible();
+
+  // Approve all asks first.
+  await page.getByRole('button', { name: 'Approve all' }).click();
+  await page.getByRole('button', { name: /Yes, approve all/ }).click();
+  await expect(page.getByText('Every placement reviewed')).toBeVisible();
+
+  // Kept after a reload: the AI step shows it as done, and only lays out again when asked.
+  await page.reload();
+  await page.getByRole('button', { name: /Start laying out room dimensions/ }).click();
+  await step(page, 'AI design').click();
+  await expect(page.getByRole('heading', { name: 'Your design is ready' })).toBeVisible();
+  await page.getByRole('button', { name: 'Open the customizer' }).click();
+  await expect(page.getByText('Every placement reviewed')).toBeVisible();
 });

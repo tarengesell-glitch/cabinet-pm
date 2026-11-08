@@ -6,12 +6,6 @@ test.beforeEach(async ({ page }) => {
   await page.evaluate(() => window.localStorage.clear());
 });
 
-test('the home page puts the design choices before the room drawing', async ({ page }) => {
-  await page.goto('/');
-  const links = page.getByRole('listitem').getByRole('link');
-  await expect(links).toHaveText(['Design choices', 'Room drawing']);
-});
-
 test('a question waits for its answer and says what is missing', async ({ page }) => {
   await page.goto('/intake');
   await tile(page, 'Galley').click();

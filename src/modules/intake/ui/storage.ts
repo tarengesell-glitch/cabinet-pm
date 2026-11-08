@@ -7,6 +7,9 @@ import type { IntakeState } from '../model/engine';
 
 const KEY = 'cabinet-pm.intake-preview.v1';
 
+/** Where a job's answers are kept: the preview job under the old key, other jobs under their own. */
+const keyFor = (job: string | null | undefined): string => (job ? `${KEY}.job.${job}` : KEY);
+
 export type Loaded = { kind: 'none' } | { kind: 'found'; state: IntakeState } | { kind: 'problem'; reason: string };
 
 const describe = (error: unknown): string => (error instanceof Error ? error.message : String(error));
@@ -17,10 +20,10 @@ function looksLikeState(v: unknown): v is IntakeState {
   return s.version === 1 && Array.isArray(s.rooms) && s.rooms.length > 0 && typeof s.room === 'number' && s.room >= 0 && s.room < s.rooms.length;
 }
 
-export function loadState(): Loaded {
+export function loadState(job?: string | null): Loaded {
   let raw: string | null;
   try {
-    raw = window.localStorage.getItem(KEY);
+    raw = window.localStorage.getItem(keyFor(job));
   } catch (error) {
     return { kind: 'problem', reason: `This browser won't let the intake read saved answers (${describe(error)}). Answers last only until the page closes.` };
   }
@@ -36,10 +39,10 @@ export function loadState(): Loaded {
 }
 
 /** Returns null when saved, or the reason it could not be saved. */
-export function saveState(state: IntakeState | null): string | null {
+export function saveState(state: IntakeState | null, job?: string | null): string | null {
   try {
-    if (state === null) window.localStorage.removeItem(KEY);
-    else window.localStorage.setItem(KEY, JSON.stringify(state));
+    if (state === null) window.localStorage.removeItem(keyFor(job));
+    else window.localStorage.setItem(keyFor(job), JSON.stringify(state));
     return null;
   } catch (error) {
     return `Your answers couldn't be saved in this browser (${describe(error)}). They last only until the page closes.`;

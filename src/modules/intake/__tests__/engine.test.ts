@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { buildDefinition, DEFINITION, type Definition } from '../model/definition';
 import { heightLength, Intake, startIntake, type IntakeState } from '../model/engine';
-import { intakeHandover, roughCeiling } from '../model/handover';
+import { intakeHandover, roomSummary, roughCeiling } from '../model/handover';
 import intakeData from '../data/intake-v1.json';
 import coloursData from '../data/colours.json';
 import listsData from '../data/lists.json';
@@ -428,5 +428,16 @@ describe('the rough ceiling height handed to the room drawing (IK-17)', () => {
     x.addRoom('r2');
     x.pick('ceiling_height', 'match_primary');
     expect(roughCeiling(def, s, 'r2')).toEqual({ ok: true, value: 120 * 64 });
+  });
+});
+
+describe('a room in words, for other screens', () => {
+  it('lists answered questions with their short names, and nothing for an unknown room', () => {
+    const { x, s } = fresh();
+    answerRoom(x, KITCHEN);
+    const rows = roomSummary(def, s, 'kitchen-room');
+    expect(rows.length).toBeGreaterThan(10);
+    expect(rows.every((r) => r.label.length > 0 && r.value.length > 0)).toBe(true);
+    expect(roomSummary(def, s, 'nope')).toEqual([]);
   });
 });

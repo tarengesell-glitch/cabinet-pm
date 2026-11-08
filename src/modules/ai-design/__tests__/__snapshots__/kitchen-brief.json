@@ -1,0 +1,6302 @@
+{
+  "brief_format": 1,
+  "job_id": "00000000-0000-4000-8000-000000000001",
+  "made_from": {
+    "master_copy_schema_version": 1,
+    "catalog": {
+      "version": 1,
+      "shop_id": "526e7ec9-47a3-5c86-9fd3-4db7010be90a",
+      "shop_name": "The colony shop"
+    },
+    "design_rules": {
+      "imported_from": "closet-builder (github tarengesell-glitch/closet-builder): docs/cabinetry-intelligence/ (hard-constraints.md, design-preferences.md, construction.md, drawings.md, decision-log.md, sessions/) and the design-related shop facts in docs/construction-strategy.md. Read 2026-11-07.",
+      "imported_on": "2026-11-07",
+      "fingerprint_sha256": "3ba22090bcdc6ab6eee47270e9ebadcca461b7ff74e5062c42afbec702668b2c",
+      "rules_in_file": 82,
+      "confirmed_rules_used": 78
+    }
+  },
+  "lengths": "Every length is in inches and fractions of an inch. Positions along a wall are measured from the wall's start corner. \"about\" marks a length that is rounded for reading.",
+  "room": {
+    "room_id": "00000000-0000-4000-8000-000000000100",
+    "name": "Kitchen",
+    "ceiling_height": "96\" (confirmed)",
+    "walls": [
+      {
+        "wall": "A",
+        "wall_id": "00000000-0000-4000-8000-000000000101",
+        "from": {
+          "x": "0\"",
+          "y": "0\""
+        },
+        "to": {
+          "x": "144\"",
+          "y": "0\""
+        },
+        "length": "144\"",
+        "typed_length": null,
+        "length_status": "confirmed",
+        "thickness": "4 1/2\" (confirmed)",
+        "openings": [
+          {
+            "opening_id": "00000000-0000-4000-8000-000000000201",
+            "kind": "window",
+            "from_wall_start": "48\" (confirmed)",
+            "width": "36\" (confirmed)",
+            "height": "40\" (confirmed)",
+            "sill_height": "42\" (confirmed)",
+            "swing": null
+          }
+        ],
+        "obstacles": [
+          {
+            "obstacle_id": "00000000-0000-4000-8000-000000000301",
+            "kind": "outlet",
+            "from_wall_start": "20\" (confirmed)",
+            "elevation": "44\" (confirmed)",
+            "width": "2 3/4\" (confirmed)",
+            "height": "4 1/2\" (confirmed)"
+          }
+        ],
+        "runs": [
+          {
+            "run_id": "00000000-0000-4000-8000-000000000601",
+            "kind": "base_upper",
+            "holds": "base and upper cabinets",
+            "from_wall_start": "0\"",
+            "length": "144\"",
+            "depth": "24\""
+          }
+        ],
+        "appliances": [
+          {
+            "placement_id": "00000000-0000-4000-8000-000000000701",
+            "kind": "sink",
+            "from_wall_start": "50\"",
+            "width": "32\" (rough, not yet confirmed)",
+            "beside": null
+          },
+          {
+            "placement_id": "00000000-0000-4000-8000-000000000702",
+            "kind": "dishwasher",
+            "from_wall_start": "82\"",
+            "width": "24\" (rough, not yet confirmed)",
+            "beside": "00000000-0000-4000-8000-000000000701"
+          }
+        ]
+      },
+      {
+        "wall": "B",
+        "wall_id": "00000000-0000-4000-8000-000000000102",
+        "from": {
+          "x": "144\"",
+          "y": "0\""
+        },
+        "to": {
+          "x": "144\"",
+          "y": "120\""
+        },
+        "length": "120\"",
+        "typed_length": null,
+        "length_status": "confirmed",
+        "thickness": "4 1/2\" (confirmed)",
+        "openings": [],
+        "obstacles": [],
+        "runs": [
+          {
+            "run_id": "00000000-0000-4000-8000-000000000602",
+            "kind": "base_upper",
+            "holds": "base and upper cabinets",
+            "from_wall_start": "0\"",
+            "length": "72\"",
+            "depth": "24\""
+          },
+          {
+            "run_id": "00000000-0000-4000-8000-000000000603",
+            "kind": "pantry",
+            "holds": "all pantry (tall) cabinets",
+            "from_wall_start": "72\"",
+            "length": "30\"",
+            "depth": "24\""
+          }
+        ],
+        "appliances": [
+          {
+            "placement_id": "00000000-0000-4000-8000-000000000703",
+            "kind": "range",
+            "from_wall_start": "30\"",
+            "width": "30\" (rough, not yet confirmed)",
+            "beside": null
+          }
+        ]
+      },
+      {
+        "wall": "C",
+        "wall_id": "00000000-0000-4000-8000-000000000103",
+        "from": {
+          "x": "144\"",
+          "y": "120\""
+        },
+        "to": {
+          "x": "0\"",
+          "y": "120\""
+        },
+        "length": "144\"",
+        "typed_length": null,
+        "length_status": "confirmed",
+        "thickness": "4 1/2\" (confirmed)",
+        "openings": [],
+        "obstacles": [],
+        "runs": [],
+        "appliances": []
+      },
+      {
+        "wall": "D",
+        "wall_id": "00000000-0000-4000-8000-000000000104",
+        "from": {
+          "x": "0\"",
+          "y": "120\""
+        },
+        "to": {
+          "x": "0\"",
+          "y": "0\""
+        },
+        "length": "120\"",
+        "typed_length": null,
+        "length_status": "confirmed",
+        "thickness": "4 1/2\" (confirmed)",
+        "openings": [
+          {
+            "opening_id": "00000000-0000-4000-8000-000000000202",
+            "kind": "door",
+            "from_wall_start": "30\" (confirmed)",
+            "width": "32\" (confirmed)",
+            "height": "80\" (confirmed)",
+            "sill_height": "0\" (confirmed)",
+            "swing": {
+              "hinge": "start",
+              "opens": "left"
+            }
+          }
+        ],
+        "obstacles": [],
+        "runs": [],
+        "appliances": []
+      }
+    ],
+    "islands": [
+      {
+        "wall": "E",
+        "wall_id": "00000000-0000-4000-8000-000000000105",
+        "from": {
+          "x": "36\"",
+          "y": "66\""
+        },
+        "to": {
+          "x": "108\"",
+          "y": "66\""
+        },
+        "length": "72\"",
+        "runs": [
+          {
+            "run_id": "00000000-0000-4000-8000-000000000604",
+            "kind": "base",
+            "holds": "base cabinets only",
+            "from_wall_start": "0\"",
+            "length": "72\"",
+            "depth": "36\""
+          }
+        ],
+        "appliances": []
+      }
+    ]
+  },
+  "intake": [
+    {
+      "question": "cabinet_height",
+      "asks": "Cabinet height",
+      "option_id": "opt-2",
+      "answer": "To the Ceiling",
+      "confirmed_with_client": false
+    },
+    {
+      "question": "colour_tone",
+      "asks": "Colour tone (door tone and counter tone)",
+      "option_id": "opt-5",
+      "answer": "White doors, dark counters",
+      "confirmed_with_client": false
+    },
+    {
+      "question": "corner_insert",
+      "asks": "Corner cabinets: double shelf or lazy Susan",
+      "option_id": "opt-16",
+      "answer": "Lazy Susan",
+      "confirmed_with_client": false
+    },
+    {
+      "question": "counter_colour",
+      "asks": "Counter colour",
+      "option_id": "opt-8",
+      "answer": "Charcoal quartz",
+      "confirmed_with_client": false
+    },
+    {
+      "question": "cutlery_organizers",
+      "asks": "Cutlery organizers (how many; 0 for none)",
+      "option_id": null,
+      "answer": "1",
+      "confirmed_with_client": false
+    },
+    {
+      "question": "door_colour",
+      "asks": "Door colour",
+      "option_id": "opt-7",
+      "answer": "Chantilly Lace",
+      "confirmed_with_client": true
+    },
+    {
+      "question": "door_style",
+      "asks": "Door style",
+      "option_id": "opt-6",
+      "answer": "Transitional",
+      "confirmed_with_client": false
+    },
+    {
+      "question": "drawer_level",
+      "asks": "Drawers: minimum, moderate or maximum",
+      "option_id": "opt-18",
+      "answer": "Moderate",
+      "confirmed_with_client": false
+    },
+    {
+      "question": "feel",
+      "asks": "Feel",
+      "option_id": "opt-3",
+      "answer": "Transitional",
+      "confirmed_with_client": false
+    },
+    {
+      "question": "garbage_recycling_cabinets",
+      "asks": "Cabinets for garbage and recycling (how many; 0 for none)",
+      "option_id": null,
+      "answer": "1",
+      "confirmed_with_client": false
+    },
+    {
+      "question": "handle",
+      "asks": "Handle (spec, size and finish)",
+      "option_id": "opt-10",
+      "answer": "Bar pull, 6\", matte black",
+      "confirmed_with_client": false
+    },
+    {
+      "question": "handle_position_doors",
+      "asks": "Handle position on doors (vertical or horizontal)",
+      "option_id": "opt-11",
+      "answer": "Vertical",
+      "confirmed_with_client": false
+    },
+    {
+      "question": "handle_position_drawers",
+      "asks": "Handle position on drawers (centred or closer to the top)",
+      "option_id": "opt-12",
+      "answer": "Centred",
+      "confirmed_with_client": false
+    },
+    {
+      "question": "hardware",
+      "asks": "Handles, knobs, or handles on drawers with knobs on doors",
+      "option_id": "opt-9",
+      "answer": "All handles",
+      "confirmed_with_client": false
+    },
+    {
+      "question": "interiors",
+      "asks": "Cabinet interiors",
+      "option_id": "opt-17",
+      "answer": "White",
+      "confirmed_with_client": false
+    },
+    {
+      "question": "island_back_panel",
+      "asks": "Island back panel detail",
+      "option_id": "opt-19",
+      "answer": "Shaker panels",
+      "confirmed_with_client": false
+    },
+    {
+      "question": "island_colour_tone",
+      "asks": "Island colour tone",
+      "option_id": "opt-22",
+      "answer": "Dark-medium doors, white counters",
+      "confirmed_with_client": false
+    },
+    {
+      "question": "island_counter_colour",
+      "asks": "Island counter colour",
+      "option_id": "opt-25",
+      "answer": "White quartz",
+      "confirmed_with_client": false
+    },
+    {
+      "question": "island_door_colour",
+      "asks": "Island door and panel colour",
+      "option_id": "opt-24",
+      "answer": "Walnut",
+      "confirmed_with_client": false
+    },
+    {
+      "question": "island_door_style",
+      "asks": "Island door style",
+      "option_id": "opt-23",
+      "answer": "Transitional",
+      "confirmed_with_client": false
+    },
+    {
+      "question": "island_material",
+      "asks": "Island material",
+      "option_id": "opt-21",
+      "answer": "Wood grain",
+      "confirmed_with_client": false
+    },
+    {
+      "question": "island_own_colour",
+      "asks": "Island in an offsetting colour",
+      "option_id": null,
+      "answer": "yes",
+      "confirmed_with_client": false
+    },
+    {
+      "question": "island_side_panel",
+      "asks": "Island side panel detail",
+      "option_id": "opt-20",
+      "answer": "Waterfall stone",
+      "confirmed_with_client": false
+    },
+    {
+      "question": "knob",
+      "asks": "Knob (spec and finish)",
+      "option_id": null,
+      "answer": "not applicable: all handles",
+      "confirmed_with_client": false
+    },
+    {
+      "question": "light_valance",
+      "asks": "Light valance style, or hidden",
+      "option_id": "opt-15",
+      "answer": "Hidden",
+      "confirmed_with_client": false
+    },
+    {
+      "question": "light_valance_colour",
+      "asks": "Light valance colour",
+      "option_id": null,
+      "answer": "not applicable: the light valance is hidden",
+      "confirmed_with_client": false
+    },
+    {
+      "question": "material",
+      "asks": "Material",
+      "option_id": "opt-4",
+      "answer": "Solid painted",
+      "confirmed_with_client": false
+    },
+    {
+      "question": "shape",
+      "asks": "Kitchen shape",
+      "option_id": "opt-1",
+      "answer": "L-Shape with Island",
+      "confirmed_with_client": false
+    },
+    {
+      "question": "spice_organizers",
+      "asks": "Spice organizers (how many; 0 for none)",
+      "option_id": null,
+      "answer": "0",
+      "confirmed_with_client": false
+    },
+    {
+      "question": "top_trim_colour",
+      "asks": "Top trim colour",
+      "option_id": "opt-14",
+      "answer": "Match doors",
+      "confirmed_with_client": false
+    },
+    {
+      "question": "top_trim_style",
+      "asks": "Top trim style",
+      "option_id": "opt-13",
+      "answer": "Flat crown",
+      "confirmed_with_client": false
+    },
+    {
+      "question": "tray_organizers",
+      "asks": "Tray organizers (how many; 0 for none)",
+      "option_id": null,
+      "answer": "1",
+      "confirmed_with_client": false
+    },
+    {
+      "question": "utility_organizers",
+      "asks": "Utility organizers (how many; 0 for none)",
+      "option_id": null,
+      "answer": "1",
+      "confirmed_with_client": false
+    }
+  ],
+  "design_rules": [
+    {
+      "id": "CB-FACT-10",
+      "kind": "front_rule",
+      "title": "Finished end at an open end, filler at a wall",
+      "says": "An applied end panel matching the doors goes on any cabinet end with no wall and no cabinet beside it. A filler goes at a wall end.",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "CB-FACT-13",
+      "kind": "front_rule",
+      "title": "Shelves evenly spaced, no opening under 6\"",
+      "says": "Adjustable shelves in a space are spaced evenly, and no opening between them may be less than 6\".",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {
+        "min_shelf_opening": "6\""
+      }
+    },
+    {
+      "id": "CB-FACT-16",
+      "kind": "front_rule",
+      "title": "Door sizes and splits",
+      "says": "1/16\" from each outside edge; each door of a pair is 1/8\" less than half the cabinet; one door up to 20\" wide, then a pair; one door up to 48\" tall, then two stacked. Under a countertop the door top is 1/4\" down from the cabinet top; otherwise flush.",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {
+        "below_countertop": "1/4\"",
+        "edge_gap": "1/16\"",
+        "max_door_height": "48\"",
+        "max_single_door_width": "20\""
+      }
+    },
+    {
+      "id": "CB-FACT-25",
+      "kind": "preference",
+      "title": "Dividing a run into cabinets",
+      "says": "The run length is fixed. Each end gives up 3/4\" to a filler (at a wall) or an applied finished end (open end). The rest is divided into cabinets by outside width on 1/16\" steps, with the aims PREF-001 to PREF-004. Making one cabinet wider makes the others narrower.",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {
+        "end_allowance": "3/4\"",
+        "width_step": "1/16\""
+      }
+    },
+    {
+      "id": "CB-FACT-31",
+      "kind": "hard",
+      "title": "Corners: the longest run takes the corner",
+      "says": "The longest run goes to the end of its wall; the run on the next wall stops about 10\" short of its fronts, with an end panel. No corner cabinet.",
+      "strength": null,
+      "applies_when": "Closet cabinet runs facing each other, while a run is being dragged in the wall and cabinet layout step",
+      "lengths": {
+        "corner_stop": "10\""
+      }
+    },
+    {
+      "id": "CB-FACT-45",
+      "kind": "front_rule",
+      "title": "Upgrade: 1 1/2\" fillers and finished ends",
+      "says": "An optional room-wide upgrade makes every filler and finished end 1 1/2\" thick (one sheet-good panel, not solid wood). Each such run end then sets aside 1 1/2\" instead of 3/4\".",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {
+        "upgrade_thickness": "1 1/2\""
+      }
+    },
+    {
+      "id": "CB-FACT-48",
+      "kind": "hard",
+      "title": "Crown moulding sets the gap above the cabinets",
+      "says": "With a crown, the cabinet top is exactly the crown's size below the ceiling (height set from the ceiling down). With no crown, any height, but never closer than 1\" to the ceiling. Placeholder crowns: 2\", 3\", 4\", 5\", 6\".",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {
+        "crown_sizes": [
+          "2\"",
+          "3\"",
+          "4\"",
+          "5\"",
+          "6\""
+        ],
+        "min_ceiling_gap": "1\""
+      }
+    },
+    {
+      "id": "CON-005",
+      "kind": "front_rule",
+      "title": "Fronts on one cabinet are grain-matched",
+      "says": "The fronts of one cabinet are always cut from grain-matched, continuous sections of the sheet, for every grained or patterned material. \"Non-negotiable.\"",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "DOC-001",
+      "kind": "documentation",
+      "title": "Stone countertop drawings show intent only",
+      "says": "The stone templater measures on site. Our countertop drawings show overall sizes, finished, unfinished and wall edges, and where fixtures and appliances go. They don't replace the field template.",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "HARD-001",
+      "kind": "hard",
+      "title": "Runs never occupy the same floor",
+      "says": "Each run claims its length along the wall plus its depth and room for fronts and handles. No other run may enter that space. Facing runs in a galley too narrow for both are reported, not overlapped.",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "HARD-002",
+      "kind": "hard",
+      "title": "A run stays inside its wall",
+      "says": "A run is never longer than its wall allows. A room edit that shortens a wall shortens its runs, and the screen says so.",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "HARD-004",
+      "kind": "hard",
+      "title": "Boxes stand gable to gable",
+      "says": "In a row each cabinet starts exactly where the one before it ends. With the fillers and end panels, the cabinets fill the run exactly.",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "HARD-005",
+      "kind": "hard",
+      "title": "Dishwasher right beside the sink base",
+      "says": "The dishwasher and the sink base must touch. No filler or corner between them (the dishwasher drains into the sink's drain).",
+      "strength": null,
+      "applies_when": "Kitchen",
+      "lengths": {}
+    },
+    {
+      "id": "HARD-006",
+      "kind": "hard",
+      "title": "A cabinet over the fridge is centred on the fridge",
+      "says": "A cabinet over a fridge is perfectly centred on the fridge.",
+      "strength": null,
+      "applies_when": "A cabinet sits over a fridge",
+      "lengths": {}
+    },
+    {
+      "id": "HARD-007",
+      "kind": "hard",
+      "title": "Whatever is over a cooktop is centred on it",
+      "says": "A hood fan, millwork hood or cabinet over a cooktop or range is centred on it. When the space over it is left open, the uppers either side are sized so the gap between them is centred on the cooktop. The gap's width comes from the code and the installation manual (the stricter decides), not a fixed 2\" a side.",
+      "strength": null,
+      "applies_when": "A range or cooktop",
+      "lengths": {}
+    },
+    {
+      "id": "HARD-008",
+      "kind": "hard",
+      "title": "30\" clear above the cooking surface",
+      "says": "Combustible cabinetry above a cooktop or range is at least 30\" above the cooking surface. The building code's reductions and its exemptions for hoods and microwaves are not verified.",
+      "strength": null,
+      "applies_when": "Cabinetry above a cooktop or range, Manitoba",
+      "lengths": {
+        "min_above_cooktop": "30\""
+      }
+    },
+    {
+      "id": "HARD-009",
+      "kind": "hard",
+      "title": "Protection of combustibles beside a cooktop",
+      "says": "From research, NOT VERIFIED: combustible finishes or cabinets within about 450 mm of the cooktop are protected above element level. No value is to be used until the code text is read.",
+      "strength": null,
+      "applies_when": "Cabinetry near a cooktop, Manitoba",
+      "lengths": {}
+    },
+    {
+      "id": "HARD-010",
+      "kind": "hard",
+      "title": "Appliance and fixture specs confirmed before sign-off",
+      "says": "Placeholder appliances are fine while designing. Sign-off and sending to production wait until every appliance's and fixture's specs are confirmed and the cabinetry meets their installation requirements.",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "HARD-011",
+      "kind": "hard",
+      "title": "Countertop into an appliance opening: at most 1/4\", equal both sides",
+      "says": "Where a countertop ends at an appliance or fixture opening, it projects 0 to 1/4\" from each side, never more, and the two sides are exactly equal. The usual 1\" overhang does not apply there. Example: a 31\" opening for a slide-in range gives a 30 1/2\" counter opening.",
+      "strength": null,
+      "applies_when": "Freestanding ranges only (owner review, 2026-11-08)",
+      "lengths": {
+        "max_projection_into_opening": "1/4\""
+      }
+    },
+    {
+      "id": "HARD-012",
+      "kind": "hard",
+      "title": "Verified site measurements before sign-off",
+      "says": "A design may use preliminary measurements, and a quote may use the homeowner's or a blueprint's. Sign-off and production need verified site measurements, recording who verified them and when (us, a contractor, the designer or the homeowner).",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "HARD-013",
+      "kind": "hard",
+      "title": "Anything that opens opens without hitting anything",
+      "says": "Doors, drawers, roll-outs, corner hardware and appliance doors complete their movement without hitting cabinetry, handles, walls, appliances, room doors or each other. Handles count. No clearance distance is invented: it comes from the real hardware and appliance.",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "HARD-014",
+      "kind": "hard",
+      "title": "Known site conditions are constraints",
+      "says": "Walls, bump-outs, columns, doors, windows, soffits, plumbing, electrical, HVAC and hood ducts that affect fit or use are constraints when known.",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "HARD-015",
+      "kind": "hard",
+      "title": "Smallest cabinet widths",
+      "says": "By outside width: an upper at least 8\"; a base with only doors at least 8\"; a cabinet with drawers at least 12\".",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {
+        "min_door_base": "8\"",
+        "min_drawer_cabinet": "12\"",
+        "min_upper": "8\""
+      }
+    },
+    {
+      "id": "HARD-016",
+      "kind": "hard",
+      "title": "No cabinet wider than 42\"",
+      "says": "A cabinet is never more than 42\" wide. Up to 38\" one cabinet is preferred to two (PREF-025).",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {
+        "max_cabinet_width": "42\""
+      }
+    },
+    {
+      "id": "OPT-001",
+      "kind": "optional",
+      "title": "Pot-lid organiser",
+      "says": "A dedicated pot-lid organiser is an optional upgrade, never added automatically.",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "OPT-002",
+      "kind": "optional",
+      "title": "Pull-out ironing board",
+      "says": "Useful but optional, never added automatically.",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "PREF-001",
+      "kind": "preference",
+      "title": "Cabinets 24\" to 32\" wide",
+      "says": "When a run is divided into cabinets, make as many as possible 24\" to 32\" wide. The ideal for looks and for sheet yield.",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {
+        "ideal_max": "32\"",
+        "ideal_min": "24\""
+      }
+    },
+    {
+      "id": "PREF-002",
+      "kind": "preference",
+      "title": "Few cabinets over 36\"",
+      "says": "As few cabinets as possible over 36\" wide. Loses to PREF-025 up to 38\".",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {
+        "avoid_over": "36\""
+      }
+    },
+    {
+      "id": "PREF-003",
+      "kind": "preference",
+      "title": "Avoid cabinets under 12\"",
+      "says": "Avoid cabinets narrower than 12\". An aim, not a limit (the limits are HARD-015).",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {
+        "avoid_under": "12\""
+      }
+    },
+    {
+      "id": "PREF-004",
+      "kind": "preference",
+      "title": "Fairly symmetrical runs",
+      "says": "Cabinet widths across a run look balanced, but cabinet size comes first: 80\" of cabinets is 32 + 32 + 16, not three of 26 5/8. A 90\" run is two 3/4\" fillers and three 29 1/2\" cabinets. ASSUMED order of trying (read from those examples): equal cabinets if they land in 24–32\"; then full 32s plus one; then the most even split, wider ones at both ends; an odd one at the right end.",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "PREF-005",
+      "kind": "preference",
+      "title": "Shoe and boot shelf spacing",
+      "says": "Flat shoe shelves 8\" apart, the first 7\" up; boots 16\".",
+      "strength": null,
+      "applies_when": "Closets and mudrooms",
+      "lengths": {
+        "boot_spacing": "16\"",
+        "first_shoe_shelf": "7\"",
+        "shoe_spacing": "8\""
+      }
+    },
+    {
+      "id": "PREF-006",
+      "kind": "preference",
+      "title": "A four-drawer bank near the sink and dishwasher",
+      "says": "A bank of four drawers should be close to the sink cabinet and dishwasher.",
+      "strength": "unclear",
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "PREF-007",
+      "kind": "preference",
+      "title": "One or two four-drawer banks beside the cooktop",
+      "says": "At least one, ideally two, four-drawer banks for pots and pans right beside the cooking appliance. Closer is better. Drawers, not deep shelves behind doors.",
+      "strength": "very strong, not hard",
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "PREF-008",
+      "kind": "preference",
+      "title": "Countertop overhangs 1\"",
+      "says": "Counters overhang 1\" past a finished end and 1\" past the face of a door or drawer front. Not at an appliance opening (HARD-011).",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {
+        "overhang": "1\""
+      }
+    },
+    {
+      "id": "PREF-009",
+      "kind": "preference",
+      "title": "The cabinet over the fridge lines up with the fridge panel",
+      "says": "The cabinet over a fridge is deep enough that its door face is flush with the front of the fridge panel beside it.",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "PREF-011",
+      "kind": "preference",
+      "title": "Walkways 42\" to 48\"",
+      "says": "Under 36\": breaks a very strong minimum. 36\" to 42\": possible, below preferred. 42\" to 48\": preferred. Over 48\": breaks a very strong maximum.",
+      "strength": "very strong, not hard",
+      "applies_when": null,
+      "lengths": {
+        "preferred_max": "48\"",
+        "preferred_min": "42\"",
+        "strong_min": "36\""
+      }
+    },
+    {
+      "id": "PREF-012",
+      "kind": "preference",
+      "title": "Islands line up with nearby runs",
+      "says": "Islands are sized and placed to line up with other runs. When an island's end is close to a wall run's end, they line up exactly (\"like snapping\").",
+      "strength": "strong",
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "PREF-013",
+      "kind": "preference",
+      "title": "Fixtures roughly in line align exactly",
+      "says": "An island sink and a back-wall range that are roughly in line are lined up exactly.",
+      "strength": "very strong",
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "PREF-014",
+      "kind": "preference",
+      "title": "A roughly centred island fixture is centred exactly",
+      "says": "A sink or cooktop roughly centred on an island is centred exactly.",
+      "strength": "extremely strong, \"almost a hard constraint\", but not hard",
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "PREF-015",
+      "kind": "principle",
+      "title": "Solve the fixed things first, then share out the rest",
+      "says": "1 set the run's ends; 2 set aside fillers and end panels; 3 lock confirmed appliance and fixture openings; 4 lock cabinets with deliberate widths; 5 share the remaining space; 6 recheck the total.",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "PREF-016",
+      "kind": "preference",
+      "title": "Acceptable cabinet widths 12\" to 36\"",
+      "says": "12–36\" is acceptable; 24–32\" is ideal (PREF-001).",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {
+        "acceptable_max": "36\"",
+        "acceptable_min": "12\""
+      }
+    },
+    {
+      "id": "PREF-017",
+      "kind": "preference",
+      "title": "Ideal door width 14\" to 16\"",
+      "says": "Each visible door: ideal 14–16\"; backup 12–14\" and 16–20\". Drawer fronts have no ideal width (the cabinet width decides). A 30\" two-door cabinet is judged on its two 14 7/8\" doors.",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {
+        "backup_max": "20\"",
+        "backup_min": "12\"",
+        "ideal_max": "16\"",
+        "ideal_min": "14\""
+      }
+    },
+    {
+      "id": "PREF-018",
+      "kind": "preference",
+      "title": "Drawer and front lines carry across neighbours",
+      "says": "Lines between drawer fronts continue across neighbouring drawer banks, and prominent front lines (the top of a door and the drawer beside it) continue across neighbouring bases. Random changes score worse unless function or a deliberate composition explains them.",
+      "strength": "strong",
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "PREF-019",
+      "kind": "preference",
+      "title": "Equal widths either side of a focal point",
+      "says": "Around a range, hood, over-range cabinet, sink, major window, niche or feature cabinet, the two cabinets immediately either side are equal widths where function allows. 18 | 36 HOOD | 18 beats 15 | 36 HOOD | 21.",
+      "strength": "strong",
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "PREF-020",
+      "kind": "preference",
+      "title": "Consistent top and bottom lines; deliberate steps",
+      "says": "A tall cabinet beside uppers shares their top line. Uppers in one run keep a consistent top, bottom or crown line. Where heights change, the change looks deliberate (a hierarchy, a repeated step, a focal composition), not accidental.",
+      "strength": "strong",
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "PREF-021",
+      "kind": "preference",
+      "title": "Repeated widths make rhythm; random one-offs are penalised",
+      "says": "Within one area, use a small deliberate set of widths (not every cabinet equal). 24 | 30 | 24 | 30 | 24 beats 18 | 27 | 21 | 33 | 16 | 24. A width that function needs is never refused.",
+      "strength": "a scored penalty",
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "PREF-022",
+      "kind": "preference",
+      "title": "Style decides how many divisions",
+      "says": "Calm or contemporary designs suit fewer, wider fronts. Traditional or detailed designs can suit more, smaller divisions.",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "PREF-023",
+      "kind": "preference",
+      "title": "Sink centred under a window; balance around a focal window",
+      "says": "When a sink and window are nearly aligned and function allows, the sink centres under the window. Cabinetry either side of a focal window is balanced. Local to the window; not every sink goes under every window.",
+      "strength": "strong",
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "PREF-024",
+      "kind": "preference",
+      "title": "Narrow doors beside a cooktop or sink hinge away from it",
+      "says": "Narrow single-door cabinets right beside the cooktop or sink open away from it, because the cook stands there. In 28 | 14 | 36 | 14 | 28 the left 14 hinges left, the right 14 hinges right. Never overrides HARD-013.",
+      "strength": "very strong beside a cooktop or sink; a weaker bonus beside prep areas; not hard",
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "PREF-025",
+      "kind": "preference",
+      "title": "Up to 38\", one cabinet beats two narrow ones",
+      "says": "Where the space could be one cabinet up to about 38\" or two of half that, one is better. Beats PREF-002 up to 38\". Never over 42\" (HARD-016).",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {
+        "one_cabinet_up_to": "38\""
+      }
+    },
+    {
+      "id": "PREF-026",
+      "kind": "preference",
+      "title": "Drawers rather than doors for everyday base storage",
+      "says": "Full-extension drawer bases are preferred to doors with shelves for kitchens, and vanities where plumbing allows. Except sinks, equipment, specialty cabinets, or where a door is genuinely better.",
+      "strength": "very strong, not hard",
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "PREF-027",
+      "kind": "preference",
+      "title": "A cutlery drawer and a separate utensil drawer",
+      "says": "One drawer for flatware with a cutlery insert, and a separate drawer for cooking utensils. Both by default in a full kitchen.",
+      "strength": "very strong default",
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "PREF-028",
+      "kind": "preference",
+      "title": "Cutlery and everyday dishes near the dishwasher",
+      "says": "What is put away from the dishwasher, above all cutlery, goes near the dishwasher and cleanup zone.",
+      "strength": "strong",
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "PREF-029",
+      "kind": "preference",
+      "title": "Vertical tray storage, over the fridge by default",
+      "says": "Vertical dividers for baking sheets, cutting boards and trays, by default in the cabinet over the fridge when it can hold them.",
+      "strength": "default; its place is a strong default",
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "PREF-030",
+      "kind": "preference",
+      "title": "Concealed garbage and recycling between sink and prep",
+      "says": "An integrated waste and recycling pull-out, placed to serve both prep and the sink.",
+      "strength": "default; its place is very strong",
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "PREF-031",
+      "kind": "preference",
+      "title": "Pull-outs inside tall pantry cabinets",
+      "says": "Tall pantry cabinets get internal pull-out drawers or trays rather than deep fixed shelves.",
+      "strength": "very strong",
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "PREF-032",
+      "kind": "preference",
+      "title": "Organised spice storage by default",
+      "says": "A dedicated spice solution near the cooking zone. The system is undecided.",
+      "strength": "default",
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "PREF-033",
+      "kind": "preference",
+      "title": "A proper corner mechanism whenever a corner holds storage",
+      "says": "No deep blind corner with fixed shelves. If a corner holds storage it gets an access mechanism (carousel, corner pull-out or similar). Leaving the corner empty can be better.",
+      "strength": "default",
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "PREF-035",
+      "kind": "preference",
+      "title": "Laundry room basics",
+      "says": "A folding surface (very strong); somewhere to hang or air-dry clothes (strong); laundry products stored by the machines (strong).",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "PREF-036",
+      "kind": "preference",
+      "title": "Mudroom basics",
+      "says": "A bench with shoe storage (very strong); small-item storage for keys, gloves and mail (strong); exposed hooks (moderate, never at the cost of the design).",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "PREF-037",
+      "kind": "preference",
+      "title": "The recommended closet cabinet",
+      "says": "Top to bottom: a shelf over the hanging if there is room; open hanging with a rod; drawers at the bottom. Doors only if there is room to open them. A recommendation, not a rule.",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "PRIN-001",
+      "kind": "principle",
+      "title": "The stricter of the code and the installation manual decides",
+      "says": "When the building code and a manufacturer's installation manual give different clearances, follow the stricter.",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "PRIN-002",
+      "kind": "principle",
+      "title": "The installation guide beats the spec sheet",
+      "says": "When an appliance's spec sheet and installation guide disagree, use the installation guide.",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "PRIN-003",
+      "kind": "principle",
+      "title": "Clearances are measured from the finished outside",
+      "says": "Doors, fronts, finished panels, countertops, handles and appliances stand beyond the cabinet, so they decide the real clearance.",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "PRIN-004",
+      "kind": "principle",
+      "title": "Fillers and panels are real parts",
+      "says": "Fillers and end panels are their own items with their own space, not space hidden in a cabinet width.",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "PRIN-005",
+      "kind": "principle",
+      "title": "Walkways against alignment and centring: no fixed order",
+      "says": "When walkway width and alignment or centring pull against each other, the AI suggests the trade-off and explains it, and the designer decides. Narrowed by PRIN-013 for lining up.",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "PRIN-006",
+      "kind": "principle",
+      "title": "Near enough becomes exact",
+      "says": "When things that read as a pair or a shared line nearly match, close the gap. A small miss is worse than an exact match or a clearly deliberate offset. 17 7/8 | FOCAL | 18 1/8 becomes 18 | FOCAL | 18.",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "PRIN-007",
+      "kind": "principle",
+      "title": "Align the edges that matter, not every seam",
+      "says": "Uppers and bases may use different widths; their ordinary seams needn't line up. Related edges (run ends, appliance, window and tall-cabinet edges) should. Three 24\" uppers over two 36\" bases is fine.",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "PRIN-008",
+      "kind": "principle",
+      "title": "Some lines matter more than others",
+      "says": "Most important first: 1 focal appliance and hood centrelines; 2 window and sink axes; 3 the outer ends of a composition; 4 tall and upper top lines; 5 major drawer and front lines; 6 large panel and end lines; 7 ordinary seams.",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "PRIN-009",
+      "kind": "principle",
+      "title": "Judge the visible fronts, not just the cabinets",
+      "says": "Equal cabinet widths aren't enough; the visible doors and drawer fronts should balance and repeat. 18 | 24 | 36 FOCAL | 24 | 18 is symmetrical in cabinets; 14 | 28 | 36 FOCAL | 28 | 14 is better; 28 | 14 | 36 FOCAL | 14 | 28 is preferred (every door 13 7/8\").",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "PRIN-010",
+      "kind": "principle",
+      "title": "Symmetry is local; deliberate asymmetry is fine",
+      "says": "A room can hold several compositions (a symmetrical range wall, an asymmetrical sink wall, a symmetrical island). A wider element may set a hierarchy on purpose. Asymmetry from function or design is fine; unexplained near-pairs are not.",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "PRIN-011",
+      "kind": "principle",
+      "title": "Function outranks decorative symmetry",
+      "says": "Don't chase symmetry at the cost of storage, appliance use, clearances, plumbing or the right cabinet type. Hard rules always win.",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "PRIN-012",
+      "kind": "principle",
+      "title": "Judge composition in elevation",
+      "says": "Front alignment, rhythm, heights and focal symmetry can only be judged in the wall (front) view, not the plan.",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "PRIN-013",
+      "kind": "principle",
+      "title": "Lining up beats a wider walkway, but not below 36\"",
+      "says": "When lining up and walkway width can't both be met, lining up wins as long as the walkway stays over 36\".",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {
+        "walkway_floor": "36\""
+      }
+    },
+    {
+      "id": "PRIN-014",
+      "kind": "principle",
+      "title": "Store things where they're used, sized to what they hold",
+      "says": "Reason from the task to what is stored to where it goes: cookware by the cooktop, cutlery by the dishwasher, spices by the cooking, garbage by prep and cleanup. Never add an insert just to fill leftover space.",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "PRIN-015",
+      "kind": "principle",
+      "title": "What counts as a default",
+      "says": "A feature is in a basic design by default only if an experienced designer would be surprised to see it missing. Nice-to-haves are optional and never added automatically.",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "PRIN-016",
+      "kind": "principle",
+      "title": "Separate the storage function from the product",
+      "says": "Rules name the function (\"cutlery organisation\", \"corner access\"); the catalog maps it to a product.",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {}
+    },
+    {
+      "id": "REJ-001",
+      "kind": "rejected",
+      "title": "Not defaults: vanity organiser drawer, hair-tool organiser, pull-out hamper, laundry sorting baskets",
+      "says": "None of these is added by default.",
+      "strength": null,
+      "applies_when": null,
+      "lengths": {}
+    }
+  ],
+  "cabinet_types": [
+    {
+      "id": "0a89c797-1c0a-5db8-b5d3-9b15726145b3",
+      "code": "above_toilet",
+      "name": "Upper over toilet",
+      "type": "wall",
+      "description": "Doors at the top and an open shelf space at the bottom.",
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "33\"",
+          "smallest": "8\"",
+          "largest": "40 1/4\"",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "36\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "12\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [
+        {
+          "kind": "doors",
+          "count": null
+        },
+        {
+          "kind": "open",
+          "count": null
+        }
+      ],
+      "inside": {
+        "adjustable_shelves": 2,
+        "fixed_shelves": 1
+      },
+      "toe_kick": false,
+      "options": [
+        {
+          "code": "door_style",
+          "name": "Door style",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "shaker_2_1_4",
+              "name": "Shaker, 2 1/4\" frame"
+            },
+            {
+              "code": "slab",
+              "name": "Slab"
+            },
+            {
+              "code": "slim_shaker_1",
+              "name": "Slim shaker, 1\" frame"
+            }
+          ]
+        },
+        {
+          "code": "end_left",
+          "name": "Left end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "end_right",
+          "name": "Right end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "hinge_side",
+          "name": "Hinge side (single door)",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "left",
+              "name": "Hinged on the left"
+            },
+            {
+              "code": "right",
+              "name": "Hinged on the right"
+            }
+          ]
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "17c4b404-a512-5579-acab-ee5c9b576a89",
+      "code": "angled_end_base",
+      "name": "Angled end base",
+      "type": "base",
+      "description": "An angled end cabinet: its door sits on a 45-degree face, so the run steps back at the end instead of stopping square.",
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "13\"",
+          "smallest": "8\"",
+          "largest": "40 1/4\"",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "34 3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "23 3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [
+        {
+          "kind": "doors",
+          "count": 1
+        }
+      ],
+      "inside": {
+        "adjustable_shelves": 2
+      },
+      "toe_kick": true,
+      "options": [
+        {
+          "code": "door_style",
+          "name": "Door style",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "shaker_2_1_4",
+              "name": "Shaker, 2 1/4\" frame"
+            },
+            {
+              "code": "slab",
+              "name": "Slab"
+            },
+            {
+              "code": "slim_shaker_1",
+              "name": "Slim shaker, 1\" frame"
+            }
+          ]
+        },
+        {
+          "code": "end_left",
+          "name": "Left end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "end_right",
+          "name": "Right end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "hand",
+          "name": "Left or right version",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "left",
+              "name": "Left"
+            },
+            {
+              "code": "right",
+              "name": "Right"
+            }
+          ]
+        },
+        {
+          "code": "hinge_side",
+          "name": "Hinge side (single door)",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "left",
+              "name": "Hinged on the left"
+            },
+            {
+              "code": "right",
+              "name": "Hinged on the right"
+            }
+          ]
+        }
+      ],
+      "notes": [
+        "A base cabinet with a toe kick like every other base. The library template leaves the toe kick out."
+      ]
+    },
+    {
+      "id": "bee7204c-ea2b-541d-9b0d-01d00d970713",
+      "code": "base_2drawers_doors_rollouts",
+      "name": "Base, two drawers over doors with roll-outs",
+      "type": "base",
+      "description": null,
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "30\"",
+          "smallest": "12\"",
+          "largest": "40 1/4\"",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "34 3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "23 3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [
+        {
+          "kind": "drawers",
+          "count": 2
+        },
+        {
+          "kind": "doors",
+          "count": null
+        }
+      ],
+      "inside": {
+        "dividers": 2,
+        "fixed_shelves": 1,
+        "rollouts": 2
+      },
+      "toe_kick": true,
+      "options": [
+        {
+          "code": "door_style",
+          "name": "Door style",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "shaker_2_1_4",
+              "name": "Shaker, 2 1/4\" frame"
+            },
+            {
+              "code": "slab",
+              "name": "Slab"
+            },
+            {
+              "code": "slim_shaker_1",
+              "name": "Slim shaker, 1\" frame"
+            }
+          ]
+        },
+        {
+          "code": "end_left",
+          "name": "Left end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "end_right",
+          "name": "Right end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "hinge_side",
+          "name": "Hinge side (single door)",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "left",
+              "name": "Hinged on the left"
+            },
+            {
+              "code": "right",
+              "name": "Hinged on the right"
+            }
+          ]
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "0eb8f295-d9ef-5e50-b9b8-c88cef05c6f1",
+      "code": "base_3_drawers",
+      "name": "Base, 3 drawers",
+      "type": "base",
+      "description": null,
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "30\"",
+          "smallest": "12\"",
+          "largest": "not known yet",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "34 3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "23 3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [
+        {
+          "kind": "drawers",
+          "count": 3
+        }
+      ],
+      "inside": {},
+      "toe_kick": true,
+      "options": [
+        {
+          "code": "door_style",
+          "name": "Door style",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "shaker_2_1_4",
+              "name": "Shaker, 2 1/4\" frame"
+            },
+            {
+              "code": "slab",
+              "name": "Slab"
+            },
+            {
+              "code": "slim_shaker_1",
+              "name": "Slim shaker, 1\" frame"
+            }
+          ]
+        },
+        {
+          "code": "end_left",
+          "name": "Left end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "end_right",
+          "name": "Right end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "ebbe2b76-acf1-5e07-911a-509320098887",
+      "code": "base_4_drawers",
+      "name": "Base, 4 drawers",
+      "type": "base",
+      "description": null,
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "30\"",
+          "smallest": "12\"",
+          "largest": "not known yet",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "34 3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "23 3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [
+        {
+          "kind": "drawers",
+          "count": 4
+        }
+      ],
+      "inside": {},
+      "toe_kick": true,
+      "options": [
+        {
+          "code": "door_style",
+          "name": "Door style",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "shaker_2_1_4",
+              "name": "Shaker, 2 1/4\" frame"
+            },
+            {
+              "code": "slab",
+              "name": "Slab"
+            },
+            {
+              "code": "slim_shaker_1",
+              "name": "Slim shaker, 1\" frame"
+            }
+          ]
+        },
+        {
+          "code": "end_left",
+          "name": "Left end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "end_right",
+          "name": "Right end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "7eb10db5-8600-5108-8c5c-6ca25aac8fde",
+      "code": "base_doors",
+      "name": "Base, doors",
+      "type": "base",
+      "description": null,
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "30\"",
+          "smallest": "8\"",
+          "largest": "40 1/4\"",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "34 3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "23 3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [
+        {
+          "kind": "doors",
+          "count": null
+        }
+      ],
+      "inside": {
+        "adjustable_shelves": 2
+      },
+      "toe_kick": true,
+      "options": [
+        {
+          "code": "door_style",
+          "name": "Door style",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "shaker_2_1_4",
+              "name": "Shaker, 2 1/4\" frame"
+            },
+            {
+              "code": "slab",
+              "name": "Slab"
+            },
+            {
+              "code": "slim_shaker_1",
+              "name": "Slim shaker, 1\" frame"
+            }
+          ]
+        },
+        {
+          "code": "end_left",
+          "name": "Left end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "end_right",
+          "name": "Right end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "hinge_side",
+          "name": "Hinge side (single door)",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "left",
+              "name": "Hinged on the left"
+            },
+            {
+              "code": "right",
+              "name": "Hinged on the right"
+            }
+          ]
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "397e68bb-eddf-546c-81aa-c8edfafd3572",
+      "code": "base_doors_rollouts",
+      "name": "Base, doors with roll-outs",
+      "type": "base",
+      "description": null,
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "30\"",
+          "smallest": "8\"",
+          "largest": "40 1/4\"",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "34 3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "23 3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [
+        {
+          "kind": "doors",
+          "count": null
+        }
+      ],
+      "inside": {
+        "rollouts": 2
+      },
+      "toe_kick": true,
+      "options": [
+        {
+          "code": "door_style",
+          "name": "Door style",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "shaker_2_1_4",
+              "name": "Shaker, 2 1/4\" frame"
+            },
+            {
+              "code": "slab",
+              "name": "Slab"
+            },
+            {
+              "code": "slim_shaker_1",
+              "name": "Slim shaker, 1\" frame"
+            }
+          ]
+        },
+        {
+          "code": "end_left",
+          "name": "Left end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "end_right",
+          "name": "Right end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "hinge_side",
+          "name": "Hinge side (single door)",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "left",
+              "name": "Hinged on the left"
+            },
+            {
+              "code": "right",
+              "name": "Hinged on the right"
+            }
+          ]
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "273602a5-a800-5e5c-aeab-43af8384d703",
+      "code": "base_drawer_doors",
+      "name": "Base, drawer over doors",
+      "type": "base",
+      "description": null,
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "15\"",
+          "smallest": "12\"",
+          "largest": "40 1/4\"",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "34 3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "23 3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [
+        {
+          "kind": "drawers",
+          "count": 1
+        },
+        {
+          "kind": "doors",
+          "count": null
+        }
+      ],
+      "inside": {
+        "adjustable_shelves": 1
+      },
+      "toe_kick": true,
+      "options": [
+        {
+          "code": "door_style",
+          "name": "Door style",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "shaker_2_1_4",
+              "name": "Shaker, 2 1/4\" frame"
+            },
+            {
+              "code": "slab",
+              "name": "Slab"
+            },
+            {
+              "code": "slim_shaker_1",
+              "name": "Slim shaker, 1\" frame"
+            }
+          ]
+        },
+        {
+          "code": "end_left",
+          "name": "Left end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "end_right",
+          "name": "Right end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "hinge_side",
+          "name": "Hinge side (single door)",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "left",
+              "name": "Hinged on the left"
+            },
+            {
+              "code": "right",
+              "name": "Hinged on the right"
+            }
+          ]
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "b799fe8e-675c-5403-a3f1-101b62006f11",
+      "code": "base_drawer_doors_rollouts",
+      "name": "Base, drawer over doors with roll-outs",
+      "type": "base",
+      "description": null,
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "30\"",
+          "smallest": "12\"",
+          "largest": "40 1/4\"",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "34 3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "23 3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [
+        {
+          "kind": "drawers",
+          "count": 1
+        },
+        {
+          "kind": "doors",
+          "count": null
+        }
+      ],
+      "inside": {
+        "rollouts": 2
+      },
+      "toe_kick": true,
+      "options": [
+        {
+          "code": "door_style",
+          "name": "Door style",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "shaker_2_1_4",
+              "name": "Shaker, 2 1/4\" frame"
+            },
+            {
+              "code": "slab",
+              "name": "Slab"
+            },
+            {
+              "code": "slim_shaker_1",
+              "name": "Slim shaker, 1\" frame"
+            }
+          ]
+        },
+        {
+          "code": "end_left",
+          "name": "Left end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "end_right",
+          "name": "Right end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "hinge_side",
+          "name": "Hinge side (single door)",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "left",
+              "name": "Hinged on the left"
+            },
+            {
+              "code": "right",
+              "name": "Hinged on the right"
+            }
+          ]
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "0832a4bf-b8f9-582f-aa99-3c76cac293aa",
+      "code": "base_filler",
+      "name": "Base filler",
+      "type": "filler",
+      "description": null,
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "34 1/2\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "23 3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [],
+      "inside": {},
+      "toe_kick": true,
+      "options": [],
+      "notes": [
+        "Cut to fit on site, sold at a fixed price rather than by the inch, 3/4\" wide by default."
+      ]
+    },
+    {
+      "id": "89390a63-38fb-5d7d-95d4-ba4a8acf0383",
+      "code": "blind_corner_base",
+      "name": "Blind corner base",
+      "type": "base",
+      "description": "A blind-corner base: one door beside a fixed blind panel that tucks into the corner behind the cabinet on the other wall.",
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "36 1/2\"",
+          "smallest": "8\"",
+          "largest": "not known yet",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "34 3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "23 3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [
+        {
+          "kind": "doors",
+          "count": 1
+        },
+        {
+          "kind": "fixed_panel",
+          "count": 1
+        }
+      ],
+      "inside": {
+        "dividers": 1
+      },
+      "toe_kick": true,
+      "options": [
+        {
+          "code": "door_style",
+          "name": "Door style",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "shaker_2_1_4",
+              "name": "Shaker, 2 1/4\" frame"
+            },
+            {
+              "code": "slab",
+              "name": "Slab"
+            },
+            {
+              "code": "slim_shaker_1",
+              "name": "Slim shaker, 1\" frame"
+            }
+          ]
+        },
+        {
+          "code": "end_left",
+          "name": "Left end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "end_right",
+          "name": "Right end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "hand",
+          "name": "Left or right version",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "left",
+              "name": "Left"
+            },
+            {
+              "code": "right",
+              "name": "Right"
+            }
+          ]
+        },
+        {
+          "code": "hinge_side",
+          "name": "Hinge side (single door)",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "left",
+              "name": "Hinged on the left"
+            },
+            {
+              "code": "right",
+              "name": "Hinged on the right"
+            }
+          ]
+        }
+      ],
+      "notes": [
+        "Confirmed as the blind-corner base."
+      ]
+    },
+    {
+      "id": "82b6ced5-3a94-5bf2-a1e9-72a5ced3c3a0",
+      "code": "closet_tower",
+      "name": "Closet tower",
+      "type": "closet",
+      "description": "An open bedroom closet tower with shelves and no doors.",
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "27\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "80\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "18\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [
+        {
+          "kind": "open",
+          "count": null
+        }
+      ],
+      "inside": {
+        "adjustable_shelves": 4,
+        "fixed_shelves": 1
+      },
+      "toe_kick": false,
+      "options": [
+        {
+          "code": "end_left",
+          "name": "Left end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "end_right",
+          "name": "Right end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "ff0b25c2-8cde-5981-91b5-e82b965c42b7",
+      "code": "corner_base",
+      "name": "Corner base",
+      "type": "corner_base",
+      "description": "An L-shaped corner base with its door on the inside corner.",
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "36\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "34 3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "36\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [
+        {
+          "kind": "doors",
+          "count": 1
+        }
+      ],
+      "inside": {
+        "fixed_shelves": 1
+      },
+      "toe_kick": true,
+      "options": [
+        {
+          "code": "door_style",
+          "name": "Door style",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "shaker_2_1_4",
+              "name": "Shaker, 2 1/4\" frame"
+            },
+            {
+              "code": "slab",
+              "name": "Slab"
+            },
+            {
+              "code": "slim_shaker_1",
+              "name": "Slim shaker, 1\" frame"
+            }
+          ]
+        },
+        {
+          "code": "end_left",
+          "name": "Left end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "end_right",
+          "name": "Right end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "hinge_side",
+          "name": "Hinge side (single door)",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "left",
+              "name": "Hinged on the left"
+            },
+            {
+              "code": "right",
+              "name": "Hinged on the right"
+            }
+          ]
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "bd33b05f-87e4-5f8f-a1c1-5f7ae14b365a",
+      "code": "corner_base_adjustable",
+      "name": "Corner base, adjustable shelves",
+      "type": "corner_base",
+      "description": "The corner base with adjustable shelves instead of a fixed one.",
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "34\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "34 3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "34\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [
+        {
+          "kind": "doors",
+          "count": 1
+        }
+      ],
+      "inside": {
+        "adjustable_shelves": 2
+      },
+      "toe_kick": true,
+      "options": [
+        {
+          "code": "door_style",
+          "name": "Door style",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "shaker_2_1_4",
+              "name": "Shaker, 2 1/4\" frame"
+            },
+            {
+              "code": "slab",
+              "name": "Slab"
+            },
+            {
+              "code": "slim_shaker_1",
+              "name": "Slim shaker, 1\" frame"
+            }
+          ]
+        },
+        {
+          "code": "end_left",
+          "name": "Left end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "end_right",
+          "name": "Right end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "hinge_side",
+          "name": "Hinge side (single door)",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "left",
+              "name": "Hinged on the left"
+            },
+            {
+              "code": "right",
+              "name": "Hinged on the right"
+            }
+          ]
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "d0c6a46d-2e7a-5fd9-874f-4899561fdf1b",
+      "code": "corner_drawer_base",
+      "name": "Corner drawer base",
+      "type": "corner_base",
+      "description": "Three drawers on the angled face of a corner cabinet. It is made in one size only.",
+      "resizable": false,
+      "size": {
+        "width": {
+          "standard": "36 5/8\"",
+          "smallest": "36 5/8\"",
+          "largest": "36 5/8\"",
+          "step": "not known yet"
+        },
+        "height": {
+          "standard": "34 3/4\"",
+          "smallest": "34 3/4\"",
+          "largest": "34 3/4\"",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "36 5/8\"",
+          "smallest": "36 5/8\"",
+          "largest": "36 5/8\"",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [
+        {
+          "kind": "drawers",
+          "count": 3
+        }
+      ],
+      "inside": {
+        "dividers": 2
+      },
+      "toe_kick": true,
+      "options": [
+        {
+          "code": "door_style",
+          "name": "Door style",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "shaker_2_1_4",
+              "name": "Shaker, 2 1/4\" frame"
+            },
+            {
+              "code": "slab",
+              "name": "Slab"
+            },
+            {
+              "code": "slim_shaker_1",
+              "name": "Slim shaker, 1\" frame"
+            }
+          ]
+        },
+        {
+          "code": "end_left",
+          "name": "Left end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "end_right",
+          "name": "Right end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        }
+      ],
+      "notes": [
+        "Fixed size only."
+      ]
+    },
+    {
+      "id": "ff53cf46-0eff-5db3-8bb3-4110eda9fff4",
+      "code": "corner_organizer_base",
+      "name": "Blind corner base with pull-out organizer",
+      "type": "base",
+      "description": "A blind-corner base with a pull-out corner organizer: one door beside a fixed blind panel.",
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "36 1/2\"",
+          "smallest": "8\"",
+          "largest": "not known yet",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "34 3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "23 3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [
+        {
+          "kind": "fixed_panel",
+          "count": 1
+        },
+        {
+          "kind": "doors",
+          "count": 1
+        }
+      ],
+      "inside": {
+        "dividers": 1
+      },
+      "toe_kick": true,
+      "options": [
+        {
+          "code": "door_style",
+          "name": "Door style",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "shaker_2_1_4",
+              "name": "Shaker, 2 1/4\" frame"
+            },
+            {
+              "code": "slab",
+              "name": "Slab"
+            },
+            {
+              "code": "slim_shaker_1",
+              "name": "Slim shaker, 1\" frame"
+            }
+          ]
+        },
+        {
+          "code": "end_left",
+          "name": "Left end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "end_right",
+          "name": "Right end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "hand",
+          "name": "Left or right version",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "left",
+              "name": "Left"
+            },
+            {
+              "code": "right",
+              "name": "Right"
+            }
+          ]
+        },
+        {
+          "code": "hinge_side",
+          "name": "Hinge side (single door)",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "left",
+              "name": "Hinged on the left"
+            },
+            {
+              "code": "right",
+              "name": "Hinged on the right"
+            }
+          ]
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "2b064150-bfda-5f23-9b9f-d2b4960a1a41",
+      "code": "dishwasher_opening",
+      "name": "Dishwasher opening",
+      "type": "appliance_opening",
+      "description": null,
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "25 1/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "34 3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "24 1/2\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [],
+      "inside": {},
+      "toe_kick": false,
+      "options": [],
+      "notes": []
+    },
+    {
+      "id": "f683f905-992c-587b-b662-2a16e49209e6",
+      "code": "floating_shelf",
+      "name": "Floating shelf",
+      "type": "shelf",
+      "description": "A 2\"-thick floating shelf with a light rail on three sides. No box and no doors.",
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "29 3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "2\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "10\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [],
+      "inside": {},
+      "toe_kick": false,
+      "options": [],
+      "notes": []
+    },
+    {
+      "id": "3b5d7ad2-79d1-5cf4-9f6d-b649a9f4fa6f",
+      "code": "furniture_end_panel",
+      "name": "Furniture end panel",
+      "type": "panel",
+      "description": "A thick, hollow end panel for the exposed end of a run, built as a frame with two dividers inside.",
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "35\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "34 3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "2 1/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [],
+      "inside": {},
+      "toe_kick": false,
+      "options": [],
+      "notes": []
+    },
+    {
+      "id": "1018c7c3-0f17-5bd7-b02d-4bce2e537205",
+      "code": "garbage_pullout",
+      "name": "Garbage pull-out",
+      "type": "base",
+      "description": "A drawer over a pull-out for a double garbage can.",
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "16 1/2\"",
+          "smallest": "12\"",
+          "largest": "not known yet",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "34 3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "23 3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [
+        {
+          "kind": "drawers",
+          "count": 1
+        },
+        {
+          "kind": "pullout",
+          "count": 1
+        }
+      ],
+      "inside": {
+        "fixed_shelves": 1
+      },
+      "toe_kick": true,
+      "options": [
+        {
+          "code": "door_style",
+          "name": "Door style",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "shaker_2_1_4",
+              "name": "Shaker, 2 1/4\" frame"
+            },
+            {
+              "code": "slab",
+              "name": "Slab"
+            },
+            {
+              "code": "slim_shaker_1",
+              "name": "Slim shaker, 1\" frame"
+            }
+          ]
+        },
+        {
+          "code": "end_left",
+          "name": "Left end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "end_right",
+          "name": "Right end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        }
+      ],
+      "notes": [
+        "The handle on the pull-out front is not centred: it sits as far down from the top of the front as the handle on the middle drawer of a three-drawer bank."
+      ]
+    },
+    {
+      "id": "000b51a2-a89f-54ca-86fa-28bde9ba631b",
+      "code": "island_back_panel",
+      "name": "Island back panel",
+      "type": "panel",
+      "description": "A flat finished panel that covers the back of an island.",
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "97 7/32\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "34 1/2\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [],
+      "inside": {},
+      "toe_kick": false,
+      "options": [],
+      "notes": []
+    },
+    {
+      "id": "af4f3b02-80dc-59d0-bfdd-4009baf91b91",
+      "code": "medicine_cabinet",
+      "name": "Medicine cabinet",
+      "type": "bath",
+      "description": "A recessed medicine cabinet: one door and shelves.",
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "30\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "36\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "5\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [
+        {
+          "kind": "doors",
+          "count": 1
+        }
+      ],
+      "inside": {
+        "adjustable_shelves": 3
+      },
+      "toe_kick": false,
+      "options": [
+        {
+          "code": "door_style",
+          "name": "Door style",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "shaker_2_1_4",
+              "name": "Shaker, 2 1/4\" frame"
+            },
+            {
+              "code": "slab",
+              "name": "Slab"
+            },
+            {
+              "code": "slim_shaker_1",
+              "name": "Slim shaker, 1\" frame"
+            }
+          ]
+        },
+        {
+          "code": "end_left",
+          "name": "Left end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "end_right",
+          "name": "Right end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "hinge_side",
+          "name": "Hinge side (single door)",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "left",
+              "name": "Hinged on the left"
+            },
+            {
+              "code": "right",
+              "name": "Hinged on the right"
+            }
+          ]
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "bdc52bcd-a64f-59b0-bad9-02941587f89b",
+      "code": "medicine_cabinet_small",
+      "name": "Small medicine cabinet",
+      "type": "bath",
+      "description": null,
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "14\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "21\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "4 1/2\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [
+        {
+          "kind": "doors",
+          "count": 1
+        }
+      ],
+      "inside": {
+        "adjustable_shelves": 2
+      },
+      "toe_kick": false,
+      "options": [
+        {
+          "code": "door_style",
+          "name": "Door style",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "shaker_2_1_4",
+              "name": "Shaker, 2 1/4\" frame"
+            },
+            {
+              "code": "slab",
+              "name": "Slab"
+            },
+            {
+              "code": "slim_shaker_1",
+              "name": "Slim shaker, 1\" frame"
+            }
+          ]
+        },
+        {
+          "code": "end_left",
+          "name": "Left end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "end_right",
+          "name": "Right end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "hinge_side",
+          "name": "Hinge side (single door)",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "left",
+              "name": "Hinged on the left"
+            },
+            {
+              "code": "right",
+              "name": "Hinged on the right"
+            }
+          ]
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "db68c587-f2e8-5089-a52a-c0c6a86f447a",
+      "code": "microwave_upper",
+      "name": "Microwave upper",
+      "type": "wall",
+      "description": "Short doors on top, and an open space below whose floor holds a microwave.",
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "25 3/8\"",
+          "smallest": "8\"",
+          "largest": "40 1/4\"",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "30\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "12\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [
+        {
+          "kind": "doors",
+          "count": null
+        },
+        {
+          "kind": "open",
+          "count": null
+        }
+      ],
+      "inside": {
+        "fixed_shelves": 1
+      },
+      "toe_kick": false,
+      "options": [
+        {
+          "code": "door_style",
+          "name": "Door style",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "shaker_2_1_4",
+              "name": "Shaker, 2 1/4\" frame"
+            },
+            {
+              "code": "slab",
+              "name": "Slab"
+            },
+            {
+              "code": "slim_shaker_1",
+              "name": "Slim shaker, 1\" frame"
+            }
+          ]
+        },
+        {
+          "code": "end_left",
+          "name": "Left end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "end_right",
+          "name": "Right end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "hinge_side",
+          "name": "Hinge side (single door)",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "left",
+              "name": "Hinged on the left"
+            },
+            {
+              "code": "right",
+              "name": "Hinged on the right"
+            }
+          ]
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "61b9f0fd-359b-5c49-b916-b6438bab81f0",
+      "code": "mirror_cabinet",
+      "name": "Mirror cabinet",
+      "type": "bath",
+      "description": "A bathroom wall cabinet whose door is a mirror.",
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "24\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "34\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "8\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [
+        {
+          "kind": "doors",
+          "count": 1
+        }
+      ],
+      "inside": {
+        "adjustable_shelves": 2
+      },
+      "toe_kick": false,
+      "options": [
+        {
+          "code": "door_style",
+          "name": "Door style",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "shaker_2_1_4",
+              "name": "Shaker, 2 1/4\" frame"
+            },
+            {
+              "code": "slab",
+              "name": "Slab"
+            },
+            {
+              "code": "slim_shaker_1",
+              "name": "Slim shaker, 1\" frame"
+            }
+          ]
+        },
+        {
+          "code": "end_left",
+          "name": "Left end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "end_right",
+          "name": "Right end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "hinge_side",
+          "name": "Hinge side (single door)",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "left",
+              "name": "Hinged on the left"
+            },
+            {
+              "code": "right",
+              "name": "Hinged on the right"
+            }
+          ]
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "5e42f50a-1f86-5ad2-83cd-581aeba0903b",
+      "code": "open_shelf_end",
+      "name": "Open shelf end",
+      "type": "wall",
+      "description": "An open, door-less shelving unit for the end of a run of uppers, with shelves that wrap around the corner.",
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "12\"",
+          "smallest": "8\"",
+          "largest": "not known yet",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "30\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "12\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [
+        {
+          "kind": "open",
+          "count": null
+        }
+      ],
+      "inside": {
+        "fixed_shelves": 2
+      },
+      "toe_kick": false,
+      "options": [
+        {
+          "code": "end_left",
+          "name": "Left end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "end_right",
+          "name": "Right end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "hand",
+          "name": "Left or right version",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "left",
+              "name": "Left"
+            },
+            {
+              "code": "right",
+              "name": "Right"
+            }
+          ]
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "7431da08-2b56-5597-bca5-8e95c5bee27d",
+      "code": "pencil_drawer",
+      "name": "Pencil drawer",
+      "type": "drawer_unit",
+      "description": "A shallow drawer box (6 1/2\" high in the example) that hangs under a counter or desk.",
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "26 1/8\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "6 1/2\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "23 3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [
+        {
+          "kind": "drawers",
+          "count": 1
+        }
+      ],
+      "inside": {},
+      "toe_kick": false,
+      "options": [
+        {
+          "code": "door_style",
+          "name": "Door style",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "shaker_2_1_4",
+              "name": "Shaker, 2 1/4\" frame"
+            },
+            {
+              "code": "slab",
+              "name": "Slab"
+            },
+            {
+              "code": "slim_shaker_1",
+              "name": "Slim shaker, 1\" frame"
+            }
+          ]
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "f65d5700-4ee1-5cfc-b7ee-1e74d01ad1b2",
+      "code": "sink_base",
+      "name": "Sink base",
+      "type": "base",
+      "description": null,
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "36\"",
+          "smallest": "8\"",
+          "largest": "40 1/4\"",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "34 3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "23 3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [
+        {
+          "kind": "doors",
+          "count": null
+        }
+      ],
+      "inside": {},
+      "toe_kick": true,
+      "options": [
+        {
+          "code": "door_style",
+          "name": "Door style",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "shaker_2_1_4",
+              "name": "Shaker, 2 1/4\" frame"
+            },
+            {
+              "code": "slab",
+              "name": "Slab"
+            },
+            {
+              "code": "slim_shaker_1",
+              "name": "Slim shaker, 1\" frame"
+            }
+          ]
+        },
+        {
+          "code": "end_left",
+          "name": "Left end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "end_right",
+          "name": "Right end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "hinge_side",
+          "name": "Hinge side (single door)",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "left",
+              "name": "Hinged on the left"
+            },
+            {
+              "code": "right",
+              "name": "Hinged on the right"
+            }
+          ]
+        },
+        {
+          "code": "sink_front",
+          "name": "Sink front",
+          "required": true,
+          "default": "full_height_doors_skirt",
+          "choices": [
+            {
+              "code": "false_drawer_front",
+              "name": "False drawer front (upgrade)"
+            },
+            {
+              "code": "full_height_doors_skirt",
+              "name": "Full-height doors with a skirt front"
+            },
+            {
+              "code": "tip_out_tray",
+              "name": "Tip-out tray (upgrade)"
+            }
+          ]
+        }
+      ],
+      "notes": [
+        "Default build: full-height doors with a skirt front, plywood, a cut-out bottom and back for plumbing, plus loose full panels to cover the side the plumbing does not come through. A false drawer front or a tip-out tray is an upgrade."
+      ]
+    },
+    {
+      "id": "7b015a7b-8997-51f0-9244-58f7fb3c9c48",
+      "code": "spice_pullout",
+      "name": "Spice pull-out",
+      "type": "base",
+      "description": "A narrow, full-height pull-out for spices.",
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "7 1/2\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "34 3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "23 3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [
+        {
+          "kind": "pullout",
+          "count": 1
+        }
+      ],
+      "inside": {},
+      "toe_kick": true,
+      "options": [
+        {
+          "code": "door_style",
+          "name": "Door style",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "shaker_2_1_4",
+              "name": "Shaker, 2 1/4\" frame"
+            },
+            {
+              "code": "slab",
+              "name": "Slab"
+            },
+            {
+              "code": "slim_shaker_1",
+              "name": "Slim shaker, 1\" frame"
+            }
+          ]
+        },
+        {
+          "code": "end_left",
+          "name": "Left end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "end_right",
+          "name": "Right end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        }
+      ],
+      "notes": [
+        "A narrow, full-height door pull-out for spices."
+      ]
+    },
+    {
+      "id": "7cf9e303-1071-510d-bc07-7fe2e11c80b8",
+      "code": "tall_appliance_stack",
+      "name": "Tall, appliance stack",
+      "type": "tall",
+      "description": "Doors on top, an open space for appliances, a roll-out shelf and a drawer at the bottom.",
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "27\"",
+          "smallest": "not known yet",
+          "largest": "40 1/4\"",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "84\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "26\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [
+        {
+          "kind": "doors",
+          "count": null
+        },
+        {
+          "kind": "open",
+          "count": null
+        },
+        {
+          "kind": "drawers",
+          "count": 1
+        }
+      ],
+      "inside": {
+        "fixed_shelves": 3,
+        "rollouts": 1
+      },
+      "toe_kick": true,
+      "options": [
+        {
+          "code": "door_style",
+          "name": "Door style",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "shaker_2_1_4",
+              "name": "Shaker, 2 1/4\" frame"
+            },
+            {
+              "code": "slab",
+              "name": "Slab"
+            },
+            {
+              "code": "slim_shaker_1",
+              "name": "Slim shaker, 1\" frame"
+            }
+          ]
+        },
+        {
+          "code": "end_left",
+          "name": "Left end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "end_right",
+          "name": "Right end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "hinge_side",
+          "name": "Hinge side (single door)",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "left",
+              "name": "Hinged on the left"
+            },
+            {
+              "code": "right",
+              "name": "Hinged on the right"
+            }
+          ]
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "fdcf3330-3124-57f4-8b1e-761e9cca7629",
+      "code": "tall_double_oven",
+      "name": "Tall, double wall oven",
+      "type": "tall",
+      "description": "Doors on top, an open space for a double wall oven, and a drawer at the bottom.",
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "30\"",
+          "smallest": "not known yet",
+          "largest": "40 1/4\"",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "104\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "26\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [
+        {
+          "kind": "doors",
+          "count": null
+        },
+        {
+          "kind": "open",
+          "count": null
+        },
+        {
+          "kind": "drawers",
+          "count": 1
+        }
+      ],
+      "inside": {
+        "adjustable_shelves": 1,
+        "fixed_shelves": 3
+      },
+      "toe_kick": true,
+      "options": [
+        {
+          "code": "door_style",
+          "name": "Door style",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "shaker_2_1_4",
+              "name": "Shaker, 2 1/4\" frame"
+            },
+            {
+              "code": "slab",
+              "name": "Slab"
+            },
+            {
+              "code": "slim_shaker_1",
+              "name": "Slim shaker, 1\" frame"
+            }
+          ]
+        },
+        {
+          "code": "end_left",
+          "name": "Left end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "end_right",
+          "name": "Right end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "hinge_side",
+          "name": "Hinge side (single door)",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "left",
+              "name": "Hinged on the left"
+            },
+            {
+              "code": "right",
+              "name": "Hinged on the right"
+            }
+          ]
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "1ca0ee90-0aa3-5237-aa4f-6488f6d84266",
+      "code": "tall_filler",
+      "name": "Tall filler",
+      "type": "filler",
+      "description": null,
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "84\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "23 3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [],
+      "inside": {},
+      "toe_kick": true,
+      "options": [],
+      "notes": [
+        "Cut to fit on site, sold at a fixed price rather than by the inch, 3/4\" wide by default."
+      ]
+    },
+    {
+      "id": "11123856-fdd2-5ad6-8298-e4765eedf050",
+      "code": "tall_oven",
+      "name": "Tall, oven opening",
+      "type": "tall",
+      "description": "A drawer at the bottom, an open space for a wall oven, and doors on top.",
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "30\"",
+          "smallest": "not known yet",
+          "largest": "40 1/4\"",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "84\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "26\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [
+        {
+          "kind": "doors",
+          "count": null
+        },
+        {
+          "kind": "open",
+          "count": null
+        },
+        {
+          "kind": "drawers",
+          "count": 1
+        }
+      ],
+      "inside": {
+        "adjustable_shelves": 1,
+        "fixed_shelves": 3
+      },
+      "toe_kick": true,
+      "options": [
+        {
+          "code": "door_style",
+          "name": "Door style",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "shaker_2_1_4",
+              "name": "Shaker, 2 1/4\" frame"
+            },
+            {
+              "code": "slab",
+              "name": "Slab"
+            },
+            {
+              "code": "slim_shaker_1",
+              "name": "Slim shaker, 1\" frame"
+            }
+          ]
+        },
+        {
+          "code": "end_left",
+          "name": "Left end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "end_right",
+          "name": "Right end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "hinge_side",
+          "name": "Hinge side (single door)",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "left",
+              "name": "Hinged on the left"
+            },
+            {
+              "code": "right",
+              "name": "Hinged on the right"
+            }
+          ]
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "f01721f6-671b-5c71-abd9-6edbbbda74cf",
+      "code": "tall_pantry",
+      "name": "Tall pantry",
+      "type": "tall",
+      "description": null,
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "30\"",
+          "smallest": "not known yet",
+          "largest": "40 1/4\"",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "84\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "26\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [
+        {
+          "kind": "doors",
+          "count": null
+        },
+        {
+          "kind": "doors",
+          "count": null
+        }
+      ],
+      "inside": {
+        "fixed_shelves": 1
+      },
+      "toe_kick": true,
+      "options": [
+        {
+          "code": "door_style",
+          "name": "Door style",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "shaker_2_1_4",
+              "name": "Shaker, 2 1/4\" frame"
+            },
+            {
+              "code": "slab",
+              "name": "Slab"
+            },
+            {
+              "code": "slim_shaker_1",
+              "name": "Slim shaker, 1\" frame"
+            }
+          ]
+        },
+        {
+          "code": "end_left",
+          "name": "Left end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "end_right",
+          "name": "Right end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "hinge_side",
+          "name": "Hinge side (single door)",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "left",
+              "name": "Hinged on the left"
+            },
+            {
+              "code": "right",
+              "name": "Hinged on the right"
+            }
+          ]
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "aa503a4d-7387-5a25-a0f0-91b37f80e7bd",
+      "code": "thick_end",
+      "name": "Thick end",
+      "type": "panel",
+      "description": "A narrow box with a fixed front panel. At the end of a run it makes the end look thick instead of 3/4\".",
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "3\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "34 1/2\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "23 3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [
+        {
+          "kind": "fixed_panel",
+          "count": 1
+        }
+      ],
+      "inside": {},
+      "toe_kick": false,
+      "options": [
+        {
+          "code": "door_style",
+          "name": "Door style",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "shaker_2_1_4",
+              "name": "Shaker, 2 1/4\" frame"
+            },
+            {
+              "code": "slab",
+              "name": "Slab"
+            },
+            {
+              "code": "slim_shaker_1",
+              "name": "Slim shaker, 1\" frame"
+            }
+          ]
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "b23feea8-3502-5fbe-983e-c935a21610b0",
+      "code": "upper_corner_45",
+      "name": "Upper corner, 45-degree",
+      "type": "corner_wall",
+      "description": "An upper corner cabinet with its door on a 45-degree face.",
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "24\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "30\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "24\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [
+        {
+          "kind": "doors",
+          "count": 1
+        }
+      ],
+      "inside": {
+        "adjustable_shelves": 2
+      },
+      "toe_kick": false,
+      "options": [
+        {
+          "code": "door_style",
+          "name": "Door style",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "shaker_2_1_4",
+              "name": "Shaker, 2 1/4\" frame"
+            },
+            {
+              "code": "slab",
+              "name": "Slab"
+            },
+            {
+              "code": "slim_shaker_1",
+              "name": "Slim shaker, 1\" frame"
+            }
+          ]
+        },
+        {
+          "code": "end_left",
+          "name": "Left end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "end_right",
+          "name": "Right end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "hinge_side",
+          "name": "Hinge side (single door)",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "left",
+              "name": "Hinged on the left"
+            },
+            {
+              "code": "right",
+              "name": "Hinged on the right"
+            }
+          ]
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "1ea4f394-6345-521a-8d12-7e13d2276ff8",
+      "code": "upper_corner_90",
+      "name": "Upper corner",
+      "type": "corner_wall",
+      "description": "The standard upper corner cabinet. Its two sides are ideally the same length, but they can differ so the cabinets beside it measure out better.",
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "24\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "38\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "24\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [
+        {
+          "kind": "doors",
+          "count": 1
+        }
+      ],
+      "inside": {
+        "adjustable_shelves": 2
+      },
+      "toe_kick": false,
+      "options": [
+        {
+          "code": "door_style",
+          "name": "Door style",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "shaker_2_1_4",
+              "name": "Shaker, 2 1/4\" frame"
+            },
+            {
+              "code": "slab",
+              "name": "Slab"
+            },
+            {
+              "code": "slim_shaker_1",
+              "name": "Slim shaker, 1\" frame"
+            }
+          ]
+        },
+        {
+          "code": "end_left",
+          "name": "Left end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "end_right",
+          "name": "Right end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "hinge_side",
+          "name": "Hinge side (single door)",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "left",
+              "name": "Hinged on the left"
+            },
+            {
+              "code": "right",
+              "name": "Hinged on the right"
+            }
+          ]
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "eb5fbf3d-5f04-5076-8f04-41a3071ea179",
+      "code": "upper_doors",
+      "name": "Upper, doors",
+      "type": "wall",
+      "description": null,
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "28\"",
+          "smallest": "8\"",
+          "largest": "40 1/4\"",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "30\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "12\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [
+        {
+          "kind": "doors",
+          "count": null
+        }
+      ],
+      "inside": {
+        "adjustable_shelves": 2
+      },
+      "toe_kick": false,
+      "options": [
+        {
+          "code": "door_style",
+          "name": "Door style",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "shaker_2_1_4",
+              "name": "Shaker, 2 1/4\" frame"
+            },
+            {
+              "code": "slab",
+              "name": "Slab"
+            },
+            {
+              "code": "slim_shaker_1",
+              "name": "Slim shaker, 1\" frame"
+            }
+          ]
+        },
+        {
+          "code": "end_left",
+          "name": "Left end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "end_right",
+          "name": "Right end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "hinge_side",
+          "name": "Hinge side (single door)",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "left",
+              "name": "Hinged on the left"
+            },
+            {
+              "code": "right",
+              "name": "Hinged on the right"
+            }
+          ]
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "49f3319c-afc8-5d2d-a019-59ac9423262f",
+      "code": "upper_doors_36",
+      "name": "Upper, doors, 36\" high or more",
+      "type": "wall",
+      "description": null,
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "32\"",
+          "smallest": "8\"",
+          "largest": "40 1/4\"",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "36\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "12\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [
+        {
+          "kind": "doors",
+          "count": null
+        }
+      ],
+      "inside": {
+        "adjustable_shelves": 3
+      },
+      "toe_kick": false,
+      "options": [
+        {
+          "code": "door_style",
+          "name": "Door style",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "shaker_2_1_4",
+              "name": "Shaker, 2 1/4\" frame"
+            },
+            {
+              "code": "slab",
+              "name": "Slab"
+            },
+            {
+              "code": "slim_shaker_1",
+              "name": "Slim shaker, 1\" frame"
+            }
+          ]
+        },
+        {
+          "code": "end_left",
+          "name": "Left end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "end_right",
+          "name": "Right end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "hinge_side",
+          "name": "Hinge side (single door)",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "left",
+              "name": "Hinged on the left"
+            },
+            {
+              "code": "right",
+              "name": "Hinged on the right"
+            }
+          ]
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "8e2fe940-ca09-5d0b-bc3e-d774691b8788",
+      "code": "upper_no_shelf",
+      "name": "Upper, short, no shelf",
+      "type": "wall",
+      "description": "A short upper with no shelf, for example over a fridge.",
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "30\"",
+          "smallest": "8\"",
+          "largest": "40 1/4\"",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "15\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "12\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [
+        {
+          "kind": "doors",
+          "count": null
+        }
+      ],
+      "inside": {},
+      "toe_kick": false,
+      "options": [
+        {
+          "code": "door_style",
+          "name": "Door style",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "shaker_2_1_4",
+              "name": "Shaker, 2 1/4\" frame"
+            },
+            {
+              "code": "slab",
+              "name": "Slab"
+            },
+            {
+              "code": "slim_shaker_1",
+              "name": "Slim shaker, 1\" frame"
+            }
+          ]
+        },
+        {
+          "code": "end_left",
+          "name": "Left end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "end_right",
+          "name": "Right end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "hinge_side",
+          "name": "Hinge side (single door)",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "left",
+              "name": "Hinged on the left"
+            },
+            {
+              "code": "right",
+              "name": "Hinged on the right"
+            }
+          ]
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "11f23571-1fc8-544d-a2ac-4b4699f05da4",
+      "code": "upper_with_lights",
+      "name": "Upper with under-cabinet light",
+      "type": "wall",
+      "description": "An upper with an LED strip light and a light-rail panel under it.",
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "33\"",
+          "smallest": "8\"",
+          "largest": "40 1/4\"",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "30\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "12\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [
+        {
+          "kind": "doors",
+          "count": null
+        }
+      ],
+      "inside": {
+        "adjustable_shelves": 2
+      },
+      "toe_kick": false,
+      "options": [
+        {
+          "code": "door_style",
+          "name": "Door style",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "shaker_2_1_4",
+              "name": "Shaker, 2 1/4\" frame"
+            },
+            {
+              "code": "slab",
+              "name": "Slab"
+            },
+            {
+              "code": "slim_shaker_1",
+              "name": "Slim shaker, 1\" frame"
+            }
+          ]
+        },
+        {
+          "code": "end_left",
+          "name": "Left end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "end_right",
+          "name": "Right end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "hinge_side",
+          "name": "Hinge side (single door)",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "left",
+              "name": "Hinged on the left"
+            },
+            {
+              "code": "right",
+              "name": "Hinged on the right"
+            }
+          ]
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "1744876b-40d5-5b4a-b063-1a4ae1e940d7",
+      "code": "vanity_3_drawers",
+      "name": "Vanity, 3 drawers",
+      "type": "vanity",
+      "description": null,
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "22 1/2\"",
+          "smallest": "12\"",
+          "largest": "not known yet",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "32 1/2\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "20 3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [
+        {
+          "kind": "drawers",
+          "count": 3
+        }
+      ],
+      "inside": {},
+      "toe_kick": true,
+      "options": [
+        {
+          "code": "door_style",
+          "name": "Door style",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "shaker_2_1_4",
+              "name": "Shaker, 2 1/4\" frame"
+            },
+            {
+              "code": "slab",
+              "name": "Slab"
+            },
+            {
+              "code": "slim_shaker_1",
+              "name": "Slim shaker, 1\" frame"
+            }
+          ]
+        },
+        {
+          "code": "end_left",
+          "name": "Left end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "end_right",
+          "name": "Right end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "4487689f-bb85-5375-99c8-0c1b64dadffa",
+      "code": "vanity_4_drawers",
+      "name": "Vanity, 4 drawers",
+      "type": "vanity",
+      "description": null,
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "27\"",
+          "smallest": "12\"",
+          "largest": "not known yet",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "30\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "20 3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [
+        {
+          "kind": "drawers",
+          "count": 4
+        }
+      ],
+      "inside": {},
+      "toe_kick": true,
+      "options": [
+        {
+          "code": "door_style",
+          "name": "Door style",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "shaker_2_1_4",
+              "name": "Shaker, 2 1/4\" frame"
+            },
+            {
+              "code": "slab",
+              "name": "Slab"
+            },
+            {
+              "code": "slim_shaker_1",
+              "name": "Slim shaker, 1\" frame"
+            }
+          ]
+        },
+        {
+          "code": "end_left",
+          "name": "Left end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "end_right",
+          "name": "Right end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "4862214c-6a74-596f-b704-534ecf3b911b",
+      "code": "vanity_drawer_doors",
+      "name": "Vanity, drawer over doors",
+      "type": "vanity",
+      "description": null,
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "24\"",
+          "smallest": "12\"",
+          "largest": "40 1/4\"",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "32 1/2\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "20 3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [
+        {
+          "kind": "drawers",
+          "count": 1
+        },
+        {
+          "kind": "doors",
+          "count": null
+        }
+      ],
+      "inside": {
+        "adjustable_shelves": 1
+      },
+      "toe_kick": true,
+      "options": [
+        {
+          "code": "door_style",
+          "name": "Door style",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "shaker_2_1_4",
+              "name": "Shaker, 2 1/4\" frame"
+            },
+            {
+              "code": "slab",
+              "name": "Slab"
+            },
+            {
+              "code": "slim_shaker_1",
+              "name": "Slim shaker, 1\" frame"
+            }
+          ]
+        },
+        {
+          "code": "end_left",
+          "name": "Left end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "end_right",
+          "name": "Right end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "hinge_side",
+          "name": "Hinge side (single door)",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "left",
+              "name": "Hinged on the left"
+            },
+            {
+              "code": "right",
+              "name": "Hinged on the right"
+            }
+          ]
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "bf12b0e2-94c2-58e9-89bf-8ef07fa32950",
+      "code": "vanity_filler",
+      "name": "Vanity filler",
+      "type": "filler",
+      "description": null,
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "32 1/2\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "20 3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [],
+      "inside": {},
+      "toe_kick": true,
+      "options": [],
+      "notes": [
+        "Cut to fit on site, sold at a fixed price rather than by the inch, 3/4\" wide by default."
+      ]
+    },
+    {
+      "id": "28869dbe-c073-5e54-9fbb-4086a0359a91",
+      "code": "vanity_furniture_1_drawer",
+      "name": "Furniture vanity, 1 drawer",
+      "type": "vanity",
+      "description": "Furniture style: a false front across the top over one drawer, legs on each side and an open shelf below.",
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "41\"",
+          "smallest": "12\"",
+          "largest": "not known yet",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "32 1/2\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "20 3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [
+        {
+          "kind": "false_front",
+          "count": 1
+        },
+        {
+          "kind": "drawers",
+          "count": 1
+        },
+        {
+          "kind": "open",
+          "count": null
+        }
+      ],
+      "inside": {
+        "dividers": 2,
+        "fixed_shelves": 2
+      },
+      "toe_kick": false,
+      "options": [
+        {
+          "code": "door_style",
+          "name": "Door style",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "shaker_2_1_4",
+              "name": "Shaker, 2 1/4\" frame"
+            },
+            {
+              "code": "slab",
+              "name": "Slab"
+            },
+            {
+              "code": "slim_shaker_1",
+              "name": "Slim shaker, 1\" frame"
+            }
+          ]
+        },
+        {
+          "code": "end_left",
+          "name": "Left end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "end_right",
+          "name": "Right end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "721b87f3-feda-507b-b94e-811968f2de5e",
+      "code": "vanity_furniture_2_drawers",
+      "name": "Furniture vanity, 2 drawers",
+      "type": "vanity",
+      "description": "Furniture style: a false front across the top over two drawers, legs on each side and a low shelf.",
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "36\"",
+          "smallest": "12\"",
+          "largest": "not known yet",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "32 1/2\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "20 3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [
+        {
+          "kind": "false_front",
+          "count": 1
+        },
+        {
+          "kind": "drawers",
+          "count": 2
+        },
+        {
+          "kind": "open",
+          "count": null
+        }
+      ],
+      "inside": {
+        "dividers": 2,
+        "fixed_shelves": 2
+      },
+      "toe_kick": false,
+      "options": [
+        {
+          "code": "door_style",
+          "name": "Door style",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "shaker_2_1_4",
+              "name": "Shaker, 2 1/4\" frame"
+            },
+            {
+              "code": "slab",
+              "name": "Slab"
+            },
+            {
+              "code": "slim_shaker_1",
+              "name": "Slim shaker, 1\" frame"
+            }
+          ]
+        },
+        {
+          "code": "end_left",
+          "name": "Left end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "end_right",
+          "name": "Right end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "90a76e04-4562-52dc-82b5-7ad79782c255",
+      "code": "vanity_sink",
+      "name": "Vanity sink",
+      "type": "vanity",
+      "description": null,
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "24\"",
+          "smallest": "8\"",
+          "largest": "40 1/4\"",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "32 1/2\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "20 3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [
+        {
+          "kind": "doors",
+          "count": null
+        }
+      ],
+      "inside": {},
+      "toe_kick": true,
+      "options": [
+        {
+          "code": "door_style",
+          "name": "Door style",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "shaker_2_1_4",
+              "name": "Shaker, 2 1/4\" frame"
+            },
+            {
+              "code": "slab",
+              "name": "Slab"
+            },
+            {
+              "code": "slim_shaker_1",
+              "name": "Slim shaker, 1\" frame"
+            }
+          ]
+        },
+        {
+          "code": "end_left",
+          "name": "Left end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "end_right",
+          "name": "Right end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "hinge_side",
+          "name": "Hinge side (single door)",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "left",
+              "name": "Hinged on the left"
+            },
+            {
+              "code": "right",
+              "name": "Hinged on the right"
+            }
+          ]
+        },
+        {
+          "code": "sink_front",
+          "name": "Sink front",
+          "required": true,
+          "default": "full_height_doors_skirt",
+          "choices": [
+            {
+              "code": "false_drawer_front",
+              "name": "False drawer front (upgrade)"
+            },
+            {
+              "code": "full_height_doors_skirt",
+              "name": "Full-height doors with a skirt front"
+            },
+            {
+              "code": "tip_out_tray",
+              "name": "Tip-out tray (upgrade)"
+            }
+          ]
+        }
+      ],
+      "notes": [
+        "Follows the kitchen sink base rules and defaults at vanity sizes: full-height doors by default, a false drawer front as an upgrade."
+      ]
+    },
+    {
+      "id": "95338e12-5a95-52ee-a7de-b481c949b2e7",
+      "code": "vanity_sink_side_drawers",
+      "name": "Vanity sink with side drawers",
+      "type": "vanity",
+      "description": "A vanity sink with a bank of drawers on one side.",
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "36\"",
+          "smallest": "12\"",
+          "largest": "40 1/4\"",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "32 1/2\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "20 3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [
+        {
+          "kind": "false_front",
+          "count": 1
+        },
+        {
+          "kind": "doors",
+          "count": null
+        }
+      ],
+      "inside": {
+        "dividers": 1
+      },
+      "toe_kick": true,
+      "options": [
+        {
+          "code": "door_style",
+          "name": "Door style",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "shaker_2_1_4",
+              "name": "Shaker, 2 1/4\" frame"
+            },
+            {
+              "code": "slab",
+              "name": "Slab"
+            },
+            {
+              "code": "slim_shaker_1",
+              "name": "Slim shaker, 1\" frame"
+            }
+          ]
+        },
+        {
+          "code": "end_left",
+          "name": "Left end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "end_right",
+          "name": "Right end",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "applied_finished",
+              "name": "Applied finished end (open end, the usual choice)"
+            },
+            {
+              "code": "finished",
+              "name": "Finished end (open end, by request)"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished (a wall or cabinet beside it)"
+            }
+          ]
+        },
+        {
+          "code": "hand",
+          "name": "Left or right version",
+          "required": true,
+          "default": null,
+          "choices": [
+            {
+              "code": "left",
+              "name": "Left"
+            },
+            {
+              "code": "right",
+              "name": "Right"
+            }
+          ]
+        },
+        {
+          "code": "hinge_side",
+          "name": "Hinge side (single door)",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "left",
+              "name": "Hinged on the left"
+            },
+            {
+              "code": "right",
+              "name": "Hinged on the right"
+            }
+          ]
+        },
+        {
+          "code": "sink_front",
+          "name": "Sink front",
+          "required": true,
+          "default": "false_drawer_front",
+          "choices": [
+            {
+              "code": "false_drawer_front",
+              "name": "False drawer front (upgrade)"
+            },
+            {
+              "code": "full_height_doors_skirt",
+              "name": "Full-height doors with a skirt front"
+            },
+            {
+              "code": "tip_out_tray",
+              "name": "Tip-out tray (upgrade)"
+            }
+          ]
+        }
+      ],
+      "notes": [
+        "This one has a false drawer front over the sink by default (only this template)."
+      ]
+    },
+    {
+      "id": "f3ff9ded-d296-5085-9f22-f8274d87245e",
+      "code": "wall_filler",
+      "name": "Upper filler",
+      "type": "filler",
+      "description": null,
+      "resizable": true,
+      "size": {
+        "width": {
+          "standard": "3/4\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "1/16\""
+        },
+        "height": {
+          "standard": "30\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        },
+        "depth": {
+          "standard": "12\"",
+          "smallest": "not known yet",
+          "largest": "not known yet",
+          "step": "not known yet"
+        }
+      },
+      "fronts": [],
+      "inside": {},
+      "toe_kick": false,
+      "options": [],
+      "notes": [
+        "Cut to fit on site, sold at a fixed price rather than by the inch, 3/4\" wide by default."
+      ]
+    }
+  ]
+}

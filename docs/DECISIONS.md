@@ -143,6 +143,15 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
   - Visual-only numbers for the 3D view (toe kick, counter thickness, upper height off the floor, rough appliance sizes) are in the same placeholder data file, marked as drawing-only and never sent to the shop.
   - The 3D view uses three.js (ARCHITECTURE "Stack"), without react-three-fiber.
 
+- **Customize feedback (owner, 2026-11-08, from screenshots):**
+  - **Heights.** Uppers and tall cabinets now reach the client's cabinet height from the design choices (7′, 8′, 10′ or to the ceiling), never above the ceiling, so their tops line up. The cabinet height options record their feet in `intake-v1.json`; "To the ceiling" is marked as such. With no cabinet height chosen, uppers are the catalog's standard height, and the design's notes say so.
+  - **The white "star" marks are gone from the 3D view.** They were the dashed marks on cabinets the placeholder put down, and there were too many. Those cabinets are still marked in the panel (a dashed dot in the run strips, "Placed by the placeholder" on the cabinet) and counted in "N placements to review".
+  - **Uppers on a cut-away wall are hidden with the wall**, so they no longer seem to float over the room.
+  - **A selected cabinet glows gold in 3D** and is outlined, and the Cabinet tab opens with a picture of it.
+  - **The panel is drawn, not just written:** each cabinet type has a small front picture (doors, drawers, pull-outs, from the catalog's front data), the run strips show those pictures, the width has − and + buttons in the placeholder's step with the row drawn above it, and the Room tab shows the finishes as swatches.
+  - **Checks list each finding once**, with how many cabinets it covers. Only widths are checked; heights and depths in the placeholder are drawing-only.
+- **Test data (owner: "save the Design choices and Room Drawing info I've inputted so that I don't have to go through those choices every single time").** Work was already kept in the browser, but separately for each job, so a new client's job started empty. The studio's "Test data" menu now saves a job (answers, drawings and designs) as a test start, loads it into any job (with fresh room IDs, after a confirmation), and downloads or loads it as a file.
+
 ### 2026-11-08: Design rules reviewed (owner, design rules review page and chat, 2026-11-07/08)
 The owner answered every carried-over design rule on a review page (https://claude.ai/artifact/7vv6Emc6tQgevJ3Pt2Sp8L). The answers are in `src/modules/shop-settings/data/design-rules.json`, each in the rule's note with its date. 82 rules remain: **78 confirmed, 4 declined**, none left unanswered.
 - **How the rules are used (owner, 2026-11-07):** the AI designer gets the confirmed rules, the room's walls and cabinet runs, and the client's intake preferences, and drafts the best-fit design and layout. It needs no stop-or-warn setting. That setting matters only in the design tool, when a designer's own change breaks a rule. Broken preferences go on **a running list of design preferences that could be improved**. This replaces S-6's "block or warn" framing.

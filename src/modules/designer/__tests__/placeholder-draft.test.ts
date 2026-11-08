@@ -8,7 +8,7 @@ const IN = 64;
 const kitchen = (): Room => examples.kitchen().rooms[0]!;
 let n = 0;
 const ids = () => `cab-${++n}`;
-const prefs = (p: Partial<DraftPreferences> = {}): DraftPreferences => ({ drawers: 'minimum', cornerInsert: 'lazy_susan', garbage: 'none', ...p });
+const prefs = (p: Partial<DraftPreferences> = {}): DraftPreferences => ({ drawers: 'minimum', cornerInsert: 'lazy_susan', garbage: 'none', cabinetTop: 'ceiling', ...p });
 const draft = (p?: Partial<DraftPreferences>): PlaceholderDesign => {
   const r = draftPlaceholder(kitchen(), prefs(p), ids);
   if (!r.ok) throw new Error(r.reason);
@@ -105,5 +105,24 @@ describe('changing the placeholder design', () => {
     const room = { ...kitchen(), walls: kitchen().walls.map((w) => ({ ...w, runs: [], appliances: [] })) };
     const r = draftPlaceholder(room, prefs(), ids, LAYOUT_RULES);
     expect(r.ok && r.value.cabinets.length).toBe(0);
+  });
+});
+
+describe('heights', () => {
+  it('takes every upper and tall cabinet to the same top line: the ceiling when asked', () => {
+    const d = draft({ cabinetTop: 'ceiling' });
+    const ceiling = kitchen().ceiling_height.value;
+    expect(d.upperTop).toBe(ceiling);
+    for (const c of d.cabinets.filter((x) => x.layer === 'upper' && x.code !== null)) expect(c.elevation + c.height).toBe(ceiling);
+    for (const c of d.cabinets.filter((x) => x.code === 'tall_pantry' || x.code === 'tall_oven')) expect(c.height).toBe(ceiling);
+  });
+
+  it('uses a picked height, never above the ceiling, and says so when none was chosen', () => {
+    expect(draft({ cabinetTop: 84 * IN }).upperTop).toBe(84 * IN);
+    const high = draft({ cabinetTop: 120 * IN });
+    expect(high.upperTop).toBe(kitchen().ceiling_height.value);
+    expect(high.notes.join(' ')).toMatch(/above the .* ceiling/);
+    const none = draft({ cabinetTop: null });
+    expect(none.notes.join(' ')).toMatch(/No cabinet height was chosen/);
   });
 });

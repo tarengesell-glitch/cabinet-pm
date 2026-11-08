@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { buildDefinition, DEFINITION, type Definition } from '../model/definition';
 import { heightLength, Intake, startIntake, type IntakeState } from '../model/engine';
-import { intakeHandover, roomSummary, roughCeiling } from '../model/handover';
+import { intakeHandover, roomSummary, roughCabinetTop, roughCeiling } from '../model/handover';
 import intakeData from '../data/intake-v1.json';
 import coloursData from '../data/colours.json';
 import listsData from '../data/lists.json';
@@ -439,5 +439,16 @@ describe('a room in words, for other screens', () => {
     expect(rows.length).toBeGreaterThan(10);
     expect(rows.every((r) => r.label.length > 0 && r.value.length > 0)).toBe(true);
     expect(roomSummary(def, s, 'nope')).toEqual([]);
+  });
+});
+
+describe('how tall the cabinets go, for the 3D view', () => {
+  it('is a length for a picked height, "ceiling" for to the ceiling, and refused when unanswered', () => {
+    const { x, s } = fresh();
+    expect(roughCabinetTop(def, s, 'kitchen-room').ok).toBe(false);
+    x.pick('cabinet_height', '7ft');
+    expect(roughCabinetTop(def, s, 'kitchen-room')).toEqual({ ok: true, value: 84 * 64 });
+    x.pick('cabinet_height', 'to_ceiling');
+    expect(roughCabinetTop(def, s, 'kitchen-room')).toEqual({ ok: true, value: 'ceiling' });
   });
 });

@@ -15,9 +15,10 @@ import { CATALOG_CHECKS, CURRENT_CATALOG, checkPlacement } from '@/modules/catal
 import { wallLabel } from '../model/editor';
 import { RUN_KIND_LABEL } from '../model/layout';
 import { applianceType, LAYOUT_RULES } from '../model/layout-rules';
-import { draftPlaceholder, editDesign, itemByCode, redraftRun, runOf, standard, type DesignEdit, type DraftPreferences, type PlaceholderCabinet, type PlaceholderDesign } from '../model/placeholder-draft';
+import { DRAFT_SETTINGS, draftPlaceholder, editDesign, itemByCode, redraftRun, runOf, standard, type DesignEdit, type DraftPreferences, type PlaceholderCabinet, type PlaceholderDesign } from '../model/placeholder-draft';
 import { parseSize } from './parseSize';
 import { saveDesign, storedDesign, storedRoom } from './placeholder-store';
+import { FrontIcon } from './FrontIcon';
 import { Stage3D, type FinishLook } from './Stage3D';
 import s from './Customize.module.css';
 
@@ -112,6 +113,9 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
     const out: { text: string; id: string | null; kind: 'review' | 'check' }[] = [];
     const pending = design.cabinets.filter((c) => !c.reviewed && c.code !== null);
     if (pending.length) out.push({ kind: 'review', text: `${pending.length} cabinet${pending.length === 1 ? '' : 's'} placed by the placeholder and not reviewed`, id: pending[0]!.id });
+    // Widths are checked against the catalog (heights and depths here are drawing-only). The same
+    // finding on several cabinets is listed once, with how many it covers.
+    const groups = new Map<string, { text: string; ids: string[] }>();
     for (const c of design.cabinets) {
       const item = c.code ? itemByCode(c.code) : null;
       if (!item) continue;
@@ -120,13 +124,20 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
         catalogItemId: item.id,
         width: c.width,
         height: item.size.height.default.value ?? 0,
-        depth: c.depth ?? item.size.depth.default.value ?? 0,
+        depth: item.size.depth.default.value ?? 0,
         selections: {},
       });
-      for (const i of placed) if (SIZE_CHECKS.has(i.check_id)) out.push({ kind: 'check', text: `${room ? wallLabel(room, c.wallId).replace(/^w/, 'W') : ''}: ${i.message}`, id: c.id });
+      for (const i of placed) {
+        if (!SIZE_CHECKS.has(i.check_id)) continue;
+        const key = i.message.replace(/; it is .*$|, so .* can’t be checked\..*$/, '');
+        const g = groups.get(key) ?? { text: i.message, ids: [] };
+        g.ids.push(c.id);
+        groups.set(key, g);
+      }
     }
+    for (const g of groups.values()) out.push({ kind: 'check', text: g.ids.length > 1 ? `${g.text} (${g.ids.length} cabinets)` : g.text, id: g.ids[0] ?? null });
     return out;
-  }, [design, room]);
+  }, [design]);
 
   if (problem) {
     return (
@@ -201,18 +212,41 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
             <>
               <div className={s.tiles}>
                 <div className={s.tile}>
-                  <div className={s.label}>Walls</div>
-                  <div className={s.v}>{room.walls.filter((w) => w.kind === 'room').length}</div>
-                </div>
-                <div className={s.tile}>
                   <div className={s.label}>Ceiling</div>
                   <div className={s.v}>{formatInches(room.ceiling_height.value)}</div>
+                </div>
+                <div className={s.tile}>
+                  <div className={s.label}>Cabinets to</div>
+                  <div className={s.v}>{formatInches(design.upperTop)}</div>
                 </div>
                 <div className={s.tile}>
                   <div className={s.label}>Cabinets</div>
                   <div className={s.v}>{design.cabinets.filter((c) => c.code !== null).length}</div>
                 </div>
               </div>
+              <section className={s.sec} aria-label="Finishes">
+                <h3 className={s.h3}>Finishes</h3>
+                <div className={s.swatches}>
+                  {[
+                    { name: 'Cabinets', hex: cr.look.door },
+                    ...(cr.look.baseDoor !== cr.look.door ? [{ name: 'Base', hex: cr.look.baseDoor }] : []),
+                    ...(cr.look.island !== cr.look.door ? [{ name: 'Island', hex: cr.look.island }] : []),
+                    { name: 'Counter', hex: cr.look.counter },
+                    { name: cr.look.doorHw === 'knob' ? 'Knobs' : 'Handles', hex: cr.look.doorHw === 'knob' ? cr.look.knobFinish : cr.look.pullFinish },
+                  ].map((f) => (
+                    <span key={f.name} className={s.swatch}>
+                      <i style={{ background: f.hex }} />
+                      {f.name}
+                    </span>
+                  ))}
+                  <span className={s.swatch}>
+                    <span className={s.swatchIcon}>
+                      <FrontIcon item={itemByCode('base_doors')} width={30} height={34} size={34} finish={cr.look.door} />
+                    </span>
+                    Door style
+                  </span>
+                </div>
+              </section>
               <section className={s.sec}>
                 <h3 className={s.h3}>Design choices</h3>
                 <dl className={s.kv}>
@@ -276,7 +310,10 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
                             aria-label={`${nameOf(c)} ${formatInches(c.width)}`}
                             onClick={() => pick(c.id)}
                           >
-                            <span>{c.code === null ? nameOf(c).split(' ')[0] : formatInches(c.width).replace('"', '')}</span>
+                            <span className={s.chipIcon}>
+                              <FrontIcon item={c.code ? itemByCode(c.code) : null} appliance={c.appliance} width={c.width} height={c.height || 34 * 64} size={30} selected={selected === c.id} finish={cr.look.door} />
+                            </span>
+                            <span className={s.chipW}>{c.code === null ? '' : formatInches(c.width).replace('"', '')}</span>
                             {!c.reviewed && c.code !== null && <i aria-hidden="true" />}
                           </button>
                         ))}
@@ -313,6 +350,9 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
                 onStep={stepCab}
                 onEdit={edit}
                 onTypeChange={(code) => edit({ kind: 'type', id: sel.id, code })}
+                row={design.cabinets.filter((c) => c.runId === sel.runId && c.layer === sel.layer).sort((a, b) => a.offset - b.offset)}
+                finish={cr.look.door}
+                onPick={pick}
                 itemType={selItem?.type ?? null}
               />
             ))}
@@ -363,7 +403,7 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
                 </span>
                 <span>
                   <b>H</b>
-                  {formatInches(standard(sel.code, 'height') ?? 0)}
+                  {formatInches(sel.height)}
                 </span>
                 <span>
                   <b>D</b>
@@ -389,64 +429,104 @@ function CabinetTab(props: {
   cab: PlaceholderCabinet;
   canEdit: boolean;
   itemType: string | null;
+  /** The cabinets in the same row (run and layer), left to right. */
+  row: readonly PlaceholderCabinet[];
+  finish: string;
   onStep: (d: 1 | -1) => void;
   onEdit: (e: DesignEdit) => boolean;
   onTypeChange: (code: string) => void;
+  onPick: (id: string) => void;
 }) {
   const { room, cab, canEdit } = props;
   const [text, setText] = useState(formatInches(cab.width));
   const [error, setError] = useState<string | null>(null);
   const where = runOf(room, cab.runId);
+  const item = cab.code ? itemByCode(cab.code) : null;
   const types = props.itemType && props.itemType !== 'filler' ? CURRENT_CATALOG.items.filter((i) => i.type === props.itemType && i.availability === 'available') : [];
+  const step = DRAFT_SETTINGS.ok ? DRAFT_SETTINGS.value.widthStep : null;
+  const setWidth = (width: number) => {
+    setError(null);
+    if (props.onEdit({ kind: 'width', id: cab.id, width })) setText(formatInches(width));
+    else setText(formatInches(cab.width));
+  };
   const apply = () => {
     const r = parseSize(text);
     if (!r.ok) return setError(r.reason);
-    setError(null);
-    if (!props.onEdit({ kind: 'width', id: cab.id, width: r.value.value })) setText(formatInches(cab.width));
+    setWidth(r.value.value);
   };
   return (
     <>
-      <div className={s.cabHead}>
-        <h2 className={s.h2}>{nameOf(cab)}</h2>
-        <button className={s.btnSm} onClick={() => props.onStep(-1)} aria-label="Previous cabinet">
-          ←
-        </button>
-        <button className={s.btnSm} onClick={() => props.onStep(1)} aria-label="Next cabinet">
-          →
-        </button>
-      </div>
-      <p className={s.sub}>
-        {where?.wall.kind === 'floating' ? 'Island' : wallLabel(room, cab.wallId).replace(/^w/, 'W')} · {formatInches(cab.offset - (where?.run.offset ?? 0))} from the run’s start
-      </p>
-      {cab.code === null ? (
-        <p className={s.notice}>An appliance. Move or resize it on the Room drawing step.</p>
-      ) : !cab.reviewed ? (
-        <div className={s.row}>
-          <span className={s.tag}>Placed by the placeholder</span>
-          <button className={s.btnSm} disabled={!canEdit} onClick={() => props.onEdit({ kind: 'approve', ids: [cab.id] })}>
-            Approve
+      <div className={s.cabHero}>
+        <span className={s.cabPic}>
+          <FrontIcon item={item} appliance={cab.appliance} width={cab.width} height={cab.height || 34 * 64} size={88} selected finish={props.finish} />
+        </span>
+        <div className={s.cabInfo}>
+          <h2 className={s.h2}>{nameOf(cab)}</h2>
+          <p className={s.sub}>
+            {where?.wall.kind === 'floating' ? 'Island' : wallLabel(room, cab.wallId).replace(/^w/, 'W')} · {formatInches(cab.offset - (where?.run.offset ?? 0))} from the run’s start
+          </p>
+          <div className={s.dimsRow}>
+            <span>
+              <b>W</b> {formatInches(cab.width)}
+            </span>
+            {cab.height > 0 && (
+              <span>
+                <b>H</b> {formatInches(cab.height)}
+              </span>
+            )}
+            {cab.code && (
+              <span>
+                <b>D</b> {formatInches(cab.depth ?? standard(cab.code, 'depth') ?? 0)}
+              </span>
+            )}
+          </div>
+          <div className={s.row}>
+            {cab.code === null ? null : !cab.reviewed ? (
+              <>
+                <span className={s.tag}>Placed by the placeholder</span>
+                <button className={s.btnSm} disabled={!canEdit} onClick={() => props.onEdit({ kind: 'approve', ids: [cab.id] })}>
+                  Approve
+                </button>
+              </>
+            ) : (
+              <span className={s.ok}>Reviewed</span>
+            )}
+          </div>
+        </div>
+        <div className={s.stepBtns}>
+          <button className={s.btnSm} onClick={() => props.onStep(-1)} aria-label="Previous cabinet">
+            ←
+          </button>
+          <button className={s.btnSm} onClick={() => props.onStep(1)} aria-label="Next cabinet">
+            →
           </button>
         </div>
-      ) : (
-        <span className={s.ok}>Reviewed</span>
-      )}
-      {types.length > 1 && (
-        <section className={s.sec}>
-          <h3 className={s.h3}>Type</h3>
-          <div className={s.chips} role="radiogroup" aria-label="Cabinet type">
-            {types.map((t) => (
-              <button key={t.code} role="radio" className={s.choice} aria-checked={t.code === cab.code} disabled={!canEdit} onClick={() => props.onTypeChange(t.code)}>
-                {t.name}
-              </button>
-            ))}
-          </div>
-        </section>
-      )}
+      </div>
+      {cab.code === null && <p className={s.notice}>An appliance. Move or resize it on the Room drawing step.</p>}
       {cab.code !== null && (
         <section className={s.sec}>
           <h3 className={s.h3}>Width</h3>
-          <p className={s.sub}>The difference comes from the cabinet or filler beside it, so the run stays the same length.</p>
+          <div className={s.rowStrip} aria-label="This cabinet in its row">
+            {props.row.map((c) => (
+              <button
+                key={c.id}
+                className={c.id === cab.id ? s.rowCellOn : s.rowCell}
+                style={{ flex: `${Math.max(c.width / 64, 4)} 1 0` }}
+                title={`${nameOf(c)} ${formatInches(c.width)}`}
+                aria-label={`${nameOf(c)} ${formatInches(c.width)}`}
+                onClick={() => props.onPick(c.id)}
+              >
+                {c.code ? formatInches(c.width).replace('"', '') : ''}
+              </button>
+            ))}
+          </div>
+          <p className={s.sub}>The cabinet or filler beside it gives or takes the difference, so the run stays the same length.</p>
           <div className={s.row}>
+            {step !== null && (
+              <button className={s.btnSq} disabled={!canEdit} aria-label={`Narrower by ${formatInches(step)}`} onClick={() => setWidth(cab.width - step)}>
+                −
+              </button>
+            )}
             <input
               className={error ? s.inputBad : s.input}
               aria-label="Width"
@@ -455,6 +535,11 @@ function CabinetTab(props: {
               onChange={(e) => setText(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && apply()}
             />
+            {step !== null && (
+              <button className={s.btnSq} disabled={!canEdit} aria-label={`Wider by ${formatInches(step)}`} onClick={() => setWidth(cab.width + step)}>
+                +
+              </button>
+            )}
             <button className={s.btn} disabled={!canEdit} onClick={apply}>
               Apply
             </button>
@@ -464,6 +549,21 @@ function CabinetTab(props: {
               {error}
             </p>
           )}
+        </section>
+      )}
+      {types.length > 1 && (
+        <section className={s.sec}>
+          <h3 className={s.h3}>Type</h3>
+          <div className={s.typeGrid} role="radiogroup" aria-label="Cabinet type">
+            {types.map((t) => (
+              <button key={t.code} role="radio" className={s.typeCard} aria-checked={t.code === cab.code} disabled={!canEdit} onClick={() => props.onTypeChange(t.code)}>
+                <span className={s.typePic}>
+                  <FrontIcon item={t} width={cab.width} height={cab.height || (t.size.height.default.value ?? 34 * 64)} size={44} selected={t.code === cab.code} finish={props.finish} />
+                </span>
+                <span className={s.typeName}>{t.name}</span>
+              </button>
+            ))}
+          </div>
         </section>
       )}
     </>

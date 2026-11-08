@@ -46,14 +46,13 @@ interface Scene3D {
   sun: THREE.DirectionalLight;
   root: THREE.Group | null;
   doors: THREE.Group[];
-  walls: { g: THREE.Object3D; n: THREE.Vector3; c: THREE.Vector3 }[];
+  walls: { id: string; g: THREE.Object3D; n: THREE.Vector3; c: THREE.Vector3 }[];
   mats: Map<string, THREE.Material>;
   centre: THREE.Vector3;
   /** Where the starting view looks from: across the room, facing the wall with the most cabinets. */
   facing: THREE.Vector3;
   span: number;
   fitted: boolean;
-  dots: { obj: THREE.Object3D; y: number; id: string }[];
 }
 
 export function Stage3D(props: {
@@ -68,7 +67,6 @@ export function Stage3D(props: {
   onError: (reason: string) => void;
 }) {
   const host = useRef<HTMLDivElement | null>(null);
-  const dotsEl = useRef<HTMLDivElement | null>(null);
   const s3 = useRef<Scene3D | null>(null);
   const doorsOpen = useRef(props.doorsOpen);
   const onPick = useRef(props.onPick);
@@ -122,7 +120,7 @@ export function Stage3D(props: {
     sun.shadow.bias = -0.0002;
     sun.shadow.normalBias = 0.6;
     scene.add(sun, sun.target, new THREE.HemisphereLight(0xffffff, 0xd9d3c9, 0.45));
-    const s: Scene3D = { renderer, scene, camera, controls, sun, root: null, doors: [], walls: [], mats: new Map(), centre: new THREE.Vector3(), facing: new THREE.Vector3(0, 0, 1), span: 200, fitted: false, dots: [] };
+    const s: Scene3D = { renderer, scene, camera, controls, sun, root: null, doors: [], walls: [], mats: new Map(), centre: new THREE.Vector3(), facing: new THREE.Vector3(0, 0, 1), span: 200, fitted: false };
     s3.current = s;
 
     const size = () => {
@@ -154,7 +152,6 @@ export function Stage3D(props: {
     renderer.domElement.addEventListener('pointerup', onUp);
 
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const v = new THREE.Vector3();
     let raf = 0;
     const loop = () => {
       for (const d of s.doors) {
@@ -164,25 +161,14 @@ export function Stage3D(props: {
         d.rotation.y = d.userData['angle'] as number;
       }
       controls.update();
-      // Cut away any wall standing between the camera and the room.
-      for (const w of s.walls) w.g.visible = camera.position.clone().sub(w.c).dot(w.n) > 0;
-      renderer.render(scene, camera);
-      // The placeholder marks follow their cabinets.
-      const box = dotsEl.current;
-      if (box) {
-        const r = renderer.domElement.getBoundingClientRect();
-        s.dots.forEach((d, i) => {
-          const dot = box.children[i] as HTMLElement | undefined;
-          if (!dot) return;
-          v.set(0, d.y, 0);
-          d.obj.localToWorld(v);
-          v.project(camera);
-          const vis = v.z < 1 && Math.abs(v.x) < 1.05 && Math.abs(v.y) < 1.05;
-          dot.style.display = vis ? '' : 'none';
-          dot.style.left = `${((v.x + 1) / 2) * r.width}px`;
-          dot.style.top = `${((1 - v.y) / 2) * r.height}px`;
-        });
+      // Cut away any wall standing between the camera and the room, with the uppers hung on it.
+      const hidden = new Set<string>();
+      for (const w of s.walls) {
+        w.g.visible = camera.position.clone().sub(w.c).dot(w.n) > 0;
+        if (!w.g.visible) hidden.add(w.id);
       }
+      for (const g of s.root?.children ?? []) if (g.userData['layer'] === 'upper') g.visible = !hidden.has(String(g.userData['wallId']));
+      renderer.render(scene, camera);
       raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
@@ -211,7 +197,6 @@ export function Stage3D(props: {
     }
     s.doors = [];
     s.walls = [];
-    s.dots = [];
     const root = new THREE.Group();
     buildRoom(s, root, room);
     for (const c of design.cabinets) {
@@ -247,20 +232,6 @@ export function Stage3D(props: {
       fit(s);
       s.fitted = true;
     }
-    // One placeholder mark per cabinet not yet reviewed.
-    const box = dotsEl.current;
-    if (box) {
-      box.replaceChildren(
-        ...s.dots.map((d) => {
-          const dot = document.createElement('span');
-          dot.className = 'placeholder-dot';
-          dot.title = 'Placed by the placeholder, not reviewed yet';
-          dot.dataset['id'] = d.id;
-          Object.assign(dot.style, { position: 'absolute', transform: 'translate(-50%, -50%)', width: '8px', height: '8px', borderRadius: '50%', background: 'rgba(255,255,255,.9)', border: '1.5px dashed #1a3045', pointerEvents: 'none' });
-          return dot;
-        }),
-      );
-    }
   }, [room, design, look, selected]);
 
   const fitToken = props.fitToken;
@@ -271,7 +242,6 @@ export function Stage3D(props: {
   return (
     <div style={{ position: 'absolute', inset: 0 }}>
       <div ref={host} data-testid="stage-3d" style={{ position: 'absolute', inset: 0, cursor: 'grab', touchAction: 'none' }} />
-      <div ref={dotsEl} aria-hidden="true" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden' }} />
     </div>
   );
 }
@@ -343,7 +313,7 @@ function buildRoom(s: Scene3D, root: THREE.Group, room: Room): void {
     g.rotation.y = Math.atan2(n.x, -n.y);
     const sign = -n.y * u.x + n.x * u.y >= 0 ? 1 : -1;
     root.add(g);
-    s.walls.push({ g, n: new THREE.Vector3(n.x, 0, -n.y), c: mid.clone().add(new THREE.Vector3(n.x, 0, -n.y).multiplyScalar(inch(halfThickness(w)))) });
+    s.walls.push({ id: w.wall_id, g, n: new THREE.Vector3(n.x, 0, -n.y), c: mid.clone().add(new THREE.Vector3(n.x, 0, -n.y).multiplyScalar(inch(halfThickness(w)))) });
     const t = Math.max(inch(w.thickness?.value ?? 0), 0.5);
     box(s, g, len, ceiling, t, [0, ceiling / 2, 0], `plain:${SURROUNDINGS.wall}`);
     for (const o of w.openings) {
@@ -397,6 +367,9 @@ function cabinet(s: Scene3D, c: PlaceholderCabinet, room: Room, look: FinishLook
   const d = inch(c.layer === 'upper' && c.appliance === 'hood' ? 20 * IN : depthBase);
   const g = new THREE.Group();
   g.userData['cabId'] = c.id;
+  g.userData['wallId'] = c.wallId;
+  g.userData['layer'] = c.layer;
+  const top = inch(c.elevation + c.height);
   const b = (bw: number, bh: number, bd: number, pos: [number, number, number], key: string, shadow = true) => box(s, g, bw, bh, bd, pos, key, shadow);
 
   const front = (parent: THREE.Object3D, fw: number, fh: number, pos: [number, number, number], drawer: boolean) => {
@@ -453,7 +426,6 @@ function cabinet(s: Scene3D, c: PlaceholderCabinet, room: Room, look: FinishLook
   const counterTop = (h: number) => b(w, counterT, d + inch(v.counterOverhang), [0, h + counterT / 2, inch(v.counterOverhang) / 2], counter);
 
   if (c.appliance === 'hood') {
-    const top = upperBottom + inch(standard('upper_doors', 'height') ?? 30 * IN);
     b(w, 8, 20, [0, upperBottom + 14, 0], `steel:${SURROUNDINGS.steel}`);
     b(12, Math.max(1, top - upperBottom - 18), 10, [0, (top + upperBottom + 18) / 2, -5], `steel:${SURROUNDINGS.steel}`);
   } else if (c.appliance) {
@@ -474,16 +446,17 @@ function cabinet(s: Scene3D, c: PlaceholderCabinet, room: Room, look: FinishLook
       if (c.appliance === 'cooktop') b(w - 6, 0.3, d - 4, [0, baseH + counterT + 0.15, 0], `plain:${SURROUNDINGS.glass}`);
     }
   } else if (item) {
-    const h = inch(item.size.height.default.value ?? 30 * IN);
+    // Heights come from the design, so every upper and tall cabinet reaches the same top line.
+    const h = inch(c.height);
     const front0 = item.front[0];
     if (item.type === 'filler' || item.type === 'panel') {
-      const y0 = c.layer === 'upper' ? upperBottom : toe;
-      b(w, h - (c.layer === 'upper' ? 0 : toe), d, [0, y0 + (h - (c.layer === 'upper' ? 0 : toe)) / 2, 0], finish);
+      const y0 = c.layer === 'upper' ? inch(c.elevation) : toe;
+      b(w, top - y0, d, [0, (y0 + top) / 2, 0], finish);
       if (c.layer === 'base') counterTop(h);
     } else if (c.layer === 'upper') {
-      const y0 = c.code === 'upper_no_shelf' ? upperBottom + inch(standard('upper_doors', 'height') ?? 30 * IN) - h : upperBottom;
+      const y0 = inch(c.elevation);
       b(w, h, d, [0, y0 + h / 2, 0], carcass);
-      doorsIn(-w / 2, w / 2, y0, y0 + h, d, true);
+      doorsIn(-w / 2, w / 2, y0, top, d, true);
     } else {
       b(w, h - toe, d, [0, toe + (h - toe) / 2, 0], carcass);
       b(w - 1, toe, d - 3, [0, toe / 2, -1.5], `plain:${SURROUNDINGS.plinth}`, false);
@@ -506,8 +479,19 @@ function cabinet(s: Scene3D, c: PlaceholderCabinet, room: Room, look: FinishLook
     }
   }
 
-  if (!c.reviewed && c.code !== null) s.dots.push({ obj: g, y: c.layer === 'upper' ? upperBottom + 34 : 40, id: c.id });
   if (isSelected) {
+    // A warm gold glow on the cabinet itself, plus its outline, so the selection is easy to see.
+    g.traverse((o) => {
+      const mesh = o as THREE.Mesh;
+      if (!mesh.isMesh) return;
+      const m = mesh.material;
+      if (m instanceof THREE.MeshStandardMaterial) {
+        const lit = m.clone();
+        lit.emissive = new THREE.Color(GOLD);
+        lit.emissiveIntensity = 0.45;
+        mesh.material = lit;
+      }
+    });
     // Measured before the cabinet is moved into place, so the outline is in its own frame.
     const b3 = new THREE.Box3().setFromObject(g);
     const sz = b3.getSize(new THREE.Vector3());
@@ -515,7 +499,7 @@ function cabinet(s: Scene3D, c: PlaceholderCabinet, room: Room, look: FinishLook
     const edges = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(sz.x + 0.8, sz.y + 0.8, sz.z + 0.8)), new THREE.LineBasicMaterial({ color: GOLD }));
     edges.position.copy(ctr);
     g.add(edges);
-    const glow = new THREE.Mesh(new THREE.BoxGeometry(sz.x + 0.6, sz.y + 0.6, sz.z + 0.6), new THREE.MeshBasicMaterial({ color: GOLD, transparent: true, opacity: 0.18, depthWrite: false }));
+    const glow = new THREE.Mesh(new THREE.BoxGeometry(sz.x + 1.4, sz.y + 1.4, sz.z + 1.4), new THREE.MeshBasicMaterial({ color: GOLD, transparent: true, opacity: 0.22, depthWrite: false }));
     glow.position.copy(ctr);
     g.add(glow);
   }

@@ -14,10 +14,11 @@ import { useCallback, useMemo, useState } from 'react';
 import { PREVIEW_SHOP, PREVIEW_USER } from '@/platform/index';
 import { roomDrawingStatus, storedDesign, type DraftPreferences, type DrawerLevel, type RoomDrawingStatus } from '@/modules/designer/contract';
 import { Customize, RoomCapture } from '@/modules/designer/ui/index';
-import { INTAKE_DEFINITION, intakeHandover, loadIntakeState, roomLook, roomSummary, roughCeiling, type IntakeState, type RoomHandover } from '@/modules/intake/contract';
+import { INTAKE_DEFINITION, intakeHandover, loadIntakeState, roomLook, roomSummary, roughCabinetTop, roughCeiling, type IntakeState, type RoomHandover } from '@/modules/intake/contract';
 import { IntakeScreen } from '@/modules/intake/ui/index';
 import { demoClient, jobName } from '../demo-data';
 import { AiStep } from './AiStep';
+import { TestDataMenu } from './TestDataMenu';
 import s from './Studio.module.css';
 
 type Stage = 'choices' | 'drawing' | 'ai' | 'customize';
@@ -34,7 +35,7 @@ const DRAWER_LEVELS: readonly DrawerLevel[] = ['minimum', 'moderate', 'maximum']
 const drawingDone = (st: RoomDrawingStatus | undefined): boolean => st?.kind === 'drawn' && st.walls > 0 && st.runs > 0 && st.problems === 0;
 
 /** What the placeholder recipe reads from a room's design choices. Missing answers stay missing. */
-function prefsOf(r: RoomHandover): DraftPreferences {
+function prefsOf(r: RoomHandover, intake: IntakeState | null): DraftPreferences {
   const option = (k: string): string | null => {
     const a = r.answers[k];
     return a && 'option_id' in a ? a.option_id : null;
@@ -45,6 +46,11 @@ function prefsOf(r: RoomHandover): DraftPreferences {
     drawers: DRAWER_LEVELS.find((d) => d === drawers) ?? null,
     cornerInsert: option('corner_insert'),
     garbage: garbage === 'under_sink' || garbage === 'dedicated_cabinet' ? garbage : 'none',
+    cabinetTop: (() => {
+      if (!intake || !INTAKE_DEFINITION.ok) return null;
+      const top = roughCabinetTop(INTAKE_DEFINITION.value, intake, r.room_id);
+      return top.ok ? top.value : null;
+    })(),
   };
 }
 
@@ -131,7 +137,7 @@ export function Studio() {
         <div className={s.title}>
           <div className={s.name}>{client ? jobName(client) : 'Design studio'}</div>
           <div className={s.who}>
-            {client ? `${client.name} (demo client)` : 'Preview job'} · kept in this browser · {user.name} · {PREVIEW_SHOP.name}
+            {client ? `${client.name} (demo client)` : 'Preview job'} · kept in this browser · <span title={`${user.name} · ${PREVIEW_SHOP.name}`}>mocked user and shop</span>
           </div>
           <div className={s.whoShort}>Preview · mocked user and shop</div>
         </div>
@@ -150,6 +156,7 @@ export function Studio() {
             );
           })}
         </nav>
+        <TestDataMenu job={job} fileName={`${client ? client.id : 'preview'}-job.json`} />
       </header>
       {rooms.length > 0 && stage !== 'ai' && (
         <nav className={s.rooms} aria-label="Rooms">
@@ -176,7 +183,7 @@ export function Studio() {
         )}
         {stage === 'ai' && (
           <AiStep
-            rooms={rooms.map((r) => ({ id: r.room_id, name: r.name, prefs: prefsOf(r) }))}
+            rooms={rooms.map((r) => ({ id: r.room_id, name: r.name, prefs: prefsOf(r, intake) }))}
             alreadyDesigned={rooms.length > 0 && rooms.every((r) => designed.has(r.room_id))}
             onDrafted={bump}
             onOpen={() => {
@@ -194,7 +201,7 @@ export function Studio() {
               name: current.name,
               look,
               choices,
-              prefs: prefsOf(current),
+              prefs: prefsOf(current, intake),
               onEditChoices: () => setStage('choices'),
               onChange: bump,
             }}

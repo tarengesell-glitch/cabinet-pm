@@ -24,6 +24,8 @@ export interface DraftPreferences {
   readonly cornerInsert: string | null;
   /** Where the garbage pull-out goes: none, under the sink, or a cabinet of its own. */
   readonly garbage: 'none' | 'under_sink' | 'dedicated_cabinet';
+  /** How tall the cabinets go (intake's cabinet height): a length, the ceiling, or null when not chosen. */
+  readonly cabinetTop: Length | 'ceiling' | null;
 }
 
 export interface PlaceholderCabinet {
@@ -40,14 +42,19 @@ export interface PlaceholderCabinet {
   readonly width: Length;
   /** Deeper than the catalog's standard (the upper over a fridge); null for the catalog's depth. */
   readonly depth: Length | null;
+  /** From the floor to the cabinet's bottom, and its height: uppers and talls reach the design's top line. */
+  readonly elevation: Length;
+  readonly height: Length;
   /** False while it is as the placeholder put it; true once a designer has changed or approved it. */
   readonly reviewed: boolean;
 }
 
 export interface PlaceholderDesign {
-  readonly version: 1;
+  readonly version: 2;
   /** The room it was drafted for. */
   readonly roomId: string;
+  /** The top line every upper and tall cabinet reaches. */
+  readonly upperTop: Length;
   readonly cabinets: readonly PlaceholderCabinet[];
   /** Why it looks the way it does, in plain words. */
   readonly notes: readonly string[];
@@ -178,7 +185,7 @@ export function draftPlaceholder(room: Room, prefs: DraftPreferences, newId: () 
   if (!DRAFT_SETTINGS.ok) return DRAFT_SETTINGS;
   const s = DRAFT_SETTINGS.value;
   const c = s.codes;
-  const size = (code: string, dim: 'width' | 'depth'): Length => {
+  const size = (code: string, dim: 'width' | 'height' | 'depth'): Length => {
     const v = standard(code, dim);
     if (v === null) throw new MissingSize(`The catalog has no standard ${dim} for "${code}".`);
     return v;
@@ -263,6 +270,25 @@ export function draftPlaceholder(room: Room, prefs: DraftPreferences, newId: () 
     }
 
     const wallIndex = (id: string) => room.walls.findIndex((w) => w.wall_id === id);
+    // The top line: the client's cabinet height, never above the ceiling.
+    const ceiling = room.ceiling_height.value;
+    const asked = prefs.cabinetTop === 'ceiling' ? ceiling : prefs.cabinetTop;
+    const standardTop = s.visual.upperBottom + size(c.upper, 'height');
+    let upperTop = asked ?? standardTop;
+    if (asked === null) notes.push(`No cabinet height was chosen for this room, so the uppers are the catalog's standard ${formatInches(size(c.upper, 'height'))} high.`);
+    if (upperTop > ceiling) {
+      notes.push(`The cabinet height chosen is above the ${formatInches(ceiling)} ceiling, so the cabinets stop at the ceiling.`);
+      upperTop = ceiling;
+    }
+    if (upperTop <= s.visual.upperBottom) return { ok: false, reason: `The cabinets would end at ${formatInches(upperTop)}, below where uppers start (${formatInches(s.visual.upperBottom)}).` };
+    const vertical = (x: Draft): { elevation: Length; height: Length } => {
+      if (x.appliance === 'hood') return { elevation: s.visual.upperBottom, height: upperTop - s.visual.upperBottom };
+      if (x.code === null) return { elevation: 0, height: 0 };
+      if (itemByCode(x.code)?.type === 'tall') return { elevation: 0, height: upperTop };
+      if (x.layer === 'base') return { elevation: 0, height: size(x.code, 'height') };
+      const bottom = x.code === c.upper_over_fridge ? Math.max(upperTop - size(x.code, 'height'), s.visual.fridgeHeight) : s.visual.upperBottom;
+      return { elevation: bottom, height: upperTop - bottom };
+    };
     if (prefs.garbage === 'dedicated_cabinet') {
       const sink = out.find((x) => x.code === c.sink);
       const beside = sink && out.find((x) => x.code !== null && isBase(x.code, s) && x.wallId === sink.wallId && (x.offset === sink.offset + sink.width || x.offset + x.width === sink.offset));
@@ -291,11 +317,12 @@ export function draftPlaceholder(room: Room, prefs: DraftPreferences, newId: () 
     return {
       ok: true,
       value: {
-        version: 1,
+        version: 2,
         roomId: room.room_id,
+        upperTop,
         cabinets: out
           .sort((a, b) => wallIndex(a.wallId) - wallIndex(b.wallId) || (a.layer === b.layer ? 0 : a.layer === 'base' ? -1 : 1) || a.offset - b.offset)
-          .map((x) => ({ ...x, reviewed: false })),
+          .map((x) => ({ ...x, ...vertical(x), reviewed: false })),
         notes,
       },
     };

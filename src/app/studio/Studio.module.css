@@ -460,3 +460,69 @@
   border-color: var(--navy);
   color: #fff;
 }
+
+/* Test data menu */
+.testMenu {
+  position: relative;
+}
+
+.testBtn {
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px dashed var(--rule-strong);
+  background: var(--paper);
+  font: 500 12.5px var(--body);
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.testBtn:hover {
+  color: var(--ink);
+}
+
+.testDrop {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 20;
+  width: 300px;
+  display: grid;
+  gap: 2px;
+  padding: 6px;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  box-shadow: var(--raised);
+}
+
+.testDrop > button {
+  text-align: left;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 0;
+  background: none;
+  font: 500 13px var(--body);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.testDrop > button:hover:not(:disabled) {
+  background: var(--track);
+}
+
+.testDrop > button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.testNote,
+.testError {
+  margin: 4px 10px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.testError {
+  color: var(--error);
+}

@@ -58,6 +58,8 @@ const OptionSchema = z.strictObject({
   drawer: z.enum(['handle', 'knob']).optional(),
   /** Height options: the height this option stands for, in whole feet (the label says it). */
   feet: z.number().int().positive().optional(),
+  /** Cabinet height options: the cabinets go up to the ceiling. */
+  to_ceiling: z.literal(true).optional(),
   /** Shows that the cost comes from live pricing (not connected yet, IK-14). */
   price_note: z.literal(true).optional(),
 });

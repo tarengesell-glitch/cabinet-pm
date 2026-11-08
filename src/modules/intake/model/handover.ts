@@ -109,3 +109,23 @@ export function roomSummary(def: Definition, state: IntakeState, roomId: string)
     return out;
   });
 }
+
+/**
+ * How tall the room's cabinets go, from the intake's cabinet height: an exact length, or
+ * "ceiling" for "To the ceiling". Refused with the reason when there is no usable answer.
+ */
+export function roughCabinetTop(def: Definition, state: IntakeState, roomId: string): Result<Length | 'ceiling'> {
+  const i = state.rooms.findIndex((r) => r.id === roomId);
+  if (i < 0) return refuse('That room is not in the design choices.');
+  const field = def.fields.get('cabinet_height');
+  if (!field) return refuse('The design choices have no cabinet height question.');
+  const x = new Intake(def, state);
+  return x.inRoom(i, () => {
+    const v = x.eff(field);
+    if (v === undefined) return refuse(`The ${x.roomName(i).toLowerCase()} has no cabinet height yet.`);
+    const option = x.options(field).find((o) => o.id === v);
+    if (option?.def?.to_ceiling) return { ok: true, value: 'ceiling' as const };
+    if (option?.def?.feet) return fromInches(option.def.feet * 12);
+    return refuse(`The cabinet height "${String(v)}" has no length in the intake data.`);
+  });
+}

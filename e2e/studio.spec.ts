@@ -24,7 +24,8 @@ test('the steps: design choices first; each later step says what it waits for', 
   await expect(step(page, 'AI design')).toBeDisabled();
   await expect(step(page, 'AI design')).toHaveAttribute('title', 'Finish the design choices for kitchen first.');
   await expect(step(page, 'Customize')).toHaveAttribute('title', 'Run the AI design step first.');
-  await expect(page.getByText(/Preview job · kept in this browser · Preview user \(mocked/)).toBeVisible();
+  await expect(page.getByText(/^Preview job · kept in this browser · mocked user and shop$/)).toBeVisible();
+  await expect(page.getByTitle(/Preview user \(mocked.*Preview shop \(mocked/)).toHaveText('mocked user and shop');
 });
 
 test('a finished kitchen goes on to its drawing, started from the rough ceiling height', async ({ page }) => {
@@ -82,7 +83,7 @@ test('every room is in the room bar, and the drawing waits until every room is f
 });
 
 test('the placeholder AI design lays out the drawn room, then the customize screens open', async ({ page }) => {
-  test.setTimeout(90_000);
+  test.setTimeout(180_000); // a long flow with the 3D view; slower when the whole suite runs at once
   await answerKitchen(page, '/studio/?job=c2');
   await page.getByRole('button', { name: 'Finish kitchen' }).click();
   await page.getByRole('button', { name: /Start laying out room dimensions/ }).click();
@@ -128,4 +129,26 @@ test('the placeholder AI design lays out the drawn room, then the customize scre
   await expect(page.getByRole('heading', { name: 'Your design is ready' })).toBeVisible();
   await page.getByRole('button', { name: 'Open the customizer' }).click();
   await expect(page.getByText('Every placement reviewed')).toBeVisible();
+});
+
+test('Test data: save a job as the test start and load it into another job', async ({ page }) => {
+  test.setTimeout(180_000); // a long flow with the 3D view; slower when the whole suite runs at once
+  await answerKitchen(page, '/studio/?job=c2');
+  await page.getByRole('button', { name: 'Finish kitchen' }).click();
+  await page.getByRole('button', { name: /Start laying out room dimensions/ }).click();
+  await page.getByRole('button', { name: 'Load example kitchen' }).click();
+  await page.getByRole('button', { name: 'Test data ▾' }).click();
+  await page.getByRole('menuitem', { name: 'Save this job as my test start' }).click();
+  await expect(page.getByText(/Saved as your test start/)).toBeVisible();
+
+  // Another client's job, empty, takes the saved one: answers and drawing, ready for the AI step.
+  await page.goto('/studio/?job=c4');
+  await expect(question(page)).toHaveText('Which layout is closest to your kitchen?');
+  page.once('dialog', (d) => d.accept());
+  await page.getByRole('button', { name: 'Test data ▾' }).click();
+  await page.getByRole('menuitem', { name: 'Load my test start into this job' }).click();
+  await expect(question(page)).toHaveText('Here is your kitchen so far');
+  await expect(step(page, 'AI design')).toBeEnabled();
+  await step(page, 'Room drawing').click();
+  await expect(roomBar(page).getByRole('button', { name: /Kitchen/ })).toHaveText('✓Kitchen');
 });

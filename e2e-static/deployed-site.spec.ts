@@ -6,6 +6,7 @@ test('the start page is Today, and Clients and a client page load', async ({ pag
   await page.goto('/');
   await expect(page.getByRole('link', { name: 'Today' })).toHaveAttribute('aria-current', 'page');
   await page.getByRole('link', { name: 'Clients' }).click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Clients');
   await page.getByRole('link', { name: /Priya Raman/ }).click();
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Priya Raman');
   await page.goto('/clients/c3');

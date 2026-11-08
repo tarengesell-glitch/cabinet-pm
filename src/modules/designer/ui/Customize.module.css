@@ -213,7 +213,12 @@
 .chip {
   position: relative;
   min-width: 0;
-  height: 42px;
+  height: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
   border-radius: 6px;
   border: 1px solid var(--rule);
   background: var(--paper);
@@ -229,6 +234,16 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: clip;
+  max-width: 100%;
+}
+
+.chipIcon {
+  display: grid;
+  place-items: center;
+}
+
+.chipW {
+  font-size: 10.5px;
 }
 
 .chip i {
@@ -579,4 +594,167 @@
   .pane {
     border-right: 0;
   }
+}
+
+/* Finishes, as swatches */
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.swatch {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.swatch i {
+  display: block;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 3px solid var(--paper);
+  box-shadow: 0 0 0 1px var(--rule), var(--ambient), inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+.swatchIcon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+}
+
+/* The selected cabinet */
+.cabHero {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: start;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid var(--gold);
+  box-shadow: var(--selected-ring);
+  background: var(--paper);
+}
+
+.cabPic {
+  display: grid;
+  place-items: center;
+  width: 96px;
+  height: 96px;
+  border-radius: 10px;
+  background: radial-gradient(90% 90% at 50% 25%, #fafaf9, #e9e8e5);
+}
+
+.cabInfo {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.dimsRow {
+  display: flex;
+  gap: 12px;
+  font: 12.5px var(--mono);
+}
+
+.dimsRow b {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.stepBtns {
+  display: flex;
+  gap: 4px;
+}
+
+.rowStrip {
+  display: flex;
+  gap: 3px;
+}
+
+.rowCell,
+.rowCellOn {
+  min-width: 0;
+  height: 34px;
+  border-radius: 6px;
+  border: 1px solid var(--rule);
+  background: var(--paper);
+  font: 500 11px var(--mono);
+  color: var(--muted);
+  overflow: hidden;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.rowCellOn {
+  border-color: var(--gold);
+  background: var(--gold-soft);
+  color: var(--navy);
+  box-shadow: inset 0 0 0 1.5px var(--gold);
+}
+
+.btnSq {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  border: 1px solid var(--rule);
+  background: var(--paper);
+  box-shadow: var(--ambient);
+  font: 500 18px var(--body);
+  cursor: pointer;
+}
+
+.btnSq:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* The type picker: a card per catalog type, with its front */
+.typeGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+  gap: 8px;
+}
+
+.typeCard {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 10px 6px 8px;
+  border-radius: 12px;
+  border: 1px solid var(--rule);
+  background: var(--paper);
+  box-shadow: var(--ambient);
+  cursor: pointer;
+  text-align: center;
+  transition: transform 0.22s var(--ease), box-shadow 0.22s var(--ease), border-color 0.22s var(--ease);
+}
+
+.typeCard:hover:not([aria-checked='true']):not(:disabled) {
+  transform: translateY(-2px);
+  border-color: var(--rule-strong);
+}
+
+.typeCard[aria-checked='true'] {
+  border-color: var(--gold);
+  box-shadow: var(--selected-ring);
+}
+
+.typeCard:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.typePic {
+  display: grid;
+  place-items: center;
+  height: 50px;
+}
+
+.typeName {
+  font: 500 11.5px/1.25 var(--body);
 }

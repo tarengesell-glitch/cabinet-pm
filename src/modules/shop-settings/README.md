@@ -14,14 +14,14 @@ Each rule has:
 - a kind: `hard`, `preference`, `principle`, `front_rule`, `documentation`, `optional` or `rejected`;
 - the rule in plain language, the owner's words and date as its source, and any lengths it uses;
 - its status in closet-builder, and its status here, with the owner's review answer in the note:
-  - **confirmed** (77): the AI designer uses it;
+  - **confirmed** (78): the AI designer uses it;
   - **declined** (4): the owner said no (construction details that come from the shop's library, grain across cabinets, U-shaped vanity drawers);
-  - **candidate** (1): not answered yet (DOC-001, stone countertop drawings);
+  - **candidate**: none left;
 - for confirmed rules, `design_tool`:
-  - `not_drawable` (7): the tool won't let it be drawn;
-  - `error` (4): an error the designer must fix;
+  - `not_drawable` (9): the tool won't let it be drawn;
+  - `error` (2): an error the designer must fix;
   - `suggestion` (36): on the running list of things that could be improved. Every confirmed preference is here;
-  - `none` (26): guidance for the AI designer, or how the tool draws things;
+  - `none` (27): guidance for the AI designer, or how the tool draws things;
   - left out (4): HARD-005, HARD-010, HARD-012, HARD-015, confirmed before the review asked this.
 
 Build measurements the visual tool uses for drawing (door gaps, shelf spacing) are kept, but the shop's library is the authority: if its numbers differ, the library wins (owner, 2026-11-08).

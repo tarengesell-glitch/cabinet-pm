@@ -33,13 +33,15 @@ describe('design rules from closet-builder', () => {
     expect(rule('CB-FACT-31').status).toBe('confirmed');
     expect(rule('PREF-010').status).toBe('declined');
     expect(rule('CB-A-05').status).toBe('declined');
-    expect(rule('DOC-001').status).toBe('candidate');
+    expect(rule('DOC-001').status).toBe('confirmed');
+    expect(DESIGN_RULES.rules.some((r) => r.status === 'candidate')).toBe(false);
     expect(DESIGN_RULES.rules.some((r) => r.id === 'HARD-003')).toBe(false);
   });
 
   it('says what the design tool does when a designer breaks a confirmed rule', () => {
     expect(rule('HARD-002').designTool).toBe('not_drawable');
-    expect(rule('HARD-006').designTool).toBe('error');
+    expect(rule('HARD-006').designTool).toBe('not_drawable');
+    expect(rule('CB-FACT-48').designTool).toBe('error');
     expect(rule('HARD-016').designTool).toBe('suggestion');
     expect(rule('PREF-019').designTool).toBe('suggestion');
     expect(rule('PREF-010').designTool).toBeNull();

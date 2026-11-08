@@ -90,12 +90,12 @@
       "closet_builder_status": "PROPOSED",
       "here": {
         "status": "confirmed",
-        "note": "Owner review, 2026-11-07: Yes."
+        "note": "Owner review, 2026-11-07: Yes. Owner, 2026-11-08 (chat): \"These should also not be allowed to be drawn.\""
       },
       "related": [
         "PREF-009"
       ],
-      "design_tool": "error"
+      "design_tool": "not_drawable"
     },
     {
       "id": "HARD-007",
@@ -108,7 +108,7 @@
       "closet_builder_status": "PROPOSED",
       "here": {
         "status": "confirmed",
-        "note": "Owner review, 2026-11-07: Yes."
+        "note": "Owner review, 2026-11-07: Yes. Owner, 2026-11-08 (chat): \"These should also not be allowed to be drawn.\""
       },
       "related": [
         "HARD-008",
@@ -116,7 +116,7 @@
         "PRIN-001",
         "PREF-019"
       ],
-      "design_tool": "error"
+      "design_tool": "not_drawable"
     },
     {
       "id": "HARD-008",
@@ -1292,9 +1292,10 @@
       "source": "Owner, 2026-10-05 (\"approve the rest\").",
       "closet_builder_status": "APPROVED",
       "here": {
-        "status": "candidate",
-        "note": ""
-      }
+        "status": "confirmed",
+        "note": "Owner review, 2026-11-08: Yes."
+      },
+      "design_tool": "none"
     },
     {
       "id": "OPT-001",

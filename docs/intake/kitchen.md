@@ -54,6 +54,29 @@ These questions, options, images and conditions are **data** (CLAUDE.md rule 6).
   - **Moderate** (balance of cost and functionality): target 60–70% of base cabinets as drawer banks; two four-drawer banks; the remainder are three-drawer banks.
   - **Maximum** (most expensive, most functional; "provide dollar cost for drawers"): drawers for all base cabinets.
 
+## Owner decisions from the prototype (2026-11-07/08)
+
+The outline above was turned into a clickable prototype and reviewed by the owner over eight rounds (https://claude.ai/artifact/MW4uLq1CX3qvoejeeaPadW). It is now built at `/intake` (`src/modules/intake/`). These decisions replace the matching parts of the outline:
+
+- **Order:** the intake comes before the room drawing (walls, openings, cabinets and appliances).
+- **Ceiling height:** 7', 8', 10', or a typed height in feet and inches. Decimals are allowed, and the height must land on a 1/64" mark (rule 11).
+- **Colour tone** is shown in the material and door the client has already picked ("Showing solid painted shaker options…"). The colours offered depend on the material (painted or wood grain), which settles IK-2's direction. The actual lists are still samples (IK-3).
+- **Colours** are one step:
+  - **cabinets:** the primary colour;
+  - **base cabinets:** match the cabinets unless changed;
+  - **island cabinets:** only for a layout with an island. They match the cabinets, or the base cabinets once those differ, unless given their own colour. This replaces the outline's "offsetting colour, then repeat material, tone, door style and colours" for the island;
+  - **counter;**
+  - **secondary colour:** none by default. When added, the client picks the colour and where it goes (island and/or other, with a note for other).
+- **Hardware:** handles only, knobs only, handles on doors with knobs on drawers, or knobs on doors with handles on drawers.
+- **Top trim and light valance colour:** match primary colour, match secondary colour (only when there is one), or other, picked from the standard colours. The valance colour is asked unless the valance is hidden.
+- **Organizers** start at 1 each, so the client only changes what they don't want.
+- **Garbage and recycling:** yes or no. If yes: under the sink or a dedicated cabinet, and how many slide-outs.
+- **Other rooms:** the room list is main bath, ensuite bath, powder room, mudroom, laundry room, main bath 2, basement bath, basement bath 2, main bedroom closet, office 1, office 2, entertainment centre 1, entertainment centre 2, and bar. Each type can be added once per job.
+  - **The second room** matches the primary room (the same design, adjusted for the room type), coordinates with it (a similar but slightly different design from a preset database), contrasts with it (a contrasting design from a preset database), or starts from scratch.
+  - **From the third room on**, matching an earlier room is the recommended path. Coordinate and contrast are still offered, based on a room the client picks.
+  - **Every later room** gets the option to match the primary room's ceiling height, and its own inserts for its room type (placeholders until the owner fills them in, IK-7).
+- **Linked rooms:** when a choice that other rooms match is changed, the person must choose: "Match currently linked rooms" (they change too) or change only this room (the others keep their design and stop matching), or cancel.
+
 ## Where each answer goes (PROPOSED)
 
 | Answer | Becomes |
@@ -69,9 +92,16 @@ These questions, options, images and conditions are **data** (CLAUDE.md rule 6).
 ## Open questions for the owner
 
 - **IK-1:** Feel and door style list the same five names. Is door style a separate pick, with photos of actual doors filtered by the chosen feel, or the same thing asked twice?
-- **IK-2:** Does material (solid painted / wood grain) narrow the colour tones and colours offered?
 - **IK-3:** What are the "standard sub-colours" for each tone? Is that list the shop's real colour catalog?
 - **IK-4:** Cabinet height "7', 8', 10'": is that the top of the uppers measured from the floor?
 - **IK-5:** Drawers, Minimum: "along the tops of all base cabinets" means one drawer over doors in every base. Is that right?
 - **IK-6:** Is "Prestige maple" a supplier product name, and is "Tafisa matching" the interior matching the Tafisa exterior colour?
-- **IK-7:** Will the other room types (bathroom, laundry, closet…) each get their own outline like this?
+- ~~**IK-2:** Does material narrow the colour tones and colours offered?~~ Yes (owner, 2026-11-08: "filtered for previous answers"). The lists per material are still samples (IK-3).
+- **IK-7:** Will the other room types (bathroom, laundry, closet…) each get their own outline like this? Partly answered (owner, 2026-11-08): each gets its own inserts, relevant to the room type; the owner fills these in later. Placeholders are in `src/modules/intake/data/intake-v1.json`.
+- **IK-8:** If the secondary colour goes on the island, does it replace the island cabinet colour, or is it for island panels and accents?
+- **IK-9:** What is the real hardware list (handle and knob styles, sizes and finishes)? The ones offered are samples.
+- **IK-10:** What are the options for the island back panel? And what is the difference between a detailed short and a detailed long side panel?
+- **IK-11:** What styles are offered for top trim and the light valance?
+- **IK-12:** What is the most of each organizer, and of garbage slide-outs, a client can ask for? The intake stops at 4.
+- **IK-13:** The preset design database for coordinate and contrast: who builds it, and what is in it? Until then, three suggestions are worked out from the room they are based on (`src/modules/intake/data/presets-standin.json`).
+- **IK-14:** The drawer level's cost comes from live pricing, which is not connected yet. The intake says so and shows no number.

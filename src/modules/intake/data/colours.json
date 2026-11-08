@@ -1,0 +1,28 @@
+{
+  "source": "SAMPLE stand-ins from the intake prototype (2026-11-07/08). The owner has not supplied the real colour list for each tone (IK-3) or the hardware finishes (IK-9). Tone names come from the owner's outline (docs/intake/kitchen.md).",
+  "door_palettes": {
+    "painted": [
+      { "id": "white", "label": "White", "subs": ["#F6F4EF", "#EDE9E0", "#E5E3DD", "#F2EEE3"] },
+      { "id": "light_medium", "label": "Light-medium", "subs": ["#D8D2C4", "#C9CCC4", "#C8CFC9", "#D6C9B4"] },
+      { "id": "dark_medium", "label": "Dark-medium", "subs": ["#7C8A7E", "#6E7C88", "#8A7F72", "#7A7570"] },
+      { "id": "dark", "label": "Dark", "subs": ["#2E3641", "#2F2C2B", "#33403A", "#3B3B3D"] }
+    ],
+    "wood": [
+      { "id": "white", "label": "White", "subs": ["#E9E1D2", "#EFE6D6", "#E3D9C6", "#ECE4D8"] },
+      { "id": "light_medium", "label": "Light-medium", "subs": ["#D2B48C", "#C8A678", "#CDB290", "#BF9F74"] },
+      { "id": "dark_medium", "label": "Dark-medium", "subs": ["#8F6A48", "#7E5E43", "#93704E", "#7A6050"] },
+      { "id": "dark", "label": "Dark", "subs": ["#4A3A2E", "#3B2F27", "#54402F", "#3A322C"] }
+    ]
+  },
+  "counter_tones": [
+    { "id": "white", "label": "White", "subs": ["#F8F7F3", "#EDEBE4", "#E8E8E6"] },
+    { "id": "medium", "label": "Medium", "subs": ["#BEB7AB", "#A9A39B", "#B9B09F"] },
+    { "id": "dark", "label": "Dark", "subs": ["#2D2E30", "#413C39", "#33383D"] }
+  ],
+  "finishes": [
+    { "id": "matte_black", "label": "Matte black", "hex": "#262626" },
+    { "id": "brushed_nickel", "label": "Brushed nickel", "hex": "#A7A8A4" },
+    { "id": "satin_brass", "label": "Satin brass", "hex": "#B39257" },
+    { "id": "polished_chrome", "label": "Polished chrome", "hex": "#CDD1D4" }
+  ]
+}

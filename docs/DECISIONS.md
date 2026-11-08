@@ -139,6 +139,28 @@ The owner answered every carried-over design rule on a review page (https://clau
   - closet-builder's room and run limits are deleted ("it's convoluted");
   - its corner rule now covers only how facing closet runs snap when a run is dragged in the layout step. Kitchen corners keep corner cabinets.
 
+### 2026-11-08: Visual intake (owner, clickable prototype rounds 1 to 8, 2026-11-07/08)
+The kitchen outline (`docs/intake/kitchen.md`) was turned into a clickable prototype with placeholder pictures (https://claude.ai/artifact/MW4uLq1CX3qvoejeeaPadW) and reviewed by the owner. It is built at `/intake` (`src/modules/intake/`). The full list of decisions is in `docs/intake/kitchen.md`, "Owner decisions from the prototype". In short:
+- **The intake comes before the room drawing** (walls, openings, cabinets and appliances). The home page lists it first, and its last screen leads on to the room drawing.
+- **One question at a time with large pictures**, a running summary, and a review per room. Pictures are placeholders until real photos exist.
+- **Choices are filtered by earlier answers:** for example, the colour tones are shown in the chosen material and door.
+- **Colours are one step:** cabinets (primary), base cabinets, island cabinets (only with an island), counter, and an optional secondary colour with where it goes. Trim and valance colours match the primary or secondary colour, or another standard colour.
+- **Defaults the owner set:** no secondary colour; base cabinets match; the island matches the cabinets, or the base cabinets once those differ; 1 of each organizer; inserts in other rooms start at none. No other defaults.
+- **Hardware:** handles only, knobs only, handles on doors with knobs on drawers, or knobs on doors with handles on drawers.
+- **Garbage and recycling:** yes or no; then under the sink or a dedicated cabinet, and how many slide-outs.
+- **Other rooms** (14 types, each once per job) can do one of four things:
+  - match an earlier room;
+  - coordinate with it (suggested designs from a preset database);
+  - contrast with it (likewise);
+  - start from scratch.
+
+  The second room is based on the kitchen. From the third room on, matching an earlier room is the recommended path, and coordinate and contrast use a room the client picks. Each room gets its own heights (with "match the kitchen" offered) and its own inserts.
+- **Linked rooms:** changing a choice that other rooms match forces a choice: "Match currently linked rooms" (they change too), change only this room (the others keep their design and stop matching), or cancel.
+- **PROPOSED (this session, not owner-decided):**
+  - the intake uses the room drawing's permissions (`room.view` to see, `room.edit` to answer) until it has its own (IK-16);
+  - a typed ceiling height that isn't on a 1/64" mark is refused with a reason, as rule 11 requires (for example 6.3", which is 403.2/64");
+  - the suggested designs are worked out from the room they are based on until the preset database exists (IK-13).
+
 ### 2026-11-07: Design rules from closet-builder (owner: "bring in all the cabinet design rules")
 The owner asked for closet-builder's design rules (layout, spacing, symmetry, aesthetic) to be brought in. They are in `src/modules/shop-settings/data/design-rules.json`: 83 rules, each with its closet-builder ID, the owner's words and date, any lengths, and a status here.
 - **12 confirmed** for this platform, because the owner already confirmed them here: smallest widths (8"/8"/12"), the door rules, the ideal 14–16" door, evenly spaced shelves, the 1/16" width step and 3/4" fillers, ends (applied finished at an open end, filler at a wall), fillers as real parts, the dishwasher touching the sink base, the sink centred under a window, the top drawer line carrying across, and the two sign-off gates (appliances confirmed, site measured).
@@ -265,7 +287,12 @@ Three confirmed rules are now checked in the design tool (HARD-014, PREF-011 and
 - **DL-1 Deadline ticker.** How is the "everything in by" date worked out? From the colony's production lead time (as data) and the promised delivery date? Who sets the delivery date?
 - **PO-1 Automatic ordering.** Who places the orders (you or the colony), which suppliers, and how does each take orders (email, portal, API)? Do "materials" mean sheet goods sent to the colony?
 - **MSG-1 Channels.** Which email (Gmail?), which texting service, and which meeting tool's transcripts? Do reminders go by text, email or both?
-- **IK-1 to IK-7** Kitchen intake questions, in `docs/intake/kitchen.md`.
+- **IK-1 to IK-14** Kitchen intake questions, in `docs/intake/kitchen.md` (IK-2 answered 2026-11-08; IK-7 partly).
+
+### From the visual intake build (2026-11-08)
+- **IK-15 AI Design reads an older intake shape.** `ai-design` (`model/intake.ts`) was written from the 2026-10-27 outline, before the prototype reviews. It expects `door_colour`, an island yes/no and separate island material, tone and door style. The owner replaced these with the colours step (cabinets, base, island, counter, secondary), four hardware combinations, and garbage location and slide-outs. Most other question codes match. AI Design needs a session to read the intake's `intakeHandover` instead. This session stayed inside `intake` (rule 1).
+- **IK-16 Intake permissions.** The intake uses `room.view` and `room.edit` for now. Should it have its own (for example `intake.view`, `intake.edit`), and should clients answering on their own get only those?
+- **IK-17 Ceiling height in two places.** The intake asks for a rough ceiling height and the room drawing asks again. Should the intake's answer fill in the room drawing's starting value? The room drawing can't read the intake today (ARCHITECTURE: `designer` may not import `intake`), so this needs the app to pass it, or a change to the dependency table.
 
 ### From the spec (section 11)
 - **S-1** Which Cabinet Vision versions do target shops run, and does ORDX behave the same across them?

@@ -9,6 +9,13 @@ test('the home page loads and links to the room drawing', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Start a room' })).toBeVisible();
 });
 
+test('the design choices load at /intake (with or without a trailing slash)', async ({ page }) => {
+  for (const path of ['/intake', '/intake/']) {
+    await page.goto(path);
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Which layout is closest to your kitchen?');
+  }
+});
+
 test('the room drawing works at /rooms/preview (with or without a trailing slash)', async ({ page }) => {
   for (const path of ['/rooms/preview', '/rooms/preview/']) {
     await page.goto(path);

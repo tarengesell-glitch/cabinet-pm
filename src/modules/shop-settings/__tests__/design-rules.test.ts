@@ -27,11 +27,42 @@ describe('design rules from closet-builder', () => {
     expect(rule('CB-FACT-48').lengths.crown_sizes).toEqual(['2', '3', '4', '5', '6'].map(inches));
   });
 
-  it('keeps the owner-confirmed rules confirmed and the closet corner rule a conflict', () => {
+  it('holds the owner review answers (2026-11-07/08)', () => {
     expect(rule('HARD-015').status).toBe('confirmed');
-    expect(rule('PREF-017').status).toBe('confirmed');
-    expect(rule('CB-FACT-31').status).toBe('conflicts');
-    expect(rule('PREF-019').status).toBe('candidate');
+    expect(rule('PREF-019').status).toBe('confirmed');
+    expect(rule('CB-FACT-31').status).toBe('confirmed');
+    expect(rule('PREF-010').status).toBe('declined');
+    expect(rule('CB-A-05').status).toBe('declined');
+    expect(rule('DOC-001').status).toBe('confirmed');
+    expect(DESIGN_RULES.rules.some((r) => r.status === 'candidate')).toBe(false);
+    expect(DESIGN_RULES.rules.some((r) => r.id === 'HARD-003')).toBe(false);
+  });
+
+  it('says what the design tool does when a designer breaks a confirmed rule', () => {
+    expect(rule('HARD-002').designTool).toBe('not_drawable');
+    expect(rule('HARD-006').designTool).toBe('not_drawable');
+    expect(rule('CB-FACT-48').designTool).toBe('error');
+    expect(rule('HARD-016').designTool).toBe('suggestion');
+    expect(rule('PREF-019').designTool).toBe('suggestion');
+    expect(rule('PREF-010').designTool).toBeNull();
+  });
+
+  it('refuses a confirmed preference that is not on the suggestion list', () => {
+    const d = copy();
+    const r0 = d.rules.find((r) => r.id === 'PREF-019') as { design_tool?: string };
+    r0.design_tool = 'error';
+    const r = readDesignRules(d);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.reason).toContain('PREF-019 is a confirmed preference');
+  });
+
+  it('refuses a design tool setting on a rule that is not confirmed', () => {
+    const d = copy();
+    const r0 = d.rules.find((r) => r.id === 'PREF-010') as { design_tool?: string };
+    r0.design_tool = 'suggestion';
+    const r = readDesignRules(d);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.reason).toContain('PREF-010 has a design tool setting');
   });
 
   it('refuses a rule listed twice', () => {

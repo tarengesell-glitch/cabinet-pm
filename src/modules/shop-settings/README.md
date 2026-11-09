@@ -2,7 +2,7 @@
 
 Per-shop design rules (structured, with a plain-language description), default selections and preferences.
 
-Status: design rules loaded as data and reviewed by the owner. Three of them are checked against the rough layout (2026-11-08); the rest wait for placed cabinets or other data (see "Design-rule checks"). See `CLAUDE.md` in this folder for the rules.
+Status: design rules loaded as data and reviewed by the owner. Five of them are checked against the rough layout (2026-11-08/09); the rest wait for placed cabinets or other data (see "Design-rule checks"). See `CLAUDE.md` in this folder for the rules.
 
 ## Design rules (`data/design-rules.json`)
 Design rules carried over from closet-builder on 2026-11-07 at the owner's request, then reviewed by the owner on 2026-11-07/08 (review page: https://claude.ai/artifact/7vv6Emc6tQgevJ3Pt2Sp8L). They cover layout, spacing, sizing, symmetry, alignment, fronts, clearances, kitchen and storage defaults, and countertops.
@@ -41,7 +41,7 @@ When a designer's own change breaks a confirmed rule, the rule's `design_tool` s
 
 The severity is read from the rule's data, not written in the code. Every length comes from `design-rules.json`. Each message names its rule ID, and each check ID is `design_rules.<rule ID>`.
 
-`data/design-rule-checks.json` names the appliance kinds that count as a sink (only `sink`, as in the rough layout). Building the checks stops the app with the reason if any of these is wrong:
+`data/design-rule-checks.json` names things in the master copy the checks look for: the appliance kinds that count as a sink (only `sink`, as in the rough layout), the back-wall range of PREF-013 (`range`), and the run kinds that carry a countertop (PROPOSED: every run with base cabinets except all pantry). Building the checks stops the app with the reason if any of these is wrong:
 - a checked rule is missing;
 - a checked rule is not confirmed;
 - a checked rule is not set to error or suggestion;
@@ -53,17 +53,18 @@ The severity is read from the rule's data, not written in the code. Every length
 | Rule | Design tool | The check | Notes |
 |---|---|---|---|
 | HARD-014 Known site conditions | error → block | An all-pantry run stands in front of a window. | Uses the owner's rough-layout rule (2026-11-06: all pantry stays clear of windows). Only actual overlap is checked. The extra 3" clearance is the designer's drawing rule. Doors and passthroughs are already Core's block (`layout.runs-clear-doorways`). |
-| PREF-011 Walkways 42" to 48" | suggestion → warn | The walkway between two cabinet runs that face each other squarely is under 36" (`strong_min`), 36" to under 42" (`preferred_min`), or over 48" (`preferred_max`). | Measured from run front to run front. Upper-only runs don't count. A nearer run or wall hides what is behind it, along the stretch it covers. Runs facing a bare wall, and runs on walls that aren't exactly parallel, are not checked yet (question DR-4). Uses the inside-of-room reading the room drawing uses; Core should own that one day. |
+| PREF-011 Walkways 42" to 48" | suggestion → warn | The walkway in front of a cabinet run is under 36" (`strong_min`), 36" to under 42" (`preferred_min`), or, between two runs, over 48" (`preferred_max`). | Owner, 2026-11-09: measured from the countertop edge, which is the run's front plus PREF-008's 1" overhang on runs with a countertop. The two minimums also apply to a bare wall; the maximum doesn't. Upper-only runs don't count. A nearer run or wall hides what is behind it, along the stretch it covers. Walls that aren't exactly parallel aren't compared. Uses the inside-of-room reading the room drawing uses; Core should own that one day. |
+| PREF-012 Islands line up with nearby runs | suggestion → warn | An island's end is more than 0" but no more than 5" (`line_up_within`, owner 2026-11-09) from lining up with the end of the cabinets on a wall parallel to it. | Cabinet runs that touch count as one stretch, so only the ends you can see count. An end already lined up with one run isn't flagged for another. |
+| PREF-013 An island sink and a back-wall range line up exactly | suggestion → warn | The centre of a sink on an island is out of line, by any amount, with the centre of a range on a wall parallel to the island. | Owner, 2026-11-09: "a strong preference that they are 100% lined up", so it needs no tolerance. With more than one range, the nearest counts. |
 | PREF-023 Sink centred under a window | suggestion → warn | A sink stands in front of a window but its centre isn't exactly on the window's centre. | Uses the owner's own test (2026-11-07: tell me when a sink in front of a window is NOT centred), so it needs no "nearly". The "balance either side of a focal window" part waits for cabinets. |
 
-### Not checked: a needed number hasn't been given (questions in `docs/DECISIONS.md`)
-- **PREF-012** Islands line up with nearby runs: how close counts as "close"? (DR-1)
-- **PREF-013** Fixtures roughly in line align exactly: how close counts as "roughly in line"? (DR-2)
-- **PREF-014** A roughly centred island fixture is centred exactly: how close counts as "roughly centred"? (DR-3)
+### Not checked: a needed number hasn't been given (question in `docs/DECISIONS.md`)
+- **PREF-014** A roughly centred island fixture is centred exactly. Owner, 2026-11-09: close to centred should be 100% centred, and off centre is better than only close. How close counts as "close" is still open (DR-3).
 
 PRIN-006 (near enough becomes exact) is set to `none`, so it is not a check. It raises the same question.
 
-### Waiting on placed cabinets (step 1b-items) or other data
+### Waiting on placed cabinets or other data
+Placed cabinets reached the master copy on 2026-11-09 (Core schema 2). Many of the rules below can now be checked; that is the next session for this module.
 | Rule | Design tool | Waits on |
 |---|---|---|
 | HARD-014 Known site conditions (the rest) | error | Obstacles: which obstacle kinds stop cabinets, and soffits against the tops of the uppers. Upper and tall heights come with placed cabinets. |

@@ -11,7 +11,7 @@
     "design_rules": {
       "imported_from": "closet-builder (github tarengesell-glitch/closet-builder): docs/cabinetry-intelligence/ (hard-constraints.md, design-preferences.md, construction.md, drawings.md, decision-log.md, sessions/) and the design-related shop facts in docs/construction-strategy.md. Read 2026-11-07.",
       "imported_on": "2026-11-07",
-      "fingerprint_sha256": "3ba22090bcdc6ab6eee47270e9ebadcca461b7ff74e5062c42afbec702668b2c",
+      "fingerprint_sha256": "20aadb236c50428bb96af1162033ef67fb6d5a9c83a462da65386c15ce38c3c5",
       "rules_in_file": 82,
       "confirmed_rules_used": 78
     }
@@ -810,7 +810,7 @@
       "id": "PREF-011",
       "kind": "preference",
       "title": "Walkways 42\" to 48\"",
-      "says": "Under 36\": breaks a very strong minimum. 36\" to 42\": possible, below preferred. 42\" to 48\": preferred. Over 48\": breaks a very strong maximum.",
+      "says": "Under 36\": breaks a very strong minimum. 36\" to 42\": possible, below preferred. 42\" to 48\": preferred. Over 48\": breaks a very strong maximum. Measured from the countertop edge. The two minimums also apply between cabinets and a bare wall (owner, 2026-11-09).",
       "strength": "very strong, not hard",
       "applies_when": null,
       "lengths": {
@@ -823,16 +823,18 @@
       "id": "PREF-012",
       "kind": "preference",
       "title": "Islands line up with nearby runs",
-      "says": "Islands are sized and placed to line up with other runs. When an island's end is close to a wall run's end, they line up exactly (\"like snapping\").",
+      "says": "Islands are sized and placed to line up with other runs. When an island's end is within 5\" of lining up with a wall run's end, they line up exactly (\"like snapping\"), by resizing and placing cabinets.",
       "strength": "strong",
       "applies_when": null,
-      "lengths": {}
+      "lengths": {
+        "line_up_within": "5\""
+      }
     },
     {
       "id": "PREF-013",
       "kind": "preference",
-      "title": "Fixtures roughly in line align exactly",
-      "says": "An island sink and a back-wall range that are roughly in line are lined up exactly.",
+      "title": "An island sink and a back-wall range line up exactly",
+      "says": "An island sink and a back-wall range are lined up exactly: 100% in line, not only when they are roughly in line.",
       "strength": "very strong",
       "applies_when": null,
       "lengths": {}

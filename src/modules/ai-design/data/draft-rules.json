@@ -24,7 +24,7 @@
     "tall_filler": { "code": "tall_filler", "status": "confirmed", "source": "Catalog; as base_filler, for talls and pantries." },
     "uppers": { "codes": ["upper_doors", "upper_doors_36"], "status": "proposed", "source": "Catalog: the two standard upper heights (30\" and 36\"). Which suits the room is weighed as an option, not decided here." },
     "fridge_upper": { "code": "upper_no_shelf", "status": "confirmed", "source": "Catalog: \"A short upper with no shelf, for example over a fridge.\" Its 24\" depth has no catalog item yet (DECISIONS AD-1)." },
-    "cooking_upper": { "code": "upper_no_shelf", "status": "proposed", "source": "Owner, 2026-11-09: a cabinet can go over a range or cooktop instead of a hood. Catalog: \"A short upper with no shelf\". Which cabinet the shop uses there is not confirmed." },
+    "cooking_upper": { "code": "upper_no_shelf", "status": "confirmed", "source": "Owner, 2026-11-09: when Cabinet is chosen over a range or cooktop, it is the catalog's short upper with no shelf (\"A short upper with no shelf\")." },
     "wall_oven": { "code": "tall_oven", "status": "confirmed", "source": "Catalog: \"A drawer at the bottom, an open space for a wall oven, and doors on top.\"" },
     "pantry": { "code": "tall_pantry", "status": "confirmed", "source": "Catalog: tall pantry." },
     "upper_corner": { "code": "upper_corner_90", "status": "confirmed", "source": "Catalog: \"The standard upper corner cabinet.\"" }

@@ -297,6 +297,11 @@ export function sidePanel(o: Look, id: string): string {
   if (id === 'waterfall_stone') s += R(60, 38, 94, 70, mix(col, -0.1)) + R(154, 30, 8, 78, c, `stroke="${mix(c, -0.2)}" stroke-width=".5"`) + R(36, 30, 126, 8, c);
   if (id === 'detailed_short') s += R(70, 38, 92, 70, col, `stroke="${mix(col, -0.2)}" stroke-width=".7"`) + doorShape(76, 44, 80, 58, col, 'classic', null);
   if (id === 'detailed_long') s += R(36, 38, 126, 70, col, `stroke="${mix(col, -0.2)}" stroke-width=".7"`) + doorShape(42, 44, 52, 58, col, 'classic', null) + doorShape(104, 44, 52, 58, col, 'classic', null);
+  // Plain gables: a flat end panel, 3/4" or 1 1/2" (owner, 2026-11-09), drawn on the island's end.
+  if (id === 'plain_gable' || id === 'deep_plain_gable') {
+    const t = id === 'plain_gable' ? 4 : 8;
+    s += R(44, 38, 110, 70, mix(col, -0.08)) + R(154 - t, 38, t + 4, 70, col, `stroke="${mix(col, -0.22)}" stroke-width=".7"`);
+  }
   return svg('0 0 200 120', s);
 }
 

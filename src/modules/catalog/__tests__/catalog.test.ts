@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { parseImperial, type Length } from '@/core/index';
-import { CATALOG_CHECKS, CURRENT_CATALOG, catalogVersion, checkPlacement, readCatalog, type ItemPlacement } from '../contract';
+import { examples, parseImperial, runChecks, type Length } from '@/core/index';
+import { CATALOG_CHECKS, CURRENT_CATALOG, catalogItemCheck, catalogVersion, checkPlacement, readCatalog, type ItemPlacement } from '../contract';
 import raw from '../data/catalog-v1.json';
 
 const len = (text: string): Length => {
@@ -165,5 +165,29 @@ describe('buildability checks', () => {
     const placement = good({ selections: { door_style: 'slab', end_left: 'finished', end_right: 'unfinished' } });
     expect(ids(checkPlacement(r.value, SHOP, placement))).toEqual([CATALOG_CHECKS.invalidCombination.id]);
     expect(checkPlacement(CURRENT_CATALOG, SHOP, placement)).toEqual([]);
+  });
+});
+
+describe('the catalog check over a whole job', () => {
+  it('checks every placed item with its selections resolved item, then room, then job', () => {
+    const base = examples.kitchenWithCabinets();
+    const room = base.rooms[0]!;
+    const one = { ...room.items[0]!, catalog_item_id: item('base_doors').id, width: len('24'), height: len('34 3/4'), depth: len('23 3/4') };
+    const job = (jobSel: Record<string, string>, roomSel: Record<string, string>, itemSel: Record<string, string>) => ({
+      ...base,
+      shop_id: SHOP,
+      job_selections: jobSel,
+      rooms: [{ ...room, room_selections: roomSel, items: [{ ...one, item_selections: itemSel }] }],
+    });
+    const check = [catalogItemCheck(CURRENT_CATALOG)];
+    // Door style from the job, ends from the room: everything required is chosen.
+    expect(runChecks(check, job({ door_style: 'slab' }, ENDS, {}), {}).issues).toEqual([]);
+    // Nothing chosen anywhere: the required choices are reported, never filled in.
+    const missing = runChecks(check, job({}, {}, {}), {}).issues;
+    expect(missing.length).toBeGreaterThan(0);
+    expect(missing.every((i) => i.check_id === CATALOG_CHECKS.required.id && i.ref.id === one.item_instance_id)).toBe(true);
+    // A catalog ID that isn't in the catalog.
+    const unknown = { ...job({ door_style: 'slab' }, ENDS, {}), rooms: [{ ...room, room_selections: ENDS, items: [{ ...one, catalog_item_id: '00000000-0000-4000-8000-000000000123' }] }] };
+    expect(runChecks(check, unknown, {}).issues.map((i) => i.check_id)).toEqual([CATALOG_CHECKS.available.id]);
   });
 });

@@ -3,21 +3,22 @@
  * The customize screens (the owner's Kitchen Studio prototype, 2026-11-08): a settings pane
  * (Room · Run · Cabinet · Checks) beside a studio-lit 3D view of the room, 40/60.
  *
- * A PREVIEW on a PLACEHOLDER design: the cabinets come from the placeholder AI step (no AI), are
- * kept in this browser beside the room's drawing, and are not in the master copy yet (Core has
- * no placed cabinets). Every cabinet the placeholder put down is marked until a person changes
- * or approves it. Live pricing is not connected (no prices exist yet, DECISIONS P-1).
+ * Drawn from, and saved to, the room's master copy (placed items, schema 2; P1, P6): the
+ * cabinets the placeholder AI step put down (no AI) are marked until a person changes or approves
+ * them. Kept in this browser until the platform store exists. Live pricing is not connected
+ * (no prices exist yet, DECISIONS P-1).
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { formatInches, type Room } from '@/core/index';
+import { formatInches, ITEM_CHECKS, runChecks, type Room } from '@/core/index';
 import { can, type User } from '@/platform/index';
-import { CATALOG_CHECKS, CURRENT_CATALOG, checkPlacement } from '@/modules/catalog/contract';
-import { wallLabel } from '../model/editor';
+import { catalogItemCheck, CURRENT_CATALOG } from '@/modules/catalog/contract';
+import { cabinetViews, editItems, placeholderItems, replaceRunItems, upperTopOf, type CabinetView, type ItemEdit } from '../model/cabinets';
+import { room as roomOf, wallLabel, type Draft } from '../model/editor';
 import { RUN_KIND_LABEL } from '../model/layout';
 import { applianceType, LAYOUT_RULES } from '../model/layout-rules';
-import { DRAFT_SETTINGS, draftPlaceholder, editDesign, itemByCode, redraftRun, runOf, standard, type DesignEdit, type DraftPreferences, type PlaceholderCabinet, type PlaceholderDesign } from '../model/placeholder-draft';
+import { DRAFT_SETTINGS, draftPlaceholder, itemByCode, runOf, standard, type DraftPreferences } from '../model/placeholder-draft';
 import { parseSize } from './parseSize';
-import { saveDesign, storedDesign, storedRoom } from './placeholder-store';
+import { placeholderNotes, saveRoom, storedDraft } from './placeholder-store';
 import { FrontIcon } from './FrontIcon';
 import { Stage3D, type FinishLook } from './Stage3D';
 import s from './Customize.module.css';
@@ -44,15 +45,15 @@ const TABS: readonly { id: Tab; name: string }[] = [
   { id: 'cabinet', name: 'Cabinet' },
   { id: 'checks', name: 'Checks' },
 ];
-const SIZE_CHECKS: ReadonlySet<string> = new Set([CATALOG_CHECKS.sizeInRange.id, CATALOG_CHECKS.sizeOnStep.id, CATALOG_CHECKS.available.id]);
+/** The checks on the room's cabinets: Core's layout checks and the catalog's buildability checks. */
+const CABINET_CHECKS = [...ITEM_CHECKS, catalogItemCheck(CURRENT_CATALOG)];
 
-const nameOf = (c: PlaceholderCabinet): string =>
+const nameOf = (c: CabinetView): string =>
   c.code ? (itemByCode(c.code)?.name ?? c.code) : c.appliance === 'hood' ? 'Hood' : (applianceType(LAYOUT_RULES, c.appliance ?? '')?.name ?? c.appliance ?? 'Appliance');
 
 export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom }) {
   const canEdit = can(user, 'room.edit');
-  const [room, setRoom] = useState<Room | null>(null);
-  const [design, setDesign] = useState<PlaceholderDesign | null>(null);
+  const [draft, setDraft] = useState<Draft | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>('room');
   const [selected, setSelected] = useState<string | null>(null);
@@ -63,36 +64,41 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
   const [approveArmed, setApproveArmed] = useState(false);
 
   useEffect(() => {
-    const r = storedRoom(cr.key);
-    const d = storedDesign(cr.key);
-    if (!r.ok) return setProblem(r.reason);
+    const d = storedDraft(cr.key);
     if (!d.ok) return setProblem(d.reason);
-    if (!d.value) return setProblem('This room has no design yet. Run the AI design step first.');
-    setRoom(r.value);
-    setDesign(d.value);
-    setRunId(d.value.cabinets[0]?.runId ?? null);
+    if (roomOf(d.value).items.length === 0) return setProblem('This room has no cabinets yet. Run the AI design step first.');
+    setDraft(d.value);
   }, [cr.key]);
+  const room: Room | null = draft ? roomOf(draft) : null;
+  /** The screens' view of the master copy: cabinets with their runs, plus appliances and hoods. */
+  const design = useMemo(() => (draft && room ? { cabinets: cabinetViews(room), notes: placeholderNotes(draft), upperTop: upperTopOf(room) } : null), [draft, room]);
 
   const onChange = cr.onChange;
+  /** Saves a changed room into the master copy, with a history entry. */
   const keep = useCallback(
-    (next: PlaceholderDesign) => {
-      setDesign(next);
-      const p = saveDesign(cr.key, next);
-      if (p) setMessage({ kind: 'error', text: p });
+    (next: Room, summary: string, origin: 'ai' | 'designer'): boolean => {
+      if (!draft) return false;
+      const saved = saveRoom(cr.key, draft, next, summary, origin);
+      if (!saved.ok) {
+        setMessage({ kind: 'error', text: saved.reason });
+        return false;
+      }
+      setDraft(saved.value);
       onChange?.();
+      return true;
     },
-    [cr.key, onChange],
+    [cr.key, draft, onChange],
   );
-  const edit = (e: DesignEdit): boolean => {
-    if (!design || !canEdit) return false;
-    const r = editDesign(design, e);
+  const edit = (e: ItemEdit): boolean => {
+    if (!room || !canEdit) return false;
+    const r = editItems(room, e);
     if (!r.ok) {
       setMessage({ kind: 'error', text: r.reason });
       return false;
     }
     setMessage(null);
-    keep(r.value);
-    return true;
+    const summary = e.kind === 'approve' ? `Approved ${e.ids.length} cabinet${e.ids.length === 1 ? '' : 's'}` : e.kind === 'type' ? 'Changed a cabinet’s type' : 'Changed a cabinet’s width';
+    return keep(r.value, summary, 'designer');
   };
 
   const designRef = useRef(design);
@@ -109,35 +115,28 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
   const show3dError = useCallback((reason: string) => setMessage({ kind: 'error', text: reason }), []);
 
   const issues = useMemo(() => {
-    if (!design) return [];
+    if (!design || !draft) return [];
     const out: { text: string; id: string | null; kind: 'review' | 'check' }[] = [];
     const pending = design.cabinets.filter((c) => !c.reviewed && c.code !== null);
     if (pending.length) out.push({ kind: 'review', text: `${pending.length} cabinet${pending.length === 1 ? '' : 's'} placed by the placeholder and not reviewed`, id: pending[0]!.id });
-    // Widths are checked against the catalog (heights and depths here are drawing-only). The same
+    // Core's layout checks and the catalog's buildability checks on the master copy. The same
     // finding on several cabinets is listed once, with how many it covers.
     const groups = new Map<string, { text: string; ids: string[] }>();
-    for (const c of design.cabinets) {
-      const item = c.code ? itemByCode(c.code) : null;
-      if (!item) continue;
-      const placed = checkPlacement(CURRENT_CATALOG, CURRENT_CATALOG.shop.id, {
-        id: c.id,
-        catalogItemId: item.id,
-        width: c.width,
-        height: item.size.height.default.value ?? 0,
-        depth: item.size.depth.default.value ?? 0,
-        selections: {},
-      });
-      for (const i of placed) {
-        if (!SIZE_CHECKS.has(i.check_id)) continue;
-        const key = i.message.replace(/; it is .*$|, so .* can’t be checked\..*$/, '');
-        const g = groups.get(key) ?? { text: i.message, ids: [] };
-        g.ids.push(c.id);
-        groups.set(key, g);
-      }
+    for (const i of runChecks(CABINET_CHECKS, draft.job, {}).issues) {
+      // A missing choice is listed once per choice, across every cabinet that needs it.
+      const choice = /needs a choice for (“[^”]+”)/.exec(i.message)?.[1];
+      const key = choice ? `choice ${choice}` : i.message.replace(/^Item \d+ in "[^"]*"/, 'Item').replace(/; it is .*$|, so .* can’t be checked\..*$/, '');
+      const g = groups.get(key) ?? { text: i.message, ids: [] };
+      g.ids.push(i.ref.id);
+      groups.set(key, g);
     }
-    for (const g of groups.values()) out.push({ kind: 'check', text: g.ids.length > 1 ? `${g.text} (${g.ids.length} cabinets)` : g.text, id: g.ids[0] ?? null });
+    for (const [key, g] of groups) {
+      const n = g.ids.length;
+      const text = key.startsWith('choice ') ? `${n} cabinet${n === 1 ? ' needs' : 's need'} a choice for ${key.slice(7)}.` : n > 1 ? `${g.text} (${n} cabinets)` : g.text;
+      out.push({ kind: 'check', text, id: g.ids[0] ?? null });
+    }
     return out;
-  }, [design]);
+  }, [design, draft]);
 
   if (problem) {
     return (
@@ -329,8 +328,10 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
                     onClick={() => {
                       const fresh = draftPlaceholder(room, cr.prefs, () => crypto.randomUUID());
                       if (!fresh.ok) return setMessage({ kind: 'error', text: fresh.reason });
-                      keep(redraftRun(design, fresh.value, run.run.run_id));
-                      setMessage({ kind: 'notice', text: 'Run re-drafted with the placeholder recipe.' });
+                      const items = placeholderItems(room, fresh.value);
+                      if (!items.ok) return setMessage({ kind: 'error', text: items.reason });
+                      if (keep(replaceRunItems(room, items.value, run.run.run_id), 'Placeholder layout (no AI was used) of one run', 'ai'))
+                        setMessage({ kind: 'notice', text: 'Run re-drafted with the placeholder recipe.' });
                     }}
                   >
                     Re-draft this run
@@ -372,13 +373,13 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
               ) : (
                 <p className={s.empty}>Nothing to fix.</p>
               )}
-              <p className={s.hint}>Sizes are checked against the catalog. Door style, hinge side and other per-cabinet choices aren’t checked here yet: the placeholder doesn’t carry them.</p>
+              <p className={s.hint}>Core’s layout checks and the catalog’s checks, on the room’s master copy. The placeholder doesn’t choose door style, ends or hinge sides yet, so those show as missing choices.</p>
             </section>
           )}
         </div>
       </section>
       <section className={s.stageCol} aria-label="3D view">
-        <Stage3D room={room} design={design} look={cr.look} selected={selected} doorsOpen={doorsOpen} fitToken={fitToken} onPick={pick} onError={show3dError} />
+        <Stage3D room={room} cabinets={design.cabinets} look={cr.look} selected={selected} doorsOpen={doorsOpen} fitToken={fitToken} onPick={pick} onError={show3dError} />
         <div className={s.hudTop}>
           <div className={s.hudCard}>
             <div className={s.label}>Live preview</div>
@@ -426,14 +427,14 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
 
 function CabinetTab(props: {
   room: Room;
-  cab: PlaceholderCabinet;
+  cab: CabinetView;
   canEdit: boolean;
   itemType: string | null;
   /** The cabinets in the same row (run and layer), left to right. */
-  row: readonly PlaceholderCabinet[];
+  row: readonly CabinetView[];
   finish: string;
   onStep: (d: 1 | -1) => void;
-  onEdit: (e: DesignEdit) => boolean;
+  onEdit: (e: ItemEdit) => boolean;
   onTypeChange: (code: string) => void;
   onPick: (id: string) => void;
 }) {

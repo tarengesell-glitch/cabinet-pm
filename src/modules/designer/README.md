@@ -90,12 +90,12 @@ The controls and behaviour are unchanged. The look follows the owner's Kitchen S
 
 ## The placeholder AI design and the customize screens (2026-11-08)
 - `model/placeholder-draft.ts` is a **placeholder for the AI design step**: no AI, a fixed recipe from the owner's prototype. It fills each cabinet run with catalog cabinets: corner cabinets where runs meet, a sink base under the sink, the dishwasher and other appliances in their spots, equal cabinets in whole steps with a filler for the rest, uppers that skip windows and stop for the hood, a deeper upper over the fridge, and drawer banks by the drawer level. The recipe's numbers are in `data/placeholder-draft.json` (marked PLACEHOLDER). Tested in `__tests__/placeholder-draft.test.ts`.
-- The result is **not in the master copy** (Core has no placed cabinets yet). It is kept in this browser beside the room's drawing (`ui/placeholder-store.ts`), and every screen says so.
+- Its layout is written into the room's **master copy as placed items** (Core schema 2; `model/cabinets.ts` turns it into `PlacedItem`s, `ui/placeholder-store.ts` saves it, with job status `ai_draft`). Customize reads and saves the master copy; `cabinetViews` works out each cabinet's run and layer, plus the appliances and hoods, every time. The room drawing's checks include Core's item checks.
 - `ui/Customize.tsx`: the settings pane (Room · Run · Cabinet · Checks) and `ui/Stage3D.tsx`, the studio-lit 3D view (three.js). Cabinet heights and depths come from the catalog, finishes from the room's design choices. Cabinets the placeholder put down carry a dashed mark until a person changes or approves them.
 - `ui/FrontIcon.tsx`: a small front picture of a cabinet type, from the catalog's front data, used across the customize panel.
 - Heights: every upper and tall cabinet reaches the design's top line (`upperTop`), from the client's cabinet height.
 - `ui/PlanThumb.tsx`: a small plan of a drawn room, for the studio's AI step and the client page.
-- Contract: `draftRoom`, `storedDesign` and the `DraftPreferences` / `PlaceholderDesign` types. Screens: `Customize`, `PlanThumb`.
+- Contract: `draftRoom`, `exportRoomData` / `importRoomData`, and the `DraftPreferences` type. Screens: `Customize`, `PlanThumb`.
 
 ## What the preview does not do yet
 - **No database.** The room is kept in this browser only (`localStorage`), and the screen says so. If the browser won't store it, a red banner says the work isn't being kept.

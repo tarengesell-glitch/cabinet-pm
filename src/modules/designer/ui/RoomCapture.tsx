@@ -5,7 +5,7 @@
  * - the user and shop are mocked (no sign-in yet), and the screen says so.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { JobSchema, RUN_CHECKS, WALL_CHECKS, examples, runChecks, type Length, type Opening, type Point, type Result, type Room } from '@/core/index';
+import { ITEM_CHECKS, JobSchema, RUN_CHECKS, WALL_CHECKS, examples, runChecks, type Length, type Opening, type Point, type Result, type Room } from '@/core/index';
 import { can, PREVIEW_SHOP, type User } from '@/platform/index';
 import {
   addWall,
@@ -205,7 +205,7 @@ export function RoomCapture({ user, studio }: { user: User; studio?: StudioRoom 
     const r = JobSchema.safeParse(draft.job);
     return r.success ? [] : r.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`);
   }, [draft]);
-  const checkRun = useMemo(() => (draft && formatErrors.length === 0 ? runChecks([...WALL_CHECKS, ...RUN_CHECKS], draft.job, {}) : null), [draft, formatErrors]);
+  const checkRun = useMemo(() => (draft && formatErrors.length === 0 ? runChecks([...WALL_CHECKS, ...RUN_CHECKS, ...ITEM_CHECKS], draft.job, {}) : null), [draft, formatErrors]);
   const issues = checkRun?.issues ?? [];
 
   const doUndo = useCallback(() => setTimeline((t) => (t ? undo(t) : t)), []);
@@ -357,7 +357,9 @@ export function RoomCapture({ user, studio }: { user: User; studio?: StudioRoom 
 
   const loadExample = (which: 'kitchen' | 'lshape') => {
     if (room && room.walls.length > 0 && !window.confirm('Replace this room with the example? (Undo brings it back.)')) return;
-    const job = which === 'kitchen' ? examples.kitchen() : examples.lShapeWithAngledWall();
+    const example = which === 'kitchen' ? examples.kitchen() : examples.lShapeWithAngledWall();
+    // An example is loaded as this preview's job: the preview's shop, so the catalog can check it.
+    const job = { ...example, shop_id: PREVIEW_SHOP.id };
     const r = apply(loadJob(job, null));
     if (!r.ok) setMessage({ kind: 'error', text: r.reason });
     setSelection(null);

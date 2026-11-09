@@ -131,13 +131,46 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 - **A room counts as drawn** (✓ in the room bar) once it has room walls and cabinet runs and no problems (owner, 2026-11-08: "yes").
 - PROPOSED (this session, not owner-decided): without `?job=`, the studio opens a single preview job, labelled as such with the mocked user and shop.
 
+### 2026-11-08: Placed cabinets in the master copy (owner: "start with the cabinets in the master copy … an actual room drawing needs to be built with true to life coordinates that can be used in a Cabinet Vision ORDX file. Please research an ORDX file structure first")
+- **Research first.** Desk research is in `docs/cabinet-vision/DESK_RESEARCH.md`. The vendor's pages couldn't be opened from this session (network), so everything there comes from search summaries and is unverified. It found that the import files place a cabinet by **wall number + offset from the wall's start + elevation (floor to the bottom of the cabinet)**, that walls join where their points match, and that ORDX is XML following each object's Properties, with several rooms per file. The exact ORDX structure is not public; it needs the install's sample file and the shop's exports (CV-3).
+- **Core schema 2: PlacedItem** (BUILD_SPEC section 6). Each room has `items`; each item has our catalog ID, width, height and depth, and a position in the same terms as the import file:
+  - `wall_id` and `side` (left or right of the wall's direction; on a room wall it must be the room's side);
+  - `offset` along the wall's line from its start corner, `elevation` from the floor to the bottom of the box, and `setback` from the wall face.
+  - All are exact whole 1/64" values, true room positions, so the writer never has to round (a 1/64" value is at most six decimal places of an inch).
+  - Islands and peninsulas stand on floating walls (A-21), so every item is wall-referenced; there is no free "room coordinates" placement.
+- **Selections:** `job_selections`, `room_selections` and `item_selections` (our option codes), resolved item, then room, then job (`resolveSelections`). Nothing is filled in.
+- **Origin:** who placed an item (`ai` or `designer`), who last changed it, and whether a designer approved it as it is.
+- **New checks (all block):** Core's `layout.items-on-wall`, `items-fit-along-wall`, `items-under-ceiling`, `items-clear-openings` (only where an item's height overlaps the opening's: a base under a window is fine), `items-overlap` (in 3D, also round corners); the catalog's buildability checks over every placed item (`catalog.placed-items`), with resolved selections. Each was broken on purpose in a test and shown to fail.
+- **The placeholder AI step now writes placed items into the room's master copy** (job status `ai_draft`, history origin `ai`, saying no AI was used). Customize reads and saves the master copy; the 3D view, run strips and checks are worked out from it every time. The browser-only placeholder design is gone.
+- **Rooms saved before** are upgraded when they load: no cabinets, no selections. **The preview shop now carries the catalog's shop ID** ("The colony shop", mocked), so the catalog can check the preview's cabinets; rooms saved with the old stand-in ID are moved over.
+- **PROPOSED (this session, not owner-decided):**
+  - `offset` is measured on the wall's centre line from its start point, like openings, runs and appliances. If the import file measures from a face or an inside corner (CV-5), the writer converts; that is exact on square walls and is an open question on slanted ones.
+  - The placeholder's cabinets count as AI-placed (`placed_by: ai`), because they stand in for the AI draft; the history says no AI was used.
+  - Appliances stay as wall placements, not catalog items; hoods are worked out from them, not stored.
+  - BUILD_SPEC's `rotation` field is not stored: a wall-placed item faces away from its wall, which `side` says.
+  - The customize Checks tab shows every finding, including required choices (door style, ends) the placeholder doesn't fill in: they are real blockers until the intake's choices are mapped to catalog options.
+
+### Phase 0 desk research: open questions (2026-11-08)
+From `docs/cabinet-vision/DESK_RESEARCH.md`. Only samples from the shop, the install's sample ORDX, or a Cabinet Vision expert can answer them. The writer is not started until they are.
+- **CV-3** The real ORDX structure: element and attribute names for job, room, wall, cabinet, position, size and options; which fields are required.
+- **CV-4** How walls are numbered, and whether a wall is given by start and end points or by direction and length.
+- **CV-5** Where "Offset from Wall Start" is measured from (centre line, inside face, or the inside corner), and whether wall points are on the centre line or a face.
+- **CV-6** Whether a cabinet can stand off the wall (our setback), and the field for it.
+- **CV-7** What the wall face suffix means, and how a cabinet on the far side of a wall is written.
+- **CV-8** Units and decimals: decimal inches (exact for us) or millimetres (needs a rounding rule).
+- **CV-9** How islands and peninsulas are written.
+- **CV-10** How corner cabinets are positioned.
+- **CV-11** Whether Elevation includes the toe kick.
+- **CV-12** Whether the format differs between Cabinet Vision versions, and which version the shop runs (spec Q1).
+- Also: the `cabinet-vision-ucs` repo may already hold some of this. This session wasn't allowed to open it.
+
 ### 2026-11-08: Placeholder office screens, AI design and customize (owner: "add in placeholder Today, Tasks, Clients, and a placeholder AI design animation (with no actual AI design) which then once it's done gets us into the cabinet customization screens")
 - **Today, Tasks and Clients** are built as in the Kitchen Studio prototype, inside its app frame (white top bar, side menu that folds). They are **placeholders on demo data** (`src/app/demo-data.ts`, the prototype's made-up clients, calls and tasks), labelled on screen. Ticked and added tasks last only until the page is closed. Joining a call is mocked and says so. The start page (`/`) is now Today.
   - Each demo client has one design job; "Start a design" opens the studio for it (`/studio/?job=<client>`), and its answers, drawings and design are kept in this browser under that job. The client page shows the job's rooms and how far each has got.
 - **The AI design step is a placeholder.** An animation runs room by room while a fixed recipe from the prototype lays out each room; when every room is done it moves on to Customize by itself. **No AI is called.** The recipe's numbers are data (`src/modules/designer/data/placeholder-draft.json`, marked PLACEHOLDER); the cabinet types and their sizes come from the catalog. It reads the drawer level, corner insert and garbage choice from the intake; a missing answer is said in the design's notes, never filled in.
 - **The customize screens** follow the prototype: a settings pane (Room · Run · Cabinet · Checks) beside a studio-lit 3D view, 40/60. Click a cabinet in 3D or in its run to select it; change its type (within its kind, from the catalog) or width (the cabinet beside it gives or takes the difference); approve it, or approve all after a confirmation. Doors open and close. Checks show the catalog's size checks. Live pricing says it is not connected (no prices exist yet, P-1).
 - **PROPOSED (this session, not owner-decided):**
-  - **The placeholder design is not in the master copy.** Core has no placed cabinets yet (BUILD_PLAN 1b-items), so the design is kept in this browser beside the room's drawing and every screen says so. This bends P6 for the cabinets only, until Core and AI Design exist; the room itself is drawn from the master copy.
+  - ~~**The placeholder design is not in the master copy.**~~ Replaced 2026-11-08: the placeholder now writes placed items into the master copy (see "Placed cabinets in the master copy").
   - The placeholder recipe lives in the Designer module, not AI Design, because AI Design may not import the Designer and Core can't hold its result yet. It is to be replaced by AI Design's real drafts.
   - The customize Checks tab runs only the catalog's size checks, against the colony's catalog (the preview shop has none of its own). Door style, hinge side and other per-cabinet choices aren't carried by the placeholder, so they aren't checked yet.
   - Visual-only numbers for the 3D view (toe kick, counter thickness, upper height off the floor, rough appliance sizes) are in the same placeholder data file, marked as drawing-only and never sent to the shop.

@@ -1,7 +1,7 @@
 // Hand-written example master copies. Both must pass every wall and rough-layout check.
 // Used by Core's tests and loadable in the room preview.
 import { pointFromLengthAndAngle, type Point } from '../geometry';
-import { JobSchema, SCHEMA_VERSION, type Job, type Wall } from '../schema/master-copy';
+import { JobSchema, SCHEMA_VERSION, type Job, type PlacedItem, type Wall } from '../schema/master-copy';
 import { ft, id, inch, measured } from './helpers';
 
 const THICKNESS = measured(inch(4, 1, 2));
@@ -31,6 +31,7 @@ function job(jobId: number, rooms: Job['rooms']): Job {
     shop_id: id(9000),
     catalog_version: null,
     status: 'draft',
+    job_selections: {},
     rooms,
     history: [
       { at: '2026-11-05T12:00:00-06:00', by: id(9001), origin: 'designer', summary: 'Drew the room' },
@@ -49,6 +50,8 @@ export function kitchen(): Job {
       room_id: id(100),
       name: 'Kitchen',
       ceiling_height: measured(ft(8)),
+      room_selections: {},
+      items: [],
       walls: [
         wall(101, a, b, {
           openings: [
@@ -121,6 +124,8 @@ export function lShapeWithAngledWall(): Job {
       room_id: id(400),
       name: 'Laundry',
       ceiling_height: measured(ft(8), 'unmeasured'),
+      room_selections: {},
+      items: [],
       walls: [
         wall(401, a, b, {
           openings: [
@@ -156,4 +161,45 @@ export function lShapeWithAngledWall(): Job {
       ],
     },
   ]);
+}
+
+/**
+ * The 12' x 10' kitchen with cabinets placed on wall A: two bases, a sink base under the window
+ * and an upper clear of it. Catalog IDs here are stand-ins (Core knows no catalog).
+ * Wall A starts at the outside of wall D's centre line, so the inside corner is half of
+ * wall D's 4 1/2" thickness from wall A's start: 2 1/4".
+ */
+export function kitchenWithCabinets(): Job {
+  const j = kitchen();
+  const room = j.rooms[0]!;
+  const wallA = room.walls[0]!.wall_id;
+  const item = (n: number, offset: number, width: number, opts: { elevation?: number; height?: number; depth?: number } = {}): PlacedItem => ({
+    item_instance_id: id(n),
+    catalog_item_id: id(n + 50),
+    width,
+    height: opts.height ?? inch(34, 3, 4),
+    depth: opts.depth ?? inch(23, 3, 4),
+    position: { wall_id: wallA, side: 'left', offset, elevation: opts.elevation ?? 0, setback: 0 },
+    item_selections: {},
+    modifications: [],
+    origin: { placed_by: 'designer', last_edited_by: 'designer', approved: true },
+    notes: '',
+  });
+  const start = inch(2, 1, 4);
+  return JobSchema.parse({
+    ...j,
+    rooms: [
+      {
+        ...room,
+        items: [
+          item(801, start, inch(24)),
+          item(802, start + inch(24), inch(21, 3, 4)),
+          // The sink base, centred under the window (48" to 84"): 48 + 18 = 66, so it starts at 48".
+          item(803, inch(48), inch(36)),
+          // An upper at 54" off the floor, 30" tall, clear of the window.
+          item(804, start, inch(30), { elevation: inch(54), height: inch(30), depth: inch(12) }),
+        ],
+      },
+    ],
+  });
 }

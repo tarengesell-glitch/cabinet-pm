@@ -13,4 +13,4 @@ export {
   type SourcedLength,
 } from './model/catalog';
 export { CURRENT_CATALOG, catalogVersion } from './model/current';
-export { CATALOG_CHECKS, checkPlacement, type ItemPlacement } from './model/checks';
+export { CATALOG_CHECKS, catalogItemCheck, checkPlacement, type ItemPlacement } from './model/checks';

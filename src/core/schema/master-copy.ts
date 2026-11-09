@@ -1,8 +1,8 @@
 /**
- * The master copy format (BUILD_SPEC section 6): Job, Room, Wall, Opening, Obstacle, plus the
- * rough layout on each wall (cabinet runs and appliance placements, owner 2026-11-06).
- * PlacedItem and selections are added by a later Core session, which raises SCHEMA_VERSION.
- * Version 1 is still a draft and is not saved anywhere but the preview's browser storage.
+ * The master copy format (BUILD_SPEC section 6): Job, Room, Wall, Opening, Obstacle, the rough
+ * layout on each wall (cabinet runs and appliance placements, owner 2026-11-06), and since
+ * version 2 the placed cabinets (PlacedItem) and the job, room and item selections.
+ * The format is still a draft and is not saved anywhere but the preview's browser storage.
  *
  * Every object is strict: an unknown or missing field is an error, never a default.
  * Fields that may be empty are required and nullable, so "not known" is explicit.
@@ -11,7 +11,7 @@ import { z } from 'zod';
 import { wallLetter } from '../labels';
 import { isLength } from '../units';
 
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 /** A length in base units (1/64 inch). Coordinates may be negative. */
 export const LengthSchema = z.number().refine(isLength, 'must be a whole number of 1/64 inch');
@@ -163,12 +163,79 @@ export const WallSchema = z
     message: 'A floating wall cannot have doors, windows or obstacles.',
   });
 
+/**
+ * Selections (BUILD_SPEC section 6): option code → chosen value code, both the catalog's own
+ * codes (never a CAD code). An item's effective selections are resolved item, then room, then job.
+ */
+export const SelectionsSchema = z.record(z.string().min(1), z.string().min(1));
+
+/**
+ * Where a placed item stands (BUILD_SPEC section 6: "wall reference plus offset along the wall
+ * and elevation"). Every placement is on a wall: islands and peninsulas stand on floating walls
+ * (A-21), so no item needs free room coordinates. All four lengths are exact base units, the
+ * true size in the room, so the CAD file can be written from them without rounding.
+ */
+export const ItemPositionSchema = z.strictObject({
+  wall_id: IdSchema,
+  /**
+   * Which side of the wall the item stands on, looking from the wall's start to its end (the
+   * same convention as a door's swing). On a room wall it must be the room's inside; a floating
+   * wall has cabinets on either side.
+   */
+  side: z.enum(['left', 'right']),
+  /**
+   * Along the wall, from the wall's start corner to the item's edge nearer that corner,
+   * measured on the wall's line (as openings, runs and appliances are).
+   */
+  offset: SizeSchema,
+  /** From the floor to the bottom of the item (its box, toe kick included). */
+  elevation: SizeSchema,
+  /**
+   * From the wall face to the back of the item: on a room wall, from the inside face; on a
+   * floating wall, from the wall's line. 0 when it stands against the wall.
+   */
+  setback: SizeSchema,
+});
+
+/** Who placed an item and who last changed it (BUILD_SPEC 5.6, 9 "Reviewer complacency"). */
+export const ItemOriginSchema = z.strictObject({
+  placed_by: z.enum(['ai', 'designer']),
+  last_edited_by: z.enum(['ai', 'designer']),
+  /** True once a designer has approved an AI-placed item as it is. A designer's edit counts too. */
+  approved: z.boolean(),
+});
+
+/** A catalog-defined modification (scribe, end panel…). Free-form modifications are not allowed. */
+export const ModificationSchema = z.strictObject({ code: z.string().min(1) });
+
+/** BUILD_SPEC section 6, PlacedItem: one catalog item placed in a room. */
+export const PlacedItemSchema = z
+  .strictObject({
+    item_instance_id: IdSchema,
+    /** Our catalog's item ID, never a CAD-specific code. */
+    catalog_item_id: IdSchema,
+    width: SizeSchema,
+    height: SizeSchema,
+    depth: SizeSchema,
+    position: ItemPositionSchema,
+    item_selections: SelectionsSchema,
+    modifications: z.array(ModificationSchema),
+    origin: ItemOriginSchema,
+    /** Free text for the shop; never used for translation. */
+    notes: z.string(),
+  })
+  .refine((i) => i.width > 0 && i.height > 0 && i.depth > 0, { message: 'A placed item needs a width, a height and a depth.' });
+
 export const RoomSchema = z.strictObject({
   room_id: IdSchema,
   name: z.string().min(1),
   ceiling_height: MeasuredSchema,
   /** In order, as drawn. */
   walls: z.array(WallSchema),
+  /** Overrides of the job's selections for this room. */
+  room_selections: SelectionsSchema,
+  /** The cabinets and other catalog items placed in this room. */
+  items: z.array(PlacedItemSchema),
 });
 
 /** BUILD_SPEC section 6, Job.status. */
@@ -200,6 +267,8 @@ export const JobSchema = z
     /** The catalog version the design was last validated against; null until it has been. */
     catalog_version: z.number().int().positive().nullable(),
     status: JobStatusSchema,
+    /** Default selections for the whole job (door style, finish, hardware, construction). */
+    job_selections: SelectionsSchema,
     rooms: z.array(RoomSchema),
     history: z.array(HistoryEntrySchema),
   })
@@ -224,6 +293,7 @@ export const JobSchema = z
         wall.runs.forEach((r, i) => note(r.run_id, `cabinet run ${i + 1} on wall ${wallLetter(w)} in "${room.name}"`));
         wall.appliances.forEach((a, i) => note(a.placement_id, `appliance ${i + 1} (${a.kind}) on wall ${wallLetter(w)} in "${room.name}"`));
       });
+      room.items.forEach((item, i) => note(item.item_instance_id, `placed item ${i + 1} in "${room.name}"`));
     });
   });
 
@@ -240,3 +310,15 @@ export type WallKind = z.infer<typeof WallKindSchema>;
 export type Room = z.infer<typeof RoomSchema>;
 export type JobStatus = z.infer<typeof JobStatusSchema>;
 export type Job = z.infer<typeof JobSchema>;
+export type Selections = z.infer<typeof SelectionsSchema>;
+export type ItemPosition = z.infer<typeof ItemPositionSchema>;
+export type ItemOrigin = z.infer<typeof ItemOriginSchema>;
+export type PlacedItem = z.infer<typeof PlacedItemSchema>;
+
+/**
+ * An item's effective selections: item, then room, then job (BUILD_SPEC section 6). The resolved
+ * values, not the chain, are what validation and translation check. Nothing is filled in.
+ */
+export function resolveSelections(job: Pick<Job, 'job_selections'>, room: Pick<Room, 'room_selections'>, item: Pick<PlacedItem, 'item_selections'>): Selections {
+  return { ...job.job_selections, ...room.room_selections, ...item.item_selections };
+}

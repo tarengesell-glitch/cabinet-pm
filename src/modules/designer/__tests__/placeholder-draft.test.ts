@@ -1,13 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import { examples, type Room } from '@/core/index';
 import { CURRENT_CATALOG } from '@/modules/catalog/contract';
-import { DRAFT_SETTINGS, draftPlaceholder, editDesign, fillWidths, redraftRun, type DraftPreferences, type PlaceholderDesign } from '../model/placeholder-draft';
+import { ITEM_CHECKS, JobSchema, runChecks } from '@/core/index';
+import { DRAFT_SETTINGS, draftPlaceholder, fillWidths, type DraftPreferences, type PlaceholderDesign } from '../model/placeholder-draft';
+import { cabinetViews, editItems, placeholderItems, replaceRunItems } from '../model/cabinets';
 import { LAYOUT_RULES } from '../model/layout-rules';
 
 const IN = 64;
 const kitchen = (): Room => examples.kitchen().rooms[0]!;
 let n = 0;
-const ids = () => `cab-${++n}`;
+const ids = () => `00000000-0000-4000-8000-${String(++n).padStart(12, "0")}`;
 const prefs = (p: Partial<DraftPreferences> = {}): DraftPreferences => ({ drawers: 'minimum', cornerInsert: 'lazy_susan', garbage: 'none', cabinetTop: 'ceiling', ...p });
 const draft = (p?: Partial<DraftPreferences>): PlaceholderDesign => {
   const r = draftPlaceholder(kitchen(), prefs(p), ids);
@@ -65,40 +67,76 @@ describe('the placeholder fill (no AI)', () => {
   });
 });
 
-describe('changing the placeholder design', () => {
+/** The example kitchen with the placeholder's cabinets placed in its master copy. */
+function placed(p?: Partial<DraftPreferences>): Room {
+  const room = kitchen();
+  const items = placeholderItems(room, draft(p));
+  if (!items.ok) throw new Error(items.reason);
+  return { ...room, items: items.value };
+}
+
+describe('placed in the master copy', () => {
+  it('becomes valid placed items (catalog IDs, exact positions on the room’s side) that pass Core’s item checks', () => {
+    const room = placed();
+    const job = { ...examples.kitchen(), rooms: [room] };
+    expect(JobSchema.safeParse(job).success).toBe(true);
+    expect(room.items.length).toBeGreaterThan(5);
+    for (const i of room.items) {
+      expect(CURRENT_CATALOG.items.some((c) => c.id === i.catalog_item_id)).toBe(true);
+      expect(i.position.side).toBe('left'); // the example is drawn counter-clockwise
+      expect(i.origin).toEqual({ placed_by: 'ai', last_edited_by: 'ai', approved: false });
+    }
+    expect(runChecks(ITEM_CHECKS, job, {}).issues).toEqual([]);
+  });
+
+  it('shows appliances and a hood beside the cabinets, from the wall’s appliance placements', () => {
+    const views = cabinetViews(placed());
+    expect(views.some((v) => v.appliance === 'range')).toBe(true);
+    // The sink stands inside its sink base, so it isn't drawn again.
+    expect(views.some((v) => v.appliance === 'sink')).toBe(false);
+    expect(views.some((v) => v.appliance === 'hood')).toBe(true);
+  });
+});
+
+describe('changing placed cabinets', () => {
   it('a new width takes the difference from the cabinet beside it, so the run keeps its length', () => {
-    const d = draft();
-    const row = d.cabinets.filter((c) => c.layer === 'upper' && c.code === 'upper_doors');
-    const [a, b] = [row[0]!, d.cabinets.find((x) => x.runId === row[0]!.runId && x.layer === 'upper' && x.offset === row[0]!.offset + row[0]!.width)!];
-    const r = editDesign(d, { kind: 'width', id: a.id, width: a.width - 3 * IN });
+    const room = placed();
+    const views = cabinetViews(room).filter((v) => v.code === 'upper_doors').sort((a, b) => a.offset - b.offset);
+    const a = views[0]!;
+    const r = editItems(room, { kind: 'width', id: a.id, width: a.width - 3 * IN });
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    const a2 = r.value.cabinets.find((x) => x.id === a.id)!;
-    const b2 = r.value.cabinets.find((x) => x.id === b.id)!;
-    expect(a2.width + b2.width).toBe(a.width + b.width);
-    expect(b2.offset).toBe(a2.offset + a2.width);
-    expect(a2.reviewed && b2.reviewed).toBe(true);
+    const a2 = r.value.items.find((x) => x.item_instance_id === a.id)!;
+    const b2 = r.value.items.find((x) => x.position.offset === a2.position.offset + a2.width && x.position.elevation === a2.position.elevation)!;
+    expect(b2).toBeDefined();
+    expect(a2.origin.last_edited_by).toBe('designer');
+    const before = room.items.filter((x) => x.position.wall_id === a2.position.wall_id && x.position.elevation === a2.position.elevation).reduce((t, x) => t + x.width, 0);
+    const after = r.value.items.filter((x) => x.position.wall_id === a2.position.wall_id && x.position.elevation === a2.position.elevation).reduce((t, x) => t + x.width, 0);
+    expect(after).toBe(before);
   });
 
-  it('refuses a width the neighbour can’t give, and keeps types within their kind', () => {
-    const d = draft();
-    const up = d.cabinets.find((c) => c.code === 'upper_doors')!;
-    expect(editDesign(d, { kind: 'width', id: up.id, width: up.width + 400 * IN }).ok).toBe(false);
-    expect(editDesign(d, { kind: 'type', id: up.id, code: 'base_doors' }).ok).toBe(false);
-    expect(editDesign(d, { kind: 'type', id: up.id, code: 'upper_with_lights' }).ok).toBe(true);
-    const hood = d.cabinets.find((c) => c.appliance === 'hood')!;
-    expect(editDesign(d, { kind: 'width', id: hood.id, width: hood.width }).ok).toBe(false);
+  it('refuses a width the neighbour can’t give, keeps types within their kind, and leaves appliances to the drawing', () => {
+    const room = placed();
+    const up = cabinetViews(room).find((c) => c.code === 'upper_doors')!;
+    expect(editItems(room, { kind: 'width', id: up.id, width: up.width + 400 * IN }).ok).toBe(false);
+    expect(editItems(room, { kind: 'type', id: up.id, code: 'base_doors' }).ok).toBe(false);
+    expect(editItems(room, { kind: 'type', id: up.id, code: 'upper_with_lights' }).ok).toBe(true);
+    const range = cabinetViews(room).find((c) => c.appliance === 'range')!;
+    expect(editItems(room, { kind: 'width', id: range.id, width: range.width }).ok).toBe(false);
   });
 
-  it('approving marks cabinets reviewed; re-drafting a run replaces only that run', () => {
-    const d = draft();
-    const all = editDesign(d, { kind: 'approve', ids: d.cabinets.map((c) => c.id) });
-    expect(all.ok && all.value.cabinets.every((c) => c.reviewed)).toBe(true);
+  it('approving marks cabinets approved; re-drafting a run replaces only that run', () => {
+    const room = placed();
+    const all = editItems(room, { kind: 'approve', ids: room.items.map((c) => c.item_instance_id) });
+    expect(all.ok && all.value.items.every((c) => c.origin.approved)).toBe(true);
     if (!all.ok) return;
-    const runId = d.cabinets[0]!.runId;
-    const again = redraftRun(all.value, draft(), runId);
-    expect(again.cabinets.filter((c) => c.runId === runId).every((c) => !c.reviewed)).toBe(true);
-    expect(again.cabinets.filter((c) => c.runId !== runId).every((c) => c.reviewed)).toBe(true);
+    const runId = cabinetViews(room).find((v) => v.code !== null)!.runId;
+    const fresh = placeholderItems(room, draft());
+    if (!fresh.ok) throw new Error(fresh.reason);
+    const again = replaceRunItems(all.value, fresh.value, runId);
+    const inRun = new Set(cabinetViews(again).filter((v) => v.runId === runId && v.code !== null).map((v) => v.id));
+    expect(again.items.filter((i) => inRun.has(i.item_instance_id)).every((i) => !i.origin.approved)).toBe(true);
+    expect(again.items.filter((i) => !inRun.has(i.item_instance_id)).every((i) => i.origin.approved)).toBe(true);
   });
 
   it('gives an empty design for a room with no cabinet runs', () => {

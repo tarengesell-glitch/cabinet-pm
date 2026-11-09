@@ -9,7 +9,7 @@ import { readStored, storageKey } from './storage';
 
 export type RoomDrawingStatus =
   | { readonly kind: 'none' }
-  | { readonly kind: 'drawn'; readonly walls: number; readonly runs: number; readonly problems: number }
+  | { readonly kind: 'drawn'; readonly walls: number; readonly runs: number; readonly problems: number; readonly cabinets: number }
   | { readonly kind: 'problem'; readonly reason: string };
 
 export function roomDrawingStatus(roomKey: string): RoomDrawingStatus {
@@ -26,5 +26,6 @@ export function roomDrawingStatus(roomKey: string): RoomDrawingStatus {
     walls: room.walls.filter((w) => w.kind === 'room').length,
     runs: room.walls.reduce((n, w) => n + w.runs.length, 0),
     problems: result.issues.length,
+    cabinets: room.items.length,
   };
 }

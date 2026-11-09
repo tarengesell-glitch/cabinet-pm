@@ -1,10 +1,10 @@
 /**
  * Buildability checks (BUILD_SPEC section 7, layer "buildability"). Every issue blocks.
  *
- * Core has no placed cabinet in the master copy yet (step 1b-items), so these checks take one
- * placed item at a time. When PlacedItem lands, a Core `Check` runs them over every item in a job.
+ * `checkPlacement` takes one placed item; `catalogItemCheck` runs it over every item in a job
+ * (the master copy has placed items since schema 2, 2026-11-08).
  */
-import { formatInches, type Issue, type Length } from '@/core/index';
+import { formatInches, resolveSelections, type Check, type Issue, type Job, type Length } from '@/core/index';
 import { catalogItem, type Catalog, type CatalogItem, type DimensionName } from './catalog';
 
 /** What a placed cabinet tells the catalog. Lengths are in the base unit. */
@@ -108,4 +108,33 @@ function checkSelections(
     const all = Object.entries(combo.selections).every(([o, v]) => selections[o] === v);
     if (all) issue(CATALOG_CHECKS.invalidCombination, `${item.name}: these choices can’t go together. ${combo.reason}`);
   }
+}
+
+/**
+ * The buildability checks over every placed item in a job (BUILD_SPEC section 7, layer
+ * "buildability", owner Catalog), with each item's selections resolved item, then room, then job.
+ * Registered beside Core's checks by whoever runs them; Core never knows about it.
+ */
+export function catalogItemCheck(catalog: Catalog): Check {
+  return {
+    id: 'catalog.placed-items',
+    layer: 'buildability',
+    description: 'Every placed item is buildable from the catalog: available, in size, on step, with its required choices',
+    run(job: Job): Issue[] {
+      const issues: Issue[] = [];
+      for (const room of job.rooms)
+        for (const item of room.items)
+          issues.push(
+            ...checkPlacement(catalog, job.shop_id, {
+              id: item.item_instance_id,
+              catalogItemId: item.catalog_item_id,
+              width: item.width,
+              height: item.height,
+              depth: item.depth,
+              selections: resolveSelections(job, room, item),
+            }),
+          );
+      return issues;
+    },
+  };
 }

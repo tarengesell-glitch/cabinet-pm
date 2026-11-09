@@ -12,7 +12,7 @@
 import Link from 'next/link';
 import { useCallback, useMemo, useState } from 'react';
 import { PREVIEW_SHOP, PREVIEW_USER } from '@/platform/index';
-import { roomDrawingStatus, storedDesign, type DraftPreferences, type DrawerLevel, type RoomDrawingStatus } from '@/modules/designer/contract';
+import { roomDrawingStatus, type DraftPreferences, type DrawerLevel, type RoomDrawingStatus } from '@/modules/designer/contract';
 import { Customize, RoomCapture } from '@/modules/designer/ui/index';
 import { INTAKE_DEFINITION, intakeHandover, loadIntakeState, roomLook, roomSummary, roughCabinetTop, roughCeiling, type IntakeState, type RoomHandover } from '@/modules/intake/contract';
 import { IntakeScreen } from '@/modules/intake/ui/index';
@@ -78,13 +78,19 @@ export function Studio() {
     void tick;
     return new Map(rooms.map((r) => [r.room_id, roomDrawingStatus(r.room_id)]));
   }, [rooms, tick]);
-  const designed = useMemo(() => {
-    void tick;
-    return new Set(rooms.filter((r) => {
-      const d = storedDesign(r.room_id);
-      return d.ok && d.value !== null;
-    }).map((r) => r.room_id));
-  }, [rooms, tick]);
+  /** Rooms whose master copy has placed cabinets (from the AI design step). */
+  const designed = useMemo(
+    () =>
+      new Set(
+        rooms
+          .filter((r) => {
+            const d = drawings.get(r.room_id);
+            return d?.kind === 'drawn' && d.cabinets > 0;
+          })
+          .map((r) => r.room_id),
+      ),
+    [rooms, drawings],
+  );
 
   const missingChoices = rooms.filter((r) => !r.complete);
   const notDrawn = rooms.filter((r) => !drawingDone(drawings.get(r.room_id)));

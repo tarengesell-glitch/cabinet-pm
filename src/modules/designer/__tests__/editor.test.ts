@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { JobSchema, WALL_CHECKS, runChecks, type Result } from '@/core/index';
+import { insideLength, JobSchema, WALL_CHECKS, runChecks, type Result } from '@/core/index';
 import {
   addWall,
   addWallByLength,
@@ -76,7 +76,7 @@ describe('starting and drawing a room', () => {
     expect(startRoom(env, { name: '  ', shopId: SHOP, ceiling: size(1) }).ok).toBe(false);
     const d = newRoom(env);
     expect(room(d).ceiling_height).toEqual({ value: 8 * FT, provenance: 'unmeasured', source_mm: null });
-    expect(d.wallDefaults.thickness).toEqual({ value: 5 * IN + 32, provenance: 'unmeasured', source_mm: null });
+    expect(d.wallDefaults.thickness).toEqual({ value: 4 * IN + 32, provenance: 'unmeasured', source_mm: null }); // 4 1/2" (owner, 2026-11-09)
     expect(JobSchema.safeParse(d.job).success).toBe(true);
   });
 
@@ -116,7 +116,7 @@ describe('starting and drawing a room', () => {
 });
 
 describe('typing a wall length', () => {
-  it('moves the far end along the wall; the joined wall slides across keeping its angle', () => {
+  it('takes the typed length as the inside length (face to face), moving the far end; the joined wall slides across keeping its angle', () => {
     const env = testEnv();
     let d = rectangle(env);
     const [w1, w2] = room(d).walls;
@@ -125,13 +125,16 @@ describe('typing a wall length', () => {
     const r = setSize(d, env, { kind: 'wall', id: w1!.wall_id, field: 'length' }, size(13 * FT));
     if (!r.ok) throw new Error(r.reason);
     const walls = room(r.value.draft).walls;
-    expect(walls[0]!.end_point).toEqual({ x: 13 * FT, y: 0 });
+    // 13' inside, plus half of each 4 1/2" side wall: 13' 4 1/2" on the centre line (owner, 2026-11-09).
+    const centre = 13 * FT + 4 * IN + 32;
+    expect(walls[0]!.end_point).toEqual({ x: centre, y: 0 });
+    expect(insideLength(room(r.value.draft), walls[0]!)).toEqual({ value: 13 * FT, exact: true });
     // Wall B moved across as a whole: still upright, still 10', still confirmed.
-    expect(walls[1]!.start_point).toEqual({ x: 13 * FT, y: 0 });
-    expect(walls[1]!.end_point).toEqual({ x: 13 * FT, y: 10 * FT });
+    expect(walls[1]!.start_point).toEqual({ x: centre, y: 0 });
+    expect(walls[1]!.end_point).toEqual({ x: centre, y: 10 * FT });
     expect(walls[1]!.length_provenance).toBe('confirmed');
     // Wall C stretched to stay joined, so it is no longer confirmed, and says so.
-    expect(walls[2]!.start_point).toEqual({ x: 13 * FT, y: 10 * FT });
+    expect(walls[2]!.start_point).toEqual({ x: centre, y: 10 * FT });
     expect(walls[2]!.length_provenance).toBe('unmeasured');
     expect(r.value.notices).toEqual([`Wall C changed length, so it's no longer confirmed. Measure it again.`]);
     // Typing a length never confirms it (owner, 2026-11-05).
@@ -315,7 +318,7 @@ describe('moving and resizing doors and windows', () => {
 
 describe('standard sizes (data/standard-sizes.json)', () => {
   it('are the owner\'s values', () => {
-    expect(STANDARD_SIZES.wall_thickness).toBe(5 * IN + 32);
+    expect(STANDARD_SIZES.wall_thickness).toBe(4 * IN + 32); // 4 1/2" (owner, 2026-11-09)
     expect(STANDARD_SIZES.openings.door).toEqual({ width: 32 * IN, height: 80 * IN, sill_height: 0 });
     expect(STANDARD_SIZES.openings.window).toEqual({ width: 36 * IN, height: 48 * IN, sill_height: 36 * IN });
     expect(STANDARD_SIZES.openings.passthrough).toEqual({ width: 32 * IN, height: 80 * IN, sill_height: 0 });
@@ -399,6 +402,13 @@ describe('two states: unmeasured and confirmed', () => {
     expect(walls[0]!.length_provenance).toBe('confirmed');
     expect(walls[1]!.length_provenance).toBe('unmeasured');
     expect(loaded.value.draft.wallDefaults.thickness.provenance).toBe('unmeasured');
+    // A room that still started new walls at the old 5 1/2" standard takes the new 4 1/2" one (owner, 2026-11-09).
+    expect(loaded.value.draft.wallDefaults.thickness.value).toBe(4 * IN + 32);
+  });
+
+  it('keeps a wall thickness someone confirmed, even the old standard', () => {
+    const up = upgradeStoredDraft({ job: examples.kitchen(), wallDefaults: { thickness: { value: 352, provenance: 'confirmed', source_mm: null } } });
+    expect(up.wallDefaults?.thickness.value).toBe(352);
   });
 });
 
@@ -501,7 +511,7 @@ describe('several walls at once', () => {
     const d = rectangle(env);
     const ids = room(d).walls.slice(1, 3).map((w) => w.wall_id);
     const next = unwrap(setWallsThickness(d, env, ids, size(4 * IN)));
-    expect(room(next).walls.map((w) => w.thickness!.value)).toEqual([5 * IN + 32, 4 * IN, 4 * IN, 5 * IN + 32]);
+    expect(room(next).walls.map((w) => w.thickness!.value)).toEqual([4 * IN + 32, 4 * IN, 4 * IN, 4 * IN + 32]);
     expect(room(next).walls[1]!.thickness!.provenance).toBe('unmeasured');
     expect(setWallsThickness(d, env, ids, size(0)).ok).toBe(false);
   });

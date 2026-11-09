@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import {
-  distanceForDisplay,
+  insideLength,
   formatInches,
   type Issue,
   type Measured,
@@ -138,7 +138,7 @@ export function RoomPanel({ room, wallDefaults, canEdit, onRename, onCeiling, on
         <p className={s.muted}>Walls ({room.walls.length})</p>
         <ul className={s.list}>
           {room.walls.map((w, i) => {
-            const d = distanceForDisplay(w.start_point, w.end_point);
+            const d = insideLength(room, w);
             return (
               <li key={w.wall_id}>
                 <button className={s.listButton} onClick={() => onSelect({ kind: 'wall', id: w.wall_id })}>
@@ -177,7 +177,8 @@ export function WallPanel({ room, wall, canEdit, onSize, onProvenance, onDelete,
   const index = room.walls.findIndex((w) => w.wall_id === wall.wall_id);
   const floating = wall.kind === 'floating';
   const [kindError, setKindError] = useState<string | null>(null);
-  const d = distanceForDisplay(wall.start_point, wall.end_point);
+  // Inside length, face to face, as measured on site (owner, 2026-11-09); typing one sets it.
+  const d = insideLength(room, wall);
   const lengthMeasured: Measured = { value: d.value, provenance: wall.length_provenance, source_mm: wall.length_source_mm };
   const detail =
     wall.entered_length !== null
@@ -279,7 +280,7 @@ export function WallsPanel({ room, walls, canEdit, onSelect, onThickness, onDele
       <p className={s.muted}>Walls {numbers.map((n) => wallLetter(n - 1)).join(', ')}. Shift-click a wall on the plan to add or remove it.</p>
       <ul className={s.list}>
         {walls.map((w, i) => {
-          const d = distanceForDisplay(w.start_point, w.end_point);
+          const d = insideLength(room, w);
           return (
             <li key={w.wall_id}>
               <button className={s.listButton} onClick={() => onSelect({ kind: 'wall', id: w.wall_id })}>

@@ -1,6 +1,6 @@
 {
-  "source": "Owner (Taren), 2026-11-05, in the Claude Code session that built the room preview. Belongs in Shop Settings once that module exists.",
-  "wall_thickness": "5 1/2",
+  "source": "Owner (Taren), 2026-11-05, in the Claude Code session that built the room preview. Wall thickness changed to 4 1/2\" by the owner on 2026-11-09 (\"interior wall thicknesses are actually 4.5\\\"\"). Belongs in Shop Settings once that module exists.",
+  "wall_thickness": "4 1/2",
   "openings": {
     "door": {
       "width": "32",

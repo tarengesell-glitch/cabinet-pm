@@ -10,6 +10,8 @@ import type Konva from 'konva';
 import {
   directionOf,
   distanceForDisplay,
+  insideLength,
+  insideSpan,
   formatInches,
   pointFromLengthAndAngle,
   snapEndToAngle,
@@ -918,6 +920,8 @@ export function PlanCanvas(props: Props) {
               key={wall.wall_id}
               wall={wall}
               index={i}
+              inside={insideSpan(room, wall)}
+              insideLength={insideLength(room, wall)}
               neighbours={neighboursOf(room.walls, wall)}
               outside={outside}
               canEdit={canEdit}
@@ -944,7 +948,7 @@ export function PlanCanvas(props: Props) {
                 const w = room.walls.find((x) => x.wall_id === wallId);
                 if (!w) return;
                 props.onSelect({ kind: 'wall', id: wallId });
-                setEditingLength({ wallId, at, text: formatInches(distanceForDisplay(w.start_point, w.end_point).value), error: null });
+                setEditingLength({ wallId, at, text: formatInches(insideLength(room, w).value), error: null });
               }}
               selectable={tool === 'select'}
               onSelect={props.onSelect}
@@ -1006,7 +1010,7 @@ export function PlanCanvas(props: Props) {
           )}
           {preview && chainStart && <PreviewWall start={chainStart} end={preview} toScreen={toScreen} typed={typed} />}
           {placing && ghost && (
-            <GhostOpening kind={placing} wall={ghost.wall} offset={ghost.offset} toScreen={toScreen} scale={view.scale} outside={outside} />
+            <GhostOpening kind={placing} wall={ghost.wall} inside={insideSpan(room, ghost.wall)} offset={ghost.offset} toScreen={toScreen} scale={view.scale} outside={outside} />
           )}
           {placing && hover && !ghost && <FloatingGhost kind={placing} at={toScreen(hover)} scale={view.scale} />}
           {marquee && dragged.current && (
@@ -1207,6 +1211,10 @@ function cornerPoints(c: V, away: V, neighbourAway: V | null, n: V, h: number): 
 interface WallShapeProps {
   wall: Wall;
   index: number;
+  /** Where the wall's inside faces meet its neighbours, along its centre line: measurements start there (owner, 2026-11-09). */
+  inside: { start: number; end: number };
+  /** The inside length, face to face, as it is measured on site. */
+  insideLength: { value: number; exact: boolean };
   neighbours: { start: Point | null; end: Point | null };
   /** +1 or -1: flips which side counts as outside (see outsideSign). */
   outside: 1 | -1;
@@ -1253,17 +1261,19 @@ function WallShape(props: WallShapeProps) {
   const ink = floating ? FLOATING : TEXT[wall.length_provenance];
 
   const fill = FILL[wall.length_provenance];
-  const length = distanceForDisplay(wall.start_point, wall.end_point);
-  // Less is more (owner, 2026-11-05): the colour shows how sure we are; the panel says it in words.
+  // Lengths are shown wall face to face, as measured on site (owner, 2026-11-09). Less is more
+  // (owner, 2026-11-05): the colour shows how sure we are; the panel says it in words.
   // The length outside the wall (where dimensions go); the wall's letter in a circle inside.
+  const length = props.insideLength;
   const label = lengthText(length);
   const letter = wallLetter(index);
   const mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
   // A wall with doors or windows gets a chain of measurements next to it (corner → opening edge,
   // opening width, … → corner), as cabinet planning guides and NKBA plans show; the overall
   // length then sits on a second line further out. Walls without openings show only the overall.
-  const breaks = [...new Set([0, ...wall.openings.flatMap((o) => [o.offset.value, o.offset.value + o.width.value]), length.value])]
-    .filter((v) => v >= 0 && v <= length.value)
+  const { inside } = props;
+  const breaks = [...new Set([inside.start, ...wall.openings.flatMap((o) => [o.offset.value, o.offset.value + o.width.value]), inside.end])]
+    .filter((v) => v >= inside.start && v <= inside.end)
     .sort((p, q) => p - q);
   const chain = wall.openings.length > 0 ? breaks.slice(1).map((end, i) => ({ start: breaks[i] as number, end })) : [];
   const labelOffset = chain.length > 0 ? h + 40 : h + 14;
@@ -1346,7 +1356,7 @@ function WallShape(props: WallShapeProps) {
             a={p0}
             b={p1}
             off={{ x: nx * (h + 10), y: ny * (h + 10) }}
-            text={lengthText({ value: end - start, exact: length.exact || end !== length.value })}
+            text={lengthText({ value: end - start, exact: length.exact || (start !== inside.start && end !== inside.end) })}
             colour={gap && selectable && canEdit ? ACCENT : DIM}
             {...(gap && selectable && canEdit ? { onClick: () => props.onEditGap(gap, at, end - start) } : {})}
           />
@@ -1524,8 +1534,8 @@ function Dimension({ a, b, off, text, colour = GHOST, name, onClick }: { a: V; b
  * The door / window / passthrough that will be placed, snapped onto a wall under the
  * cursor, with its distance to each end of the wall. Clicking places exactly this.
  */
-function GhostOpening(p: { kind: Opening['kind']; wall: Wall; offset: number; toScreen: (q: Point) => Point; scale: number; outside: 1 | -1 }) {
-  const { kind, wall, offset, toScreen, scale, outside } = p;
+function GhostOpening(p: { kind: Opening['kind']; wall: Wall; inside: { start: number; end: number }; offset: number; toScreen: (q: Point) => Point; scale: number; outside: 1 | -1 }) {
+  const { kind, wall, offset, toScreen, scale, outside, inside: span } = p;
   const a = toScreen(wall.start_point);
   const b = toScreen(wall.end_point);
   const u = unit(sub(b, a));
@@ -1537,13 +1547,15 @@ function GhostOpening(p: { kind: Opening['kind']; wall: Wall; offset: number; to
   const s = at(offset);
   const e = at(offset + std.width);
   const wallLength = distanceForDisplay(wall.start_point, wall.end_point);
-  const after = wallLength.value - offset - std.width;
+  // Distances from the inside corners, as measured on site (owner, 2026-11-09).
+  const before = offset - span.start;
+  const after = span.end - offset - std.width;
   const inside = { x: -n.x * (h + 22), y: -n.y * (h + 22) };
   return (
     <Group listening={false} opacity={0.9} name="ghost-opening">
       <OpeningSymbol kind={kind} s={s} e={e} n={n} h={h} wallWidth={wallWidth} widthPx={std.width * scale} swing={kind === 'door' ? ghostSwing(outside) : null} stroke={GHOST} thick />
-      <Dimension a={a} b={s} off={inside} text={formatInches(offset)} />
-      <Dimension a={e} b={b} off={inside} text={lengthText({ value: Math.max(0, after), exact: wallLength.exact })} />
+      <Dimension a={at(span.start)} b={s} off={inside} text={lengthText({ value: Math.max(0, before), exact: wallLength.exact })} />
+      <Dimension a={e} b={at(span.end)} off={inside} text={lengthText({ value: Math.max(0, after), exact: wallLength.exact })} />
     </Group>
   );
 }

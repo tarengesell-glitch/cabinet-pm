@@ -6,6 +6,7 @@
  * IDs and times come from `env`, so tests can pass fixed ones.
  */
 import {
+  centreLengthFor,
   JobSchema,
   SCHEMA_VERSION,
   directionOf,
@@ -415,8 +416,13 @@ export function setWallsThickness(draft: Draft, env: Env, wallIds: readonly stri
 }
 
 /** A typed wall length: the far end moves along the wall's line (see resizeWall). */
+/** A typed length is the wall's inside length, face to face (owner, 2026-11-09); walls are stored by their centre line. */
 function setWallLength(draft: Draft, env: Env, wallId: string, size: TypedSize): Result<Change> {
-  return resizeWall(draft, env, wallId, 'end', size);
+  const r = room(draft);
+  const wall = r.walls.find((w) => w.wall_id === wallId);
+  if (!wall) return refuse('That wall no longer exists.');
+  if (size.value <= 0) return refuse('A wall needs a length.');
+  return resizeWall(draft, env, wallId, 'end', { ...size, value: centreLengthFor(r, wall, size.value) });
 }
 
 /** Sets any size the person typed. A typed value is "measured": typing never verifies. */
@@ -577,6 +583,9 @@ export function resizeOpening(draft: Draft, env: Env, openingId: string, offset:
  * Brings a draft saved by an older version of this preview up to date, saying what
  * changed. Today: walls no longer have their own height (owner, 2026-11-05).
  */
+/** The standard wall thickness before 2026-11-09 (5 1/2"), in 1/64". Only used to recognise rooms saved with it. */
+const REPLACED_WALL_THICKNESS = 352;
+
 export function upgradeStoredDraft(data: unknown): { job: unknown; wallDefaults: WallDefaults | null; notes: string[] } {
   const notes: string[] = [];
   const d = (data ?? {}) as { job?: { rooms?: { walls?: Record<string, unknown>[] }[] }; wallDefaults?: { thickness?: Measured } };
@@ -642,8 +651,12 @@ export function upgradeStoredDraft(data: unknown): { job: unknown; wallDefaults:
       }
     }
   }
+  // The standard wall thickness changed from 5 1/2" to 4 1/2" (owner, 2026-11-09: interior walls are
+  // 4 1/2"). A room that still starts new walls at the old standard, never changed by hand, takes
+  // the new one. A thickness someone confirmed is kept.
   const thickness = d.wallDefaults?.thickness;
-  return { job, wallDefaults: thickness ? { thickness } : null, notes };
+  const oldStandard = thickness && thickness.value === REPLACED_WALL_THICKNESS && thickness.provenance !== 'confirmed';
+  return { job, wallDefaults: thickness && !oldStandard ? { thickness } : null, notes };
 }
 
 export function setOpeningKind(draft: Draft, env: Env, openingId: string, kind: Opening['kind']): Result<Change> {

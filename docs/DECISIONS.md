@@ -147,6 +147,24 @@ The owner's goal: lock in the wall measurements, openings, cabinet runs, room dr
   - the AI judge's instructions;
   - the "Not reviewed by AI" label when the call fails.
 
+### 2026-11-09: The shared database, step 0a (owner: "live work shouldn't live solely in a browser")
+- Built in the Supabase project **cabinet-pm** (Canada, AD-3). The tables are in `supabase/migrations/` and were applied through the Supabase connector:
+  - `staff`, `shops` (the colony shop, with the catalog's ID);
+  - `master_copy_versions`;
+  - `audit_log`, `alerts`.
+- The rules are enforced in the database and tested against the real project (`src/platform/README.md`):
+  - versions are never changed;
+  - two saves from the same version can't both land;
+  - only staff see or save anything;
+  - every write is audited;
+  - alerts are resolved only with a note.
+- Supabase's own security check is clean.
+- **PROPOSED (this session, not owner-decided):**
+  - **Sign-in is by an emailed link, invite only.** The owner invites each person in the Supabase dashboard and adds them to the `staff` table with their roles. No passwords, and no one can sign themselves up.
+  - **The database checks only "is this person staff".** Which role may do what stays data in `roles.json`, checked by `can()` in the app, so roles are still changed in one place.
+  - **Customers and jobs are not tables yet** (projects, BUILD_PLAN 7a). A version is filed by its job ID only.
+  - `@supabase/supabase-js` 2.118.0 is installed, pinned to that exact version.
+
 ### 2026-11-08: The design studio (owner: "the design choices flow seems to work well, so let's integrate that into the actual code", Kitchen Studio prototype, https://claude.ai/artifact/Tkd2r8vTUswCs3ioJnGjqg)
 - **C-2 answered: the look is the prototype's**, which is closet-builder's owner-approved design system: navy (#1A3045) to act or show "you are here", gold (#D4B57F) for what is selected, Newsreader for headings, Geist for everything else, light only. The owner asked for "the more polished UI of the artifact". The tokens live once, in `src/platform/design-system/tokens.css`; the palette in `docs/ux/UX_BRIEF.md` Part 4 is replaced. The owner's wall colours (pastel red unmeasured, black confirmed) stay.
 - **The design studio (`/studio`)** puts one job's steps in a row along the top: Design choices · Room drawing · AI design · Customize, with the job's rooms as chips under them, as in the prototype. Clicking a room chip switches rooms in either step.

@@ -93,7 +93,7 @@ Core schema 2 now has all of this (DECISIONS "Placed cabinets in the master copy
 ## Next (the plan approved 2026-11-09)
 0. **The shared database first:** the master copy store on Supabase, so live work doesn't live only in a browser (platform).
 1. ~~Read the real intake (IK-15).~~ Done 2026-11-09.
-2. **Move the room geometry helpers** (inside span, corners, upper pieces) from the designer to Core, so the drafter and the room drawing agree.
+2. ~~Move the room geometry helpers to Core.~~ Done 2026-11-09: `src/core/layout/room-geometry.ts` (inside spans, corners, where uppers go), with its numbers passed in.
 3. **The layout engine** (ordinary code, no AI): fixed things first, purposeful appliance moves of at most 24", gaps filled with widths the catalog accepts, and a scorecard of rules met and broken for each option.
 4. **The AI judge:** a server function (Netlify Functions) that picks between options, checks requirements and writes the notes. It never places a cabinet.
 5. **Draft runs and the studio:** saved as a master copy version (origin `ai`), replacing the placeholder.

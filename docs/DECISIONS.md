@@ -147,6 +147,15 @@ The owner's goal: lock in the wall measurements, openings, cabinet runs, room dr
   - the AI judge's instructions;
   - the "Not reviewed by AI" label when the call fails.
 
+### 2026-11-09: Room geometry moved to Core (AI designer plan, step 2)
+- The room drawing's geometry (where cabinets can stand along a wall, corner cabinets, where uppers go, door and window clearances) moved unchanged from `designer/model/layout.ts` to Core (`src/core/layout/room-geometry.ts`). The AI designer may not import the designer, and two copies could disagree.
+- Core takes its numbers as inputs (rule 6): the opening clearance, the upper band's depth, the shortest run, and which appliances get their own upper. The designer passes them from its `layout-rules.json`, keeping the same function names, so no screen changed.
+- **Checked:**
+  - all 302 existing tests pass unchanged, with 9 new Core tests;
+  - ignoring wall thickness made 15 tests fail across Core and the designer;
+  - letting uppers run over windows made 4 fail.
+- **PROPOSED (this session, not owner-decided):** the layout numbers stay the designer's data for now. The AI designer will receive them from the app, which composes both. If more modules need them, they move to shop settings.
+
 ### 2026-11-09: The shared database, step 0b: sign-in and the studio (owner answers, chat, 2026-11-09)
 - **Saving is automatic** (owner). There is no Save button. A change is saved to the database a second or two after the person stops, as a new version. The studio's header always says "Saved to the shared database", "Saving…" or, in red, "Not saved", with the reason in a banner.
 - **The demo clients stay as the jobs** (owner) until real client and job records exist (BUILD_PLAN 7a). They are still labelled as demo clients.

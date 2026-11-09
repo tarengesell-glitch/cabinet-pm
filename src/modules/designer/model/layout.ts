@@ -616,7 +616,9 @@ export function offCentreNotice(w: Wall, type: ApplianceType, offset: Length, wi
  * Makes sure a stretch stands within runs: extends a run that touches or overlaps it, or adds a
  * short run of the given kind. An upper-only run under an appliance becomes base + upper.
  */
-function ensureRun(env: Env, w: Wall, span: Span, kind: RunKind, rules: LayoutRules, notices: string[]): Wall {
+function ensureRun(env: Env, w: Wall, span: Span, kind: RunKind | null, rules: LayoutRules, notices: string[]): Wall {
+  // A toilet, tub or shower stands on the floor: no run is made under it (owner, 2026-11-09).
+  if (kind === null) return w;
   let runs = [...w.runs];
   for (const run of runs.filter((x) => overlaps(runSpan(x), span) && x.kind === 'upper')) {
     runs = runs.map((x) => (x === run ? { ...x, kind: 'base_upper' as const, depth: rules.runDepths.base } : x));

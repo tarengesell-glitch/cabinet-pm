@@ -28,6 +28,16 @@
     { "id": "bar_sink", "name": "Bar sink", "label": "BAR SINK", "widths": ["24"], "comes_with_hood": false, "keep_clear_of_windows": false, "run_when_alone": "base", "centre_under_window": false, "adds_beside": null, "upper_above_depth": null },
     { "id": "dishwasher", "name": "Dishwasher", "label": "DW", "widths": ["24"], "comes_with_hood": false, "keep_clear_of_windows": false, "run_when_alone": "base", "centre_under_window": false, "adds_beside": null, "upper_above_depth": null },
     { "id": "microwave", "name": "Microwave", "label": "MW", "widths": ["24"], "comes_with_hood": false, "keep_clear_of_windows": false, "run_when_alone": "base", "centre_under_window": false, "adds_beside": null, "upper_above_depth": null },
-    { "id": "wine_fridge", "name": "Wine fridge", "label": "WINE", "widths": ["24"], "comes_with_hood": false, "keep_clear_of_windows": false, "run_when_alone": "base", "centre_under_window": false, "adds_beside": null, "upper_above_depth": null }
-  ]
+    { "id": "wine_fridge", "name": "Wine fridge", "label": "WINE", "widths": ["24"], "comes_with_hood": false, "keep_clear_of_windows": false, "run_when_alone": "base", "centre_under_window": false, "adds_beside": null, "upper_above_depth": null },
+    { "id": "vanity_sink", "name": "Vanity sink", "label": "SINK", "widths": ["20"], "comes_with_hood": false, "keep_clear_of_windows": false, "run_when_alone": "base", "centre_under_window": false, "adds_beside": null, "upper_above_depth": null },
+    { "id": "double_vanity_sink", "name": "Double vanity sink", "label": "2 SINKS", "widths": ["60"], "comes_with_hood": false, "keep_clear_of_windows": false, "run_when_alone": "base", "centre_under_window": false, "adds_beside": null, "upper_above_depth": null },
+    { "id": "toilet", "name": "Toilet", "label": "WC", "widths": ["30"], "comes_with_hood": false, "keep_clear_of_windows": false, "run_when_alone": null, "centre_under_window": false, "adds_beside": null, "upper_above_depth": null },
+    { "id": "tub", "name": "Tub", "label": "TUB", "widths": ["60"], "comes_with_hood": false, "keep_clear_of_windows": false, "run_when_alone": null, "centre_under_window": false, "adds_beside": null, "upper_above_depth": null },
+    { "id": "shower", "name": "Shower", "label": "SHOWER", "widths": ["48"], "comes_with_hood": false, "keep_clear_of_windows": false, "run_when_alone": null, "centre_under_window": false, "adds_beside": null, "upper_above_depth": null }
+  ],
+  "room_sets": {
+    "source": "Owner, 2026-11-09 (chat): bathroom-type rooms offer a toilet (30\" clear space), vanity sink (20\" bowl), double vanity sink (60\"), tub (60\") and shower (48\"); their runs start base-only, 21\" deep for the catalog's 20 3/4\" vanities. A run of \"run_when_alone\": null means the fixture stands on the floor, not on a cabinet run. Which rooms are bathrooms is the intake's own room-type grouping (\"bath\"); other room types use the kitchen set until the owner says otherwise (PROPOSED).",
+    "kitchen": { "tray": ["fridge", "range", "cooktop", "wall_oven", "sink", "bar_sink", "dishwasher", "microwave", "wine_fridge"], "default_run_kind": "base_upper", "base_depth": "24" },
+    "bath": { "tray": ["vanity_sink", "double_vanity_sink", "toilet", "tub", "shower"], "default_run_kind": "base", "base_depth": "21" }
+  }
 }

@@ -26,7 +26,7 @@ import {
   splitRun,
   upperPieces,
 } from '../model/layout';
-import { LAYOUT_RULES, readLayoutRules } from '../model/layout-rules';
+import { freestandingKinds, LAYOUT_RULES, readLayoutRules, rulesForRoom } from '../model/layout-rules';
 import raw from '../data/layout-rules.json';
 
 const IN = 64;
@@ -472,7 +472,41 @@ describe('the layout rules file', () => {
     expect(LAYOUT_RULES.openingClearance).toBe(3 * IN);
     expect(LAYOUT_RULES.cornerGaps).toEqual([3 * IN, 6 * IN, 9 * IN]);
     expect(LAYOUT_RULES.islandDepths).toEqual([15, 27, 36, 42, 48].map((x) => x * IN));
-    expect(LAYOUT_RULES.appliances.map((a) => a.id)).toEqual(['fridge', 'range', 'cooktop', 'wall_oven', 'sink', 'bar_sink', 'dishwasher', 'microwave', 'wine_fridge']);
+    expect(LAYOUT_RULES.appliances.map((a) => a.id)).toEqual([
+      'fridge', 'range', 'cooktop', 'wall_oven', 'sink', 'bar_sink', 'dishwasher', 'microwave', 'wine_fridge',
+      'vanity_sink', 'double_vanity_sink', 'toilet', 'tub', 'shower',
+    ]);
+    // The kitchen tray is today's list; every kind stays known in every room.
+    expect(LAYOUT_RULES.tray.map((a) => a.id)).toEqual(['fridge', 'range', 'cooktop', 'wall_oven', 'sink', 'bar_sink', 'dishwasher', 'microwave', 'wine_fridge']);
+  });
+
+  it('gives bathrooms their own fixtures, base-only runs 21" deep (owner, 2026-11-09)', () => {
+    const bath = rulesForRoom('bath');
+    expect(bath.tray.map((a) => [a.id, a.widths[0]! / IN])).toEqual([['vanity_sink', 20], ['double_vanity_sink', 60], ['toilet', 30], ['tub', 60], ['shower', 48]]);
+    expect(bath.defaultRunKind).toBe('base');
+    expect(bath.runDepths.base).toBe(21 * IN);
+    // Any other kind of room uses the kitchen's.
+    expect(rulesForRoom('laundry').tray).toEqual(LAYOUT_RULES.tray);
+    expect(rulesForRoom(null).runDepths.base).toBe(24 * IN);
+    expect(freestandingKinds()).toEqual(['toilet', 'tub', 'shower']);
+  });
+
+  it('a toilet stands on the floor: no run is made under it, and the checks do not ask for one', () => {
+    const k = bareKitchen();
+    const env = testEnv();
+    const d = unwrap(placeAppliance(k, env, 'toilet', wallOf(k, 'C').wall_id, 72 * IN, SNAP, rulesForRoom('bath')));
+    const c = wallOf(d, 'C');
+    expect(c.appliances.map((a) => a.kind)).toEqual(['toilet']);
+    expect(c.runs).toEqual([]);
+    expect(runChecks(RUN_CHECKS, d.job, { freestanding_kinds: freestandingKinds() }).issues).toEqual([]);
+    // Without the list, the check fails closed: every appliance needs a run.
+    expect(runChecks(RUN_CHECKS, d.job, {}).issues.map((i) => i.check_id)).toEqual(['layout.appliances-on-runs']);
+  });
+
+  it('a vanity sink on a bare bathroom wall gets a base-only run, 21" deep', () => {
+    const k = bareKitchen();
+    const d = unwrap(placeAppliance(k, testEnv(), 'vanity_sink', wallOf(k, 'C').wall_id, 72 * IN, SNAP, rulesForRoom('bath')));
+    expect(wallOf(d, 'C').runs.map((r) => [r.kind, r.depth / IN])).toEqual([['base', 21]]);
   });
 
   it('fails loudly on a bad width or a partner that is not on the list', () => {

@@ -8,7 +8,7 @@ import { useRef } from 'react';
 import { formatInches, type Length, type Result, type Room, type RunKind, wallLetter } from '@/core/index';
 import type { TypedSize } from '../model/editor';
 import { RUN_KIND_LABEL, cornerCabinets, findAppliance, findRun, insideSpan, runEnd } from '../model/layout';
-import { LAYOUT_RULES, applianceType } from '../model/layout-rules';
+import { LAYOUT_RULES, applianceType, type ApplianceType } from '../model/layout-rules';
 import { SizeField } from './SizeField';
 import { ApplianceIcon } from './applianceIcons';
 import type { LayoutEdit } from './layoutEdits';
@@ -197,6 +197,8 @@ const TRAY_DRAG_PX = 6;
  * events (not the browser's drag and drop), so it works the same with a mouse, a finger or a pen.
  */
 export function ApplianceTray(props: {
+  /** What this kind of room offers (owner, 2026-11-09: a bathroom offers its own fixtures). */
+  tray: readonly ApplianceType[];
   armed: string | null;
   canEdit: boolean;
   onArm: (kind: string | null) => void;
@@ -231,7 +233,7 @@ export function ApplianceTray(props: {
     <section className={s.stack} aria-label="Appliances">
       <p className={s.muted}>Drag one onto the plan, or tap it and then tap where it goes. Select one on the plan to change it.</p>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 6 }}>
-        {LAYOUT_RULES.appliances.map((a) => (
+        {props.tray.map((a) => (
           <button
             key={a.id}
             className={props.armed === a.id ? s.buttonActive : s.button}

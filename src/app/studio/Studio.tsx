@@ -58,6 +58,17 @@ function prefsOf(r: RoomHandover, intake: IntakeState | null): DraftPreferences 
   };
 }
 
+/**
+ * Which kind of room it is for the drawing's fixtures and depths (owner, 2026-11-09): rooms the
+ * design choices group as bathrooms (their "bath" insert set) are "bath"; every other room uses the
+ * kitchen's until the owner says otherwise.
+ */
+function roomSetOf(r: RoomHandover): string {
+  if (!INTAKE_DEFINITION.ok) return 'kitchen';
+  const type = INTAKE_DEFINITION.value.intake.room_types.types.find((t) => t.id === r.room_type);
+  return type?.inserts === 'bath' ? 'bath' : 'kitchen';
+}
+
 function readIntake(job: string | null): IntakeState | null {
   const loaded = loadIntakeState(job);
   return loaded.kind === 'found' ? loaded.state : null;
@@ -186,7 +197,7 @@ export function Studio({ user, saveStatus, client }: { user: User; saveStatus: R
                 The {current.name.toLowerCase()}&apos;s drawing can&apos;t be read: {drawingProblem.reason}
               </p>
             )}
-            <RoomCapture key={current.room_id} user={user} studio={{ key: current.room_id, name: current.name, ceiling, onChange: bump }} />
+            <RoomCapture key={current.room_id} user={user} studio={{ key: current.room_id, name: current.name, ceiling, onChange: bump, roomSet: roomSetOf(current) }} />
           </>
         )}
         {stage === 'ai' && (

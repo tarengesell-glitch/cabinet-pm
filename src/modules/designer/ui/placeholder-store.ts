@@ -4,7 +4,7 @@
  * placeholder AI step writes its cabinets into the master copy here, as placed items (schema 2).
  * Every failure is returned with its reason (rule 7).
  */
-import { type Result, type Room } from '@/core/index';
+import { type Job, type Result, type Room } from '@/core/index';
 import { placeholderItems } from '../model/cabinets';
 import { loadJob, room as roomOf, upgradeStoredDraft, type Draft } from '../model/editor';
 import { draftPlaceholder, type DraftPreferences } from '../model/placeholder-draft';
@@ -79,6 +79,20 @@ export function draftRoom(roomKey: string, prefs: DraftPreferences, userId: stri
 export function placeholderNotes(draft: Draft): string[] {
   const last = [...draft.job.history].reverse().find((h) => h.summary.startsWith(PLACEHOLDER));
   return last ? last.summary.split(' · ').slice(1) : [];
+}
+
+/**
+ * A room's master copy as kept in this browser, brought up to date and checked exactly as the room
+ * drawing does when it opens it (older saves are upgraded), for saving it elsewhere: the shared
+ * database. A copy that can't be read or isn't valid is a problem with its reason, never skipped.
+ */
+export function roomMasterCopy(roomKey: string): { readonly kind: 'none' } | { readonly kind: 'found'; readonly job: Job } | { readonly kind: 'problem'; readonly reason: string } {
+  const stored = readStored(storageKey(roomKey));
+  if (stored.kind === 'none') return { kind: 'none' };
+  if (stored.kind === 'unavailable' || stored.kind === 'unreadable') return { kind: 'problem', reason: `The room’s drawing can’t be read (${stored.reason}).` };
+  const upgraded = upgradeStoredDraft(stored.data);
+  const loaded = loadJob(upgraded.job, upgraded.wallDefaults);
+  return loaded.ok ? { kind: 'found', job: loaded.value.draft.job } : { kind: 'problem', reason: `The room’s drawing in this browser can’t be used: ${loaded.reason}` };
 }
 
 /** A room's master copy as kept, for saving a whole job as a test start (the studio's Test data). */

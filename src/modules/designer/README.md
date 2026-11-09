@@ -100,6 +100,7 @@ The controls and behaviour are unchanged. The look follows the owner's Kitchen S
 ## What the preview does not do yet
 - **The browser keeps the working copy** (`localStorage`). Inside the design studio, the app saves it to the shared database as you work (2026-11-09, `src/app/sync/`); the standalone room preview (`/rooms/preview`) still keeps it in this browser only, and says so. If the browser won't store it, a red banner says the work isn't being kept.
 - **Who changed what:** `saveRoom` and `draftRoom` take the signed-in person's ID for the room's history (the preview user without the database).
+- **`roomMasterCopy(roomKey)`** (contract): a room's master copy as kept in this browser, upgraded and checked exactly as the room drawing does when it opens it. The studio saves this to the shared database, so a room drawn by an older version goes up in today's format (found on the live site, 2026-11-09).
 - **No sign-in.** The user and shop are **mocked** (`PREVIEW_USER`, `PREVIEW_SHOP` in `src/platform/`) and labelled on screen. Permissions are still checked with `can()`.
 - **No alerts table yet.** Refusals show next to the field; they are not written to an alerts table.
 - **No cabinets yet** (step 1b-items). Obstacles from loaded files are shown but can't be edited, and you can't move corners by dragging.

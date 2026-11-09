@@ -10,3 +10,4 @@ export * from './layout/wall-checks';
 export * from './layout/run-checks';
 export * as examples from './examples/rooms';
 export * from './layout/item-checks';
+export * from './layout/room-geometry';

@@ -32,6 +32,15 @@ Core never throws for bad input. Anything that can be refused returns `{ ok: tru
 
   The tolerance, grid and step are UI settings that the caller passes in.
 
+## Room geometry (`layout/room-geometry.ts`, 2026-11-09)
+Where cabinets can go along a room's walls, shared by the room drawing and the AI designer so they always agree (BUILD_PLAN 6, step 2). Moved from the designer unchanged; the designer's own tests still pass on it.
+- `insideSpan`: the stretch of a wall cabinets can stand along, between the inside corners (a floating wall's whole length). `wallLength`, `neighbours`, `direction`, `insideNormal`, `halfThickness`, `meetSquare`.
+- `cornerCabinets`: where runs on two walls meet, with the depths of the base and upper overlap. `runAtStart`, `runAtEnd`, `upperDepth`.
+- `upperPieces`: where the uppers on a base + upper run go, skipping windows and anything that gets its own upper (a fridge).
+- `doorwayZones`, `windowZones`, `windowSpans`, `subtract`, `runEnd`, `applianceEnd`, `hasBase`, `hasUpper`.
+
+Core holds no business values (rule 6): the few numbers these need (clearance kept from doors and windows, the upper band's depth, the shortest run, which appliances get their own upper) are passed in by the caller from its data. Today that is the designer's `data/layout-rules.json`; the AI designer gets the same values through the app.
+
 ## The master copy (`schema/master-copy.ts`)
 Job, Room, Wall, Opening (window, door or passthrough), Obstacle, the rough layout on each wall (cabinet runs and appliance placements), and since **schema version 2** (2026-11-08) the placed cabinets and selections. The format is still a draft, saved only in the preview's browser storage.
 - Every object is strict. An unknown or missing field is an error, never a default. "Not known" is an explicit `null`.

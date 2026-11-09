@@ -157,12 +157,13 @@ From `docs/cabinet-vision/DESK_RESEARCH.md`. Only samples from the shop, the ins
 - **CV-5** Where "Offset from Wall Start" is measured from (centre line, inside face, or the inside corner), and whether wall points are on the centre line or a face.
 - **CV-6** Whether a cabinet can stand off the wall (our setback), and the field for it.
 - **CV-7** What the wall face suffix means, and how a cabinet on the far side of a wall is written.
-- **CV-8** Units and decimals: decimal inches (exact for us) or millimetres (needs a rounding rule).
+- **CV-8** Units and decimals. *Narrowed 2026-11-09 (the official ORDX help page, pasted by the owner):* shapes are written with `unit="mm"`, and part values read like mm. Writing mm is exact for us (1/64" = 0.396875 mm exactly), with six decimal places. Still open: whether room, wall and cabinet values are mm too, and how many decimals are read.
 - **CV-9** How islands and peninsulas are written.
 - **CV-10** How corner cabinets are positioned.
 - **CV-11** Whether Elevation includes the toe kick.
 - **CV-12** Whether the format differs between Cabinet Vision versions, and which version the shop runs (spec Q1).
 - Also: the `cabinet-vision-ucs` repo may already hold some of this. This session wasn't allowed to open it.
+- **2026-11-09:** the owner pasted the official "ORDX Format" help page (Cabinet Vision 2026). It covers part overrides, shapes and parameter types, and points to the sample file in the install (`\Support\Sample ORDX\`). It doesn't cover rooms, walls or cabinet placement, so CV-3 to CV-7 and CV-9 to CV-11 stay open. The owner will send more ORDX files. Recorded in `docs/cabinet-vision/DESK_RESEARCH.md`.
 
 ### 2026-11-08: Placeholder office screens, AI design and customize (owner: "add in placeholder Today, Tasks, Clients, and a placeholder AI design animation (with no actual AI design) which then once it's done gets us into the cabinet customization screens")
 - **Today, Tasks and Clients** are built as in the Kitchen Studio prototype, inside its app frame (white top bar, side menu that folds). They are **placeholders on demo data** (`src/app/demo-data.ts`, the prototype's made-up clients, calls and tasks), labelled on screen. Ticked and added tasks last only until the page is closed. Joining a call is mocked and says so. The start page (`/`) is now Today.

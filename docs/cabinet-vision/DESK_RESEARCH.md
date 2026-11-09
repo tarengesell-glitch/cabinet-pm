@@ -23,6 +23,64 @@
 
 Sources (titles as found): Hexagon "CABINET VISION Design"; content.planit.com CV help "ORD File Format" and "ORDX Format"; planitcanada.ca "The Smart Guide to CABINET VISION DESIGN" (2022); articles.allmoxy.com "Creating Cabinet Vision Export"; imapper.tech "Cabinet Vision" integration; craftsmanengineering.com "Importing ORDX files" (not readable).
 
+## The official "ORDX Format" help page (pasted by the owner, 2026-11-09)
+
+The owner pasted the page from the Hexagon Documentation Center, **CABINET VISION 2026 – Online Help (HTML)**, Room Level › Ribbonbar › Utilities Tab › Export ORDX › **ORDX Format** (updated Aug 14, 2026). The page notes that after September 30, 2026 this documentation moves to https://documentation.cadence.com/msc/home.html. This is the vendor's own text, so it replaces S8 to S10 above (which were search summaries of an older copy). It is documentation, not a sample file: element names below are as the page prints them.
+
+**What the page says, in its own words where quoted:**
+- "In general the ORDX format follows the formatting of Properties throughout a Job. Unlike an ORD file which is restricted to one Room the ORDX can have multiple Rooms. The ORDX can also define both Face and Interior Sectioning per Assembly which also can not be achieved via the ORD file."
+- "We have included a sample ORDX file, which touches most areas of a Job, in the install. It is located in the `\Support\Sample ORDX\` Folder."
+- "As the format matures we'll be adding more documentation to this topic."
+
+**Parts.** "There is a `PartOverrides` section in the ORDX. It uses the part path from the Object Tree to identify the part e.g. `Cab.interior.AS@2`. The standard 9 parameters are written out as well as other modified parameters which will be in a `Parameter` section." The page's example:
+
+```xml
+<PartOverrides>
+   <PartOverride>
+      <Name>Cab.Case.LF</Name>
+      <DZ>50</DZ>
+   </PartOverride>
+   <PartOverride>
+      <Name>Cab.Case.TO</Name>
+      <Y>760</Y>
+      <DZ>20</DZ>
+      <AX>-65</AX>
+      <Parameter>
+         <Name>GOAT</Name>
+         <Type>M</Type>
+         <Value>0.925</Value>
+      </Parameter>
+   </PartOverride>
+   <PartOverride>
+      <Name>Cab.Interior.AS@2</Name>
+      <DZ>35</DZ>
+   </PartOverride>
+</PartOverrides>
+```
+
+**Shapes.** A `Shape` can sit in a `PartOverride`, and in the `AdditionalParts` section for manually added parts. It has an `Axis` (`XY` is the default; `XZ` or `YZ`) and a `template` (attributes `firstid` and `unit`, e.g. `unit="mm"`) made of entities, "either lines or arcs". A line is `<entity id="1" type="line2d">` with `<Begin>` and `<End>`, each with `<x>` and `<y>`; "Everything is assumed to be Zero", so a line from (0,0) to (2,0) needs only `<End><x>2</x></End>`. Any entity can carry `<parameters><parameter name="…"><value type="4">1</value></parameter></parameters>`. "It is probably best to output some cabinets / parts with various shapes to get a handle on the output."
+
+(The page's own triangle example has typing slips: curly quotes, `</ Begin >` with spaces, a closing `<entity>` without the slash, and two entities both with `id="2"`. Real files must be read to see the true form.)
+
+**Parameter value types** (the `type` number):
+
+| ID | Name | ID | Name |
+|---|---|---|---|
+| 1 | Measurement | 7 | PartID |
+| 2 | Degrees | 8 | Text |
+| 3 | Radians | 9 | Currency |
+| 4 | Integer | 10 | Unsigned |
+| 5 | Boolean | 11 | GUID |
+| 6 | Decimal | 12 | ShapeID |
+
+The part example also shows a `<Type>M</Type>` letter code beside a numeric value (0.925), which the page doesn't explain.
+
+**What it means for us:**
+- **The "standard 9 parameters"** look like a position, a size and a rotation per part (`X`, `Y`, `Z`, `DX`, `DY`, `DZ`, `AX`, `AY`, `AZ`; the example uses `Y`, `DZ` and `AX`). That is unverified: the page names only the three in its example.
+- **Units.** Shapes say `unit="mm"`, and the part values (`DZ` 50, `Y` 760) read like millimetres. **Writing millimetres is still exact for us:** an inch is exactly 25.4 mm, so 1/64" is exactly 0.396875 mm, and every master-copy length is a millimetre decimal with at most six places. Only *reading* millimetres back needs rounding (U-2), and the writer must use enough decimals (CV-8, narrowed).
+- **Part overrides are for engineering-level changes** (a part's size or angle inside a cabinet). Our master copy does not engineer cabinets (BUILD_SPEC section 1), so the writer should normally write none. Any that are ever needed must come from catalog-defined modifications, never free-form (rule 6).
+- **Not on the page:** the job, room, wall and cabinet elements, how a cabinet is positioned in the room, its width, height and depth, its catalog name, and options. Those still need the sample ORDX and the shop's exports (CV-3 to CV-7, CV-9 to CV-11).
+
 ## What this means for the master copy
 
 The writer can only be reliable if every value it needs is already in the master copy, exact, in the same terms the import file uses. So the master copy (schema 2) stores:
@@ -43,7 +101,7 @@ The writer can only be reliable if every value it needs is already in the master
 | Options (hinge, door style…) | `job_selections` → `room_selections` → `item_selections`, resolved in that order | Codes are ours; the adapter maps them |
 | Several rooms (ORDX, S8) | a job holds several rooms | Yes |
 
-**Decimals are exact.** Every 1/64" value is a decimal with at most six places (1/64 = 0.015625), so a file written in decimal inches never needs rounding. Millimetres would (U-2): if the file is in mm, the writer must refuse or follow an owner rule (CV-8).
+**Decimals are exact.** Every 1/64" value is a decimal with at most six places in inches (1/64" = 0.015625") and in millimetres (1/64" = 0.396875 mm, since an inch is exactly 25.4 mm). So a file written in either unit never needs rounding, as long as it takes six decimals. Reading millimetres back does (U-2) (CV-8).
 
 **Islands and peninsulas** stand on floating walls (A-21): a wall line with no thickness, with cabinets on either side. If the import file has no such wall, the writer would place island cabinets another way (CV-9).
 
@@ -56,7 +114,7 @@ The writer can only be reliable if every value it needs is already in the master
 - **CV-5** Where "Offset from Wall Start" is measured from: the wall's start point on its centre line, on its inside face, or the inside corner where it meets the previous wall. And whether wall points are on the centre line or a face.
 - **CV-6** Is there a field for a cabinet standing off the wall (our setback), and what is it called?
 - **CV-7** What the wall face suffix means exactly, and how a cabinet on the far side of a wall is written.
-- **CV-8** The file's units and decimals: decimal inches (exact for us), or millimetres (needs a rounding rule).
+- **CV-8** The file's units and decimals. *Narrowed 2026-11-09:* shapes use `unit="mm"` and part values look like mm. Writing mm is exact for us (1/64" = 0.396875 mm), given six decimal places; still to confirm: whether room, wall and cabinet values are mm too, how many decimals Cabinet Vision reads, and whether a unit is set per file.
 - **CV-9** How islands and peninsulas are written: an island wall, a free-standing cabinet with room coordinates and a rotation, or something else.
 - **CV-10** How corner cabinets are positioned: on which wall, and from which corner.
 - **CV-11** Is Elevation measured to the bottom of the box including the toe kick, or above it?

@@ -42,7 +42,7 @@ import {
   type Timeline,
 } from '../model/editor';
 import { findAppliance, findRun } from '../model/layout';
-import { LAYOUT_RULES } from '../model/layout-rules';
+import { freestandingKinds, LAYOUT_RULES, rulesForRoom } from '../model/layout-rules';
 import { ApplianceTray, RunsFrame } from './LayoutPanels';
 import { OpeningIcon } from './applianceIcons';
 import { STEP_LABEL, StepList, type StepId } from './Steps';
@@ -116,11 +116,17 @@ export interface StudioRoom {
   readonly ceiling: Length | null;
   /** Called after every saved change, so the studio can update its room list. */
   readonly onChange?: () => void;
+  /**
+   * Which kind of room it is, for its fixtures and cabinet depths (owner, 2026-11-09): "bath" for
+   * bathroom-type rooms, "kitchen" otherwise. From the design choices, through the app.
+   */
+  readonly roomSet?: string;
 }
 
 export function RoomCapture({ user, studio }: { user: User; studio?: StudioRoom }) {
   const key = storageKey(studio?.key ?? null);
   const onStudioChange = studio?.onChange;
+  const rules = useMemo(() => rulesForRoom(studio?.roomSet ?? null), [studio?.roomSet]);
   /** A studio room with no drawing yet starts at once, from its name and rough ceiling height. */
   const startWith = studio && studio.ceiling !== null ? { name: studio.name, ceiling: studio.ceiling } : null;
   const startRef = useRef(startWith);
@@ -205,7 +211,7 @@ export function RoomCapture({ user, studio }: { user: User; studio?: StudioRoom 
     const r = JobSchema.safeParse(draft.job);
     return r.success ? [] : r.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`);
   }, [draft]);
-  const checkRun = useMemo(() => (draft && formatErrors.length === 0 ? runChecks([...WALL_CHECKS, ...RUN_CHECKS, ...ITEM_CHECKS], draft.job, {}) : null), [draft, formatErrors]);
+  const checkRun = useMemo(() => (draft && formatErrors.length === 0 ? runChecks([...WALL_CHECKS, ...RUN_CHECKS, ...ITEM_CHECKS], draft.job, { freestanding_kinds: freestandingKinds() }) : null), [draft, formatErrors]);
   const issues = checkRun?.issues ?? [];
 
   const doUndo = useCallback(() => setTimeline((t) => (t ? undo(t) : t)), []);
@@ -219,9 +225,9 @@ export function RoomCapture({ user, studio }: { user: User; studio?: StudioRoom 
       selection.kind === 'opening'
         ? apply(deleteOpening(draft, env, selection.id))
         : selection.kind === 'runs'
-          ? apply(applyLayoutEdit(draft, env, { kind: 'delete-runs', runIds: selection.ids }))
+          ? apply(applyLayoutEdit(draft, env, { kind: 'delete-runs', runIds: selection.ids }, rules))
           : selection.kind === 'appliance'
-            ? apply(applyLayoutEdit(draft, env, { kind: 'delete-appliances', placementIds: [selection.id] }))
+            ? apply(applyLayoutEdit(draft, env, { kind: 'delete-appliances', placementIds: [selection.id] }, rules))
             : apply(deleteWalls(draft, env, selectedWallIds(selection)));
     if (r.ok) setSelection(null);
     else setMessage({ kind: 'error', text: r.reason });
@@ -327,7 +333,7 @@ export function RoomCapture({ user, studio }: { user: User; studio?: StudioRoom 
    */
   const layoutEdit = (edit: LayoutEdit, done: boolean): Result<Change> | null => {
     if (!draft) return null;
-    const r = applyLayoutEdit(draft, env, edit);
+    const r = applyLayoutEdit(draft, env, edit, rules);
     if (!done) {
       if (r.ok) setDragPreview(r.value.draft);
       return r;
@@ -683,6 +689,7 @@ export function RoomCapture({ user, studio }: { user: User; studio?: StudioRoom 
                   return (
                     <>
                       <ApplianceTray
+                        tray={rules.tray}
                         armed={armed}
                         canEdit={canEdit}
                         onArm={(k) => (setArmed(k), setSelection(null))}

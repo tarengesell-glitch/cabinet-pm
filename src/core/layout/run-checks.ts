@@ -145,11 +145,17 @@ export const appliancesOverlap: Check = {
 export const appliancesOnRuns: Check = {
   id: 'layout.appliances-on-runs',
   layer: 'layout',
-  description: 'Every appliance stands within a cabinet run',
-  run(job) {
+  description: 'Every appliance stands within a cabinet run (fixtures that stand on the floor excepted)',
+  run(job, context) {
     const issues: Issue[] = [];
+    // Kinds that stand on the floor, not on a cabinet run (a toilet, tub or shower; owner,
+    // 2026-11-09), named by whoever runs the check from its data. Without the list, every
+    // appliance needs a run: it fails closed.
+    const listed = context['freestanding_kinds'];
+    const freestanding = new Set(Array.isArray(listed) ? listed.filter((k): k is string => typeof k === 'string') : []);
     eachWall(job, (room, wall, w) => {
       wall.appliances.forEach((a, i) => {
+        if (freestanding.has(a.kind)) return;
         const start = a.offset;
         const end = a.offset + a.width.value;
         // Touching runs count as one stretch, so an appliance may sit across a split.

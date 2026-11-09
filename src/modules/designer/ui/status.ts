@@ -5,6 +5,7 @@
  */
 import { RUN_CHECKS, WALL_CHECKS, runChecks } from '@/core/index';
 import { loadJob, room as roomOf, upgradeStoredDraft } from '../model/editor';
+import { freestandingKinds } from '../model/layout-rules';
 import { readStored, storageKey } from './storage';
 
 export type RoomDrawingStatus =
@@ -20,7 +21,7 @@ export function roomDrawingStatus(roomKey: string): RoomDrawingStatus {
   const loaded = loadJob(upgraded.job, upgraded.wallDefaults);
   if (!loaded.ok) return { kind: 'problem', reason: loaded.reason };
   const room = roomOf(loaded.value.draft);
-  const result = runChecks([...WALL_CHECKS, ...RUN_CHECKS], loaded.value.draft.job, {});
+  const result = runChecks([...WALL_CHECKS, ...RUN_CHECKS], loaded.value.draft.job, { freestanding_kinds: freestandingKinds() });
   return {
     kind: 'drawn',
     walls: room.walls.filter((w) => w.kind === 'room').length,

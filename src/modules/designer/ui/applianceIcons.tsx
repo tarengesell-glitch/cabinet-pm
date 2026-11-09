@@ -75,6 +75,40 @@ const ICONS: Readonly<Record<string, ReactNode>> = {
       <line x1="12" y1="19" x2="22" y2="19" />
     </>
   ),
+  // Bathroom fixtures (owner, 2026-11-09), drawn in the same line style.
+  vanity_sink: (
+    <>
+      <rect x="5" y="7" width="24" height="14" rx="1.5" />
+      <ellipse cx="17" cy="14" rx="6" ry="4" />
+    </>
+  ),
+  double_vanity_sink: (
+    <>
+      <rect x="2" y="7" width="30" height="14" rx="1.5" />
+      <ellipse cx="10" cy="14" rx="5" ry="3.5" />
+      <ellipse cx="24" cy="14" rx="5" ry="3.5" />
+    </>
+  ),
+  toilet: (
+    <>
+      <rect x="10" y="3" width="14" height="6" rx="1" />
+      <ellipse cx="17" cy="18" rx="6" ry="7" />
+    </>
+  ),
+  tub: (
+    <>
+      <rect x="2" y="7" width="30" height="15" rx="4" />
+      <rect x="5" y="10" width="24" height="9" rx="3" />
+      <circle cx="8" cy="14.5" r="1" />
+    </>
+  ),
+  shower: (
+    <>
+      <rect x="5" y="4" width="24" height="20" rx="1" />
+      <circle cx="17" cy="14" r="1.5" />
+      <line x1="5" y1="4" x2="29" y2="24" />
+    </>
+  ),
 };
 
 /** The icon for an appliance type, or null when there is none. */

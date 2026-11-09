@@ -170,6 +170,11 @@ The owner tried the studio on a real job and asked for seven changes. The answer
   - the tray offers a toilet (30"), a vanity sink (20"), a double vanity sink (60"), a tub (60") and a shower (48");
   - runs start base-only and 21" deep, for the 20 3/4" vanities.
 
+  *Built:*
+  - the studio tells the drawing which kind of room it is, from the design choices' own bathroom grouping;
+  - a toilet, tub or shower stands on the floor: no run is made under it, and the "appliances on runs" check leaves it out;
+  - **PROPOSED:** other room types use the kitchen's tray until the owner says otherwise.
+
  (owner asked to add a real client)
 - **The repository is public on GitHub, and the site's code reaches every visitor's browser.** So real client details (names, emails, phones, addresses) are **never** written in code, commits, pull requests or docs. That includes the demo-client file. They live only in the shared database (`customers`, owned by projects), where only signed-in staff can read them.
 - **The table:** `customers` (`supabase/migrations/20261109000004_customers.sql`).

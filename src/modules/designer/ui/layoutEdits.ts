@@ -4,6 +4,7 @@
  */
 import type { Length, Point, Result, RunKind } from '@/core/index';
 import { deleteWalls, room as roomOf, type Change, type Draft, type Env } from '../model/editor';
+import { LAYOUT_RULES, type LayoutRules } from '../model/layout-rules';
 import {
   addIsland,
   addIslandOnWall,
@@ -52,26 +53,27 @@ export type LayoutEdit =
   | { kind: 'appliance-flip'; placementId: string }
   | { kind: 'delete-appliances'; placementIds: readonly string[] };
 
-export function applyLayoutEdit(draft: Draft, env: Env, edit: LayoutEdit): Result<Change> {
+/** `rules`: the layout rules for this kind of room (its tray, how runs start and how deep; owner, 2026-11-09). */
+export function applyLayoutEdit(draft: Draft, env: Env, edit: LayoutEdit, rules: LayoutRules = LAYOUT_RULES): Result<Change> {
   switch (edit.kind) {
     case 'fill':
-      return fillWall(draft, env, edit.wallId);
+      return fillWall(draft, env, edit.wallId, rules);
     case 'draw':
-      return drawRun(draft, env, edit.wallId, edit.from, edit.to);
+      return drawRun(draft, env, edit.wallId, edit.from, edit.to, rules);
     case 'run-end':
-      return setRunEnd(draft, env, edit.runId, edit.end, edit.at);
+      return setRunEnd(draft, env, edit.runId, edit.end, edit.at, rules);
     case 'run-move':
-      return moveRun(draft, env, edit.runId, edit.offset);
+      return moveRun(draft, env, edit.runId, edit.offset, rules);
     case 'run-length':
-      return setRunLength(draft, env, edit.runId, edit.length);
+      return setRunLength(draft, env, edit.runId, edit.length, rules);
     case 'joint':
-      return moveJoint(draft, env, edit.leftId, edit.rightId, edit.at);
+      return moveJoint(draft, env, edit.leftId, edit.rightId, edit.at, rules);
     case 'run-depth':
       return setRunDepth(draft, env, edit.runIds, edit.depth);
     case 'run-kind':
-      return setRunKind(draft, env, edit.runIds, edit.runKind);
+      return setRunKind(draft, env, edit.runIds, edit.runKind, rules);
     case 'split':
-      return splitRun(draft, env, edit.runId);
+      return splitRun(draft, env, edit.runId, rules);
     case 'delete-runs': {
       // Deleting every run on an island deletes the island (its floating wall) too.
       const r = roomOf(draft);
@@ -93,16 +95,16 @@ export function applyLayoutEdit(draft: Draft, env: Env, edit: LayoutEdit): Resul
     case 'island-resize':
       return resizeIsland(draft, env, edit.wallId, edit.length, edit.depth);
     case 'appliance-place':
-      return placeAppliance(draft, env, edit.applianceKind, edit.wallId, edit.centre, { windowSnap: WINDOW_SNAP });
+      return placeAppliance(draft, env, edit.applianceKind, edit.wallId, edit.centre, { windowSnap: WINDOW_SNAP }, rules);
     case 'appliance-move':
       return moveAppliance(draft, env, edit.placementId, edit.wallId, edit.centre, {
         windowSnap: WINDOW_SNAP,
         ...(edit.centreSnap !== undefined ? { centreSnap: edit.centreSnap } : {}),
-      });
+      }, rules);
     case 'appliance-width':
-      return setApplianceWidth(draft, env, edit.placementId, edit.width);
+      return setApplianceWidth(draft, env, edit.placementId, edit.width, rules);
     case 'appliance-flip':
-      return flipPartner(draft, env, edit.placementId);
+      return flipPartner(draft, env, edit.placementId, rules);
     case 'delete-appliances':
       return deleteAppliances(draft, env, edit.placementIds);
   }

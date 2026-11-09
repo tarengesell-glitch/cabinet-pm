@@ -90,11 +90,65 @@ Core schema 2 now has all of this (DECISIONS "Placed cabinets in the master copy
 - **Status `ai_draft` and a version saved with origin `ai`,** which the master copy store (platform) provides.
 - **Item layout checks** (overlap, past a wall's end, blocking an opening) and the catalog's buildability checks run over every cabinet, so a draft passes the same validation as a human design and a failed draft is kept with its issues.
 
+## The layout builder (`model/engine/`, 2026-11-09)
+`draftLayout({ job, roomId, catalog, designRules, layout, answers, cabinetTop })` fills one room with real catalog cabinets at exact wall-referenced positions. It is the owner's "fast fill for the whole project". It is ordinary code with no AI: the same input always gives the same options, in the same order, with the same IDs.
+
+**What is locked:** walls, openings, cabinet runs and every design choice. Appliances may move only:
+- at most 24" (`data/draft-rules.json`, owner 2026-11-09);
+- along their own wall;
+- for a reason, which is recorded with the move.
+
+There are two reasons today: centring the sink under its window (PREF-023), and the least move that clears a fixed cabinet, such as a corner cabinet (function first, PRIN-011).
+
+**How a room is filled (fixed things first, PREF-015):**
+1. **Corners.** Where runs meet, the corner cabinet goes on the wall whose run ends there; the next wall starts after its leg. The upper corner works the same way.
+2. **Sink and dishwasher.** The sink base is centred on the sink. The dishwasher opening touches it (HARD-005). A dedicated garbage pull-out, if asked for, goes on the sink's other side (PREF-030). A cooktop gets a base under it, a wall oven its tall cabinet, and other appliances keep their space open.
+3. **Ends.** A wall end gets a ¾" filler. An open end keeps ¾" for an applied finished end, set on the cabinet's end choice (CB-FACT-10, CB-FACT-25).
+4. **The rest.** The rest is divided into cabinets the catalog accepts (`split.ts`), in one of five ways: equal; full 32" plus one; even with wider ends; as many 30" drawer banks as fit; or one cabinet up to 38". If a way doesn't fit a stretch, the next is tried.
+5. **Base types.** These follow the client's drawer level, in the intake's own words. Four-drawer banks go beside the cooktop first (PREF-007), then by the sink (PREF-006).
+6. **Uppers.** They:
+   - skip windows;
+   - leave the hood space exactly over the cooktop, so it is centred (HARD-007);
+   - put the cabinet over the fridge centred on it (HARD-006);
+   - can line up with the bases below, or be divided on their own;
+   - hang from the client's cabinet height, never above the ceiling.
+
+**Options.** These are every combination of:
+- sink as drawn, or centred under the window;
+- the five ways of dividing;
+- 30" or 36" uppers;
+- uppers matched to the bases, or not.
+
+Identical results are merged. Each option has:
+- the room with its cabinets (origin `ai`, not approved);
+- its appliance moves with their reasons;
+- every issue: Core's wall, run and cabinet checks, the catalog's buildability checks, the shop's design-rule checks, and anything the builder couldn't do;
+- a **scorecard**: each rule it can judge (PREF-001, 002, 003, 006, 007, 019, 020, 021, 023, 030, and the client's drawer level), met or broken, in the owner's strength words.
+
+Options are ranked by the PROPOSED ladder: fewest blocks, then the client's choices, then the fewest broken preferences of the strongest wording.
+
+**What it can't do yet, said on every draft it affects:**
+- **Door style and hinge side.** These stay missing until the intake's choices are mapped (owner, 2026-11-09) and CAT-2 is answered.
+- **Sizes not known yet (CAT-1).** Fillers are ¾" only and talls are 30" × 84" only, so small leftovers and short pantry runs can't be filled. Drawer banks are 30" only.
+- **The cabinet over the fridge** is 12" deep, not 24" (AD-1).
+- **Islands** get cabinets on one side, backs on the island's line. Back and side panels are not drawn yet.
+- **A "base, upper + pantry" run** is drafted as base + upper.
+
+Tests: `__tests__/engine.test.ts` and `split.test.ts`. They check, on the example kitchen and on a test wall:
+- the same input gives the same output;
+- every option passes every layout check;
+- the dishwasher always touches the sink;
+- moves stay along the wall, at most 24";
+- the sink is centred under the window;
+- the hood and fridge spaces are kept;
+- the corner and the ends are right;
+- the builder refuses what it should.
+
 ## Next (the plan approved 2026-11-09)
 0. **The shared database first:** the master copy store on Supabase, so live work doesn't live only in a browser (platform).
 1. ~~Read the real intake (IK-15).~~ Done 2026-11-09.
 2. ~~Move the room geometry helpers to Core.~~ Done 2026-11-09: `src/core/layout/room-geometry.ts` (inside spans, corners, where uppers go), with its numbers passed in.
-3. **The layout engine** (ordinary code, no AI): fixed things first, purposeful appliance moves of at most 24", gaps filled with widths the catalog accepts, and a scorecard of rules met and broken for each option.
+3. ~~The layout builder.~~ Built 2026-11-09: see "The layout builder" below.
 4. **The AI judge:** a server function (Netlify Functions) that picks between options, checks requirements and writes the notes. It never places a cabinet.
 5. **Draft runs and the studio:** saved as a master copy version (origin `ai`), replacing the placeholder.
 

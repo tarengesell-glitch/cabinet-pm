@@ -8,7 +8,7 @@ import { useRef } from 'react';
 import { formatInches, type Length, type Result, type Room, type RunKind, wallLetter } from '@/core/index';
 import type { TypedSize } from '../model/editor';
 import { RUN_KIND_LABEL, cornerCabinets, findAppliance, findRun, insideSpan, runEnd } from '../model/layout';
-import { LAYOUT_RULES, applianceType, type ApplianceType } from '../model/layout-rules';
+import { LAYOUT_RULES, applianceType, overOf, type ApplianceType } from '../model/layout-rules';
 import { SizeField } from './SizeField';
 import { ApplianceIcon } from './applianceIcons';
 import type { LayoutEdit } from './layoutEdits';
@@ -252,7 +252,7 @@ export function ApplianceTray(props: {
           </button>
         ))}
       </div>
-      <p className={s.muted}>Ranges and cooktops come with a hood. A sink dropped near a window centres under it, and a dishwasher is added beside it.</p>
+      <p className={s.muted}>Ranges and cooktops start with an appliance hood over them; tap one to choose a millwork hood or a cabinet instead. A sink dropped near a window centres under it, and a dishwasher is added beside it.</p>
     </section>
   );
 }
@@ -270,6 +270,7 @@ export function AppliancePopover(props: {
   if (!found) return null;
   const { appliance: a, wall } = found;
   const type = applianceType(LAYOUT_RULES, a.kind);
+  const over = overOf(a);
   return (
     <PopupFrame label={type?.name ?? a.kind} at={{ x: Math.max(6, props.at.x - 110), y: Math.max(6, props.at.y) }} width={220} onClose={props.onClose}>
       <strong style={{ fontSize: 13 }}>{type?.name ?? `Unknown appliance "${a.kind}"`}</strong>
@@ -292,7 +293,24 @@ export function AppliancePopover(props: {
           {formatInches(a.width.value)} wide{type?.upperAboveDepth && wall.kind === 'room' ? `, with a ${formatInches(type.upperAboveDepth)}-deep upper above` : ''}
         </span>
       )}
-      {type?.comesWithHood && <span className={s.muted}>Comes with a matching hood.</span>}
+      {over && (
+        <>
+          <span className={s.muted}>Over it</span>
+          <div className={s.row} role="group" aria-label={`Over the ${type?.name.toLowerCase() ?? 'appliance'}`}>
+            {LAYOUT_RULES.overCooking.choices.map((c) => (
+              <button
+                key={c.id}
+                className={over === c.id ? s.buttonActive : s.button}
+                aria-pressed={over === c.id}
+                disabled={!props.canEdit || over === c.id}
+                onClick={() => props.onEdit({ kind: 'appliance-above', placementId: a.placement_id, above: c.id })}
+              >
+                {c.name}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
       {a.paired_with && (
         <button className={s.button} disabled={!props.canEdit} onClick={() => props.onEdit({ kind: 'appliance-flip', placementId: a.placement_id })}>
           Move to other side of sink

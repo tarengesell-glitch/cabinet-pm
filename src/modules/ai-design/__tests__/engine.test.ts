@@ -140,6 +140,28 @@ describe('the layout builder', () => {
     }
   });
 
+  it('follows what the designer chose over the range: a cabinet centred on it, or a millwork hood left open (owner, 2026-11-09)', () => {
+    const withAbove = (above: 'cabinet' | 'millwork_hood'): Job => {
+      const job = wallC(40);
+      const room = job.rooms[0]!;
+      const walls = room.walls.map((w, i) => (i === 2 ? { ...w, appliances: w.appliances.map((a) => (a.kind === 'range' ? { ...a, above } : a)) } : w));
+      return JobSchema.parse({ ...job, rooms: [{ ...room, walls }] });
+    };
+    for (const o of drafted(input(withAbove('cabinet'))).options) {
+      const wall = o.room.walls[2]!;
+      const range = wall.appliances.find((a) => a.kind === 'range')!;
+      const over = o.room.items.filter((i) => i.position.wall_id === wall.wall_id && i.position.elevation > 0 && i.position.offset < range.offset + range.width.value && end(i) > range.offset);
+      expect(over.map((i) => [code.get(i.catalog_item_id), i.position.offset, i.width])).toEqual([['upper_no_shelf', range.offset, range.width.value]]);
+      expect(o.issues.some((i) => i.message.includes('HARD-008'))).toBe(true);
+    }
+    for (const o of drafted(input(withAbove('millwork_hood'))).options) {
+      const wall = o.room.walls[2]!;
+      const range = wall.appliances.find((a) => a.kind === 'range')!;
+      expect(o.room.items.some((i) => i.position.wall_id === wall.wall_id && i.position.elevation > 0 && i.position.offset < range.offset + range.width.value && end(i) > range.offset)).toBe(false);
+      expect(o.issues.some((i) => i.message.includes('millwork hood'))).toBe(true);
+    }
+  });
+
   it('puts the corner cabinet in the corner and starts the next wall after its leg', () => {
     const o = drafted().options[0]!;
     const room = o.room;

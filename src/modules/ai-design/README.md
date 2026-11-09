@@ -108,7 +108,7 @@ There are two reasons today: centring the sink under its window (PREF-023), and 
 5. **Base types.** These follow the client's drawer level, in the intake's own words. Four-drawer banks go beside the cooktop first (PREF-007), then by the sink (PREF-006).
 6. **Uppers.** They:
    - skip windows;
-   - leave the hood space exactly over the cooktop, so it is centred (HARD-007);
+   - over a range or cooktop, follow the designer's choice (owner, 2026-11-09): leave an appliance or millwork hood's space exactly over it, so it is centred (HARD-007), or centre a short cabinet over it (`cooking_upper` in the data, PROPOSED), reporting that the 30" clearance (HARD-008) can't be checked yet;
    - put the cabinet over the fridge centred on it (HARD-006);
    - can line up with the bases below, or be divided on their own;
    - hang from the client's cabinet height, never above the ceiling.

@@ -29,6 +29,7 @@ import {
   windowSpans,
   windowZones as coreWindowZones,
   type AppliancePlacement,
+  type OverCooking,
   type CornerCabinet,
   type Span,
   type Length,
@@ -40,7 +41,7 @@ import {
   type Wall,
 } from '@/core/index';
 import { addWall, room, wallLabel, withRoom, type Change, type Draft, type Env } from './editor';
-import { LAYOUT_RULES, applianceType, type ApplianceType, type LayoutRules } from './layout-rules';
+import { LAYOUT_RULES, applianceType, overOf, type ApplianceType, type LayoutRules } from './layout-rules';
 
 const ok = (draft: Draft, notices: string[] = []): Result<Change> => ({ ok: true, value: { draft, notices } });
 const refuse = (reason: string): Result<Change> => ({ ok: false, reason });
@@ -662,7 +663,9 @@ export function placeAppliance(
   const w = r.walls.find((x) => x.wall_id === wallId) as Wall;
   const notices: string[] = [];
   const id = env.newId();
-  const placed: AppliancePlacement[] = [{ placement_id: id, kind, offset: plan.offset, width: unmeasured(plan.width), paired_with: null }];
+  // A range or cooktop starts with an appliance hood over it (owner, 2026-11-09).
+  const above = type.comesWithHood ? { above: rules.overCooking.startsAs } : {};
+  const placed: AppliancePlacement[] = [{ placement_id: id, kind, offset: plan.offset, width: unmeasured(plan.width), paired_with: null, ...above }];
   const offCentre = offCentreNotice(w, type, plan.offset, plan.width);
   if (offCentre) notices.push(offCentre);
   let next: Wall = { ...w, appliances: [...w.appliances, ...placed] };
@@ -750,6 +753,22 @@ export function setApplianceWidth(draft: Draft, env: Env, placementId: string, w
   let next: Wall = { ...wall, appliances: wall.appliances.map((a) => (a === appliance ? { ...a, offset: at, width: unmeasured(width) } : a)) };
   next = ensureRun(env, next, { start: at, end: at + width }, type.runWhenAlone, rules, notices);
   return ok(withRoom(draft, env, `Made a ${type.name.toLowerCase()} ${formatInches(width)} wide`, replaceWall(r, next)), dedupe(notices));
+}
+
+/** Chooses what goes over a range or cooktop: an appliance hood, a millwork hood or a cabinet (owner, 2026-11-09). */
+export function setApplianceAbove(draft: Draft, env: Env, placementId: string, above: OverCooking, rules: LayoutRules = LAYOUT_RULES): Result<Change> {
+  const r = room(draft);
+  const found = findAppliance(r, placementId);
+  if (!found) return refuse('That appliance no longer exists.');
+  const { wall, appliance } = found;
+  const type = applianceType(rules, appliance.kind);
+  if (!type) return refuse(`"${appliance.kind}" is not on the list of appliances.`);
+  if (!type.comesWithHood) return refuse(`Nothing goes over a ${type.name.toLowerCase()}.`);
+  const choice = rules.overCooking.choices.find((c) => c.id === above);
+  if (!choice) return refuse(`"${above}" is not one of the choices for over a ${type.name.toLowerCase()}.`);
+  if (overOf(appliance, rules) === above) return refuse('Nothing changed.');
+  const next: Wall = { ...wall, appliances: wall.appliances.map((a) => (a === appliance ? { ...a, above } : a)) };
+  return ok(withRoom(draft, env, `Over the ${type.name.toLowerCase()}: ${choice.name.toLowerCase()}`, replaceWall(r, next)));
 }
 
 /** Moves a dishwasher to the other side of its sink. */

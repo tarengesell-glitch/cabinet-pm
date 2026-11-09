@@ -27,7 +27,7 @@ import {
   upperPieces,
   wallLength,
 } from '../model/layout';
-import { LAYOUT_RULES, applianceType } from '../model/layout-rules';
+import { LAYOUT_RULES, applianceType, overOf } from '../model/layout-rules';
 import { ERROR, INK as THEME_INK, NAVY, NAVY_FILL, NAVY_FILL_LIGHT } from './theme';
 import { Dimension } from './Dimension';
 import type { LayoutEdit } from './layoutEdits';
@@ -261,7 +261,8 @@ export function LayoutShapes(props: {
         />,
       );
       const inset = Math.min(2 * INCH, depth / 6);
-      if (type?.comesWithHood) {
+      const over = overOf(a);
+      if (over === 'appliance_hood' || over === 'millwork_hood') {
         shapes.push(<Line key={`hood-${a.placement_id}`} name="hood" points={band(r, w, t0 + inset, t1 - inset, d0 + inset, d0 + Math.min(20 * INCH, depth - inset), toScreen)} closed stroke={INK} strokeWidth={0.8} dash={[5, 3]} listening={false} />);
       }
       if (type?.upperAboveDepth && w.kind === 'room') {
@@ -269,7 +270,7 @@ export function LayoutShapes(props: {
       }
       const centre = toScreen(on(r, w, (t0 + t1) / 2, (d0 + d1) / 2));
       const name = type?.label ?? a.kind;
-      const sub = `${formatInches(a.width.value)}${type?.comesWithHood ? ' + hood' : ''}${type?.upperAboveDepth && w.kind === 'room' ? ` · ${formatInches(type.upperAboveDepth)} upper` : ''}`;
+      const sub = `${formatInches(a.width.value)}${over ? ` + ${(LAYOUT_RULES.overCooking.choices.find((c) => c.id === over)?.name ?? over).toLowerCase()}` : ''}${type?.upperAboveDepth && w.kind === 'room' ? ` · ${formatInches(type.upperAboveDepth)} upper` : ''}`;
       const size = Math.max(8, Math.min(11, (depth * scale) / 5));
       shapes.push(
         <Group key={`apl-${a.placement_id}`} x={centre.x} y={centre.y} listening={false}>

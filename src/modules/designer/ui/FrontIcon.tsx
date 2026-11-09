@@ -64,7 +64,7 @@ export function FrontIcon({ item, appliance, width, height, size = 56, selected 
     parts.push(<rect key="app" x={x0 + g} y={inY} width={w - 2 * g} height={inH} rx={0.8} fill="#d6d9dd" stroke={stroke} strokeWidth={0.8} />);
     parts.push(
       <text key="t" x={x0 + w / 2} y={y0 + h / 2} textAnchor="middle" dominantBaseline="central" fontSize={Math.min(9, w / 4)} fill={MUTED} fontFamily="Geist, sans-serif">
-        {appliance === 'hood' ? 'HOOD' : appliance.slice(0, 5).toUpperCase()}
+        {appliance === 'hood' || appliance === 'millwork_hood' ? 'HOOD' : appliance.slice(0, 5).toUpperCase()}
       </text>,
     );
   } else if (!item || item.type === 'filler' || item.type === 'panel' || front?.kind === 'fixed_panel') {

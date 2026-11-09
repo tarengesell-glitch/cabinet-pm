@@ -49,7 +49,7 @@ const TABS: readonly { id: Tab; name: string }[] = [
 const CABINET_CHECKS = [...ITEM_CHECKS, catalogItemCheck(CURRENT_CATALOG)];
 
 const nameOf = (c: CabinetView): string =>
-  c.code ? (itemByCode(c.code)?.name ?? c.code) : c.appliance === 'hood' ? 'Hood' : (applianceType(LAYOUT_RULES, c.appliance ?? '')?.name ?? c.appliance ?? 'Appliance');
+  c.code ? (itemByCode(c.code)?.name ?? c.code) : c.appliance === 'hood' ? 'Hood' : c.appliance === 'millwork_hood' ? 'Millwork hood' : (applianceType(LAYOUT_RULES, c.appliance ?? '')?.name ?? c.appliance ?? 'Appliance');
 
 export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom }) {
   const canEdit = can(user, 'room.edit');

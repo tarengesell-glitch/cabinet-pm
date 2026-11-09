@@ -37,6 +37,7 @@
     "garbage": "garbage_pullout",
     "upper": "upper_doors",
     "upper_over_fridge": "upper_no_shelf",
+    "upper_over_cooking": "upper_no_shelf",
     "upper_corner": "upper_corner_90",
     "upper_filler": "wall_filler"
   },

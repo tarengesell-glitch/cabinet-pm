@@ -17,7 +17,28 @@ const draft = (p?: Partial<DraftPreferences>): PlaceholderDesign => {
   return r.value;
 };
 
+/** The example kitchen with every range and cooktop given `above`. */
+const kitchenWith = (above: 'cabinet' | 'millwork_hood'): Room => {
+  const r = kitchen();
+  return { ...r, walls: r.walls.map((w) => ({ ...w, appliances: w.appliances.map((a) => (a.kind === 'range' || a.kind === 'cooktop' ? { ...a, above } : a)) })) };
+};
+
 describe('the placeholder fill (no AI)', () => {
+  it('follows what is chosen over the range: a cabinet centred on it, or a millwork hood (owner, 2026-11-09)', () => {
+    const wall = kitchen().walls.find((w) => w.appliances.some((a) => a.kind === 'range' || a.kind === 'cooktop'))!;
+    const cooker = wall.appliances.find((a) => a.kind === 'range' || a.kind === 'cooktop')!;
+    const withCabinet = draftPlaceholder(kitchenWith('cabinet'), prefs(), ids);
+    if (!withCabinet.ok) throw new Error(withCabinet.reason);
+    expect(withCabinet.value.cabinets.some((c) => c.appliance === 'hood')).toBe(false);
+    const over = withCabinet.value.cabinets.filter((c) => c.wallId === wall.wall_id && c.layer === 'upper' && c.offset < cooker.offset + cooker.width.value && c.offset + c.width > cooker.offset);
+    expect(over.map((c) => [c.code, c.offset, c.width])).toEqual([['upper_no_shelf', cooker.offset, cooker.width.value]]);
+    expect(withCabinet.value.notes.some((n) => n.includes('30"'))).toBe(true);
+    const withMillwork = draftPlaceholder(kitchenWith('millwork_hood'), prefs(), ids);
+    if (!withMillwork.ok) throw new Error(withMillwork.reason);
+    expect(withMillwork.value.cabinets.filter((c) => c.appliance === 'millwork_hood')).toHaveLength(1);
+  });
+
+
   it('reads its data, and every cabinet type it uses is in the catalog', () => {
     expect(DRAFT_SETTINGS.ok).toBe(true);
   });

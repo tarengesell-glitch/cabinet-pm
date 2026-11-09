@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { examples } from '../index';
 import { ft, inch } from '../examples/helpers';
 import {
+  centreLengthFor,
   cornerCabinets,
+  insideLength,
   doorwayZones,
   insideSpan,
   neighbours,
@@ -104,5 +106,44 @@ describe('where the uppers go', () => {
   it('gives no upper band to base-only or pantry runs', () => {
     expect(upperPieces(wall(1), run(1, 1), { minRun: inch(9), ownUpperKinds: new Set() })).toEqual([]);
     expect(upperPieces(wall(0), { ...run(0), kind: 'base' }, { minRun: inch(9), ownUpperKinds: new Set() })).toEqual([]);
+  });
+});
+
+describe('inside lengths, as measured on site (owner, 2026-11-09)', () => {
+  // An ensuite like the owner's: three walls in a U, 4 1/2" thick, the back wall between the two sides.
+  const t = inch(4, 1, 2);
+  const wall = (n: number, a: { x: number; y: number }, b: { x: number; y: number }) => ({
+    ...examples.kitchen().rooms[0]!.walls[0]!,
+    wall_id: `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`,
+    start_point: a,
+    end_point: b,
+    thickness: { value: t, provenance: 'unmeasured' as const, source_mm: null },
+    openings: [],
+    obstacles: [],
+    runs: [],
+    appliances: [],
+  });
+  const ensuite = (back: number) => {
+    const r = room();
+    return { ...r, walls: [wall(1, { x: 0, y: ft(5) }, { x: 0, y: 0 }), wall(2, { x: 0, y: 0 }, { x: back, y: 0 }), wall(3, { x: back, y: 0 }, { x: back, y: ft(5) })] };
+  };
+
+  it('a 44" ensuite is 48 1/2" between the walls\' centre lines, and shows 44"', () => {
+    const r = ensuite(inch(44) + t);
+    expect(insideLength(r, r.walls[1]!)).toEqual({ value: inch(44), exact: true });
+    expect(centreLengthFor(r, r.walls[1]!, inch(44))).toBe(inch(48, 1, 2));
+  });
+
+  it('is the whole length for a wall with no neighbours, and for a floating wall', () => {
+    const r = ensuite(inch(60));
+    const lone = { ...r, walls: [r.walls[1]!] };
+    expect(insideLength(lone, lone.walls[0]!)).toEqual({ value: inch(60), exact: true });
+    expect(centreLengthFor(lone, lone.walls[0]!, inch(44))).toBe(inch(44));
+  });
+
+  it('says when a slanted corner rounds it', () => {
+    const r = examples.lShapeWithAngledWall().rooms[0]!;
+    const slanted = r.walls.find((w) => w.start_point.x !== w.end_point.x && w.start_point.y !== w.end_point.y)!;
+    expect(insideLength(r, slanted).exact).toBe(false);
   });
 });

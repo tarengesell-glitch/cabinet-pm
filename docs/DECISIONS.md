@@ -152,8 +152,16 @@ The owner tried the studio on a real job and asked for seven changes. The answer
 - **Island end panels:** two new side-panel choices, "Plain gable" (3/4") and "Deep plain gable" (1 1/2"). *Built (intake).*
 - **Top trim:** a "None" choice. *Built.*
 - **Light valance:** a "None" choice, with "Hidden" kept. With None or Hidden, no valance colour is asked. *Built.*
-- **Measurements on walls are inside measurements,** wall face to wall face. The plan showed, and typing set, the walls' centre-line length, which is why the ensuite didn't add up. *Next PR.*
-- **Interior walls are 4 1/2"**, not 5 1/2". New walls start at 4 1/2", and every existing wall changes to 4 1/2". *Next PR.*
+- **Measurements on walls are inside measurements,** wall face to wall face. The plan showed, and typing set, the walls' centre-line length, which is why the ensuite didn't add up. *Built:*
+  - the plan's wall labels, the door and window measurement chains, the placing ghost and the side panel all show inside lengths;
+  - a typed length is the inside length;
+  - walls are still stored by their centre line, so the checks, the layout builder and the future export are unchanged.
+
+  Lengths typed while *drawing* a new wall are still centre-line lengths. Once the wall is joined, its label shows the inside length, and typing on it sets that.
+- **Interior walls are 4 1/2"**, not 5 1/2". *Built:*
+  - the standard is now 4 1/2";
+  - a room that still started new walls at the old 5 1/2" default takes the new one;
+  - every existing wall in the database was changed to 4 1/2" as a new version of its room.
 - **Distances while placing islands and appliances:** to the ends of the wall, the opposing wall, and the other things on the same wall.
 - **Over a range or cooktop**, the designer chooses Cabinet, Appliance hood or Millwork hood, on the appliance. A new one starts as Appliance hood.
 - **Bathroom-type rooms:**

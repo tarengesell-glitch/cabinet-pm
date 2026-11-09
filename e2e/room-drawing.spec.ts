@@ -70,11 +70,11 @@ test('asks only for a name and ceiling height, and refuses sizes that are not ex
   await expect(page.getByText(`"1/3" isn't on a 1/64 inch mark.`, { exact: false })).toBeVisible();
 });
 
-test('new walls start at the standard 5 1/2" thickness, unmeasured', async ({ page }) => {
+test('new walls start at the standard 4 1/2" thickness, unmeasured (owner, 2026-11-09)', async ({ page }) => {
   await startRoom(page);
   await typeWall(page, `12'`, 'right');
   await wallButtons(page).first().click();
-  await expect(page.getByTestId('value-Thickness')).toHaveText('5 1/2"');
+  await expect(page.getByTestId('value-Thickness')).toHaveText('4 1/2"');
   await expect(page.locator('[data-provenance="unmeasured"]').last()).toBeVisible();
 });
 
@@ -143,10 +143,11 @@ test('typing a wall length moves the joined wall across without changing its ang
   await page.getByRole('button', { name: 'Edit Length' }).click();
   await page.getByRole('textbox', { name: 'Length' }).fill(`13'`);
   await page.getByRole('button', { name: 'Save' }).click();
+  // Lengths are inside, face to face (owner, 2026-11-09): 13' typed is 156" between the walls.
   await expect(page.getByTestId('value-Length')).toHaveText(`156"`);
-  // Wall B moved across, still 120"; wall C stretched to stay joined.
+  // Wall B moved across, still 115 1/2" inside (10' on its centre line); wall C stretched to stay joined.
   await page.getByRole('button', { name: '← Room' }).click();
-  await expect(page.getByRole('button', { name: /^Wall B: 120"/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /^Wall B: 115 1\/2"/ })).toBeVisible();
   await expect(page.getByRole('button', { name: /^Wall C: 156"/ })).toBeVisible();
   await expect(checks(page).getByText('No problems found')).toBeVisible();
 });
@@ -180,7 +181,7 @@ test('loads the example rooms', async ({ page }) => {
   await page.goto('/rooms/preview');
   await page.getByRole('button', { name: /Example L-shaped room/ }).click();
   await expect(page.getByRole('heading', { name: 'Laundry', level: 1 })).toBeVisible();
-  await expect(page.getByRole('button', { name: /^Wall C: ≈ 48"/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /^Wall C: ≈ 46 1\/8"/ })).toBeVisible(); // inside, slanted so rounded
   await expect(checks(page).getByText('No problems found')).toBeVisible();
 });
 
@@ -368,21 +369,21 @@ test('a selected wall has handles: slide it by the middle, move a corner by an e
   // Slide wall B outward: it keeps its length and tag, walls 1 and 3 stretch and go rough.
   await dragFrom(page, await centreOf(page, '.handle-middle'), 40, 0);
   await expect(page.getByText(/Wall A changed length/)).toBeVisible();
-  await expect(page.getByTestId('value-Length')).toHaveText(`120"`);
+  await expect(page.getByTestId('value-Length')).toHaveText(`115 1/2"`);
   await expect(page.getByRole('heading', { name: /^Wall B/ })).toBeVisible(); // still selected
 
   // One undo puts it back.
   await page.getByRole('button', { name: 'Undo' }).click();
   await page.getByRole('button', { name: '← Room' }).click();
-  await expect(page.getByRole('button', { name: /^Wall A: 144"/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /^Wall A: 139 1\/2"/ })).toBeVisible();
 
   // Drag wall B's top end up: wall B gets longer along its own line; nothing changes angle.
   await wallButtons(page).nth(1).click();
   await dragFrom(page, await centreOf(page, '.handle-end'), 25, -40); // sideways part is ignored
-  await expect(page.getByTestId('value-Length')).not.toHaveText(`120"`);
+  await expect(page.getByTestId('value-Length')).not.toHaveText(`115 1/2"`);
   await page.getByRole('button', { name: '← Room' }).click();
-  await expect(page.getByRole('button', { name: /^Wall C: 144"/ })).toBeVisible(); // top wall moved up, same length
-  await expect(page.getByRole('button', { name: /^Wall D: / })).not.toHaveText(/^Wall D: 120"/);
+  await expect(page.getByRole('button', { name: /^Wall C: 139 1\/2"/ })).toBeVisible(); // top wall moved up, same length
+  await expect(page.getByRole('button', { name: /^Wall D: / })).not.toHaveText(/^Wall D: 115 1\/2"/);
   await expect(page.locator('[data-provenance="unmeasured"]').first()).toBeVisible();
 });
 
@@ -413,7 +414,7 @@ test('walls are lettered A, B, C in circles', async ({ page }) => {
   for (const letter of ['A', 'B', 'C', 'D']) {
     await expect.poll(() => konvaRect(page, `.wall-tag-${letter}`)).not.toBeNull();
   }
-  await expect(page.getByRole('button', { name: /^Wall A: 144"/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /^Wall A: 139 1\/2"/ })).toBeVisible();
 });
 
 test('a door can be set to left or right hand and to swing in or out', async ({ page }) => {
@@ -508,7 +509,7 @@ test('click a wall length on the plan and type a new one', async ({ page }) => {
   await page.getByRole('button', { name: /Example kitchen/ }).click();
   await page.mouse.click(...Object.values(await centreOf(page, '.wall-length-1')) as [number, number]);
   const box = page.getByRole('textbox', { name: 'Wall length' });
-  await expect(box).toHaveValue('144"');
+  await expect(box).toHaveValue('139 1/2"'); // inside, face to face (owner, 2026-11-09)
   // Not exact: refused, with the reason, and nothing changes.
   await box.fill('1/3');
   await box.press('Enter');
@@ -519,7 +520,7 @@ test('click a wall length on the plan and type a new one', async ({ page }) => {
   await expect(box).toHaveCount(0);
   await expect(page.getByTestId('value-Length')).toHaveText('150"');
   await page.getByRole('button', { name: '← Room' }).click();
-  await expect(page.getByRole('button', { name: /^Wall B: 120"/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /^Wall B: 115 1\/2"/ })).toBeVisible();
   // Escape leaves the length as it was.
   await page.mouse.click(...Object.values(await centreOf(page, '.wall-length-1')) as [number, number]);
   await page.getByRole('textbox', { name: 'Wall length' }).fill('99');
@@ -536,11 +537,12 @@ test('a wall with a window shows the measurements to and across it, plus the ove
       const w = window as unknown as { Konva: { stages: { findOne: (s: string) => { text: () => string } | undefined }[] } };
       return w.Konva.stages[0]!.findOne(n)?.text() ?? null;
     }, name);
-  // Wall A is 144" with a 36" window starting 48" from its start: 48" | 36" | 60".
-  await expect.poll(() => text('.wall-1-segment-1-text')).toBe('48"');
+  // Wall A is 144" on its centre line, 139 1/2" inside, with a 36" window 48" from its centre-line
+  // start. Measured from the inside corners (owner, 2026-11-09): 45 3/4" | 36" | 57 3/4".
+  await expect.poll(() => text('.wall-1-segment-1-text')).toBe('45 3/4"');
   expect(await text('.wall-1-segment-2-text')).toBe('36"');
-  expect(await text('.wall-1-segment-3-text')).toBe('60"');
-  expect(await text('.wall-length-1')).toBe('144"');
+  expect(await text('.wall-1-segment-3-text')).toBe('57 3/4"');
+  expect(await text('.wall-length-1')).toBe('139 1/2"');
   // A wall with no openings shows only its overall length.
   expect(await text('.wall-2-segment-1-text')).toBeNull();
 });
@@ -636,19 +638,20 @@ test('click the measurement beside a window and type a distance: it slides over,
   await page.getByRole('button', { name: /Example kitchen/ }).click();
   await wallTool(page, 'Select').click();
   const saved = async () => (await page.evaluate(() => JSON.parse(window.localStorage.getItem('cabinet-pm.room-preview.v0')!))).job.rooms[0].walls[0].openings[0];
-  // Wall A: corner → window is 48", the window 36", window → corner 60".
+  // Wall A, from the inside corners: corner → window 45 3/4", the window 36", window → corner 57 3/4".
   const before = await centreOf(page, '.wall-1-segment-1-text');
   await page.mouse.click(before.x, before.y);
   await page.getByRole('textbox', { name: 'Distance to the window' }).fill('60');
   await page.keyboard.press('Enter');
-  await expect.poll(async () => (await saved()).offset.value).toBe(60 * 64);
+  // 60" from the inside corner, which is 2 1/4" along the centre line from the wall's start.
+  await expect.poll(async () => (await saved()).offset.value).toBe(60 * 64 + 144);
   expect((await saved()).width.value).toBe(36 * 64);
   // The measurement after it: type 24" and the window's far edge sits 24" from the corner.
   const after = await centreOf(page, '.wall-1-segment-3-text');
   await page.mouse.click(after.x, after.y);
   await page.getByRole('textbox', { name: 'Distance to the window' }).fill('24');
   await page.keyboard.press('Enter');
-  await expect.poll(async () => (await saved()).offset.value).toBe((144 - 24 - 36) * 64);
+  await expect.poll(async () => (await saved()).offset.value).toBe((144 - 24 - 36) * 64 - 144);
   await expect(checks(page).getByText('No problems found')).toBeVisible();
 });
 

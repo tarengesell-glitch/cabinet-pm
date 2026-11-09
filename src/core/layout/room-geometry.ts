@@ -143,6 +143,31 @@ export function insideSpan(r: Room, w: Wall): Span {
   return { start, end };
 }
 
+/**
+ * A wall's inside length: wall face to wall face, as it is measured on site (owner, 2026-11-09).
+ * `exact` is false when a slanted corner made it round to the nearest 1/64".
+ */
+export function insideLength(r: Room, w: Wall): { value: Length; exact: boolean } {
+  const centre = distanceForDisplay(w.start_point, w.end_point);
+  if (w.kind === 'floating') return centre;
+  const { before, after } = neighbours(r, w);
+  const a = before ? insideCornerOffset(r, w, before) : 0;
+  const b = after ? insideCornerOffset(r, w, after) : centre.value;
+  const span = insideSpan(r, w);
+  const exact = centre.exact && a !== null && b !== null && Number.isInteger(a) && Number.isInteger(b);
+  return { value: span.end - span.start, exact };
+}
+
+/**
+ * The centre-line length that gives a wall this inside length, keeping how far its inside corners
+ * sit from its centre-line corners. Lengths are typed as inside measurements; walls are stored by
+ * their centre line.
+ */
+export function centreLengthFor(r: Room, w: Wall, inside: Length): Length {
+  const span = insideSpan(r, w);
+  return inside + span.start + (wallLength(w) - span.end);
+}
+
 /** The run that reaches the wall's first inside corner, if any. */
 export const runAtStart = (r: Room, w: Wall): Run | null => w.runs.find((x) => x.offset <= insideSpan(r, w).start) ?? null;
 /** The run that reaches the wall's last inside corner, if any. */

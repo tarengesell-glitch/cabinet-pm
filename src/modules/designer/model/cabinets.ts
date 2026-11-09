@@ -11,7 +11,7 @@
  */
 import { formatInches, roomInsideSide, type Length, type PlacedItem, type Result, type Room, type Wall } from '@/core/index';
 import { catalogItem, CURRENT_CATALOG, type CatalogItem } from '@/modules/catalog/contract';
-import { applianceType, LAYOUT_RULES } from './layout-rules';
+import { overOf } from './layout-rules';
 import { applianceEnd } from './layout';
 import { DRAFT_SETTINGS, itemByCode, standard, type PlaceholderCabinet, type PlaceholderDesign } from './placeholder-draft';
 
@@ -69,8 +69,10 @@ export function cabinetViews(room: Room): CabinetView[] {
         (i) => i.position.wall_id === wall.wall_id && !isUpper(i) && i.position.offset <= a.offset && a.offset + a.width.value <= i.position.offset + i.width,
       );
       if (!housed) out.push({ id: a.placement_id, code: null, appliance: a.kind, wallId: wall.wall_id, runId, layer: 'base', offset: a.offset, width: a.width.value, depth: null, elevation: 0, height: 0, reviewed: true });
-      if (applianceType(LAYOUT_RULES, a.kind)?.comesWithHood)
-        out.push({ id: `${a.placement_id}-hood`, code: null, appliance: 'hood', wallId: wall.wall_id, runId, layer: 'upper', offset: a.offset, width: applianceEnd(a) - a.offset, depth: null, elevation: upperBottom, height: Math.max(0, top - upperBottom), reviewed: true });
+      // An appliance or millwork hood over a range or cooktop; a cabinet there is a placed item.
+      const over = overOf(a);
+      if (over === 'appliance_hood' || over === 'millwork_hood')
+        out.push({ id: `${a.placement_id}-hood`, code: null, appliance: over === 'appliance_hood' ? 'hood' : 'millwork_hood', wallId: wall.wall_id, runId, layer: 'upper', offset: a.offset, width: applianceEnd(a) - a.offset, depth: null, elevation: upperBottom, height: Math.max(0, top - upperBottom), reviewed: true });
     }
   return out;
 }

@@ -4,7 +4,7 @@
  * it is never filled in.
  */
 import { z } from 'zod';
-import { RunKindSchema, parseImperial, type Length, type RunKind } from '@/core/index';
+import { OverCookingSchema, RunKindSchema, parseImperial, type Length, type OverCooking, type RunKind } from '@/core/index';
 import raw from '../data/layout-rules.json';
 
 const Size = z.string().min(1);
@@ -34,12 +34,17 @@ const FileSchema = z.strictObject({
   island_start_size: z.strictObject({ length: Size, depth: Size }),
   appliances: z.array(ApplianceSchema).min(1),
   room_sets: z.object({ source: z.string().min(1) }).catchall(z.unknown()),
+  over_cooking: z.strictObject({
+    source: z.string().min(1),
+    choices: z.array(z.strictObject({ id: OverCookingSchema, name: z.string().min(1) })).min(1),
+    starts_as: OverCookingSchema,
+  }),
 });
 const RoomSetSchema = z.strictObject({ tray: z.array(z.string()).min(1), default_run_kind: RunKindSchema, base_depth: Size });
 
 export interface ApplianceType {
   readonly id: string;
-  /** For people: "Range + hood". */
+  /** For people: "Range". */
   readonly name: string;
   /** Short, for the plan: "RANGE". */
   readonly label: string;
@@ -70,6 +75,8 @@ export interface LayoutRules {
   /** What the "Add island" button makes. */
   readonly islandStartSize: { readonly length: Length; readonly depth: Length };
   readonly appliances: readonly ApplianceType[];
+  /** What can go over a range or cooktop, in order, and what a new one starts as (owner, 2026-11-09). */
+  readonly overCooking: { readonly choices: readonly { readonly id: OverCooking; readonly name: string }[]; readonly startsAs: OverCooking };
   /** The appliances the tray offers in this kind of room (all kinds stay known everywhere). */
   readonly tray: readonly ApplianceType[];
   /** Per kind of room (owner, 2026-11-09): what the tray offers, how runs start and how deep. */
@@ -138,7 +145,9 @@ export function readLayoutRules(data: unknown): { ok: true; value: LayoutRules }
     appliances,
     tray: roomSets['kitchen']?.tray ?? appliances,
     roomSets,
+    overCooking: { choices: d.over_cooking.choices, startsAs: d.over_cooking.starts_as },
   };
+  if (!d.over_cooking.choices.some((c) => c.id === d.over_cooking.starts_as)) problems.push('over_cooking starts as a choice it does not list');
   if (problems.length > 0) return { ok: false, reason: `layout-rules.json has bad values: ${problems.join('; ')}` };
   return { ok: true, value };
 }
@@ -156,6 +165,16 @@ export function rulesForRoom(set: string | null, rules: LayoutRules = LAYOUT_RUL
   const s = (set !== null ? rules.roomSets[set] : undefined) ?? rules.roomSets['kitchen'];
   if (!s) return rules;
   return { ...rules, tray: s.tray, defaultRunKind: s.defaultRunKind, runDepths: { ...rules.runDepths, base: s.baseDepth } };
+}
+
+/**
+ * What goes over this appliance, for one that takes something (a range or cooktop); null for
+ * anything else. A placement saved before the choice existed had an appliance hood.
+ */
+export function overOf(a: { kind: string; above?: OverCooking | undefined }, rules: LayoutRules = LAYOUT_RULES): OverCooking | null {
+  const type = applianceType(rules, a.kind);
+  if (!type?.comesWithHood) return null;
+  return a.above ?? 'appliance_hood';
 }
 
 /** Appliance kinds that stand on the floor, not on a cabinet run (a toilet, tub or shower). */

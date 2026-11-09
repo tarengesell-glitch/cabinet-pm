@@ -36,6 +36,7 @@ const FileSchema = z.strictObject({
     tall_filler: Role,
     uppers: z.strictObject({ codes: z.array(z.string()).min(1), status: Status, source: z.string().min(1) }),
     fridge_upper: Role,
+    cooking_upper: Role,
     wall_oven: Role,
     pantry: Role,
     upper_corner: Role,
@@ -83,6 +84,8 @@ export interface DraftConfig {
     readonly tallFiller: CatalogItem;
     readonly uppers: readonly CatalogItem[];
     readonly fridgeUpper: CatalogItem;
+    /** The cabinet over a range or cooktop, when the designer chose one instead of a hood. */
+    readonly cookingUpper: CatalogItem;
     readonly wallOven: CatalogItem;
     readonly pantry: CatalogItem;
     readonly upperCorner: CatalogItem;
@@ -145,6 +148,7 @@ export function readDraftConfig(catalog: Catalog, rules: DesignRules, data: unkn
       tallFiller: item(i.tall_filler.code, 'tall_filler'),
       uppers: i.uppers.codes.map((c) => item(c, 'uppers')),
       fridgeUpper: item(i.fridge_upper.code, 'fridge_upper'),
+      cookingUpper: item(i.cooking_upper.code, 'cooking_upper'),
       wallOven: item(i.wall_oven.code, 'wall_oven'),
       pantry: item(i.pantry.code, 'pantry'),
       upperCorner: item(i.upper_corner.code, 'upper_corner'),

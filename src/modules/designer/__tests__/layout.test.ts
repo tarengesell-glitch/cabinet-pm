@@ -17,6 +17,7 @@ import {
   placeAppliance,
   resizeIsland,
   runEndLimits,
+  setApplianceAbove,
   setApplianceWidth,
   setRunDepth,
   setRunEnd,
@@ -26,7 +27,7 @@ import {
   splitRun,
   upperPieces,
 } from '../model/layout';
-import { freestandingKinds, LAYOUT_RULES, readLayoutRules, rulesForRoom } from '../model/layout-rules';
+import { freestandingKinds, LAYOUT_RULES, overOf, readLayoutRules, rulesForRoom } from '../model/layout-rules';
 import raw from '../data/layout-rules.json';
 
 const IN = 64;
@@ -404,7 +405,33 @@ describe('appliances', () => {
     expect(range.width.value).toBe(30 * IN);
     d = unwrap(setApplianceWidth(d, env, range.placement_id, 36 * IN));
     expect(wallOf(d, 'A').appliances[0]!.width.value).toBe(36 * IN);
-    expect(setApplianceWidth(d, env, range.placement_id, 33 * IN)).toEqual({ ok: false, reason: 'A range + hood comes 30" or 36" wide.' });
+    expect(setApplianceWidth(d, env, range.placement_id, 33 * IN)).toEqual({ ok: false, reason: 'A range comes 30" or 36" wide.' });
+  });
+
+  it('a new range starts with an appliance hood over it; the designer can choose a millwork hood or a cabinet (owner, 2026-11-09)', () => {
+    const { d: start, env } = withA();
+    let d = unwrap(placeAppliance(start, env, 'range', wallOf(start, 'A').wall_id, 120 * IN, SNAP));
+    const range = wallOf(d, 'A').appliances[0]!;
+    expect(range.above).toBe('appliance_hood');
+    d = unwrap(setApplianceAbove(d, env, range.placement_id, 'cabinet'));
+    expect(wallOf(d, 'A').appliances[0]!.above).toBe('cabinet');
+    d = unwrap(setApplianceAbove(d, env, range.placement_id, 'millwork_hood'));
+    expect(wallOf(d, 'A').appliances[0]!.above).toBe('millwork_hood');
+    expect(setApplianceAbove(d, env, range.placement_id, 'millwork_hood')).toEqual({ ok: false, reason: 'Nothing changed.' });
+    // A range saved before the choice existed had a hood; a sink takes nothing over it.
+    expect(overOf({ kind: 'range' })).toBe('appliance_hood');
+    expect(overOf({ kind: 'sink' })).toBeNull();
+    d = unwrap(placeAppliance(d, env, 'sink', wallOf(d, 'A').wall_id, 40 * IN, SNAP));
+    const sink = wallOf(d, 'A').appliances.find((a) => a.kind === 'sink')!;
+    expect(sink.above).toBeUndefined();
+    expect(setApplianceAbove(d, env, sink.placement_id, 'cabinet')).toEqual({ ok: false, reason: 'Nothing goes over a sink.' });
+  });
+
+  it('the layout rules refuse an over-the-range start that is not one of its choices', () => {
+    const bad = { ...raw, over_cooking: { ...raw.over_cooking, choices: raw.over_cooking.choices.filter((c) => c.id !== 'appliance_hood') } };
+    const r = readLayoutRules(bad);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.reason).toContain('over_cooking starts as a choice it does not list');
   });
 
   it('upper only drops the appliances on it, and says so; deleting runs takes their appliances', () => {

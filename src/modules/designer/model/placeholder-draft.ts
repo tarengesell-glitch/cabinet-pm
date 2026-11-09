@@ -11,7 +11,7 @@
 import { formatInches, parseImperial, type Length, type Result, type Room, type Run, type Wall } from '@/core/index';
 import { CURRENT_CATALOG, type Catalog, type CatalogItem } from '@/modules/catalog/contract';
 import data from '../data/placeholder-draft.json';
-import { applianceType, LAYOUT_RULES, type LayoutRules } from './layout-rules';
+import { applianceType, LAYOUT_RULES, overOf, type LayoutRules } from './layout-rules';
 import { applianceEnd, cornerCabinets, hasBase, hasUpper, insideSpan, runEnd, sortedRuns, subtract, upperPieces, windowSpans, type Span } from './layout';
 
 export type DrawerLevel = 'minimum' | 'moderate' | 'maximum';
@@ -108,6 +108,7 @@ function readSettings(): Result<DraftSettings> {
     codes.garbage,
     codes.upper,
     codes.upper_over_fridge,
+    codes.upper_over_cooking,
     codes.upper_corner,
     codes.upper_filler,
     codes.base_by_drawer_level.minimum.most,
@@ -175,7 +176,11 @@ export function fillWidths(gap: Length, s: Pick<DraftSettings, 'largestWidth' | 
   return { widths, filler: rest };
 }
 
-type Draft = { id: string; code: string | null; appliance: string | null; layer: 'base' | 'upper'; offset: Length; width: Length; depth: Length | null };
+/** `hung`: a cabinet over a range or cooktop, hung from the top line at its own height. */
+type Draft = { id: string; code: string | null; appliance: string | null; layer: 'base' | 'upper'; offset: Length; width: Length; depth: Length | null; hung?: true };
+
+/** The hood views: an appliance hood or a millwork hood over a range or cooktop. */
+export const isHood = (appliance: string | null): boolean => appliance === 'hood' || appliance === 'millwork_hood';
 
 /**
  * Drafts the room. Refuses (with the reason) when the recipe's data can't be used or a cabinet
@@ -257,10 +262,11 @@ export function draftPlaceholder(room: Room, prefs: DraftPreferences, newId: () 
           for (const a of w.appliances) {
             const t = applianceType(rules, a.kind);
             if (!t || a.offset < run.offset || applianceEnd(a) > runEnd(run)) continue;
-            if (t.comesWithHood) {
-              add({ code: null, appliance: 'hood', layer: 'upper', offset: a.offset, width: a.width.value, depth: null });
-              cuts.push({ start: a.offset, end: applianceEnd(a) });
-            }
+            // What goes over a range or cooktop is the designer's choice (owner, 2026-11-09).
+            const over = overOf(a, rules);
+            if (over === 'appliance_hood' || over === 'millwork_hood') add({ code: null, appliance: over === 'appliance_hood' ? 'hood' : 'millwork_hood', layer: 'upper', offset: a.offset, width: a.width.value, depth: null });
+            if (over === 'cabinet') add({ code: c.upper_over_cooking, appliance: null, layer: 'upper', offset: a.offset, width: a.width.value, depth: null, hung: true });
+            if (over) cuts.push({ start: a.offset, end: applianceEnd(a) });
             if (t.upperAboveDepth !== null && run.kind !== 'upper') add({ code: c.upper_over_fridge, appliance: null, layer: 'upper', offset: a.offset, width: a.width.value, depth: t.upperAboveDepth });
           }
           for (const p of pieces.flatMap((p) => subtract(p, cuts))) if (p.end - p.start >= rules.minRunLength) fillGap(p, c.upper, c.upper_filler, 'upper', add, s, rules);
@@ -282,10 +288,11 @@ export function draftPlaceholder(room: Room, prefs: DraftPreferences, newId: () 
     }
     if (upperTop <= s.visual.upperBottom) return { ok: false, reason: `The cabinets would end at ${formatInches(upperTop)}, below where uppers start (${formatInches(s.visual.upperBottom)}).` };
     const vertical = (x: Draft): { elevation: Length; height: Length } => {
-      if (x.appliance === 'hood') return { elevation: s.visual.upperBottom, height: upperTop - s.visual.upperBottom };
+      if (isHood(x.appliance)) return { elevation: s.visual.upperBottom, height: upperTop - s.visual.upperBottom };
       if (x.code === null) return { elevation: 0, height: 0 };
       if (itemByCode(x.code)?.type === 'tall') return { elevation: 0, height: upperTop };
       if (x.layer === 'base') return { elevation: 0, height: size(x.code, 'height') };
+      if (x.hung) return { elevation: Math.max(s.visual.upperBottom, upperTop - size(x.code, 'height')), height: Math.min(upperTop - s.visual.upperBottom, size(x.code, 'height')) };
       const bottom = x.code === c.upper_over_fridge ? Math.max(upperTop - size(x.code, 'height'), s.visual.fridgeHeight) : s.visual.upperBottom;
       return { elevation: bottom, height: upperTop - bottom };
     };
@@ -310,7 +317,9 @@ export function draftPlaceholder(room: Room, prefs: DraftPreferences, newId: () 
     );
     if (out.some((x) => x.code === cornerCode))
       notes.push(lazy ? 'Lazy Susan corners, as picked.' : prefs.cornerInsert === null ? 'No corner insert was chosen for this room, so its corners are drawn as blind corners.' : 'Blind corners, as picked.');
-    if (out.some((x) => x.appliance === 'hood')) notes.push('A hood over the range or cooktop; uppers stop at windows and over the fridge.');
+    if (out.some((x) => isHood(x.appliance))) notes.push('A hood over the range or cooktop; uppers stop at windows and over the fridge.');
+    if (out.some((x) => x.appliance === 'millwork_hood')) notes.push('A millwork hood is drawn as a box: the catalog has no millwork hood yet.');
+    if (out.some((x) => x.hung)) notes.push('A short cabinet over the range or cooktop, hung from the top line. The 30" clear above the cooking surface is not checked yet: there is no counter height in the data.');
     const fillers = out.filter((x) => x.code === c.base_filler || x.code === c.upper_filler).length;
     if (fillers) notes.push(`Equal cabinets in whole steps, with ${fillers} filler${fillers === 1 ? '' : 's'} to take up the rest.`);
 

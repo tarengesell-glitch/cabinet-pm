@@ -11,7 +11,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import type { Room, Wall } from '@/core/index';
 import { direction, halfThickness, insideNormal, wallLength } from '../model/layout';
 import type { CabinetView } from '../model/cabinets';
-import { DRAFT_SETTINGS, itemByCode, standard } from '../model/placeholder-draft';
+import { DRAFT_SETTINGS, isHood, itemByCode, standard } from '../model/placeholder-draft';
 import { GOLD } from './theme';
 
 /** How the room looks, from the design choices (the intake's look). */
@@ -366,7 +366,7 @@ function cabinet(s: Scene3D, c: CabinetView, room: Room, look: FinishLook, isSel
   const counter = `counter:${look.counter}`;
   const dCode = c.depth ?? (c.code ? standard(c.code, 'depth') : null);
   const depthBase = c.appliance === 'fridge' ? v.fridgeDepth : c.appliance === 'range' ? v.rangeDepth : (dCode ?? standard('base_doors', 'depth') ?? 24 * IN);
-  const d = inch(c.layer === 'upper' && c.appliance === 'hood' ? 20 * IN : depthBase);
+  const d = inch(c.layer === 'upper' && isHood(c.appliance) ? 20 * IN : depthBase);
   const g = new THREE.Group();
   g.userData['cabId'] = c.id;
   g.userData['wallId'] = c.wallId;
@@ -427,7 +427,10 @@ function cabinet(s: Scene3D, c: CabinetView, room: Room, look: FinishLook, isSel
   };
   const counterTop = (h: number) => b(w, counterT, d + inch(v.counterOverhang), [0, h + counterT / 2, inch(v.counterOverhang) / 2], counter);
 
-  if (c.appliance === 'hood') {
+  if (c.appliance === 'millwork_hood') {
+    // A millwork hood: a box in the door finish (no catalog item yet; drawn for the look only).
+    b(w, Math.max(1, top - upperBottom - 12), 20, [0, (top + upperBottom + 12) / 2, 0], finish);
+  } else if (c.appliance === 'hood') {
     b(w, 8, 20, [0, upperBottom + 14, 0], `steel:${SURROUNDINGS.steel}`);
     b(12, Math.max(1, top - upperBottom - 18), 10, [0, (top + upperBottom + 18) / 2, -5], `steel:${SURROUNDINGS.steel}`);
   } else if (c.appliance) {

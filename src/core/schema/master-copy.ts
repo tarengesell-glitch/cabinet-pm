@@ -112,6 +112,13 @@ export const RunSchema = z
  * Where an appliance will likely go (OA-3; DATA_MODEL "Appliances in the room"). Placed along
  * a wall like an opening. Its width stays unmeasured until the appliance is confirmed (OA-4).
  */
+/**
+ * What goes over a range or cooktop (owner, 2026-11-09): an appliance hood, a millwork hood or a
+ * cabinet. Which appliance kinds take one is data (the appliance-type list).
+ */
+export const OverCookingSchema = z.enum(['appliance_hood', 'millwork_hood', 'cabinet']);
+export type OverCooking = z.infer<typeof OverCookingSchema>;
+
 export const AppliancePlacementSchema = z.strictObject({
   placement_id: IdSchema,
   /** An ID from the list of appliance types (fridge, range, sink…). The list is data. */
@@ -121,6 +128,12 @@ export const AppliancePlacementSchema = z.strictObject({
   width: MeasuredSchema,
   /** The sink a dishwasher was placed beside (owner, 2026-11-06); null for anything else. */
   paired_with: IdSchema.nullable(),
+  /**
+   * For an appliance that takes something over it (a range or cooktop): what goes there. Not
+   * set on rooms saved before 2026-11-09, which had an appliance hood (DECISIONS 2026-11-06:
+   * ranges and cooktops come with a hood); the screens read it so.
+   */
+  above: OverCookingSchema.optional(),
 });
 
 /**

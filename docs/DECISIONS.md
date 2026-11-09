@@ -165,7 +165,11 @@ The owner tried the studio on a real job and asked for seven changes. The answer
 - **Distances while placing islands and appliances:** to the ends of the wall, the opposing wall, and the other things on the same wall. *Built:*
   - a selected appliance, including while it is dragged, shows its distance each way along its wall (to the inside corner, or the nearest appliance, door or window) and, on a room wall, from its front to the opposing wall's face;
   - a selected island shows the distance from each of its four sides to the nearest wall face.
-- **Over a range or cooktop**, the designer chooses Cabinet, Appliance hood or Millwork hood, on the appliance. A new one starts as Appliance hood.
+- **Over a range or cooktop**, the designer chooses Cabinet, Appliance hood or Millwork hood, on the appliance. A new one starts as Appliance hood. *Built:*
+  - the choice is saved on the appliance in the master copy; a range or cooktop saved before this has an appliance hood, which is what it already had (this replaces "ranges and cooktops always come with a hood", 2026-11-06);
+  - the appliance's pop-up offers the three choices, and the plan label, the 3D view and the Customize list follow it. The tray now says "Range" and "Cooktop";
+  - the layout builder leaves an appliance or millwork hood's space open and centred (HARD-007); a millwork hood is also reported, because the catalog has no millwork hood yet;
+  - a cabinet is a short upper with no shelf (`upper_no_shelf`), centred on the appliance and hung from the top line. **PROPOSED:** which cabinet the shop uses there is not confirmed. The 30" clear above the cooking surface (HARD-008) is reported as not checked: there is no counter height in the data yet.
 - **Bathroom-type rooms:**
   - the tray offers a toilet (30"), a vanity sink (20"), a double vanity sink (60"), a tub (60") and a shower (48");
   - runs start base-only and 21" deep, for the 20 3/4" vanities.
@@ -424,7 +428,7 @@ After walls, doors and windows, the person marks where cabinetry goes and where 
 - **Corner cabinets:** where runs on two walls meet in the corner, a corner cabinet is needed: base where both have bases, upper where both have uppers. Shown, not stored.
 - **All pantry stays clear of windows:** the stretch in front of a window, plus 3" either side, becomes base cabinets.
 - **Islands:** floating walls (A-21) with a run on them. Island depths: **15", 27", 36", 42", 48"**.
-- **Appliance tray and standard widths:** fridge 36"; range 30" or 36"; cooktop 30" or 36"; wall oven 30"; sink 32"; bar sink 24"; dishwasher 24"; microwave 24"; wine fridge 24". Ranges and cooktops always come with a hood. Appliances are only placed by the person (drag, or tap then tap the plan); nothing drops in on its own.
+- **Appliance tray and standard widths:** fridge 36"; range 30" or 36"; cooktop 30" or 36"; wall oven 30"; sink 32"; bar sink 24"; dishwasher 24"; microwave 24"; wine fridge 24". Ranges and cooktops always come with a hood (replaced 2026-11-09: the designer chooses a hood, millwork hood or cabinet; see round 3). Appliances are only placed by the person (drag, or tap then tap the plan); nothing drops in on its own.
 - **Appliance rules:** a sink dropped near a window centres under it. Placing a sink adds a dishwasher right beside it when the plan has none yet; the dishwasher can be moved to the sink's other side and moves with the sink. A fridge gets a full 24"-deep upper above it. An appliance dropped on a bare wall gets a short run under it.
 - **Controls match the wall drawing:** click selects, Shift+click adds, Delete removes, Ctrl/Cmd+Z undoes, Esc cancels, scroll zooms, Space+drag pans, Alt stops snapping, click a length to type it. Run and island options sit in a "Cabinet runs" frame on the right; appliance options pop up next to the appliance.
 - **Still to confirm:** the hood is assumed to match the width of the range or cooktop under it.

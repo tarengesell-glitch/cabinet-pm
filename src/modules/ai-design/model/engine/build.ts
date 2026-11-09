@@ -60,6 +60,7 @@ export type SlotRole =
   | 'wall_oven'
   | 'pantry'
   | 'fridge_upper'
+  | 'cooking_upper'
   | 'upper_corner';
 
 /** One cabinet along a wall, before it becomes a placed item. */
@@ -352,12 +353,16 @@ export function buildOption(input: BuildInput, choices: OptionChoices): BuiltRoo
           run.kind === 'upper'
             ? subtract(seg, windowSpans(wall))
             : upperPieces({ ...wall, appliances: wall.appliances.map(cur) }, run, { minRun: layout.minRunLength, ownUpperKinds }).map((p) => ({ start: Math.max(p.start, seg.start), end: Math.min(p.end, seg.end) }));
-        // The hood space is left open over every cooking appliance, exactly its width, so it is centred (HARD-007).
-        const hoods = wall.appliances.map(cur).filter((a) => kindInfo(a.kind)?.comesWithHood).map((a) => ({ start: a.offset, end: applianceEnd(a) }));
+        // Over a range or cooktop goes what the designer chose (owner, 2026-11-09): an appliance or
+        // millwork hood, whose space is left open exactly the appliance's width so it is centred
+        // (HARD-007), or a cabinet centred on it. A placement from before the choice has a hood.
+        const cookers = wall.appliances.map(cur).filter((a) => kindInfo(a.kind)?.comesWithHood);
+        const overOf = (a: (typeof cookers)[number]) => a.above ?? 'appliance_hood';
+        const hoods = cookers.filter((a) => overOf(a) !== 'cabinet').map((a) => ({ start: a.offset, end: applianceEnd(a) }));
         const endCorner = corners.find((c) => c.upper && c.endingWallId === wall.wall_id && runAtEnd(room, wall) === run);
         const startCorner = corners.find((c) => c.upper && c.startingWallId === wall.wall_id && runAtStart(room, wall) === run);
         const uc = config.items.upperCorner;
-        const cuts: Span[] = [...hoods];
+        const cuts: Span[] = cookers.map((a) => ({ start: a.offset, end: applianceEnd(a) }));
         const openEdges: Length[] = [];
         /** Edges where an upper meets another cabinet (the upper corner, the cabinet over the fridge): no end allowance. */
         const closedEdges = new Set<Length>();
@@ -383,6 +388,21 @@ export function buildOption(input: BuildInput, choices: OptionChoices): BuiltRoo
           closedEdges.add(f.offset);
           closedEdges.add(applianceEnd(f));
           problem('warn', { kind: 'appliance', id: f.placement_id }, `The cabinet over the fridge is drafted ${formatInches(standard(fu, 'depth'))} deep: the catalog has no deeper one yet (DECISIONS AD-1).`);
+        }
+
+        for (const a of cookers.filter((x) => overlap({ start: x.offset, end: applianceEnd(x) }, seg))) {
+          const name = a.kind.replace(/_/g, ' ');
+          if (overOf(a) === 'millwork_hood') problem('warn', { kind: 'appliance', id: a.placement_id }, `A millwork hood goes over the ${name}: its space is left open, because the catalog has no millwork hood yet.`);
+          if (overOf(a) !== 'cabinet') continue;
+          const cu = config.items.cookingUpper;
+          if (!widthAllowed(cu, a.width.value)) {
+            problem('block', { kind: 'appliance', id: a.placement_id }, `The catalog has no ${cu.name} ${formatInches(a.width.value)} wide for over the ${name}.`);
+            continue;
+          }
+          add({ wallId: wall.wall_id, runId: run.run_id, layer: 'upper', role: 'cooking_upper', start: a.offset, width: a.width.value, item: cu, depth: standard(cu, 'depth'), elevation: top - standard(cu, 'height'), height: standard(cu, 'height') });
+          closedEdges.add(a.offset);
+          closedEdges.add(applianceEnd(a));
+          problem('warn', { kind: 'appliance', id: a.placement_id }, `The cabinet over the ${name} is hung from the top line; the 30" clear above the cooking surface (HARD-008) can't be checked yet, because there is no counter height in the data.`);
         }
 
         const wf = config.items.wallFiller;
@@ -429,7 +449,7 @@ export function buildOption(input: BuildInput, choices: OptionChoices): BuiltRoo
 }
 
 function describeRole(role: SlotRole): string {
-  return { divided: 'cabinet', sink_base: 'sink base', dishwasher: 'dishwasher opening', garbage: 'garbage pull-out', under_cooktop: 'cabinet under the cooktop', filler: 'filler', corner: 'corner cabinet', wall_oven: 'wall oven cabinet', pantry: 'pantry', fridge_upper: 'cabinet over the fridge', upper_corner: 'upper corner cabinet' }[role];
+  return { divided: 'cabinet', sink_base: 'sink base', dishwasher: 'dishwasher opening', garbage: 'garbage pull-out', under_cooktop: 'cabinet under the cooktop', filler: 'filler', corner: 'corner cabinet', wall_oven: 'wall oven cabinet', pantry: 'pantry', fridge_upper: 'cabinet over the fridge', cooking_upper: 'cabinet over the range or cooktop', upper_corner: 'upper corner cabinet' }[role];
 }
 
 /** Moves a sink to centre under its window when the option asks for it and the rules allow (PREF-023). */

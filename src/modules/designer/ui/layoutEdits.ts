@@ -2,7 +2,7 @@
  * The rough-layout actions the plan and panels can ask for, and how each maps onto the
  * editing functions in model/layout.ts. Display glue only: every rule lives in the model.
  */
-import type { Length, Point, Result, RunKind } from '@/core/index';
+import type { Length, OverCooking, Point, Result, RunKind } from '@/core/index';
 import { deleteWalls, room as roomOf, type Change, type Draft, type Env } from '../model/editor';
 import { LAYOUT_RULES, type LayoutRules } from '../model/layout-rules';
 import {
@@ -20,6 +20,7 @@ import {
   moveRun,
   placeAppliance,
   resizeIsland,
+  setApplianceAbove,
   setApplianceWidth,
   setRunDepth,
   setRunEnd,
@@ -51,6 +52,8 @@ export type LayoutEdit =
   | { kind: 'appliance-move'; placementId: string; wallId: string; centre: number; centreSnap?: Length }
   | { kind: 'appliance-width'; placementId: string; width: Length }
   | { kind: 'appliance-flip'; placementId: string }
+  /** What goes over a range or cooktop (owner, 2026-11-09). */
+  | { kind: 'appliance-above'; placementId: string; above: OverCooking }
   | { kind: 'delete-appliances'; placementIds: readonly string[] };
 
 /** `rules`: the layout rules for this kind of room (its tray, how runs start and how deep; owner, 2026-11-09). */
@@ -105,6 +108,8 @@ export function applyLayoutEdit(draft: Draft, env: Env, edit: LayoutEdit, rules:
       return setApplianceWidth(draft, env, edit.placementId, edit.width, rules);
     case 'appliance-flip':
       return flipPartner(draft, env, edit.placementId, rules);
+    case 'appliance-above':
+      return setApplianceAbove(draft, env, edit.placementId, edit.above, rules);
     case 'delete-appliances':
       return deleteAppliances(draft, env, edit.placementIds);
   }

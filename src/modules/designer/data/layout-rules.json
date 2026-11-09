@@ -21,8 +21,8 @@
   "island_start_size": { "length": "72", "depth": "36" },
   "appliances": [
     { "id": "fridge", "name": "Fridge", "label": "FRIDGE", "widths": ["36"], "comes_with_hood": false, "keep_clear_of_windows": true, "run_when_alone": "base_upper", "centre_under_window": false, "adds_beside": null, "upper_above_depth": "24" },
-    { "id": "range", "name": "Range + hood", "label": "RANGE", "widths": ["30", "36"], "comes_with_hood": true, "keep_clear_of_windows": false, "run_when_alone": "base", "centre_under_window": false, "adds_beside": null, "upper_above_depth": null },
-    { "id": "cooktop", "name": "Cooktop + hood", "label": "COOKTOP", "widths": ["30", "36"], "comes_with_hood": true, "keep_clear_of_windows": false, "run_when_alone": "base", "centre_under_window": false, "adds_beside": null, "upper_above_depth": null },
+    { "id": "range", "name": "Range", "label": "RANGE", "widths": ["30", "36"], "comes_with_hood": true, "keep_clear_of_windows": false, "run_when_alone": "base", "centre_under_window": false, "adds_beside": null, "upper_above_depth": null },
+    { "id": "cooktop", "name": "Cooktop", "label": "COOKTOP", "widths": ["30", "36"], "comes_with_hood": true, "keep_clear_of_windows": false, "run_when_alone": "base", "centre_under_window": false, "adds_beside": null, "upper_above_depth": null },
     { "id": "wall_oven", "name": "Wall oven", "label": "OVEN", "widths": ["30"], "comes_with_hood": false, "keep_clear_of_windows": true, "run_when_alone": "pantry", "centre_under_window": false, "adds_beside": null, "upper_above_depth": null },
     { "id": "sink", "name": "Sink", "label": "SINK", "widths": ["32"], "comes_with_hood": false, "keep_clear_of_windows": false, "run_when_alone": "base", "centre_under_window": true, "adds_beside": "dishwasher", "upper_above_depth": null },
     { "id": "bar_sink", "name": "Bar sink", "label": "BAR SINK", "widths": ["24"], "comes_with_hood": false, "keep_clear_of_windows": false, "run_when_alone": "base", "centre_under_window": false, "adds_beside": null, "upper_above_depth": null },
@@ -35,6 +35,15 @@
     { "id": "tub", "name": "Tub", "label": "TUB", "widths": ["60"], "comes_with_hood": false, "keep_clear_of_windows": false, "run_when_alone": null, "centre_under_window": false, "adds_beside": null, "upper_above_depth": null },
     { "id": "shower", "name": "Shower", "label": "SHOWER", "widths": ["48"], "comes_with_hood": false, "keep_clear_of_windows": false, "run_when_alone": null, "centre_under_window": false, "adds_beside": null, "upper_above_depth": null }
   ],
+  "over_cooking": {
+    "source": "Owner, 2026-11-09 (chat): the designer chooses what goes over a range or cooktop: a cabinet, an appliance hood or a millwork hood, on the appliance. A new one starts as an appliance hood (as ranges and cooktops always had, 2026-11-06).",
+    "choices": [
+      { "id": "appliance_hood", "name": "Appliance hood" },
+      { "id": "millwork_hood", "name": "Millwork hood" },
+      { "id": "cabinet", "name": "Cabinet" }
+    ],
+    "starts_as": "appliance_hood"
+  },
   "room_sets": {
     "source": "Owner, 2026-11-09 (chat): bathroom-type rooms offer a toilet (30\" clear space), vanity sink (20\" bowl), double vanity sink (60\"), tub (60\") and shower (48\"); their runs start base-only, 21\" deep for the catalog's 20 3/4\" vanities. A run of \"run_when_alone\": null means the fixture stands on the floor, not on a cabinet run. Which rooms are bathrooms is the intake's own room-type grouping (\"bath\"); other room types use the kitchen set until the owner says otherwise (PROPOSED).",
     "kitchen": { "tray": ["fridge", "range", "cooktop", "wall_oven", "sink", "bar_sink", "dishwasher", "microwave", "wine_fridge"], "default_run_kind": "base_upper", "base_depth": "24" },

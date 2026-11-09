@@ -3,8 +3,8 @@
  * (with no actual AI design)"). No AI is called: a fixed recipe from the owner's Kitchen Studio
  * prototype fills each cabinet run with catalog cabinets, so the customize screens can be tried.
  *
- * It is NOT the master copy. Core has no placed cabinets yet (BUILD_PLAN 1b-items), so the result
- * is kept beside the room's drawing in this browser and every screen says it is a placeholder.
+ * Its layout becomes placed items in the room's master copy (`cabinets.ts`), marked as placed by
+ * the draft step until a designer approves or changes them; every screen says it is a placeholder.
  * The recipe's numbers are data (`data/placeholder-draft.json`); cabinet types and sizes come
  * from the catalog. Pure: no clock, no randomness (IDs are passed in).
  */
@@ -384,60 +384,6 @@ function applyDrawerLevel(cabs: (Draft & { wallId: string })[], level: DrawerLev
   if (three) three.code = m.one_bank_of_3;
   const four = bases.find((b) => b !== three && fits(m.one_bank_of_4, b.width) && b.width >= s.narrowBelow);
   if (four) four.code = m.one_bank_of_4;
-}
-
-/* ---------- Edits on the customize screens ---------- */
-
-export type DesignEdit =
-  | { readonly kind: 'width'; readonly id: string; readonly width: Length }
-  | { readonly kind: 'type'; readonly id: string; readonly code: string }
-  | { readonly kind: 'approve'; readonly ids: readonly string[] };
-
-const sameRow = (a: PlaceholderCabinet, b: PlaceholderCabinet) => a.wallId === b.wallId && a.runId === b.runId && a.layer === b.layer;
-
-/**
- * Applies a change. A new width takes the difference from the cabinet or filler right beside it
- * (after it first, then before it), so the run keeps its length, as in the prototype. Refused
- * with the reason when nothing beside it can give or take the difference.
- */
-export function editDesign(d: PlaceholderDesign, edit: DesignEdit): Result<PlaceholderDesign> {
-  const find = (id: string) => d.cabinets.find((x) => x.id === id) ?? null;
-  if (edit.kind === 'approve') {
-    const ids = new Set(edit.ids);
-    return { ok: true, value: { ...d, cabinets: d.cabinets.map((x) => (ids.has(x.id) ? { ...x, reviewed: true } : x)) } };
-  }
-  const cab = find(edit.id);
-  if (!cab) return { ok: false, reason: 'That cabinet is no longer in the design.' };
-  if (cab.code === null) return { ok: false, reason: 'An appliance or hood is moved on the Room drawing step.' };
-  if (edit.kind === 'type') {
-    const now = itemByCode(cab.code);
-    const next = itemByCode(edit.code);
-    if (!now || !next) return { ok: false, reason: `"${edit.code}" isn't in the catalog.` };
-    if (now.type !== next.type) return { ok: false, reason: `A ${now.name.toLowerCase()} can only change to another cabinet of the same kind.` };
-    return { ok: true, value: { ...d, cabinets: d.cabinets.map((x) => (x.id === cab.id ? { ...x, code: edit.code, reviewed: true } : x)) } };
-  }
-  if (!Number.isSafeInteger(edit.width) || edit.width <= 0) return { ok: false, reason: 'The width must be more than zero.' };
-  const diff = edit.width - cab.width;
-  if (diff === 0) return { ok: true, value: d };
-  const after = d.cabinets.find((x) => x !== cab && sameRow(x, cab) && x.offset === cab.offset + cab.width && x.code !== null);
-  const before = d.cabinets.find((x) => x !== cab && sameRow(x, cab) && x.offset + x.width === cab.offset && x.code !== null);
-  const nb = after ?? before;
-  if (!nb) return { ok: false, reason: 'Nothing beside it can give or take the difference. Change the run on the Room drawing step.' };
-  const left = nb.width - diff;
-  if (left < 0) return { ok: false, reason: `The cabinet beside it is only ${formatInches(nb.width)} wide, so this one can grow by that much at most.` };
-  const cabinets = d.cabinets
-    .map((x) => {
-      if (x.id === cab.id) return { ...x, width: edit.width, offset: nb === before ? cab.offset - diff : cab.offset, reviewed: true };
-      if (x.id === nb.id) return { ...x, width: left, offset: nb === after ? nb.offset + diff : nb.offset, reviewed: true };
-      return x;
-    })
-    .filter((x) => x.width > 0);
-  return { ok: true, value: { ...d, cabinets } };
-}
-
-/** Re-drafts one run, keeping the rest of the design as it is. */
-export function redraftRun(d: PlaceholderDesign, fresh: PlaceholderDesign, runId: string): PlaceholderDesign {
-  return { ...d, cabinets: [...d.cabinets.filter((x) => x.runId !== runId), ...fresh.cabinets.filter((x) => x.runId === runId)] };
 }
 
 /** The run a cabinet stands on, for the screens. */

@@ -180,3 +180,19 @@ export function snapEndToAngle(start: Point, end: Point, step: Angle): Result<{ 
   if (!placed.ok) return placed;
   return ok({ point: placed.value.point, angle: dir.value });
 }
+
+/**
+ * Which side of the room's walls is inside, looking along each wall from start to end: left for
+ * a room drawn counter-clockwise (room Y up), right for clockwise. From the area the room walls
+ * enclose (floating walls are not part of the outline); an open chain is closed from its last
+ * corner to its first. Exact (BigInt).
+ */
+export function roomInsideSide(walls: readonly { kind: 'room' | 'floating'; start_point: Point; end_point: Point }[]): 'left' | 'right' {
+  const outline = walls.filter((w) => w.kind !== 'floating');
+  let twice = 0n;
+  for (const w of outline) twice += BigInt(w.start_point.x) * BigInt(w.end_point.y) - BigInt(w.end_point.x) * BigInt(w.start_point.y);
+  const first = outline[0];
+  const last = outline[outline.length - 1];
+  if (first && last) twice += BigInt(last.end_point.x) * BigInt(first.start_point.y) - BigInt(first.start_point.x) * BigInt(last.end_point.y);
+  return twice < 0n ? 'right' : 'left';
+}

@@ -14,6 +14,7 @@ import {
   formatInchesApprox,
   distanceSquared,
   pointFromLengthAndAngle,
+  roomInsideSide,
   samePoint,
   segmentsOverlap,
   type Job,
@@ -28,6 +29,7 @@ import {
   type Wall,
   wallLetter,
 } from '@/core/index';
+import { PREVIEW_SHOP } from '@/platform/index';
 import { STANDARD_SIZES } from './standard-sizes';
 
 export interface Env {
@@ -47,14 +49,7 @@ export interface WallDefaults {
  * area the corners enclose; an open chain is closed from its last corner to its first.
  */
 export function insideSide(r: Room): 'left' | 'right' {
-  // Floating walls (islands, peninsulas) are not part of the room's outline.
-  const outline = r.walls.filter((w) => w.kind !== 'floating');
-  let twice = 0;
-  for (const w of outline) twice += w.start_point.x * w.end_point.y - w.end_point.x * w.start_point.y;
-  const first = outline[0];
-  const last = outline[outline.length - 1];
-  if (first && last) twice += last.end_point.x * first.start_point.y - first.start_point.x * last.end_point.y;
-  return twice < 0 ? 'right' : 'left';
+  return roomInsideSide(r.walls);
 }
 
 const otherSide = (side: 'left' | 'right'): 'left' | 'right' => (side === 'left' ? 'right' : 'left');
@@ -136,7 +131,8 @@ export function startRoom(env: Env, input: { name: string; shopId: string; ceili
     shop_id: input.shopId,
     catalog_version: null,
     status: 'draft',
-    rooms: [{ room_id: env.newId(), name, ceiling_height: typed(input.ceiling), walls: [] }],
+    job_selections: {},
+    rooms: [{ room_id: env.newId(), name, ceiling_height: typed(input.ceiling), walls: [], room_selections: {}, items: [] }],
     history: [{ at: env.now(), by: env.userId, origin: 'designer', summary: `Started room "${name}"` }],
   };
   return ok({ job, wallDefaults: { thickness: rough(STANDARD_SIZES.wall_thickness) } });
@@ -619,8 +615,19 @@ export function upgradeStoredDraft(data: unknown): { job: unknown; wallDefaults:
     if (!('runs' in wall)) wall.runs = [];
     if (!('appliances' in wall)) wall.appliances = [];
   }
-  const j = job as { schema_version?: unknown } | undefined;
+  const j = job as { schema_version?: unknown; job_selections?: unknown; shop_id?: unknown } | undefined;
   if (j && j.schema_version === 0) j.schema_version = 1;
+  // Schema 2 (2026-11-08) added placed cabinets and selections; rooms saved before have none.
+  if (j && j.schema_version === 1) {
+    j.schema_version = 2;
+    if (!('job_selections' in j)) j.job_selections = {};
+    for (const room of (job?.rooms ?? []) as Record<string, unknown>[]) {
+      if (!('room_selections' in room)) room.room_selections = {};
+      if (!('items' in room)) room.items = [];
+    }
+  }
+  // The preview's stand-in shop became the catalog's shop (2026-11-08), so its cabinets can be checked.
+  if (j && j.shop_id === PREVIEW_SHOP.retiredId) j.shop_id = PREVIEW_SHOP.id;
   const oldThickness = d.wallDefaults?.thickness as unknown;
   retag(oldThickness);
   if (retagged > 0) notes.push('Your saved room was updated: sizes are now either unmeasured (red) or confirmed (black).');
@@ -628,7 +635,7 @@ export function upgradeStoredDraft(data: unknown): { job: unknown; wallDefaults:
   // hinged at the start side, opening into the room.
   for (const room of job?.rooms ?? []) {
     const walls = (room.walls ?? []) as unknown as Wall[];
-    const inside = insideSide({ room_id: '', name: '', ceiling_height: rough(0), walls });
+    const inside = insideSide({ room_id: '', name: '', ceiling_height: rough(0), walls, room_selections: {}, items: [] });
     for (const wall of walls) {
       for (const o of (wall.openings ?? []) as unknown as Record<string, unknown>[]) {
         if (!('swing' in o)) o.swing = o.kind === 'door' ? { hinge: 'start', opens: inside } : null;

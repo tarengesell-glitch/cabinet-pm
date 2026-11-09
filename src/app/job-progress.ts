@@ -3,7 +3,7 @@
  * contracts from what this browser keeps (the preview has no database). Null when the job
  * hasn't been started in this browser.
  */
-import { roomDrawingStatus, storedDesign } from '@/modules/designer/contract';
+import { roomDrawingStatus } from '@/modules/designer/contract';
 import { INTAKE_DEFINITION, intakeHandover, loadIntakeState } from '@/modules/intake/contract';
 
 export type RoomStage = 'Choices in progress' | 'Choices done' | 'Drawn' | 'Designed';
@@ -26,8 +26,8 @@ export function jobProgress(job: string | null): JobProgress | null {
   const rooms = intakeHandover(INTAKE_DEFINITION.value, loaded.state).map((r) => {
     const drawing = roomDrawingStatus(r.room_id);
     const drawn = drawing.kind === 'drawn' && drawing.walls > 0 && drawing.runs > 0 && drawing.problems === 0;
-    const design = storedDesign(r.room_id);
-    const stage: RoomStage = !r.complete ? 'Choices in progress' : design.ok && design.value ? 'Designed' : drawn ? 'Drawn' : 'Choices done';
+    const designed = drawing.kind === 'drawn' && drawing.cabinets > 0;
+    const stage: RoomStage = !r.complete ? 'Choices in progress' : designed ? 'Designed' : drawn ? 'Drawn' : 'Choices done';
     return { id: r.room_id, name: r.name, stage, drawn: drawing.kind === 'drawn' && drawing.walls > 0 };
   });
   const stage = rooms.reduce<RoomStage>((m, r) => (ORDER.indexOf(r.stage) < ORDER.indexOf(m) ? r.stage : m), 'Designed');

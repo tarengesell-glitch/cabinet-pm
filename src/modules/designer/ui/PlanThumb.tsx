@@ -5,9 +5,9 @@
  * this browser keeps; a room that can't be read says so.
  */
 import { useMemo } from 'react';
-import type { Room } from '@/core/index';
+import { itemFootprint, type Room } from '@/core/index';
 import { direction, halfThickness, insideNormal, runEnd } from '../model/layout';
-import { storedDesign, storedRoom } from './placeholder-store';
+import { storedRoom } from './placeholder-store';
 import { MUTED, NAVY } from './theme';
 
 const RUN_FILL = '#e6cfa8';
@@ -18,14 +18,13 @@ export function PlanThumb({ roomKey, showDesign, version = 0 }: { roomKey: strin
   const data = useMemo(() => {
     void version;
     const r = storedRoom(roomKey);
-    const d = showDesign ? storedDesign(roomKey) : null;
-    return { room: r.ok ? r.value : null, reason: r.ok ? null : r.reason, design: d && d.ok ? d.value : null };
-  }, [roomKey, showDesign, version]);
+    return { room: r.ok ? r.value : null, reason: r.ok ? null : r.reason };
+  }, [roomKey, version]);
   if (!data.room) return <span style={{ fontSize: 12, color: MUTED }}>{data.reason}</span>;
-  return <PlanSvg room={data.room} cabinets={data.design?.cabinets ?? null} />;
+  return <PlanSvg room={data.room} showCabinets={showDesign} />;
 }
 
-function PlanSvg({ room, cabinets }: { room: Room; cabinets: readonly { wallId: string; layer: 'base' | 'upper'; offset: number; width: number; code: string | null }[] | null }) {
+function PlanSvg({ room, showCabinets }: { room: Room; showCabinets: boolean }) {
   const pts = room.walls.flatMap((w) => [w.start_point, w.end_point]);
   if (pts.length === 0) return <span style={{ fontSize: 12, color: MUTED }}>No walls yet</span>;
   const xs = pts.map((p) => p.x);
@@ -50,9 +49,13 @@ function PlanSvg({ room, cabinets }: { room: Room; cabinets: readonly { wallId: 
       {room.walls.flatMap((wall) =>
         wall.runs.map((r) => <polygon key={r.run_id} points={quad(wall.wall_id, r.offset, runEnd(r), r.depth)} fill={RUN_FILL} stroke={RUN_STROKE} strokeWidth={sw * 0.5} />),
       )}
-      {cabinets
-        ?.filter((c) => c.layer === 'base')
-        .map((c, i) => <polygon key={i} points={quad(c.wallId, c.offset, c.offset + c.width, 24 * 64)} fill={c.code ? '#fff6e6' : '#ffffff'} stroke={c.code ? RUN_STROKE : WALL} strokeWidth={sw * 0.45} />)}
+      {showCabinets &&
+        room.items
+          .filter((item) => item.position.elevation === 0)
+          .map((item) => {
+            const f = itemFootprint(room, item);
+            return f ? <polygon key={item.item_instance_id} points={f.corners.map(([x, y]) => `${x},${-y}`).join(' ')} fill="#fff6e6" stroke={RUN_STROKE} strokeWidth={sw * 0.45} /> : null;
+          })}
       {room.walls.map((wall) => (
         <line
           key={wall.wall_id}

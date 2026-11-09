@@ -22,7 +22,7 @@ The phases are `docs/BUILD_SPEC.md` section 10. Phases 9 and 10 and the addition
 |---|---|---|---|
 | 1a | Claude | Scaffold the repo and its guardrails: folders, dependency rules, vendor-name check, purity checks, test runners. Can run alongside Phase 0. **Done 2026-11-05** (see `docs/DEVELOPMENT.md`). | `prompts/01-scaffold-and-guardrails.md` |
 | 1b-walls | Claude | Core, room shell: base unit, angles, Job/Room/Wall/Opening/Obstacle schemas, check interface, wall layout checks. **Done 2026-11-05.** | `prompts/02-core-master-copy.md` (part) |
-| 1b-items | Claude | Core, cabinets: PlacedItem, selections and modifications, selection resolution, item layout checks (overlap, past a wall end, blocks an opening), proof-slice fixtures. Raises `schema_version`. | `prompts/02-core-master-copy.md` (rest) |
+| 1b-items | Claude | Core, cabinets: PlacedItem, selections and modifications, selection resolution, item layout checks (overlap, past a wall end, blocks an opening), proof-slice fixtures. Raises `schema_version`. **Done 2026-11-08** (schema 2), after desk research on the import file (`docs/cabinet-vision/DESK_RESEARCH.md`); the proof-slice fixture is `kitchenWithCabinets`. | `prompts/02-core-master-copy.md` (rest) |
 | 1c | Claude | Catalog, minimal: the proof-slice items as versioned data, plus the buildability checks | `prompts/03-catalog-proof-slice.md` |
 | 1d | Claude | Cabinet Vision adapter, minimal: mapping data, preflight, deterministic writer, first golden cases | `prompts/04-ordx-writer-proof-slice.md` |
 | 1e | Owner | Import the generated files into Cabinet Vision and record the go/no-go in `DECISIONS.md` | `golden/cabinet-vision/README.md` (written in 1d) |
@@ -55,7 +55,7 @@ Full Product Catalog with versions and the editor for it; **automatic** catalog 
 
 **Exit:** designers produce jobs that pass the gate and import cleanly.
 
-**Placeholders built early (2026-11-08):** the customize screens (settings pane and 3D view) on a placeholder layout, so the flow can be tried end to end. They are to be rebuilt on the master copy once Core has placed cabinets (1b-items). See DECISIONS "Placeholder office screens, AI design and customize".
+**Placeholders built early (2026-11-08):** the customize screens (settings pane and 3D view) on a placeholder layout, so the flow can be tried end to end. Since 1b-items (2026-11-08) they read and save placed cabinets in the master copy. See DECISIONS "Placeholder office screens, AI design and customize".
 
 **Pulled forward (2026-11-05):** room capture (walls, doors, windows on react-konva) is built early, right after the scaffold (1a): Core walls and openings first, then the Designer drawing screen. See DECISIONS "2026-11-05".
 

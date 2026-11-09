@@ -34,6 +34,7 @@ Core owns no tables. It owns the master copy *format*: Job, Room, Wall, PlacedIt
   - Corner cabinets, the 24" upper above a fridge and the hood over a range or cooktop are worked out from these and the rules; they are not stored.
   - Islands are floating walls with a run on them (A-21), not a separate shape.
   - Later, when `appliances` exists: a placement gains a reference to the job's appliance record, whose specs live there; the master copy keeps a copy of the confirmed size it was designed to.
+- **Placed cabinets (schema 2, 2026-11-08):** each room has `items` (PlacedItem). Positions are wall-referenced in the CAD import file's terms: wall, side, offset along the wall from its start corner, elevation from the floor, setback from the wall face; exact 1/64" values. Selections at job, room and item level. See DECISIONS "Placed cabinets in the master copy".
 - **PROPOSED:**
   - **Price shown live** is calculated from the catalog and is never stored in the master copy. Quotes freeze it (`projects`).
 

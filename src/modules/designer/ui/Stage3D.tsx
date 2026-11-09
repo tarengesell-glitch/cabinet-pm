@@ -10,7 +10,8 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import type { Room, Wall } from '@/core/index';
 import { direction, halfThickness, insideNormal, wallLength } from '../model/layout';
-import { DRAFT_SETTINGS, itemByCode, standard, type PlaceholderCabinet, type PlaceholderDesign } from '../model/placeholder-draft';
+import type { CabinetView } from '../model/cabinets';
+import { DRAFT_SETTINGS, itemByCode, standard } from '../model/placeholder-draft';
 import { GOLD } from './theme';
 
 /** How the room looks, from the design choices (the intake's look). */
@@ -57,7 +58,8 @@ interface Scene3D {
 
 export function Stage3D(props: {
   room: Room;
-  design: PlaceholderDesign;
+  /** The room's cabinets, appliances and hoods, worked out from the master copy. */
+  cabinets: readonly CabinetView[];
   look: FinishLook;
   selected: string | null;
   doorsOpen: boolean;
@@ -187,7 +189,7 @@ export function Stage3D(props: {
   }, [onError]);
 
   // Rebuild the room whenever it, its design or its look changes.
-  const { room, design, look, selected } = props;
+  const { room, cabinets, look, selected } = props;
   useEffect(() => {
     const s = s3.current;
     if (!s) return;
@@ -199,7 +201,7 @@ export function Stage3D(props: {
     s.walls = [];
     const root = new THREE.Group();
     buildRoom(s, root, room);
-    for (const c of design.cabinets) {
+    for (const c of cabinets) {
       const g = cabinet(s, c, room, look, c.id === selected);
       if (g) root.add(g);
     }
@@ -214,7 +216,7 @@ export function Stage3D(props: {
     s.span = xs.length ? Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...zs) - Math.min(...zs), 60) : 200;
     s.centre.set(cx, 34, cz);
     const widths = new Map<string, number>();
-    for (const c of design.cabinets) widths.set(c.wallId, (widths.get(c.wallId) ?? 0) + c.width);
+    for (const c of cabinets) widths.set(c.wallId, (widths.get(c.wallId) ?? 0) + c.width);
     const main = room.walls.filter((w) => w.kind === 'room').sort((a, b) => (widths.get(b.wall_id) ?? 0) - (widths.get(a.wall_id) ?? 0))[0];
     if (main) {
       const m = insideNormal(room, main);
@@ -232,7 +234,7 @@ export function Stage3D(props: {
       fit(s);
       s.fitted = true;
     }
-  }, [room, design, look, selected]);
+  }, [room, cabinets, look, selected]);
 
   const fitToken = props.fitToken;
   useEffect(() => {
@@ -340,14 +342,14 @@ function placement(room: Room, wall: Wall, offset: number, width: number, depth:
   const u = direction(wall);
   const n = insideNormal(room, wall);
   const along = offset + width / 2;
-  // On a room wall the cabinet stands against the inside face; on a floating wall it is centred on the line.
-  const out = wall.kind === 'room' ? halfThickness(wall) + depth / 2 : 0;
+  // Its back on the wall face (a room wall's inside face; a floating wall's line), facing into the room.
+  const out = (wall.kind === 'room' ? halfThickness(wall) : 0) + depth / 2;
   const x = wall.start_point.x + u.x * along + n.x * out;
   const y = wall.start_point.y + u.y * along + n.y * out;
   return { at: floor(x, y), angle: Math.atan2(n.x, -n.y) };
 }
 
-function cabinet(s: Scene3D, c: PlaceholderCabinet, room: Room, look: FinishLook, isSelected: boolean): THREE.Group | null {
+function cabinet(s: Scene3D, c: CabinetView, room: Room, look: FinishLook, isSelected: boolean): THREE.Group | null {
   if (!DRAFT_SETTINGS.ok) return null;
   const v = DRAFT_SETTINGS.value.visual;
   const wall = room.walls.find((w) => w.wall_id === c.wallId);

@@ -139,7 +139,7 @@ The owner's goal: lock in the wall measurements, openings, cabinet runs, room dr
   - Claude picks between them and writes the notes;
   - Claude never types coordinates.
 - **The AI call runs on Netlify Functions**, with the key kept in Netlify's settings. Designers in any browser, anywhere, call the same function. The site stays plain pages.
-- **Live work must not live only in a browser.** The shared master copy store on Supabase is built **before** the AI designer, on the owner's existing project (`kpbcqnnsjtdafxvvarfw`). This session's Supabase connector could not open that project, so its region (it must be Canada) is not checked yet.
+- **Live work must not live only in a browser.** The shared master copy store on Supabase is built **before** the AI designer, on the Supabase project **cabinet-pm** in Canada (see AD-3).
 - **Design choices → catalog options** (door style, colours, handles): left as blockers for now. Drafts show "door style missing" and similar until that mapping exists.
 - **IK-15 closed:** the design brief now reads the intake's own handover and keeps no copy of the questions (`src/modules/ai-design/README.md`). The brief's format is now 2.
 - **PROPOSED (this session, not owner-decided):**
@@ -390,12 +390,12 @@ Five confirmed rules are now checked in the design tool (HARD-014, PREF-011, PRE
 - **IK-16 Intake permissions.** The intake uses `room.view` and `room.edit` for now. Should it have its own (for example `intake.view`, `intake.edit`), and should clients answering on their own get only those?
 - ~~**IK-17 Ceiling height in two places.**~~ Answered 2026-11-08 (see "The design studio"). The intake asks for a rough ceiling height and the room drawing asks again. Should the intake's answer fill in the room drawing's starting value? The room drawing can't read the intake today (ARCHITECTURE: `designer` may not import `intake`), so this needs the app to pass it, or a change to the dependency table.
 
-- **IK-18 A drawn island with a layout that has none.** The brief refuses a layout with an island (L-shape with island, double island) when the drawing has none. The other way round can't be checked yet: a peninsula is drawn as a floating wall too, and the intake doesn't ask the island questions (colour, panels) for it. Should a peninsula get the island questions? And should a drawn island with a galley, L or U layout be refused?
+- ~~**IK-18 A drawn island with a layout that has none.**~~ Answered 2026-11-09 (owner): a peninsula does not get the island questions, and a drawn island with a galley, L or U layout is not refused. The brief still refuses an island layout with no island drawn. The question was: the brief refuses a layout with an island (L-shape with island, double island) when the drawing has none. The other way round can't be checked yet: a peninsula is drawn as a floating wall too, and the intake doesn't ask the island questions (colour, panels) for it. Should a peninsula get the island questions? And should a drawn island with a galley, L or U layout be refused?
 
 ### From the AI designer plan (2026-11-09)
-- **AD-1 The upper over a fridge.** The room drawing gives it 24" deep, but the catalog has no upper at that depth: `upper_no_shelf` is 12" deep, and its depth limits are not known (CAT-1). Until the shop says which cabinet and depth to use, a draft shows it as a blocker.
-- **AD-2 Moved appliances and the client.** When the AI moves an appliance (at most 24"), does the client need to re-confirm where it goes, or is the designer's approval enough?
-- **AD-3 Supabase access.** This session couldn't open the Supabase project. Please give the Claude Supabase connector access to it, or confirm that it is in the Canada region, before the database step starts.
+- ~~**AD-1 The upper over a fridge.**~~ Answered 2026-11-09 (owner: "sounds good"): it stays a blocker on drafts until the shop names the cabinet and depth. The room drawing gives it 24" deep, but the catalog has no upper at that depth: `upper_no_shelf` is 12" deep, and its depth limits are not known (CAT-1). Until the shop says which cabinet and depth to use, a draft shows it as a blocker.
+- ~~**AD-2 Moved appliances and the client.**~~ Answered 2026-11-09 (owner): "A note on why it moved in the builder and final client approval is enough." The client does not re-confirm a move separately.
+- ~~**AD-3 Supabase access.**~~ Answered 2026-11-09: the platform's database is the Supabase project **cabinet-pm** (`https://btuwrakpnlutemfdxnve.supabase.co`, organization "Gesell/gray", region ca-central-1, Canada), chosen by the owner. The connector reaches it, so database changes are applied from these sessions and reviewed in a pull request. The earlier link (`kpbcqnnsjtdafxvvarfw`) is not used. The Netlify variables must hold this project's URL and publishable key.
 
 ### From the spec (section 11)
 - **S-1** Which Cabinet Vision versions do target shops run, and does ORDX behave the same across them?

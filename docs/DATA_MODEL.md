@@ -14,9 +14,11 @@
 ## platform (PROPOSED owner)
 
 - **users**, **roles**, **permissions**, **role_permissions**. Permissions are strings like `design.approve` or `job.send`. New roles are rows.
+  - *Built 2026-11-09 (step 0a):* a **staff** table (Supabase user, name, roles). Which permissions each role has stays data in `src/platform/permissions/roles.json` (PROPOSED: the database checks only "is staff"; finer permissions are checked by `can()`).
 - **shops**: a manufacturing partner, which is a Hutterite colony. There is one now; more must be possible (OA-1). Not a customer of the software: there is no separate sign-up or billing per shop.
 - **audit_log**, **alerts**, **locks**.
 - **master_copy_versions**: job_id, version_no, parent_version, schema_version, document (JSON, per spec section 6), origin (designer | ai | returned), created_by. Written only by the modules named in ARCHITECTURE "Who writes it".
+  - *Built 2026-11-09 (step 0a):* in Supabase (`supabase/migrations/`), with `shop_id`, `summary` and `created_at` too. Insert only; a version is always its parent + 1, so two saves from the same version can't both land. **shops**, **audit_log** (written by triggers) and **alerts** (resolved only with a note) are built too. `locks` and `gate_results` are not built yet.
 - **gate_results**: master copy version, each check's issues, pass/fail, run at.
 
 ## core

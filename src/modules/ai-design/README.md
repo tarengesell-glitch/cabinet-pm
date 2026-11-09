@@ -25,7 +25,7 @@ What goes in:
 - a dishwasher is paired with a sink that is not in the room;
 - the catalog belongs to another shop;
 - there are no confirmed design rules, or no available cabinet types;
-- any intake answer is missing, "not sure", skipped, "needs follow-up", in the wrong shape, or for a question the brief doesn't know.
+- any intake answer is missing, skipped, "needs follow-up", in the wrong shape, or for a question the brief doesn't know. Intake questions have no "not sure" answer (owner, 2026-11-09); one sent anyway is refused.
 
 The brief never fills in an answer. It reports; the draft run that calls it writes the alert (rule 7) once draft runs exist.
 
@@ -38,8 +38,10 @@ The type is `KitchenIntake` in `model/intake.ts`, taken from `docs/intake/kitche
 - a picked option: `{ status, option_id, label }`;
 - a number: `{ status, count }` (0 means none);
 - yes or no: `{ status, yes }`;
-- not answered yet: `{ status: 'not_sure' | 'skipped' | 'needs_follow_up' }`. The brief refuses it;
-- **PROPOSED:** `{ status: 'not_applicable', reason }`, only for a follow-up an earlier answer ruled out. It is not in DATA_MODEL's answer statuses yet.
+- not answered yet: `{ status: 'skipped' | 'needs_follow_up' }`. The brief refuses it;
+- doesn't apply: `{ status: 'not_applicable', reason }`, only for a follow-up an earlier answer ruled out (owner approved, 2026-11-09).
+
+There is no "not sure": the intake questions don't offer it (owner, 2026-11-09).
 
 `status` is `selected` or `confirmed` (DATA_MODEL "intake").
 
@@ -75,7 +77,7 @@ Not asked: **ceiling height.** The room drawing already holds it, and the master
 Island answers given for a room with no island are refused, as are island colour answers when the island is not in its own colour. They contradict the drawing, so the brief doesn't pick one.
 
 ## DRAFT: instructions for the AI designer (PROPOSED, not decided)
-These are the instructions the AI will be given with the brief. They are a draft for the owner to review.
+These are the instructions the AI will be given with the brief. They are a draft for the owner to review. The walkway paragraph (PRIN-005 and PRIN-013) is confirmed by the owner (2026-11-09); the rest is still a draft.
 
 > You are drafting the cabinet layout for one room. The design brief below is everything you know: the room as drawn, where the cabinets go (the runs), the appliances, the client's answers, the shop's confirmed design rules and the cabinet types you may use. Use only those cabinet types, and only the sizes and options each one allows. Where a size limit is "not known yet", use the standard size. Never invent a cabinet, an option or a size.
 >

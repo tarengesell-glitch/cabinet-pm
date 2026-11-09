@@ -5,7 +5,7 @@
  */
 import { createClient, type PostgrestError, type SupabaseClient } from '@supabase/supabase-js';
 import { ok, refuse, type Result } from '@/core/index';
-import type { AlertRow, BackendFailure, BackendResult, StaffRow, StoreBackend, VersionRow } from './backend';
+import type { AlertRow, BackendFailure, BackendResult, ChoicesRow, StaffRow, StoreBackend, VersionRow } from './backend';
 
 /** The two public settings. Next.js writes them into the pages when the site is built. */
 export function supabaseSettings(
@@ -33,7 +33,8 @@ export function supabaseClient(): Result<SupabaseClient> {
   const settings = supabaseSettings();
   if (!settings.ok) return settings;
   shared = createClient(settings.value.url, settings.value.key, {
-    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
+    // The implicit flow lets a sign-in link work even when it is opened in another browser.
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'implicit' },
   });
   return ok(shared);
 }
@@ -57,7 +58,7 @@ function failure(error: PostgrestError | { message: string; code?: string }): Ba
   }
 }
 
-const VERSION_COLUMNS = 'job_id, version_no, parent_version, shop_id, schema_version, origin, summary, created_by, created_at';
+const VERSION_COLUMNS = 'job_id, version_no, parent_version, shop_id, schema_version, origin, summary, created_by, created_at, studio_job_key, studio_room_key';
 
 export function supabaseBackend(client: SupabaseClient): StoreBackend {
   const run = async <T>(call: () => PromiseLike<{ data: unknown; error: PostgrestError | null }>): Promise<BackendResult<T>> => {
@@ -92,6 +93,21 @@ export function supabaseBackend(client: SupabaseClient): StoreBackend {
     versions: (jobId) =>
       run<Omit<VersionRow, 'document'>[]>(() => client.from('master_copy_versions').select(VERSION_COLUMNS).eq('job_id', jobId).order('version_no', { ascending: false })),
     insertVersion: (row) => run<VersionRow>(() => client.from('master_copy_versions').insert(row).select(`${VERSION_COLUMNS}, document`).single()),
+    latestStudioRoom: (roomKey) =>
+      run<VersionRow | null>(() =>
+        client
+          .from('master_copy_versions')
+          .select(`${VERSION_COLUMNS}, document`)
+          .eq('studio_room_key', roomKey)
+          .order('version_no', { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+      ),
+    latestChoices: (jobKey) =>
+      run<ChoicesRow | null>(() =>
+        client.from('intake_answer_versions').select().eq('job_key', jobKey).order('version_no', { ascending: false }).limit(1).maybeSingle(),
+      ),
+    insertChoices: (row) => run<ChoicesRow>(() => client.from('intake_answer_versions').insert(row).select().single()),
     insertAlert: (row) => run<AlertRow>(() => client.from('alerts').insert(row).select().single()),
     openAlerts: (jobId) =>
       run<AlertRow[]>(() => {

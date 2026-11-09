@@ -24,8 +24,8 @@ test('the steps: design choices first; each later step says what it waits for', 
   await expect(step(page, 'AI design')).toBeDisabled();
   await expect(step(page, 'AI design')).toHaveAttribute('title', 'Finish the design choices for kitchen first.');
   await expect(step(page, 'Customize')).toHaveAttribute('title', 'Run the AI design step first.');
-  await expect(page.getByText(/^Preview job · kept in this browser · mocked user and shop$/)).toBeVisible();
-  await expect(page.getByTitle(/Preview user \(mocked.*colony shop \(mocked/)).toHaveText('mocked user and shop');
+  // Without the shared database (as in these tests) the studio says work stays in this browser, with the mocked user.
+  await expect(page.getByText(/^Preview job · Kept in this browser only: not connected to the shared database · Preview user \(mocked, no sign-in yet\)$/)).toBeVisible();
 });
 
 test('a finished kitchen goes on to its drawing, started from the rough ceiling height', async ({ page }) => {

@@ -90,6 +90,7 @@ Core owns no tables. It owns the master copy *format*: Job, Room, Wall, PlacedIt
 
 - **intake_questions**: room type, order, conditions (for example "if there's an island"), fidelity (line drawing | photorealistic).
 - **intake_options**: label, image asset, a link to a catalog option (if it is a real selection) or a style tag (if it is guidance).
+- **intake_answer_versions** (*built 2026-11-09, step 0b; PROPOSED as a stand-in*): the studio job's whole intake state, saved as a new version on every change, insert only. It stands in for `intake_answers` below until answers are stored one per row.
 - **intake_answers**: job, room, question, option, status (selected, skipped, needs follow-up, not applicable, confirmed; no "not sure": the questions don't offer it, owner 2026-11-09. "Not applicable" is for a follow-up an earlier answer ruled out, with a reason), who, when. The option ID is the source of truth, not the label.
 
 ## appliances (OA-4, OA-5)

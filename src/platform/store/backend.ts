@@ -18,8 +18,23 @@ export interface VersionRow {
   readonly summary: string;
   readonly created_by: string;
   readonly created_at: string;
+  /** PROPOSED stand-in until real jobs exist (BUILD_PLAN 7a): the studio job and room it is filed under. */
+  readonly studio_job_key: string | null;
+  readonly studio_room_key: string | null;
 }
 export type NewVersionRow = Omit<VersionRow, 'created_by' | 'created_at'>;
+
+/** One saved version of a studio job's design choices (table `intake_answer_versions`, owned by intake). */
+export interface ChoicesRow {
+  readonly job_key: string;
+  readonly version_no: number;
+  readonly parent_version: number | null;
+  readonly state: unknown;
+  readonly summary: string;
+  readonly created_by: string;
+  readonly created_at: string;
+}
+export type NewChoicesRow = Omit<ChoicesRow, 'created_by' | 'created_at'>;
 
 /** A failure that blocks a step (table `alerts`). It stays until a person resolves it with a note. */
 export interface AlertRow {
@@ -59,6 +74,10 @@ export interface StoreBackend {
   /** Every version of a job, newest first, without the documents. */
   versions(jobId: string): Promise<BackendResult<readonly Omit<VersionRow, 'document'>[]>>;
   insertVersion(row: NewVersionRow): Promise<BackendResult<VersionRow>>;
+  /** The newest master copy version filed under a studio room. */
+  latestStudioRoom(roomKey: string): Promise<BackendResult<VersionRow | null>>;
+  latestChoices(jobKey: string): Promise<BackendResult<ChoicesRow | null>>;
+  insertChoices(row: NewChoicesRow): Promise<BackendResult<ChoicesRow>>;
   insertAlert(row: Pick<AlertRow, 'source' | 'job_id' | 'message'>): Promise<BackendResult<AlertRow>>;
   openAlerts(jobId: string | null): Promise<BackendResult<readonly AlertRow[]>>;
   resolveAlert(id: string, userId: string, note: string): Promise<BackendResult<AlertRow | null>>;

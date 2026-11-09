@@ -70,6 +70,8 @@ Open it at `/rooms/preview` (`npm run dev`, then http://localhost:3000/rooms/pre
 
 **Measurements are inside, wall face to wall face** (owner, 2026-11-09). The plan's wall labels, the door and window chains, the placing ghost and the panel show the inside length (Core `insideLength`), and a typed length sets it (Core `centreLengthFor`); walls are stored by their centre line. Standard wall thickness: 4 1/2".
 
+**Distances** (owner, 2026-11-09): a selected appliance shows its distance each way along its wall and from its front to the opposing wall; a selected island shows each side's distance to the nearest wall face (Core `distanceToFace`; drawn by `ui/LayoutCanvas.tsx`, with the shared `ui/Dimension.tsx`).
+
 **Rules** are in `model/layout.ts`. The room geometry underneath (spans, corners, where uppers go) is Core's `layout/room-geometry.ts` since 2026-11-09, so the AI designer uses exactly the same; `model/layout.ts` keeps the same names and passes in the numbers from `data/layout-rules.json`.
 - **Positions:** measured along the wall's centre line, like doors and windows.
 - **Where cabinets stand:** against the wall's inside face, and only as far as the inside corners (`insideSpan`). The 3", 6" and 9" corner gaps are measured from there. Its rules are data in `data/layout-rules.json`, read by `model/layout-rules.ts`, which fails loudly at start-up if the file is bad. Entries marked PROPOSED there are mockup defaults the owner has not confirmed.

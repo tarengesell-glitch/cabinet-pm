@@ -406,3 +406,37 @@ test('grab cabinets and drag them along the wall: they slide, keeping their leng
   // Wall C runs right to left, so moving right on screen moves it towards C's start.
   expect(moved[0]!.offset).toBe(drawn.offset - 20 * IN);
 });
+
+test('a selected appliance shows its distances: along its wall, and to the opposing wall (owner, 2026-11-09)', async ({ page }) => {
+  await bareKitchen(page);
+  const at = await plotter(page);
+  let p = at(100, 12); // a run along wall A
+  await page.mouse.click(p.x, p.y);
+  await page.getByRole('button', { name: 'Appliances', exact: true }).click();
+  await page.getByRole('region', { name: 'Appliances' }).getByRole('button', { name: /^Sink/ }).click();
+  p = at(70, 10); // under wall A's window: the sink lands at 50", its dishwasher to its right
+  await page.mouse.click(p.x, p.y);
+  await expect(page.getByRole('dialog', { name: 'Sink' })).toBeVisible();
+  const text = (name: string) =>
+    page.evaluate((n) => {
+      const w = window as unknown as { Konva: { stages: { findOne: (s: string) => { text: () => string } | undefined }[] } };
+      return w.Konva.stages[0]!.findOne(n)?.text() ?? null;
+    }, name);
+  // From wall A's inside corner (2 1/4" in) to the sink at 50": 47 3/4". The dishwasher touches it on the right, so no measurement there.
+  await expect.poll(() => text('.along-before-text')).toBe('47 3/4"');
+  expect(await text('.along-after-text')).toBeNull();
+  // From the sink's front to the face of the opposing wall C.
+  expect(await text('.opposite-text')).toMatch(/^\d+( \d+\/\d+)?"$/);
+});
+
+test('a selected island shows the distance from each of its sides to the nearest wall (owner, 2026-11-09)', async ({ page }) => {
+  await bareKitchen(page);
+  await page.getByRole('button', { name: 'Add island' }).click();
+  const texts = () =>
+    page.evaluate(() => {
+      const w = window as unknown as { Konva: { stages: { findOne: (s: string) => { text: () => string } | undefined }[] } };
+      return ['front', 'back', 'start', 'end'].map((k) => w.Konva.stages[0]!.findOne(`.island-${k}-text`)?.text() ?? null);
+    });
+  await expect.poll(async () => (await texts()).every((t) => t !== null && /^\d/.test(t))).toBe(true);
+  await page.screenshot({ path: 'test-results/island-distances.png' });
+});

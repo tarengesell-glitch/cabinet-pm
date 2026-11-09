@@ -7,13 +7,15 @@
  */
 import { useRef } from 'react';
 import { Circle, Group, Line, Rect, Text } from 'react-konva';
-import { formatInches, type AppliancePlacement, type Point, type Room, type Run, type RunKind, type Wall } from '@/core/index';
+import { distanceToFace, formatInches, type AppliancePlacement, type Point, type Room, type Run, type RunKind, type Wall } from '@/core/index';
 import {
+  applianceEnd,
   cornerCabinets,
   direction,
   findRun,
   halfThickness,
   insideNormal,
+  insideSpan,
   jointLimits,
   nearestIslandDepth,
   runEnd,
@@ -27,6 +29,7 @@ import {
 } from '../model/layout';
 import { LAYOUT_RULES, applianceType } from '../model/layout-rules';
 import { ERROR, INK as THEME_INK, NAVY, NAVY_FILL, NAVY_FILL_LIGHT } from './theme';
+import { Dimension } from './Dimension';
 import type { LayoutEdit } from './layoutEdits';
 
 /** UI settings (not business values): touch targets and snapping reach, in screen pixels. */
@@ -292,7 +295,72 @@ export function LayoutShapes(props: {
       shapes.push(<Rect key="h-depth" name="run-depth-handle" x={dp.x - 6} y={dp.y - 6} width={12} height={12} fill="#fff" stroke={ACCENT} strokeWidth={2} listening={false} />);
     }
   }
+  shapes.push(...selectionDistances(r, selection, toScreen));
   return <Group name="layout">{shapes}</Group>;
+}
+
+const MEASURE = '#2f6f8f';
+
+/**
+ * Distances for what is selected, while it is placed, dragged or resized (owner, 2026-11-09):
+ * an appliance's distance to the next thing on its wall each side (an inside corner, another
+ * appliance, a door or window) and, on a room wall, to the opposing wall's face; an island's
+ * distance from each of its four sides to the nearest wall face.
+ */
+function selectionDistances(r: Room, selection: LayoutSelection, toScreen: ToScreen): React.ReactNode[] {
+  const out: React.ReactNode[] = [];
+  const screenDir = (p: Point, d: { x: number; y: number }, px: number) => {
+    const a = toScreen(p);
+    const b = toScreen({ x: p.x + d.x * INCH, y: p.y + d.y * INCH });
+    const l = Math.hypot(b.x - a.x, b.y - a.y) || 1;
+    return { x: ((b.x - a.x) / l) * px, y: ((b.y - a.y) / l) * px };
+  };
+  const measure = (key: string, from: Point, dir: { x: number; y: number }, side: { x: number; y: number }, skip: string | null) => {
+    const dist = distanceToFace(r, from, dir, skip);
+    if (dist === null || dist < 1) return;
+    const to = { x: from.x + dir.x * dist, y: from.y + dir.y * dist };
+    out.push(<Dimension key={key} name={`distance ${key}`} a={toScreen(from)} b={toScreen(to)} off={screenDir(from, side, 12)} text={formatInches(Math.round(dist))} colour={MEASURE} />);
+  };
+
+  if (selection?.kind === 'appliance') {
+    const w = r.walls.find((x) => x.appliances.some((a) => a.placement_id === selection.id));
+    const a = w?.appliances.find((x) => x.placement_id === selection.id);
+    if (!w || !a) return out;
+    const u = direction(w);
+    const n = insideNormal(r, w);
+    const lo = a.offset;
+    const hi = applianceEnd(a);
+    const span = insideSpan(r, w);
+    const others = [
+      ...w.appliances.filter((x) => x !== a).map((x) => [x.offset, applianceEnd(x)] as const),
+      ...w.openings.map((o) => [o.offset.value, o.offset.value + o.width.value] as const),
+    ];
+    const left = Math.max(span.start, ...others.map(([, e]) => e).filter((e) => e <= lo));
+    const right = Math.min(span.end, ...others.map(([s]) => s).filter((s) => s >= hi));
+    const [, d1] = depthRange(w, applianceDepth(w, a));
+    const front = d1 + 3 * INCH;
+    for (const [key, from, to] of [['before', left, lo], ['after', hi, right]] as const) {
+      if (to - from < 1) continue;
+      const p = on(r, w, from, front);
+      out.push(<Dimension key={`along-${key}`} name={`distance along-${key}`} a={toScreen(p)} b={toScreen(on(r, w, to, front))} off={screenDir(p, n, 10)} text={formatInches(to - from)} colour={MEASURE} />);
+    }
+    if (w.kind === 'room') measure('opposite', on(r, w, (lo + hi) / 2, d1), n, u, w.wall_id);
+  }
+
+  if (selection?.kind === 'runs' && selection.ids.length === 1) {
+    const found = findRun(r, selection.ids[0] as string);
+    if (!found || found.wall.kind !== 'floating') return out;
+    const { wall: w, run } = found;
+    const u = direction(w);
+    const n = insideNormal(r, w);
+    const [d0, d1] = depthRange(w, run.depth);
+    const mid = (run.offset + runEnd(run)) / 2;
+    measure('island-front', on(r, w, mid, d1), n, u, null);
+    measure('island-back', on(r, w, mid, d0), { x: -n.x, y: -n.y }, u, null);
+    measure('island-start', on(r, w, run.offset, 0), { x: -u.x, y: -u.y }, n, null);
+    measure('island-end', on(r, w, runEnd(run), 0), u, n, null);
+  }
+  return out;
 }
 
 // ---------- pointer handling for the Cabinets & appliances tool ----------

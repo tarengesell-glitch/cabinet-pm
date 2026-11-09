@@ -162,7 +162,9 @@ The owner tried the studio on a real job and asked for seven changes. The answer
   - the standard is now 4 1/2";
   - a room that still started new walls at the old 5 1/2" default takes the new one;
   - every existing wall in the database was changed to 4 1/2" as a new version of its room.
-- **Distances while placing islands and appliances:** to the ends of the wall, the opposing wall, and the other things on the same wall.
+- **Distances while placing islands and appliances:** to the ends of the wall, the opposing wall, and the other things on the same wall. *Built:*
+  - a selected appliance, including while it is dragged, shows its distance each way along its wall (to the inside corner, or the nearest appliance, door or window) and, on a room wall, from its front to the opposing wall's face;
+  - a selected island shows the distance from each of its four sides to the nearest wall face.
 - **Over a range or cooktop**, the designer chooses Cabinet, Appliance hood or Millwork hood, on the appliance. A new one starts as Appliance hood.
 - **Bathroom-type rooms:**
   - the tray offers a toilet (30"), a vanity sink (20"), a double vanity sink (60"), a tub (60") and a shower (48");

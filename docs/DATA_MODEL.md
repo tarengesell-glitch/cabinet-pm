@@ -82,7 +82,7 @@ Core owns no tables. It owns the master copy *format*: Job, Room, Wall, PlacedIt
 
 ## projects
 
-- **customers**, **leads**, **jobs** (job_id shared with the master copy; status, owner, target delivery date), **quotes**, **quote_lines**, **milestones**, **schedule_entries**.
+- **customers** (*built 2026-11-09*: `id`, household `name`, `contacts` (one or two, each with a role, a name, an email and a phone), `address`, `notes`, who added and last changed it. Staff only, never deleted, every change audited. Real client details live only here, never in code: the repository is public), **leads**, **jobs** (job_id shared with the master copy; status, owner, target delivery date), **quotes**, **quote_lines**, **milestones**, **schedule_entries**.
 - **payments**: amount, status and reference from the payment connector. "Paid" for the push gate is open (PAY-1).
 - Stores no design data. Quotes are priced from the catalog and a named master copy version. An issued quote freezes the prices it used (earlier decision, still in force).
 

@@ -147,6 +147,22 @@ The owner's goal: lock in the wall measurements, openings, cabinet runs, room dr
   - the AI judge's instructions;
   - the "Not reviewed by AI" label when the call fails.
 
+### 2026-11-09: Real clients live only in the database (owner asked to add a real client)
+- **The repository is public on GitHub, and the site's code reaches every visitor's browser.** So real client details (names, emails, phones, addresses) are **never** written in code, commits, pull requests or docs. That includes the demo-client file. They live only in the shared database (`customers`, owned by projects), where only signed-in staff can read them.
+- **The table:** `customers` (`supabase/migrations/20261109000004_customers.sql`).
+  - Staff can read, add and change clients. No one can delete one.
+  - Every add and change writes an audit row with the old and new values. Who added a client, and when, can't be changed.
+  - Tested against the real project in rolled-back transactions; all 10 checks passed. Letting any signed-in account read clients was tried on purpose (rolled back): a non-staff account then saw the client, so that test catches it.
+- **The screens:**
+  - **Clients** lists real clients first, then the demo clients, still labelled.
+  - **New client** (owner: yes) adds one. It needs the database, and it is refused with reasons when the name is missing, the primary contact can't be reached, or an email or phone isn't valid.
+  - Real clients open at `/clients/view/?id=…`, because the site is plain pages.
+  - "Start a design" opens the client's job, keyed by the client's ID until jobs have their own records (BUILD_PLAN 7a).
+- **The first real client** was added straight into the database through the connector, recorded as added by the owner's account.
+- **PROPOSED (this session, not owner-decided):**
+  - permissions `client.view` and `client.add` for owner, admin and designer;
+  - a client has a household name plus one or two contacts, each with a name, an email and a phone.
+
 ### 2026-11-09: AI designer: layout builder (plan step 3)
 - **Built:** `src/modules/ai-design/model/engine/` (README "The layout builder"). It is ordinary code that fills a room with catalog cabinets at exact positions. It makes several options, each checked with the same checks as a human design and scored against the confirmed rules. Its data is `src/modules/ai-design/data/draft-rules.json`, each entry with its source.
 - **Appliance moves:** 24" at most, along their own wall, and only for a reason:

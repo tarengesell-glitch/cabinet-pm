@@ -7,4 +7,6 @@ The shared database's tables, rules and their history, as SQL files applied in n
 
 - `20261109000003_studio_jobs.sql`: files each studio room's master copy under its studio job and room, and adds `intake_answer_versions` for the design choices, with the same rules.
 
+- `20261109000004_customers.sql`: real clients (projects): staff only, never deleted, every add and change audited.
+
 What these enforce, and how to add a person, is in `src/platform/README.md`.

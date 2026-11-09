@@ -1,20 +1,21 @@
 'use client';
-/** One client (placeholder, demo data): their design, contact, notes and open tasks. */
+/** One client (a real client from the database, or a demo client): their design, contact, notes and open tasks. */
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { PlanThumb } from '@/modules/designer/ui/index';
-import { demoClient, jobName } from '../../../demo-data';
+import { useClients } from '../../../clients';
+import { jobName } from '../../../demo-data';
 import { jobProgress, type JobProgress } from '../../../job-progress';
 import { useOffice } from '../../OfficeFrame';
 import { studioHref, TaskRow } from '../../parts';
 import s from '../../office.module.css';
 
 export function ClientPage({ id }: { id: string }) {
-  const c = demoClient(id);
+  const c = useClients().find(id);
   const { tasks } = useOffice();
   const [progress, setProgress] = useState<JobProgress | null | undefined>(undefined);
   useEffect(() => setProgress(jobProgress(id)), [id]);
-  if (!c) return <div className={s.screen}><div className={s.empty}>There is no client “{id}” in the demo data.</div></div>;
+  if (!c) return <div className={s.screen}><div className={s.empty}>There is no client “{id}”, or this account can’t see it.</div></div>;
   const open = tasks.filter((t) => t.clientId === id && !t.done);
   return (
     <div className={s.screen}>
@@ -24,7 +25,10 @@ export function ClientPage({ id }: { id: string }) {
             ← Clients
           </Link>
           <h1 className={s.h1}>{c.name}</h1>
-          <p className={s.sub}>{c.address}</p>
+          <p className={s.sub}>
+            {c.address}
+            {c.demo ? ' · demo client' : ''}
+          </p>
         </div>
         <div className={s.headActions}>
           <Link className={s.btnPrimaryLg} href={studioHref(c)}>
@@ -79,22 +83,42 @@ export function ClientPage({ id }: { id: string }) {
           <dl className={s.kv}>
             <dt>Primary</dt>
             <dd>{c.primary}</dd>
+            {c.email && (
+              <>
+                <dt>Email</dt>
+                <dd className={s.mono}>{c.email}</dd>
+              </>
+            )}
+            {c.phone && (
+              <>
+                <dt>Phone</dt>
+                <dd className={s.mono}>{c.phone}</dd>
+              </>
+            )}
             {c.secondary && (
               <>
                 <dt>Also</dt>
                 <dd>{c.secondary}</dd>
               </>
             )}
-            <dt>Email</dt>
-            <dd className={s.mono}>{c.email}</dd>
-            <dt>Phone</dt>
-            <dd className={s.mono}>{c.phone}</dd>
+            {c.secondaryEmail && (
+              <>
+                <dt>Email</dt>
+                <dd className={s.mono}>{c.secondaryEmail}</dd>
+              </>
+            )}
+            {c.secondaryPhone && (
+              <>
+                <dt>Phone</dt>
+                <dd className={s.mono}>{c.secondaryPhone}</dd>
+              </>
+            )}
           </dl>
           <div>
             <p className={s.label} style={{ marginBottom: 6 }}>
               Notes
             </p>
-            <p className={s.prior}>{c.notes}</p>
+            <p className={s.prior}>{c.notes || 'None.'}</p>
           </div>
           <div>
             <p className={s.label} style={{ marginBottom: 6 }}>

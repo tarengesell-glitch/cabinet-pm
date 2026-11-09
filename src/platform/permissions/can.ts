@@ -5,7 +5,7 @@
  */
 import rolesData from './roles.json';
 
-export type Permission = 'room.view' | 'room.edit';
+export type Permission = 'room.view' | 'room.edit' | 'client.view' | 'client.add';
 
 export interface User {
   readonly id: string;

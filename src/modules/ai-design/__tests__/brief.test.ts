@@ -108,10 +108,9 @@ describe('refusing the brief', () => {
     expect(problems).toEqual(['"Door colour" has no answer.']);
   });
 
-  it('refuses "not sure", "skipped" and "needs follow-up" instead of filling them in', () => {
+  it('refuses "skipped" and "needs follow-up" instead of filling them in', () => {
     const problems = refusal({
       intake: intakeWith((a) => {
-        a['drawer_level'] = { status: 'not_sure' };
         a['interiors'] = { status: 'skipped' };
         a['corner_insert'] = { status: 'needs_follow_up' };
       }),
@@ -119,7 +118,13 @@ describe('refusing the brief', () => {
     expect(problems).toEqual([
       '"Corner cabinets: double shelf or lazy Susan" is marked "needs follow-up". It needs the client\'s answer.',
       '"Cabinet interiors" is marked skipped. It needs the client\'s answer.',
-      '"Drawers: minimum, moderate or maximum" is marked "not sure". It needs the client\'s answer.',
+    ]);
+  });
+
+  it('refuses "not sure": intake questions have no such answer (owner, 2026-11-09)', () => {
+    const problems = refusal({ intake: intakeWith((a) => (a['drawer_level'] = { status: 'not_sure' })) });
+    expect(problems).toEqual([
+      '"Drawers: minimum, moderate or maximum" is not in the expected shape: it needs a picked option (its ID and label).',
     ]);
   });
 

@@ -6,8 +6,9 @@
  * questions are listed here. The options (their IDs, labels and pictures) are intake's data
  * (rule 6), so an answer carries the option's ID and label exactly as intake stored them.
  *
- * Nothing is filled in (rule 7). A missing answer, "not sure", "skipped" or "needs follow-up"
- * refuses the brief, naming the question.
+ * Nothing is filled in (rule 7). A missing, "skipped" or "needs follow-up" answer refuses the
+ * brief, naming the question. Intake questions have no "not sure" answer (owner, 2026-11-09),
+ * so one is refused as an answer in the wrong shape.
  */
 import { z } from 'zod';
 
@@ -95,11 +96,14 @@ export interface YesNoAnswer {
   readonly status: Given;
   readonly yes: boolean;
 }
-/** A question the client has not really answered. The brief refuses these. */
+/** A question the client has not answered yet. The brief refuses these. */
 export interface OpenAnswer {
-  readonly status: 'not_sure' | 'skipped' | 'needs_follow_up';
+  readonly status: 'skipped' | 'needs_follow_up';
 }
-/** PROPOSED: a follow-up an earlier answer ruled out (for example "knob" when it is all handles). */
+/**
+ * A follow-up an earlier answer ruled out (for example "knob" when it is all handles).
+ * Owner, 2026-11-09: approved as an answer status. Only follow-up questions may use it.
+ */
 export interface NotApplicable {
   readonly status: 'not_applicable';
   readonly reason: string;
@@ -129,7 +133,7 @@ export interface BriefAnswer {
 
 const Text = z.string().trim().min(1);
 const GivenSchema = z.enum(['selected', 'confirmed']);
-const OPEN_STATUSES = { not_sure: '"not sure"', skipped: 'skipped', needs_follow_up: '"needs follow-up"' } as const;
+const OPEN_STATUSES = { skipped: 'skipped', needs_follow_up: '"needs follow-up"' } as const;
 const SHAPE_SCHEMAS = {
   choice: z.strictObject({ status: GivenSchema, option_id: Text, label: Text }),
   count: z.strictObject({ status: GivenSchema, count: z.number().int().min(0) }),
@@ -137,7 +141,7 @@ const SHAPE_SCHEMAS = {
 } as const;
 const SHAPE_WORDS = { choice: 'a picked option (its ID and label)', count: 'a whole number, 0 or more', yes_no: 'yes or no' };
 const NotApplicableSchema = z.strictObject({ status: z.literal('not_applicable'), reason: Text });
-const OpenSchema = z.strictObject({ status: z.enum(['not_sure', 'skipped', 'needs_follow_up']) });
+const OpenSchema = z.strictObject({ status: z.enum(['skipped', 'needs_follow_up']) });
 const InputSchema = z.strictObject({ room_type: z.string(), answers: z.record(z.string(), z.unknown()) });
 
 /**

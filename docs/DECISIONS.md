@@ -120,6 +120,15 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 - **Room drawing, round 9 (owner, 2026-11-05): edge scrolling.** While drawing walls or dragging a handle, a cursor within 40 px of the plan's edge scrolls the plan that way, faster nearer the edge, as AutoCAD, SketchUp and Figma do. The wall or drag being made follows the cursor. It stops when the cursor moves back in.
 - Room capture is pulled ahead of Phase 5 (BUILD_PLAN). Order: scaffold (1a), then Core walls and openings, then the Designer drawing screen.
 
+### 2026-11-09: AI design brief: owner answers (chat, 2026-11-09)
+The design brief (`src/modules/ai-design/`, PR #29) asked three questions. The owner's answers:
+- **No "not sure" answers.** The intake questions don't let the client answer "not sure". The brief refuses one if it is ever sent. "Not sure" is removed from the intake answer statuses (DATA_MODEL "intake").
+- **"Not applicable" is an answer status.** It is for a follow-up question that an earlier answer ruled out (for example "which knob?" when the client chose all handles), and it carries a reason. Main questions can't be marked not applicable.
+- **Walkways (PRIN-005, PRIN-013), as written in the AI designer's draft instructions:**
+  - when lining up and walkway width pull against each other, lining up wins as long as the walkway stays over 36" (PRIN-013);
+  - below 36", and when centring or alignment pulls against walkway width (PRIN-005), the AI explains the trade-off and the designer decides.
+- The rest of the AI designer's draft instructions are still PROPOSED.
+
 ### 2026-11-08: The design studio (owner: "the design choices flow seems to work well, so let's integrate that into the actual code", Kitchen Studio prototype, https://claude.ai/artifact/Tkd2r8vTUswCs3ioJnGjqg)
 - **C-2 answered: the look is the prototype's**, which is closet-builder's owner-approved design system: navy (#1A3045) to act or show "you are here", gold (#D4B57F) for what is selected, Newsreader for headings, Geist for everything else, light only. The owner asked for "the more polished UI of the artifact". The tokens live once, in `src/platform/design-system/tokens.css`; the palette in `docs/ux/UX_BRIEF.md` Part 4 is replaced. The owner's wall colours (pastel red unmeasured, black confirmed) stay.
 - **The design studio (`/studio`)** puts one job's steps in a row along the top: Design choices · Room drawing · AI design · Customize, with the job's rooms as chips under them, as in the prototype. Clicking a room chip switches rooms in either step.

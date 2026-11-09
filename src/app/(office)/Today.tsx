@@ -2,7 +2,8 @@
 /** Today (placeholder, demo data): the next three days of calls, today's tasks, designs in progress. */
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { DEMO_CLIENTS, DEMO_MEETINGS, demoClient, demoDate, type DemoMeeting } from '../demo-data';
+import { useClients, type ClientInfo } from '../clients';
+import { DEMO_MEETINGS, demoClient, demoDate, type DemoMeeting } from '../demo-data';
 import { jobProgress, type JobProgress } from '../job-progress';
 import { useOffice } from './OfficeFrame';
 import { AddTask, dayDiff, dayLabel, JobRow, studioHref, TaskRow, taskDue, timeLabel } from './parts';
@@ -12,13 +13,14 @@ export function Today() {
   const { tasks, toast } = useOffice();
   const [open, setOpen] = useState<string | null>('m1');
   const [adding, setAdding] = useState(false);
-  const [jobs, setJobs] = useState<{ client: (typeof DEMO_CLIENTS)[number]; progress: JobProgress }[]>([]);
+  const { list } = useClients();
+  const [jobs, setJobs] = useState<{ client: ClientInfo; progress: JobProgress }[]>([]);
   useEffect(() => {
-    setJobs(DEMO_CLIENTS.flatMap((c) => {
+    setJobs(list.flatMap((c) => {
       const p = jobProgress(c.id);
       return p && p.stage !== 'Designed' ? [{ client: c, progress: p }] : [];
     }));
-  }, []);
+  }, [list]);
 
   const meetings = [...DEMO_MEETINGS].sort((a, b) => demoDate(a.day, a.hour, a.minute).getTime() - demoDate(b.day, b.hour, b.minute).getTime());
   const days = [...new Set(meetings.map((m) => m.day))];

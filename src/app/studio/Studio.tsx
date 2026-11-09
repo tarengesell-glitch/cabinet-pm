@@ -7,8 +7,8 @@
  *
  * Each job is saved to the shared database as the person works, by the signed-in staff member
  * (`app/sync`); without the database it is kept in this browser only, with the labelled preview
- * user. The jobs are still the demo clients until real jobs exist (BUILD_PLAN 7a). A demo client's
- * job is opened with `?job=<client>`; without it, the studio opens the preview job. The AI design
+ * user. Each client (a real client from the database, or a demo client) has one job until jobs have
+ * their own records (BUILD_PLAN 7a). A client's job is opened with `?job=<client ID>`; without it, the studio opens the preview job. The AI design
  * step is a PLACEHOLDER: an animation, then a fixed recipe fills the rooms (no AI is called).
  */
 import Link from 'next/link';
@@ -18,7 +18,8 @@ import { roomDrawingStatus, type DraftPreferences, type DrawerLevel, type RoomDr
 import { Customize, RoomCapture } from '@/modules/designer/ui/index';
 import { INTAKE_DEFINITION, intakeHandover, loadIntakeState, roomLook, roomSummary, roughCabinetTop, roughCeiling, type IntakeState, type RoomHandover } from '@/modules/intake/contract';
 import { IntakeScreen } from '@/modules/intake/ui/index';
-import { demoClient, jobName } from '../demo-data';
+import { clientHref, type ClientInfo } from '../clients';
+import { jobName } from '../demo-data';
 import { WhoIsIn } from '../sync/session';
 import { AiStep } from './AiStep';
 import { TestDataMenu } from './TestDataMenu';
@@ -62,9 +63,8 @@ function readIntake(job: string | null): IntakeState | null {
   return loaded.kind === 'found' ? loaded.state : null;
 }
 
-export function Studio({ user, saveStatus }: { user: User; saveStatus: ReactNode }) {
+export function Studio({ user, saveStatus, client }: { user: User; saveStatus: ReactNode; client: ClientInfo | null }) {
   const job = useMemo(() => new URLSearchParams(window.location.search).get('job'), []);
-  const client = demoClient(job);
   const [stage, setStage] = useState<Stage>('choices');
   const [intake, setIntake] = useState<IntakeState | null>(() => readIntake(job));
   const [roomId, setRoomId] = useState<string | null>(() => {
@@ -139,13 +139,13 @@ export function Studio({ user, saveStatus }: { user: User; saveStatus: ReactNode
   return (
     <div className={s.flow}>
       <header className={s.top}>
-        <Link className={s.back} href={client ? `/clients/${client.id}/` : '/'} aria-label={client ? `Back to ${client.name}` : 'Back to Today'}>
+        <Link className={s.back} href={client ? clientHref(client) : '/'} aria-label={client ? `Back to ${client.name}` : 'Back to Today'}>
           ←
         </Link>
         <div className={s.title}>
           <div className={s.name}>{client ? jobName(client) : 'Design studio'}</div>
           <div className={s.who}>
-            {client ? `${client.name} (demo client)` : 'Preview job'} · {saveStatus} · <WhoIsIn />
+            {client ? `${client.name}${client.demo ? ' (demo client)' : ''}` : 'Preview job'} · {saveStatus} · <WhoIsIn />
           </div>
           <div className={s.whoShort}>{saveStatus}</div>
         </div>

@@ -168,6 +168,33 @@ export function centreLengthFor(r: Room, w: Wall, inside: Length): Length {
   return inside + span.start + (wallLength(w) - span.end);
 }
 
+/**
+ * How far it is from a point, going in one direction, to the first room wall's inside face: the
+ * distance to the opposing wall, as a designer measures it (owner, 2026-11-09). Null when no wall
+ * is in that direction. `skipWallId` leaves out the wall the measurement starts from.
+ */
+export function distanceToFace(r: Room, from: Point, dir: Dir, skipWallId: string | null = null): number | null {
+  let best: number | null = null;
+  for (const w of r.walls) {
+    if (w.kind !== 'room' || w.wall_id === skipWallId) continue;
+    const n = insideNormal(r, w);
+    const h = halfThickness(w);
+    const ax = w.start_point.x + n.x * h;
+    const ay = w.start_point.y + n.y * h;
+    const ex = w.end_point.x - w.start_point.x;
+    const ey = w.end_point.y - w.start_point.y;
+    // from + dir·t = a + e·s, solved for t (along the ray) and s (along the face, 0 to 1).
+    const det = dir.x * -ey - dir.y * -ex;
+    if (Math.abs(det) < 1e-9) continue;
+    const dx = ax - from.x;
+    const dy = ay - from.y;
+    const t = (dx * -ey - dy * -ex) / det;
+    const s = (dir.x * dy - dir.y * dx) / det;
+    if (t > 1e-6 && s >= -1e-9 && s <= 1 + 1e-9 && (best === null || t < best)) best = t;
+  }
+  return best;
+}
+
 /** The run that reaches the wall's first inside corner, if any. */
 export const runAtStart = (r: Room, w: Wall): Run | null => w.runs.find((x) => x.offset <= insideSpan(r, w).start) ?? null;
 /** The run that reaches the wall's last inside corner, if any. */

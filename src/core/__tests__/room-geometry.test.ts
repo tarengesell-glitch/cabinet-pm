@@ -4,6 +4,7 @@ import { ft, inch } from '../examples/helpers';
 import {
   centreLengthFor,
   cornerCabinets,
+  distanceToFace,
   insideLength,
   doorwayZones,
   insideSpan,
@@ -145,5 +146,17 @@ describe('inside lengths, as measured on site (owner, 2026-11-09)', () => {
     const r = examples.lShapeWithAngledWall().rooms[0]!;
     const slanted = r.walls.find((w) => w.start_point.x !== w.end_point.x && w.start_point.y !== w.end_point.y)!;
     expect(insideLength(r, slanted).exact).toBe(false);
+  });
+});
+
+describe('the distance to the opposing wall (owner, 2026-11-09)', () => {
+  it('runs from a point to the first inside face in that direction', () => {
+    const r = room();
+    // From the middle of the room, straight up: the inside face of wall C (10' centre line, 2 1/4" in).
+    expect(distanceToFace(r, { x: ft(6), y: ft(5) }, { x: 0, y: 1 })).toBe(ft(5) - inch(2, 1, 4));
+    // From the front of a 24" run on wall A (2 1/4" + 24" in), straight across.
+    expect(distanceToFace(r, { x: ft(6), y: inch(26, 1, 4) }, { x: 0, y: 1 }, r.walls[0]!.wall_id)).toBe(ft(10) - inch(2, 1, 4) - inch(26, 1, 4));
+    // Out of the room through a wall: the first face it meets.
+    expect(distanceToFace(r, { x: ft(6), y: ft(5) }, { x: -1, y: 0 })).toBe(ft(6) - inch(2, 1, 4));
   });
 });

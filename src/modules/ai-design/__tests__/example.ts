@@ -1,9 +1,10 @@
 // An example kitchen for the design brief tests: Core's example kitchen (a 12' x 10' room with a
 // window, a door, a sink and dishwasher under the window, a range and a pantry), plus an island,
-// on the colony shop's catalog, with a complete set of intake answers.
+// on the colony shop's catalog, with a finished set of design choices.
 import { examples, fromInches, JobSchema, type Job, type Length } from '@/core/index';
 import { CURRENT_CATALOG } from '@/modules/catalog/contract';
-import type { KitchenIntake } from '../model/intake';
+import type { RoomHandover } from '@/modules/intake/contract';
+import handover from './kitchen-handover.json';
 
 function inch(whole: number): Length {
   const r = fromInches(whole);
@@ -46,45 +47,12 @@ export function kitchenWithIsland(): Job {
   });
 }
 
-const pick = (option: number, label: string) => ({ status: 'selected', option_id: `opt-${option}`, label }) as const;
-
-export function kitchenIntake(): KitchenIntake {
-  return {
-    room_type: 'kitchen',
-    answers: {
-      shape: pick(1, 'L-Shape with Island'),
-      cabinet_height: pick(2, 'To the Ceiling'),
-      feel: pick(3, 'Transitional'),
-      material: pick(4, 'Solid painted'),
-      colour_tone: pick(5, 'White doors, dark counters'),
-      door_style: pick(6, 'Transitional'),
-      door_colour: { status: 'confirmed', option_id: 'opt-7', label: 'Chantilly Lace' },
-      counter_colour: pick(8, 'Charcoal quartz'),
-      hardware: pick(9, 'All handles'),
-      handle: pick(10, 'Bar pull, 6", matte black'),
-      knob: { status: 'not_applicable', reason: 'all handles' },
-      handle_position_doors: pick(11, 'Vertical'),
-      handle_position_drawers: pick(12, 'Centred'),
-      top_trim_style: pick(13, 'Flat crown'),
-      top_trim_colour: pick(14, 'Match doors'),
-      light_valance: pick(15, 'Hidden'),
-      light_valance_colour: { status: 'not_applicable', reason: 'the light valance is hidden' },
-      corner_insert: pick(16, 'Lazy Susan'),
-      cutlery_organizers: { status: 'selected', count: 1 },
-      utility_organizers: { status: 'selected', count: 1 },
-      spice_organizers: { status: 'selected', count: 0 },
-      tray_organizers: { status: 'selected', count: 1 },
-      garbage_recycling_cabinets: { status: 'selected', count: 1 },
-      interiors: pick(17, 'White'),
-      drawer_level: pick(18, 'Moderate'),
-      island_own_colour: { status: 'selected', yes: true },
-      island_back_panel: pick(19, 'Shaker panels'),
-      island_side_panel: pick(20, 'Waterfall stone'),
-      island_material: pick(21, 'Wood grain'),
-      island_colour_tone: pick(22, 'Dark-medium doors, white counters'),
-      island_door_style: pick(23, 'Transitional'),
-      island_door_colour: pick(24, 'Walnut'),
-      island_counter_colour: pick(25, 'White quartz'),
-    },
-  };
+/**
+ * A finished kitchen, exactly as the intake hands it over (`intakeHandover`): an L-shape with an
+ * island, cabinets to the ceiling, handles only, a lazy Susan, a dedicated garbage cabinet with
+ * two slide-outs, and moderate drawers. Made by answering the real intake questions (2026-11-09),
+ * so every option ID is the intake's own. A copy, so tests can change it freely.
+ */
+export function kitchenIntake(): RoomHandover {
+  return structuredClone(handover) as RoomHandover;
 }

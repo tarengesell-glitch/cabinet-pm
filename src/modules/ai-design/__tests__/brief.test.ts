@@ -1,15 +1,20 @@
 import { describe, expect, it } from 'vitest';
 import type { Job } from '@/core/index';
 import { CURRENT_CATALOG, type Catalog } from '@/modules/catalog/contract';
+import { INTAKE_DEFINITION } from '@/modules/intake/contract';
 import { DESIGN_RULES, type DesignRules } from '@/modules/shop-settings/contract';
 import { buildDesignBrief, type DesignBriefInput } from '../contract';
 import { KITCHEN_ROOM_ID, kitchenIntake, kitchenWithIsland } from './example';
+
+if (!INTAKE_DEFINITION.ok) throw new Error(INTAKE_DEFINITION.reason);
+const intakeDefinition = INTAKE_DEFINITION.value;
 
 const input = (over: Partial<DesignBriefInput> = {}): DesignBriefInput => ({
   job: kitchenWithIsland(),
   roomId: KITCHEN_ROOM_ID,
   catalog: CURRENT_CATALOG,
   designRules: DESIGN_RULES,
+  intakeDefinition,
   intake: kitchenIntake(),
   ...over,
 });
@@ -28,7 +33,7 @@ function refusal(over: Partial<DesignBriefInput>): readonly string[] {
 
 function intakeWith(change: (answers: Record<string, unknown>) => void): unknown {
   const intake = kitchenIntake();
-  const answers: Record<string, unknown> = { ...intake.answers };
+  const answers: Record<string, unknown> = { ...(intake.answers as Record<string, unknown>) };
   change(answers);
   return { ...intake, answers };
 }
@@ -102,68 +107,87 @@ describe('the design brief', () => {
   });
 });
 
-describe('refusing the brief', () => {
-  it('refuses when an intake answer is missing, naming the question', () => {
-    const problems = refusal({ intake: intakeWith((a) => delete a['door_colour']) });
-    expect(problems).toEqual(['"Door colour" has no answer.']);
+describe('reading the design choices', () => {
+  it('lists every answer by its intake key, with the option IDs and the words the client saw', () => {
+    const intake = made().brief.intake;
+    expect(intake.find((a) => a.question === 'cabinet_colour')).toEqual({
+      question: 'cabinet_colour',
+      asks: 'Cabinets',
+      option_ids: ['painted.white.2'],
+      answer: 'White 2',
+    });
+    expect(intake.find((a) => a.question === 'garbage_slide_outs')?.answer).toBe('2');
+    expect(intake.find((a) => a.question === 'cutlery_organizers')).toMatchObject({ option_ids: [], answer: '1' });
+    expect(intake.map((a) => a.question)).toEqual([...intake.map((a) => a.question)].sort());
   });
 
-  it('refuses "skipped" and "needs follow-up" instead of filling them in', () => {
-    const problems = refusal({
+  it('leaves out the ceiling height: the room drawing holds it (P1)', () => {
+    expect(made().brief.intake.some((a) => a.question.startsWith('ceiling_height'))).toBe(false);
+  });
+
+  it('reads picked lists and typed text', () => {
+    const r = made({
       intake: intakeWith((a) => {
-        a['interiors'] = { status: 'skipped' };
-        a['corner_insert'] = { status: 'needs_follow_up' };
+        a['secondary_colour_mode'] = { status: 'selected', option_id: 'add', label: 'Add a secondary colour' };
+        a['secondary_areas'] = { status: 'selected', option_ids: ['island', 'other'], labels: ['Island', 'Other'] };
+        a['secondary_where'] = { status: 'selected', text: 'the hutch' };
       }),
     });
-    expect(problems).toEqual([
-      '"Corner cabinets: double shelf or lazy Susan" is marked "needs follow-up". It needs the client\'s answer.',
-      '"Cabinet interiors" is marked skipped. It needs the client\'s answer.',
+    expect(r.brief.intake.find((a) => a.question === 'secondary_areas')).toMatchObject({ option_ids: ['island', 'other'], answer: 'Island, Other' });
+    expect(r.brief.intake.find((a) => a.question === 'secondary_where')).toMatchObject({ option_ids: [], answer: 'the hutch' });
+  });
+});
+
+describe('refusing the brief', () => {
+  it('refuses design choices that are not finished, instead of filling them in', () => {
+    const intake = { ...kitchenIntake(), complete: false };
+    expect(refusal({ intake })).toEqual([
+      'The design choices for "Kitchen" aren\'t finished. Finish the room\'s review in Design choices first.',
     ]);
   });
 
-  it('refuses "not sure": intake questions have no such answer (owner, 2026-11-09)', () => {
-    const problems = refusal({ intake: intakeWith((a) => (a['drawer_level'] = { status: 'not_sure' })) });
-    expect(problems).toEqual([
-      '"Drawers: minimum, moderate or maximum" is not in the expected shape: it needs a picked option (its ID and label).',
-    ]);
+  it('refuses an answer to a question the intake does not have', () => {
+    const problems = refusal({ intake: intakeWith((a) => (a['favourite_colour'] = { status: 'selected', option_id: 'x', label: 'Blue' })) });
+    expect(problems).toEqual(['The design choices have an answer to "favourite_colour", which is not a question the intake has.']);
   });
 
-  it('refuses "not applicable" on a question every kitchen needs', () => {
-    const problems = refusal({ intake: intakeWith((a) => (a['door_style'] = { status: 'not_applicable', reason: 'n/a' })) });
-    expect(problems).toEqual(['"Door style" is marked "not applicable", but every kitchen needs this answer.']);
-  });
-
-  it('needs the island answers when the room has an island, and only then', () => {
-    expect(refusal({ intake: intakeWith((a) => delete a['island_side_panel']) })).toEqual(['"Island side panel detail" has no answer.']);
-    expect(
-      refusal({
-        intake: intakeWith((a) => {
-          a['island_own_colour'] = { status: 'selected', yes: false };
-        }),
-      }),
-    ).toContain('"Island material" was answered, but the island is not in an offsetting colour. Remove the answer or change that choice.');
-
-    const job = kitchenWithIsland();
-    const noIsland: Job = { ...job, rooms: job.rooms.map((r) => ({ ...r, walls: r.walls.filter((w) => w.kind === 'room') })) };
-    expect(refusal({ job: noIsland })).toContain('"Island in an offsetting colour" was answered, but the room has no island. Draw the island or remove the answer.');
-  });
-
-  it('refuses an answer in the wrong shape, or to a question it does not know', () => {
+  it('refuses an answer in the wrong shape, or with a status the intake does not hand over', () => {
     const problems = refusal({
       intake: intakeWith((a) => {
         a['spice_organizers'] = { status: 'selected', count: -1 };
-        a['favourite_colour'] = { status: 'selected', option_id: 'x', label: 'Blue' };
+        a['drawer_level'] = { status: 'not_sure' };
+        a['interiors'] = { status: 'skipped' };
       }),
     });
     expect(problems).toEqual([
-      'The intake has an answer to "favourite_colour", which is not a question the design brief knows.',
-      '"Spice organizers (how many; 0 for none)" is not in the expected shape: it needs a whole number, 0 or more.',
+      'The answer to "Drawers" is not in the expected shape: it needs one picked option (its ID and label).',
+      'The answer to "Interiors" is not in the expected shape: it needs one picked option (its ID and label).',
+      'The answer to "Spice" is not in the expected shape: it needs a whole number, 0 or more.',
+    ]);
+  });
+
+  it('refuses an option the question does not offer', () => {
+    const problems = refusal({ intake: intakeWith((a) => (a['door_style'] = { status: 'selected', option_id: 'gothic', label: 'Gothic' })) });
+    expect(problems).toEqual(['The answer to "Door style" (gothic) is not one of the question\'s options.']);
+  });
+
+  it('refuses a layout with an island when the room drawing has none', () => {
+    const job = kitchenWithIsland();
+    const noIsland: Job = { ...job, rooms: job.rooms.map((r) => ({ ...r, walls: r.walls.filter((w) => w.kind === 'room') })) };
+    expect(refusal({ job: noIsland })).toEqual([
+      'The design choices say "L-shape with island", but the room drawing has no island. Draw the island (a floating wall with cabinets) or change the layout choice.',
+    ]);
+  });
+
+  it('refuses a handover in the wrong shape', () => {
+    expect(refusal({ intake: { answers: {} } })).toEqual([
+      'The design choices for this room are missing or not in the shape the intake hands over.',
     ]);
   });
 
   it('refuses another room type, another shop\'s catalog, a room with no cabinet runs, and an unknown room', () => {
-    expect(refusal({ intake: { room_type: 'bathroom', answers: {} } })).toEqual([
-      'Only the kitchen intake is defined so far; this room\'s intake is "bathroom" (DECISIONS IK-7).',
+    expect(refusal({ intake: { ...kitchenIntake(), name: 'Main bath', room_type: 'bathroom' } })).toEqual([
+      'Only the kitchen can be drafted so far; "Main bath" is a "bathroom" room (DECISIONS IK-7).',
     ]);
     const otherShop: Catalog = { ...CURRENT_CATALOG, shop: { ...CURRENT_CATALOG.shop, id: '00000000-0000-4000-8000-000000009999' } };
     expect(refusal({ catalog: otherShop })[0]).toMatch(/^The catalog is for .+ but this job belongs to shop/);

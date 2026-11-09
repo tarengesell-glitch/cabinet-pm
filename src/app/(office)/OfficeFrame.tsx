@@ -7,7 +7,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
-import { PREVIEW_USER } from '@/platform/index';
+import { WhoIsIn } from '../sync/session';
 import { DEMO_TASKS, type DemoTask } from '../demo-data';
 import s from './office.module.css';
 
@@ -77,7 +77,9 @@ export function OfficeFrame({ children }: { children: ReactNode }) {
             <div className={s.brandSub}>Design studio</div>
           </div>
           <span className={s.spacer} />
-          <span className={s.flag}>Placeholder screens · demo data · {PREVIEW_USER.name}</span>
+          <span className={s.flag}>
+            Placeholder screens · demo data · <WhoIsIn />
+          </span>
         </header>
         <nav className={collapsed ? s.railCollapsed : s.rail} aria-label="Main">
           {item('/', 'today', 'Today')}

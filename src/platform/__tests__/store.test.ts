@@ -1,66 +1,21 @@
 import { describe, expect, it } from 'vitest';
 import { examples, type Job } from '@/core/index';
-import type { AlertRow, BackendFailure, BackendResult, StaffRow, StoreBackend, VersionRow } from '../store/backend';
+import { MOCKED_USER_ID as ME, mockedDatabase } from '../store/mocked-database';
 import {
   history,
+  isSavedByOthersFirst,
   loadLatest,
+  loadLatestChoices,
+  loadLatestStudioRoom,
   loadVersion,
   openAlerts,
   raiseAlert,
   resolveAlert,
+  saveChoices,
   saveVersion,
   signedInStaff,
   supabaseSettings,
 } from '../store/index';
-
-const ME = 'aaaaaaaa-0000-4000-8000-000000000001';
-const done = <T>(value: T): Promise<BackendResult<T>> => Promise.resolve({ ok: true, value });
-const fail = <T>(failure: BackendFailure): Promise<BackendResult<T>> => Promise.resolve({ ok: false, failure });
-
-/**
- * MOCKED (tests only, rule 14): an in-memory stand-in for the shared database, following the
- * same rules its migration enforces (versions are added, never changed; a second save from the
- * same version is refused). The real rules are tested against the real database separately.
- */
-function mockedDatabase(opts: { signedIn?: string | null; staff?: StaffRow[]; down?: boolean } = {}) {
-  const versions: VersionRow[] = [];
-  const alerts: AlertRow[] = [];
-  const signedIn = opts.signedIn === undefined ? ME : opts.signedIn;
-  const staff = opts.staff ?? [{ user_id: ME, name: 'Test designer', roles: ['designer'] }];
-  const down = <T>(): Promise<BackendResult<T>> => fail({ kind: 'unreachable', detail: 'network down' });
-  let clock = 0;
-  const backend: StoreBackend = {
-    signedInUserId: () => (opts.down ? down() : done(signedIn)),
-    staffMember: (id) => (opts.down ? down() : done(staff.find((s) => s.user_id === id) ?? null)),
-    latestVersion: (jobId) =>
-      opts.down ? down() : done([...versions].filter((v) => v.job_id === jobId).sort((a, b) => b.version_no - a.version_no)[0] ?? null),
-    version: (jobId, n) => done(versions.find((v) => v.job_id === jobId && v.version_no === n) ?? null),
-    versions: (jobId) => done(versions.filter((v) => v.job_id === jobId).sort((a, b) => b.version_no - a.version_no)),
-    insertVersion: (row) => {
-      if (opts.down) return down();
-      if (versions.some((v) => v.job_id === row.job_id && v.version_no === row.version_no)) {
-        return fail({ kind: 'conflict', detail: 'duplicate key value violates unique constraint' });
-      }
-      const saved: VersionRow = { ...row, created_by: signedIn ?? '', created_at: `2026-11-09T00:00:0${clock++}Z` };
-      versions.push(saved);
-      return done(saved);
-    },
-    insertAlert: (row) => {
-      const a: AlertRow = { ...row, id: `alert-${alerts.length + 1}`, created_at: 'now', created_by: ME, resolved_at: null, resolved_by: null, resolution_note: null };
-      alerts.push(a);
-      return done(a);
-    },
-    openAlerts: (jobId) => done(alerts.filter((a) => a.resolved_at === null && (jobId === null || a.job_id === jobId))),
-    resolveAlert: (id, userId, note) => {
-      const i = alerts.findIndex((a) => a.id === id && a.resolved_at === null);
-      if (i < 0) return done(null);
-      const resolved = { ...alerts[i]!, resolved_at: 'now', resolved_by: userId, resolution_note: note };
-      alerts[i] = resolved;
-      return done(resolved);
-    },
-  };
-  return { backend, versions, alerts };
-}
 
 const job = (): Job => examples.kitchen();
 const user = { id: ME, name: 'Test designer', roles: ['designer'], mocked: false } as const;
@@ -102,7 +57,7 @@ describe('saving and loading versions', () => {
     const late = await saveVersion(backend, { job: job(), madeFrom: 1, origin: 'designer', summary: 'Bob: widened the run' });
     expect(late).toEqual({
       ok: false,
-      reason: "The job wasn't saved: someone else saved a newer version of this job first. Reload to see it; your change is still on screen.",
+      reason: "The job wasn't saved: someone else saved a newer version first. Reload to see it; your change is still on screen.",
     });
     expect(versions.map((v) => v.summary)).toEqual(['Room drawn', 'Alice: moved the sink']);
   });
@@ -139,6 +94,34 @@ describe('saving and loading versions', () => {
 
   it('refuses something that is not a job ID', async () => {
     expect(await loadLatest(mockedDatabase().backend, 'kitchen')).toEqual({ ok: false, reason: '"kitchen" is not a job ID.' });
+  });
+});
+
+describe('studio rooms and design choices', () => {
+  const ROOM = 'cccccccc-0000-4000-8000-000000000001';
+  it('files a room under its studio job and room, and finds its newest version by the room', async () => {
+    const { backend } = mockedDatabase();
+    await saveVersion(backend, { job: job(), madeFrom: null, origin: 'designer', summary: 'Room drawn', filedUnder: { jobKey: 'c1', roomKey: ROOM } });
+    await saveVersion(backend, { job: job(), madeFrom: 1, origin: 'ai', summary: 'AI draft', filedUnder: { jobKey: 'c1', roomKey: ROOM } });
+    expect(await loadLatestStudioRoom(backend, ROOM)).toMatchObject({ ok: true, value: { versionNo: 2, origin: 'ai' } });
+    expect(await loadLatestStudioRoom(backend, 'cccccccc-0000-4000-8000-000000000002')).toEqual({ ok: true, value: null });
+    expect(await saveVersion(backend, { job: job(), madeFrom: 2, origin: 'designer', summary: 'x', filedUnder: { jobKey: 'C 1', roomKey: ROOM } })).toEqual({
+      ok: false,
+      reason: 'The job wasn\'t saved: "C 1" / "cccccccc-0000-4000-8000-000000000001" is not a studio job and room.',
+    });
+  });
+
+  it('keeps every version of the design choices, and refuses a second save from the same version', async () => {
+    const { backend } = mockedDatabase();
+    expect(await saveChoices(backend, { jobKey: 'c1', state: { version: 1 }, madeFrom: null, summary: 'Started' })).toMatchObject({ ok: true, value: { versionNo: 1 } });
+    expect(await saveChoices(backend, { jobKey: 'c1', state: { version: 1, a: 1 }, madeFrom: 1, summary: 'Changed' })).toMatchObject({ ok: true, value: { versionNo: 2 } });
+    const late = await saveChoices(backend, { jobKey: 'c1', state: { version: 1, a: 2 }, madeFrom: 1, summary: 'Changed elsewhere' });
+    expect(!late.ok && isSavedByOthersFirst(late.reason)).toBe(true);
+    expect(await loadLatestChoices(backend, 'c1')).toMatchObject({ ok: true, value: { versionNo: 2, state: { version: 1, a: 1 } } });
+    expect(await saveChoices(backend, { jobKey: 'c1', state: null, madeFrom: 2, summary: 'x' })).toEqual({
+      ok: false,
+      reason: "The design choices weren't saved: there is nothing to save.",
+    });
   });
 });
 

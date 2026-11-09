@@ -147,6 +147,30 @@ The owner's goal: lock in the wall measurements, openings, cabinet runs, room dr
   - the AI judge's instructions;
   - the "Not reviewed by AI" label when the call fails.
 
+### 2026-11-09: The shared database, step 0b: sign-in and the studio (owner answers, chat, 2026-11-09)
+- **Saving is automatic** (owner). There is no Save button. A change is saved to the database a second or two after the person stops, as a new version. The studio's header always says "Saved to the shared database", "Saving…" or, in red, "Not saved", with the reason in a banner.
+- **The demo clients stay as the jobs** (owner) until real client and job records exist (BUILD_PLAN 7a). They are still labelled as demo clients.
+- **Sign-in is by an emailed link** (recommended to the owner, who asked what suits customers signing themselves up later):
+  - there is no password to set or forget, so it is also the easiest way for a stranger to make an account;
+  - today only invited staff get in;
+  - when the customer side is built, sign-up opens for customers only, with a customer role, and the database lets each customer see only their own designs.
+- **When two people save the same job:** the first save lands. The second is stopped and told, and nothing is overwritten. When they reopen the job, they choose:
+  - use the saved copy;
+  - or keep theirs, which is saved as one more version, so the history keeps both.
+- **Live database mode:**
+  - the studio, Today and Clients need a signed-in staff member;
+  - the job is opened from the database before any screen reads it;
+  - work that was only in a browser is moved into the database the first time it is opened.
+- **Not connected:** a build without the database settings (a developer's machine, the automated tests) keeps work in the browser only and says so in the header, with the labelled preview user.
+- **Tested against the real database:** the new table (`intake_answer_versions`) and the room filing were checked with the same rolled-back tests. The sign-in gate was checked in a build with the live settings: signed out, only the sign-in card shows.
+- **The live connection can't be reached from Claude's sessions** (network policy). The first real sign-in and save are tried on the live site.
+- **PROPOSED (this session, not owner-decided):**
+  - the browser keeps a working copy, so the screens work as before, and `src/app/sync/` keeps it in step with the database;
+  - a room's version is saved with the summary and origin of its own latest history entry (for example "Moved the sink", AI or designer);
+  - the thickness new walls start at is not saved and goes back to the standard size on another browser;
+  - a save that fails for a moment (network) is retried every second or two and shown in red. It doesn't raise a database alert, which would flood the list; a clash stops saving until the person chooses;
+  - the standalone previews (`/intake`, `/rooms/preview`) stay browser-only and say so.
+
 ### 2026-11-09: The shared database, step 0a (owner: "live work shouldn't live solely in a browser")
 - Built in the Supabase project **cabinet-pm** (Canada, AD-3). The tables are in `supabase/migrations/` and were applied through the Supabase connector:
   - `staff`, `shops` (the colony shop, with the catalog's ID);

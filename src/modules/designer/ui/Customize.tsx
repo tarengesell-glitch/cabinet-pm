@@ -78,7 +78,7 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
   const keep = useCallback(
     (next: Room, summary: string, origin: 'ai' | 'designer'): boolean => {
       if (!draft) return false;
-      const saved = saveRoom(cr.key, draft, next, summary, origin);
+      const saved = saveRoom(cr.key, draft, next, summary, origin, user.id);
       if (!saved.ok) {
         setMessage({ kind: 'error', text: saved.reason });
         return false;

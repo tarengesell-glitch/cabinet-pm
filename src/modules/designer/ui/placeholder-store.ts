@@ -5,7 +5,6 @@
  * Every failure is returned with its reason (rule 7).
  */
 import { type Result, type Room } from '@/core/index';
-import { PREVIEW_USER } from '@/platform/index';
 import { placeholderItems } from '../model/cabinets';
 import { loadJob, room as roomOf, upgradeStoredDraft, type Draft } from '../model/editor';
 import { draftPlaceholder, type DraftPreferences } from '../model/placeholder-draft';
@@ -34,14 +33,23 @@ export function storedRoom(roomKey: string): Result<Room> {
  * Saves a changed room into the master copy, with a history entry saying who changed what.
  * Returns the saved copy, or the reason it couldn't be saved.
  */
-export function saveRoom(roomKey: string, draft: Draft, next: Room, summary: string, origin: 'ai' | 'designer', status?: Draft['job']['status']): Result<Draft> {
+export function saveRoom(
+  roomKey: string,
+  draft: Draft,
+  next: Room,
+  summary: string,
+  origin: 'ai' | 'designer',
+  /** Who made the change: the signed-in person (or the labelled preview user without the database). */
+  userId: string,
+  status?: Draft['job']['status'],
+): Result<Draft> {
   const saved: Draft = {
     ...draft,
     job: {
       ...draft.job,
       ...(status ? { status } : {}),
       rooms: [next],
-      history: [...draft.job.history, { at: new Date().toISOString(), by: PREVIEW_USER.id, origin, summary }],
+      history: [...draft.job.history, { at: new Date().toISOString(), by: userId, origin, summary }],
     },
   };
   // Never save what isn't a valid master copy.
@@ -55,7 +63,7 @@ export function saveRoom(roomKey: string, draft: Draft, next: Room, summary: str
  * The studio's AI design step (a PLACEHOLDER, no AI): lays out the room's runs with catalog
  * cabinets and writes them into its master copy as an AI draft, replacing any cabinets it had.
  */
-export function draftRoom(roomKey: string, prefs: DraftPreferences): Result<Room> {
+export function draftRoom(roomKey: string, prefs: DraftPreferences, userId: string): Result<Room> {
   const d = storedDraft(roomKey);
   if (!d.ok) return d;
   const room = roomOf(d.value);
@@ -63,7 +71,7 @@ export function draftRoom(roomKey: string, prefs: DraftPreferences): Result<Room
   if (!design.ok) return design;
   const items = placeholderItems(room, design.value);
   if (!items.ok) return items;
-  const saved = saveRoom(roomKey, d.value, { ...room, items: items.value }, [PLACEHOLDER, ...design.value.notes].join(' · '), 'ai', 'ai_draft');
+  const saved = saveRoom(roomKey, d.value, { ...room, items: items.value }, [PLACEHOLDER, ...design.value.notes].join(' · '), 'ai', userId, 'ai_draft');
   return saved.ok ? { ok: true, value: roomOf(saved.value) } : saved;
 }
 

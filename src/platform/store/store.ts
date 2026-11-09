@@ -10,7 +10,7 @@
  */
 import { JobSchema, ok, refuse, SCHEMA_VERSION, type Job, type Result } from '@/core/index';
 import type { User } from '../permissions/can';
-import type { AlertRow, BackendFailure, StoreBackend, VersionOrigin, VersionRow } from './backend';
+import type { AlertRow, BackendFailure, ChoicesRow, StoreBackend, VersionOrigin, VersionRow } from './backend';
 
 export interface SavedVersion {
   readonly jobId: string;
@@ -32,14 +32,23 @@ export interface SaveRequest {
   readonly origin: VersionOrigin;
   /** What changed, in words, for the history. */
   readonly summary: string;
+  /** PROPOSED stand-in until real jobs exist (BUILD_PLAN 7a): the studio job and room it belongs to. */
+  readonly filedUnder?: { readonly jobKey: string; readonly roomKey: string };
 }
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+/** A studio job's key: a demo client's ID, or "preview" (the database checks the same pattern). */
+const JOB_KEY = /^[a-z0-9_-]{1,64}$/;
+
+const CONFLICT = 'someone else saved a newer version first';
+
+/** True when a save was refused because someone else saved first (nothing was overwritten). */
+export const isSavedByOthersFirst = (reason: string): boolean => reason.includes(CONFLICT);
 
 function explain(what: string, f: BackendFailure): string {
   switch (f.kind) {
     case 'conflict':
-      return `${what} wasn't saved: someone else saved a newer version of this job first. Reload to see it; your change is still on screen.`;
+      return `${what} wasn't saved: ${CONFLICT}. Reload to see it; your change is still on screen.`;
     case 'not_allowed':
       return `${what} isn't allowed for this account. Ask the owner to add you to the staff list.`;
     case 'refused':
@@ -115,6 +124,9 @@ export async function saveVersion(backend: StoreBackend, request: SaveRequest): 
   if (request.madeFrom !== null && (!Number.isInteger(request.madeFrom) || request.madeFrom < 1)) {
     return refuse(`The job wasn't saved: "${request.madeFrom}" is not a version number.`);
   }
+  if (request.filedUnder && (!JOB_KEY.test(request.filedUnder.jobKey) || !UUID.test(request.filedUnder.roomKey))) {
+    return refuse(`The job wasn't saved: "${request.filedUnder.jobKey}" / "${request.filedUnder.roomKey}" is not a studio job and room.`);
+  }
   const row = await backend.insertVersion({
     job_id: job.job_id,
     version_no: request.madeFrom === null ? 1 : request.madeFrom + 1,
@@ -124,9 +136,72 @@ export async function saveVersion(backend: StoreBackend, request: SaveRequest): 
     document: job,
     origin: request.origin,
     summary: request.summary.trim(),
+    studio_job_key: request.filedUnder?.jobKey ?? null,
+    studio_room_key: request.filedUnder?.roomKey ?? null,
   });
   if (!row.ok) return refuse(explain('The job', row.failure));
   return toSaved(row.value, 'The job was saved, but reading it back');
+}
+
+/** The newest master copy of a studio room (filed by the room's ID in the design choices), or null if never saved. */
+export async function loadLatestStudioRoom(backend: StoreBackend, roomKey: string): Promise<Result<SavedVersion | null>> {
+  if (!UUID.test(roomKey)) return refuse(`"${roomKey}" is not a room ID.`);
+  const row = await backend.latestStudioRoom(roomKey);
+  if (!row.ok) return refuse(explain('Loading the room', row.failure));
+  return row.value === null ? ok(null) : toSaved(row.value, 'Loading the room');
+}
+
+// ---- Design choices (intake answers) ------------------------------------------------------------
+// The intake owns their shape and checks it when it reads them; the store only keeps versions.
+
+export interface SavedChoices {
+  readonly jobKey: string;
+  readonly versionNo: number;
+  readonly parentVersion: number | null;
+  readonly state: unknown;
+  readonly summary: string;
+  readonly savedBy: string;
+  readonly savedAt: string;
+}
+const toChoices = (r: ChoicesRow): SavedChoices => ({
+  jobKey: r.job_key,
+  versionNo: r.version_no,
+  parentVersion: r.parent_version,
+  state: r.state,
+  summary: r.summary,
+  savedBy: r.created_by,
+  savedAt: r.created_at,
+});
+
+/** A studio job's newest design choices, or null when they were never saved. */
+export async function loadLatestChoices(backend: StoreBackend, jobKey: string): Promise<Result<SavedChoices | null>> {
+  if (!JOB_KEY.test(jobKey)) return refuse(`"${jobKey}" is not a studio job.`);
+  const row = await backend.latestChoices(jobKey);
+  if (!row.ok) return refuse(explain('Loading the design choices', row.failure));
+  return ok(row.value === null ? null : toChoices(row.value));
+}
+
+export async function saveChoices(
+  backend: StoreBackend,
+  request: { readonly jobKey: string; readonly state: unknown; readonly madeFrom: number | null; readonly summary: string },
+): Promise<Result<SavedChoices>> {
+  if (!JOB_KEY.test(request.jobKey)) return refuse(`The design choices weren't saved: "${request.jobKey}" is not a studio job.`);
+  if (typeof request.state !== 'object' || request.state === null || Array.isArray(request.state)) {
+    return refuse("The design choices weren't saved: there is nothing to save.");
+  }
+  if (!request.summary.trim()) return refuse("The design choices weren't saved: a save needs a short summary.");
+  if (request.madeFrom !== null && (!Number.isInteger(request.madeFrom) || request.madeFrom < 1)) {
+    return refuse(`The design choices weren't saved: "${request.madeFrom}" is not a version number.`);
+  }
+  const row = await backend.insertChoices({
+    job_key: request.jobKey,
+    version_no: request.madeFrom === null ? 1 : request.madeFrom + 1,
+    parent_version: request.madeFrom,
+    state: request.state,
+    summary: request.summary.trim(),
+  });
+  if (!row.ok) return refuse(explain('The design choices', row.failure));
+  return ok(toChoices(row.value));
 }
 
 // ---- Alerts (rule 7: a failure stays until a person resolves it with a note) --------------------

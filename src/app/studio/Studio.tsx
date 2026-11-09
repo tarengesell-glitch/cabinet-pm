@@ -5,18 +5,21 @@
  * prototype, 2026-11-08). The app only puts the modules' screens together here; the intake and
  * the designer own everything they show.
  *
- * A PREVIEW: each job is kept in this browser and the user is mocked. A demo client's job is
- * opened with `?job=<client>`; without it, the studio opens the preview job. The AI design step
- * is a PLACEHOLDER: an animation, then a fixed recipe fills the rooms (no AI is called).
+ * Each job is saved to the shared database as the person works, by the signed-in staff member
+ * (`app/sync`); without the database it is kept in this browser only, with the labelled preview
+ * user. The jobs are still the demo clients until real jobs exist (BUILD_PLAN 7a). A demo client's
+ * job is opened with `?job=<client>`; without it, the studio opens the preview job. The AI design
+ * step is a PLACEHOLDER: an animation, then a fixed recipe fills the rooms (no AI is called).
  */
 import Link from 'next/link';
-import { useCallback, useMemo, useState } from 'react';
-import { PREVIEW_SHOP, PREVIEW_USER } from '@/platform/index';
+import { useCallback, useMemo, useState, type ReactNode } from 'react';
+import type { User } from '@/platform/index';
 import { roomDrawingStatus, type DraftPreferences, type DrawerLevel, type RoomDrawingStatus } from '@/modules/designer/contract';
 import { Customize, RoomCapture } from '@/modules/designer/ui/index';
 import { INTAKE_DEFINITION, intakeHandover, loadIntakeState, roomLook, roomSummary, roughCabinetTop, roughCeiling, type IntakeState, type RoomHandover } from '@/modules/intake/contract';
 import { IntakeScreen } from '@/modules/intake/ui/index';
 import { demoClient, jobName } from '../demo-data';
+import { WhoIsIn } from '../sync/session';
 import { AiStep } from './AiStep';
 import { TestDataMenu } from './TestDataMenu';
 import s from './Studio.module.css';
@@ -59,8 +62,7 @@ function readIntake(job: string | null): IntakeState | null {
   return loaded.kind === 'found' ? loaded.state : null;
 }
 
-export function Studio() {
-  const user = PREVIEW_USER; // MOCKED until sign-in exists (rule 14); the header says so.
+export function Studio({ user, saveStatus }: { user: User; saveStatus: ReactNode }) {
   const job = useMemo(() => new URLSearchParams(window.location.search).get('job'), []);
   const client = demoClient(job);
   const [stage, setStage] = useState<Stage>('choices');
@@ -143,9 +145,9 @@ export function Studio() {
         <div className={s.title}>
           <div className={s.name}>{client ? jobName(client) : 'Design studio'}</div>
           <div className={s.who}>
-            {client ? `${client.name} (demo client)` : 'Preview job'} · kept in this browser · <span title={`${user.name} · ${PREVIEW_SHOP.name}`}>mocked user and shop</span>
+            {client ? `${client.name} (demo client)` : 'Preview job'} · {saveStatus} · <WhoIsIn />
           </div>
-          <div className={s.whoShort}>Preview · mocked user and shop</div>
+          <div className={s.whoShort}>{saveStatus}</div>
         </div>
         <nav className={s.stepper} aria-label="Progress">
           {STEPS.map((st, i) => {
@@ -191,6 +193,7 @@ export function Studio() {
           <AiStep
             rooms={rooms.map((r) => ({ id: r.room_id, name: r.name, prefs: prefsOf(r, intake) }))}
             alreadyDesigned={rooms.length > 0 && rooms.every((r) => designed.has(r.room_id))}
+            userId={user.id}
             onDrafted={bump}
             onOpen={() => {
               setRoomId(rooms[0]?.room_id ?? null);

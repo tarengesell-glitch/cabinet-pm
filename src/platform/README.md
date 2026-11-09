@@ -2,7 +2,7 @@
 
 Shared services that need a database or framework: db access, users, roles and permissions (`can(user, permission)`), audit log, alerts, locks, the master copy store, the config loader and design-system components. No business rules. May import `core` only.
 
-Status: permissions, the design system and **the shared database** (2026-11-09, step 0a). Nothing in the app uses the database yet; sign-in and the studio switch-over are step 0b.
+Status: permissions, the design system and **the shared database** (2026-11-09, steps 0a and 0b). The design studio and the office screens use it; how is in `src/app/sync/README.md`.
 
 ## The shared database (`store/`, 2026-11-09)
 The owner: "live work shouldn't live solely in a browser" (DECISIONS "AI designer: how it works"). The database is the Supabase project **cabinet-pm** in Canada (DECISIONS AD-3). Its tables are made by the files in `supabase/migrations/`, which were applied to the project through the Supabase connector.
@@ -19,11 +19,14 @@ The owner: "live work shouldn't live solely in a browser" (DECISIONS "AI designe
 - `loadLatest`, `loadVersion`, `history`, `saveVersion`:
   - every document is checked against Core's master copy schema before saving and after loading;
   - a job never saved comes back as "none", never as an empty job.
+- `loadLatestStudioRoom` and `saveVersion(… filedUnder)`: a studio room's master copy, filed under its studio job and room (PROPOSED stand-in until real jobs exist, BUILD_PLAN 7a).
+- `loadLatestChoices`, `saveChoices`: a studio job's design choices (table `intake_answer_versions`, owned by intake; the store only keeps versions, and the intake checks their shape).
+- `isSavedByOthersFirst`: tells a refused save from someone else saving first.
 - `raiseAlert`, `openAlerts`, `resolveAlert`.
 - `sendSignInLink`, `signOut`: sign-in by an emailed link, only for people the owner has invited.
 - `supabaseSettings`, `supabaseClient`, `supabaseBackend`: the connection. The address and publishable key come from the site's Netlify settings (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`). Without them, the store says the database isn't set up.
 
-Every failure is a plain-language reason, and a save is reported only once the database has it. The tests (`__tests__/store.test.ts`) use an in-memory stand-in, labelled MOCKED, that follows the same rules.
+Every failure is a plain-language reason, and a save is reported only once the database has it. The tests use an in-memory stand-in (`store/mocked-database.ts`, labelled MOCKED, for tests only) that follows the same rules.
 
 **Adding a person (owner, in the Supabase dashboard):**
 1. Authentication → Users → Invite user, with their email.

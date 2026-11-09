@@ -17,6 +17,8 @@ export function AiStep(props: {
   rooms: readonly { id: string; name: string; prefs: DraftPreferences }[];
   /** Every room already has a design: show it as done, and only draft again when asked. */
   alreadyDesigned: boolean;
+  /** The person running the step, recorded in each room's history. */
+  userId: string;
   onDrafted: () => void;
   onOpen: () => void;
 }) {
@@ -39,7 +41,7 @@ export function AiStep(props: {
     const tick = () => {
       const room = roomsRef.current[i];
       if (!room) return;
-      const r = draftRoom(room.id, room.prefs);
+      const r = draftRoom(room.id, room.prefs, props.userId);
       if (!r.ok) {
         setError(`The ${room.name.toLowerCase()} couldn’t be laid out: ${r.reason}`);
         return;

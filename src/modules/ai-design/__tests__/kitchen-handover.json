@@ -1,0 +1,175 @@
+{
+  "room_id": "kitchen-room",
+  "room_type": "kitchen",
+  "name": "Kitchen",
+  "complete": true,
+  "design_from": null,
+  "answers": {
+    "shape": {
+      "status": "selected",
+      "option_id": "l_shape_island",
+      "label": "L-shape with island"
+    },
+    "ceiling_height": {
+      "status": "selected",
+      "option_id": "8ft",
+      "label": "8′"
+    },
+    "cabinet_height": {
+      "status": "selected",
+      "option_id": "to_ceiling",
+      "label": "To the ceiling"
+    },
+    "feel": {
+      "status": "selected",
+      "option_id": "transitional",
+      "label": "Transitional"
+    },
+    "material": {
+      "status": "selected",
+      "option_id": "painted",
+      "label": "Solid painted"
+    },
+    "colour_tone": {
+      "status": "selected",
+      "option_id": "white.medium",
+      "label": "White doors, medium counters"
+    },
+    "door_style": {
+      "status": "selected",
+      "option_id": "transitional",
+      "label": "Transitional"
+    },
+    "cabinet_colour": {
+      "status": "selected",
+      "option_id": "painted.white.2",
+      "label": "White 2"
+    },
+    "base_colour_mode": {
+      "status": "selected",
+      "option_id": "match",
+      "label": "Match cabinets"
+    },
+    "island_colour_mode": {
+      "status": "selected",
+      "option_id": "cabinets",
+      "label": "Match cabinets"
+    },
+    "counter_colour": {
+      "status": "selected",
+      "option_id": "counter.medium.2",
+      "label": "Medium 2"
+    },
+    "secondary_colour_mode": {
+      "status": "selected",
+      "option_id": "none",
+      "label": "No secondary colour"
+    },
+    "hardware": {
+      "status": "selected",
+      "option_id": "handles",
+      "label": "Handles only"
+    },
+    "handle_style": {
+      "status": "selected",
+      "option_id": "edge",
+      "label": "Edge pull"
+    },
+    "handle_size": {
+      "status": "selected",
+      "option_id": "5in",
+      "label": "5″"
+    },
+    "handle_finish": {
+      "status": "selected",
+      "option_id": "brushed_nickel",
+      "label": "Brushed nickel"
+    },
+    "handle_position_doors": {
+      "status": "selected",
+      "option_id": "horizontal",
+      "label": "Horizontal"
+    },
+    "handle_position_drawers": {
+      "status": "selected",
+      "option_id": "near_top",
+      "label": "Closer to the top"
+    },
+    "island_back_panel": {
+      "status": "selected",
+      "option_id": "door_panels",
+      "label": "Matching door panels"
+    },
+    "island_side_panel": {
+      "status": "selected",
+      "option_id": "detailed_short",
+      "label": "Detailed short panel"
+    },
+    "top_trim_style": {
+      "status": "selected",
+      "option_id": "crown",
+      "label": "Crown"
+    },
+    "top_trim_colour": {
+      "status": "selected",
+      "option_id": "other",
+      "label": "Other"
+    },
+    "top_trim_colour_other": {
+      "status": "selected",
+      "option_id": "painted.white.2",
+      "label": "White 2"
+    },
+    "light_valance": {
+      "status": "selected",
+      "option_id": "hidden",
+      "label": "Hidden"
+    },
+    "corner_insert": {
+      "status": "selected",
+      "option_id": "lazy_susan",
+      "label": "Lazy Susan"
+    },
+    "cutlery_organizers": {
+      "status": "selected",
+      "count": 1
+    },
+    "utility_organizers": {
+      "status": "selected",
+      "count": 1
+    },
+    "spice_organizers": {
+      "status": "selected",
+      "count": 1
+    },
+    "tray_organizers": {
+      "status": "selected",
+      "count": 1
+    },
+    "garbage_recycling": {
+      "status": "selected",
+      "option_id": "yes",
+      "label": "Yes"
+    },
+    "garbage_location": {
+      "status": "selected",
+      "option_id": "dedicated_cabinet",
+      "label": "A dedicated cabinet"
+    },
+    "garbage_slide_outs": {
+      "status": "selected",
+      "option_id": "2",
+      "label": "2"
+    },
+    "interiors": {
+      "status": "selected",
+      "option_id": "prestige_maple",
+      "label": "Prestige maple"
+    },
+    "drawer_level": {
+      "status": "selected",
+      "option_id": "moderate",
+      "label": "Moderate"
+    }
+  }
+}

@@ -12,7 +12,6 @@
  * Fail closed (rule 7): anything missing or inconsistent refuses the brief with every reason.
  * The caller (the draft run) turns a refusal into an alert; this function only reports.
  */
-import { createHash } from 'node:crypto';
 import {
   describeDistance,
   formatInches,
@@ -31,11 +30,13 @@ import {
   type Wall,
 } from '@/core/index';
 import type { Catalog, CatalogItem, DimensionName, SourcedLength } from '@/modules/catalog/contract';
+import type { IntakeDefinition } from '@/modules/intake/contract';
 import type { DesignRule, DesignRules } from '@/modules/shop-settings/contract';
-import { compare, readKitchenIntake, type BriefAnswer } from './intake';
+import { compare, readRoomIntake, type BriefAnswer } from './intake';
+import { sha256Hex } from './sha256';
 
 /** The shape of the brief itself. Raise it when the brief's fields change, so stored briefs stay readable. */
-export const BRIEF_FORMAT = 1;
+export const BRIEF_FORMAT = 2;
 
 export interface DesignBriefInput {
   /** The master copy version the draft starts from. Checked again here. */
@@ -45,7 +46,9 @@ export interface DesignBriefInput {
   readonly catalog: Catalog;
   /** The shop's design rules as read by shop-settings. Only confirmed rules go into the brief. */
   readonly designRules: DesignRules;
-  /** The client's intake answers for this room: see `KitchenIntake`. Checked here. */
+  /** The intake's questions (intake contract `INTAKE_DEFINITION`), to read the answers by. */
+  readonly intakeDefinition: IntakeDefinition;
+  /** This room's design choices, as the intake hands them over (`intakeHandover`). Checked here. */
   readonly intake: unknown;
 }
 
@@ -107,7 +110,7 @@ export function buildDesignBrief(input: DesignBriefInput): DesignBriefResult {
   const roomHasIsland = room.walls.some((w) => w.kind === 'floating' && w.runs.length > 0);
 
   // The client's answers.
-  const intake = readKitchenIntake(input.intake, roomHasIsland);
+  const intake = readRoomIntake(input.intake, input.intakeDefinition, roomHasIsland);
   if (!intake.ok) problems.push(...intake.problems);
 
   // The confirmed design rules.
@@ -447,5 +450,5 @@ function rulesFingerprint(rules: DesignRules): string {
     caution: rules.caution,
     rules: [...rules.rules].sort((a, b) => compare(a.id, b.id)),
   };
-  return createHash('sha256').update(JSON.stringify(sorted)).digest('hex');
+  return sha256Hex(JSON.stringify(sorted));
 }

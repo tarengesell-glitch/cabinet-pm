@@ -6,14 +6,4 @@ export {
   type DesignBriefInput,
   type DesignBriefResult,
 } from './model/brief';
-export {
-  KITCHEN_INTAKE_QUESTIONS,
-  type BriefAnswer,
-  type ChoiceAnswer,
-  type CountAnswer,
-  type IntakeQuestionCode,
-  type KitchenIntake,
-  type NotApplicable,
-  type OpenAnswer,
-  type YesNoAnswer,
-} from './model/intake';
+export { type BriefAnswer } from './model/intake';

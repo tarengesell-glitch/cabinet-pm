@@ -129,6 +129,24 @@ The design brief (`src/modules/ai-design/`, PR #29) asked three questions. The o
   - below 36", and when centring or alignment pulls against walkway width (PRIN-005), the AI explains the trade-off and the designer decides.
 - The rest of the AI designer's draft instructions are still PROPOSED.
 
+### 2026-11-09: AI designer: how it works (owner, plan review in chat, 2026-11-09)
+The owner's goal: lock in the wall measurements, openings, cabinet runs, room drawing and every design choice as the canvas, then fill the whole room with real cabinets at exact coordinates, weighed against every design rule. It is "fast fill" for the entire project, not one gap.
+
+- **Mandatory, never changed by the draft:** every design choice the client made, wall lengths, openings, and where the cabinet runs go.
+- **Appliances may move up to 24" along their own wall,** only to improve the design, and every move is explained. They never move to another wall. The 24" will be data with this decision as its source.
+- **Ordinary code for as much as possible; AI only for what it is good at:** taste, judgement, trade-offs, comparing options, fact-checking that every requirement is met, and explanations. So:
+  - code builds several complete, valid layouts per room;
+  - Claude picks between them and writes the notes;
+  - Claude never types coordinates.
+- **The AI call runs on Netlify Functions**, with the key kept in Netlify's settings. Designers in any browser, anywhere, call the same function. The site stays plain pages.
+- **Live work must not live only in a browser.** The shared master copy store on Supabase is built **before** the AI designer, on the owner's existing project (`kpbcqnnsjtdafxvvarfw`). This session's Supabase connector could not open that project, so its region (it must be Canada) is not checked yet.
+- **Design choices → catalog options** (door style, colours, handles): left as blockers for now. Drafts show "door style missing" and similar until that mapping exists.
+- **IK-15 closed:** the design brief now reads the intake's own handover and keeps no copy of the questions (`src/modules/ai-design/README.md`). The brief's format is now 2.
+- **PROPOSED (this session, not owner-decided):**
+  - the ranking ladder used to shortlist layouts and as the fallback when the AI can't be reached: hard rules never broken, then the fewest broken preferences of the strongest wording;
+  - the AI judge's instructions;
+  - the "Not reviewed by AI" label when the call fails.
+
 ### 2026-11-08: The design studio (owner: "the design choices flow seems to work well, so let's integrate that into the actual code", Kitchen Studio prototype, https://claude.ai/artifact/Tkd2r8vTUswCs3ioJnGjqg)
 - **C-2 answered: the look is the prototype's**, which is closet-builder's owner-approved design system: navy (#1A3045) to act or show "you are here", gold (#D4B57F) for what is selected, Newsreader for headings, Geist for everything else, light only. The owner asked for "the more polished UI of the artifact". The tokens live once, in `src/platform/design-system/tokens.css`; the palette in `docs/ux/UX_BRIEF.md` Part 4 is replaced. The owner's wall colours (pastel red unmeasured, black confirmed) stay.
 - **The design studio (`/studio`)** puts one job's steps in a row along the top: Design choices · Room drawing · AI design · Customize, with the job's rooms as chips under them, as in the prototype. Clicking a room chip switches rooms in either step.
@@ -368,9 +386,16 @@ Five confirmed rules are now checked in the design tool (HARD-014, PREF-011, PRE
 - **IK-1 to IK-14** Kitchen intake questions, in `docs/intake/kitchen.md` (IK-2 answered 2026-11-08; IK-7 partly).
 
 ### From the visual intake build (2026-11-08)
-- **IK-15 AI Design reads an older intake shape.** `ai-design` (`model/intake.ts`) was written from the 2026-10-27 outline, before the prototype reviews. It expects `door_colour`, an island yes/no and separate island material, tone and door style. The owner replaced these with the colours step (cabinets, base, island, counter, secondary), four hardware combinations, and garbage location and slide-outs. Most other question codes match. AI Design needs a session to read the intake's `intakeHandover` instead. This session stayed inside `intake` (rule 1).
+- ~~**IK-15 AI Design reads an older intake shape.**~~ Answered 2026-11-09: the brief reads `intakeHandover` (see "AI designer: how it works"). `ai-design` (`model/intake.ts`) was written from the 2026-10-27 outline, before the prototype reviews. It expects `door_colour`, an island yes/no and separate island material, tone and door style. The owner replaced these with the colours step (cabinets, base, island, counter, secondary), four hardware combinations, and garbage location and slide-outs. Most other question codes match. AI Design needs a session to read the intake's `intakeHandover` instead. This session stayed inside `intake` (rule 1).
 - **IK-16 Intake permissions.** The intake uses `room.view` and `room.edit` for now. Should it have its own (for example `intake.view`, `intake.edit`), and should clients answering on their own get only those?
 - ~~**IK-17 Ceiling height in two places.**~~ Answered 2026-11-08 (see "The design studio"). The intake asks for a rough ceiling height and the room drawing asks again. Should the intake's answer fill in the room drawing's starting value? The room drawing can't read the intake today (ARCHITECTURE: `designer` may not import `intake`), so this needs the app to pass it, or a change to the dependency table.
+
+- **IK-18 A drawn island with a layout that has none.** The brief refuses a layout with an island (L-shape with island, double island) when the drawing has none. The other way round can't be checked yet: a peninsula is drawn as a floating wall too, and the intake doesn't ask the island questions (colour, panels) for it. Should a peninsula get the island questions? And should a drawn island with a galley, L or U layout be refused?
+
+### From the AI designer plan (2026-11-09)
+- **AD-1 The upper over a fridge.** The room drawing gives it 24" deep, but the catalog has no upper at that depth: `upper_no_shelf` is 12" deep, and its depth limits are not known (CAT-1). Until the shop says which cabinet and depth to use, a draft shows it as a blocker.
+- **AD-2 Moved appliances and the client.** When the AI moves an appliance (at most 24"), does the client need to re-confirm where it goes, or is the designer's approval enough?
+- **AD-3 Supabase access.** This session couldn't open the Supabase project. Please give the Claude Supabase connector access to it, or confirm that it is in the Canada region, before the database step starts.
 
 ### From the spec (section 11)
 - **S-1** Which Cabinet Vision versions do target shops run, and does ORDX behave the same across them?

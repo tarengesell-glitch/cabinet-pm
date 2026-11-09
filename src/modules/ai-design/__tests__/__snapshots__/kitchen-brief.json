@@ -1,5 +1,5 @@
 {
-  "brief_format": 1,
+  "brief_format": 2,
   "job_id": "00000000-0000-4000-8000-000000000001",
   "made_from": {
     "master_copy_schema_version": 2,
@@ -213,235 +213,260 @@
   },
   "intake": [
     {
+      "question": "base_colour_mode",
+      "asks": "Base cabinets",
+      "option_ids": [
+        "match"
+      ],
+      "answer": "Match cabinets"
+    },
+    {
+      "question": "cabinet_colour",
+      "asks": "Cabinets",
+      "option_ids": [
+        "painted.white.2"
+      ],
+      "answer": "White 2"
+    },
+    {
       "question": "cabinet_height",
       "asks": "Cabinet height",
-      "option_id": "opt-2",
-      "answer": "To the Ceiling",
-      "confirmed_with_client": false
+      "option_ids": [
+        "to_ceiling"
+      ],
+      "answer": "To the ceiling"
     },
     {
       "question": "colour_tone",
-      "asks": "Colour tone (door tone and counter tone)",
-      "option_id": "opt-5",
-      "answer": "White doors, dark counters",
-      "confirmed_with_client": false
+      "asks": "Colour tone",
+      "option_ids": [
+        "white.medium"
+      ],
+      "answer": "White doors, medium counters"
     },
     {
       "question": "corner_insert",
-      "asks": "Corner cabinets: double shelf or lazy Susan",
-      "option_id": "opt-16",
-      "answer": "Lazy Susan",
-      "confirmed_with_client": false
+      "asks": "Corners",
+      "option_ids": [
+        "lazy_susan"
+      ],
+      "answer": "Lazy Susan"
     },
     {
       "question": "counter_colour",
-      "asks": "Counter colour",
-      "option_id": "opt-8",
-      "answer": "Charcoal quartz",
-      "confirmed_with_client": false
+      "asks": "Counter",
+      "option_ids": [
+        "counter.medium.2"
+      ],
+      "answer": "Medium 2"
     },
     {
       "question": "cutlery_organizers",
-      "asks": "Cutlery organizers (how many; 0 for none)",
-      "option_id": null,
-      "answer": "1",
-      "confirmed_with_client": false
-    },
-    {
-      "question": "door_colour",
-      "asks": "Door colour",
-      "option_id": "opt-7",
-      "answer": "Chantilly Lace",
-      "confirmed_with_client": true
+      "asks": "Cutlery",
+      "option_ids": [],
+      "answer": "1"
     },
     {
       "question": "door_style",
       "asks": "Door style",
-      "option_id": "opt-6",
-      "answer": "Transitional",
-      "confirmed_with_client": false
+      "option_ids": [
+        "transitional"
+      ],
+      "answer": "Transitional"
     },
     {
       "question": "drawer_level",
-      "asks": "Drawers: minimum, moderate or maximum",
-      "option_id": "opt-18",
-      "answer": "Moderate",
-      "confirmed_with_client": false
+      "asks": "Drawers",
+      "option_ids": [
+        "moderate"
+      ],
+      "answer": "Moderate"
     },
     {
       "question": "feel",
       "asks": "Feel",
-      "option_id": "opt-3",
-      "answer": "Transitional",
-      "confirmed_with_client": false
+      "option_ids": [
+        "transitional"
+      ],
+      "answer": "Transitional"
     },
     {
-      "question": "garbage_recycling_cabinets",
-      "asks": "Cabinets for garbage and recycling (how many; 0 for none)",
-      "option_id": null,
-      "answer": "1",
-      "confirmed_with_client": false
+      "question": "garbage_location",
+      "asks": "Location",
+      "option_ids": [
+        "dedicated_cabinet"
+      ],
+      "answer": "A dedicated cabinet"
     },
     {
-      "question": "handle",
-      "asks": "Handle (spec, size and finish)",
-      "option_id": "opt-10",
-      "answer": "Bar pull, 6\", matte black",
-      "confirmed_with_client": false
+      "question": "garbage_recycling",
+      "asks": "Garbage pull-outs",
+      "option_ids": [
+        "yes"
+      ],
+      "answer": "Yes"
+    },
+    {
+      "question": "garbage_slide_outs",
+      "asks": "Slide-outs",
+      "option_ids": [
+        "2"
+      ],
+      "answer": "2"
+    },
+    {
+      "question": "handle_finish",
+      "asks": "Handle finish",
+      "option_ids": [
+        "brushed_nickel"
+      ],
+      "answer": "Brushed nickel"
     },
     {
       "question": "handle_position_doors",
-      "asks": "Handle position on doors (vertical or horizontal)",
-      "option_id": "opt-11",
-      "answer": "Vertical",
-      "confirmed_with_client": false
+      "asks": "Handles on doors",
+      "option_ids": [
+        "horizontal"
+      ],
+      "answer": "Horizontal"
     },
     {
       "question": "handle_position_drawers",
-      "asks": "Handle position on drawers (centred or closer to the top)",
-      "option_id": "opt-12",
-      "answer": "Centred",
-      "confirmed_with_client": false
+      "asks": "On drawers",
+      "option_ids": [
+        "near_top"
+      ],
+      "answer": "Closer to the top"
+    },
+    {
+      "question": "handle_size",
+      "asks": "Handle size",
+      "option_ids": [
+        "5in"
+      ],
+      "answer": "5″"
+    },
+    {
+      "question": "handle_style",
+      "asks": "Handle",
+      "option_ids": [
+        "edge"
+      ],
+      "answer": "Edge pull"
     },
     {
       "question": "hardware",
-      "asks": "Handles, knobs, or handles on drawers with knobs on doors",
-      "option_id": "opt-9",
-      "answer": "All handles",
-      "confirmed_with_client": false
+      "asks": "Type",
+      "option_ids": [
+        "handles"
+      ],
+      "answer": "Handles only"
     },
     {
       "question": "interiors",
-      "asks": "Cabinet interiors",
-      "option_id": "opt-17",
-      "answer": "White",
-      "confirmed_with_client": false
+      "asks": "Interiors",
+      "option_ids": [
+        "prestige_maple"
+      ],
+      "answer": "Prestige maple"
     },
     {
       "question": "island_back_panel",
-      "asks": "Island back panel detail",
-      "option_id": "opt-19",
-      "answer": "Shaker panels",
-      "confirmed_with_client": false
+      "asks": "Back panel",
+      "option_ids": [
+        "door_panels"
+      ],
+      "answer": "Matching door panels"
     },
     {
-      "question": "island_colour_tone",
-      "asks": "Island colour tone",
-      "option_id": "opt-22",
-      "answer": "Dark-medium doors, white counters",
-      "confirmed_with_client": false
-    },
-    {
-      "question": "island_counter_colour",
-      "asks": "Island counter colour",
-      "option_id": "opt-25",
-      "answer": "White quartz",
-      "confirmed_with_client": false
-    },
-    {
-      "question": "island_door_colour",
-      "asks": "Island door and panel colour",
-      "option_id": "opt-24",
-      "answer": "Walnut",
-      "confirmed_with_client": false
-    },
-    {
-      "question": "island_door_style",
-      "asks": "Island door style",
-      "option_id": "opt-23",
-      "answer": "Transitional",
-      "confirmed_with_client": false
-    },
-    {
-      "question": "island_material",
-      "asks": "Island material",
-      "option_id": "opt-21",
-      "answer": "Wood grain",
-      "confirmed_with_client": false
-    },
-    {
-      "question": "island_own_colour",
-      "asks": "Island in an offsetting colour",
-      "option_id": null,
-      "answer": "yes",
-      "confirmed_with_client": false
+      "question": "island_colour_mode",
+      "asks": "Island cabinets",
+      "option_ids": [
+        "cabinets"
+      ],
+      "answer": "Match cabinets"
     },
     {
       "question": "island_side_panel",
-      "asks": "Island side panel detail",
-      "option_id": "opt-20",
-      "answer": "Waterfall stone",
-      "confirmed_with_client": false
-    },
-    {
-      "question": "knob",
-      "asks": "Knob (spec and finish)",
-      "option_id": null,
-      "answer": "not applicable: all handles",
-      "confirmed_with_client": false
+      "asks": "Side panel",
+      "option_ids": [
+        "detailed_short"
+      ],
+      "answer": "Detailed short panel"
     },
     {
       "question": "light_valance",
-      "asks": "Light valance style, or hidden",
-      "option_id": "opt-15",
-      "answer": "Hidden",
-      "confirmed_with_client": false
-    },
-    {
-      "question": "light_valance_colour",
-      "asks": "Light valance colour",
-      "option_id": null,
-      "answer": "not applicable: the light valance is hidden",
-      "confirmed_with_client": false
+      "asks": "Valance",
+      "option_ids": [
+        "hidden"
+      ],
+      "answer": "Hidden"
     },
     {
       "question": "material",
       "asks": "Material",
-      "option_id": "opt-4",
-      "answer": "Solid painted",
-      "confirmed_with_client": false
+      "option_ids": [
+        "painted"
+      ],
+      "answer": "Solid painted"
+    },
+    {
+      "question": "secondary_colour_mode",
+      "asks": "Secondary colour",
+      "option_ids": [
+        "none"
+      ],
+      "answer": "No secondary colour"
     },
     {
       "question": "shape",
-      "asks": "Kitchen shape",
-      "option_id": "opt-1",
-      "answer": "L-Shape with Island",
-      "confirmed_with_client": false
+      "asks": "Layout",
+      "option_ids": [
+        "l_shape_island"
+      ],
+      "answer": "L-shape with island"
     },
     {
       "question": "spice_organizers",
-      "asks": "Spice organizers (how many; 0 for none)",
-      "option_id": null,
-      "answer": "0",
-      "confirmed_with_client": false
+      "asks": "Spice",
+      "option_ids": [],
+      "answer": "1"
     },
     {
       "question": "top_trim_colour",
       "asks": "Top trim colour",
-      "option_id": "opt-14",
-      "answer": "Match doors",
-      "confirmed_with_client": false
+      "option_ids": [
+        "other"
+      ],
+      "answer": "Other"
+    },
+    {
+      "question": "top_trim_colour_other",
+      "asks": "Top trim other",
+      "option_ids": [
+        "painted.white.2"
+      ],
+      "answer": "White 2"
     },
     {
       "question": "top_trim_style",
-      "asks": "Top trim style",
-      "option_id": "opt-13",
-      "answer": "Flat crown",
-      "confirmed_with_client": false
+      "asks": "Top trim",
+      "option_ids": [
+        "crown"
+      ],
+      "answer": "Crown"
     },
     {
       "question": "tray_organizers",
-      "asks": "Tray organizers (how many; 0 for none)",
-      "option_id": null,
-      "answer": "1",
-      "confirmed_with_client": false
+      "asks": "Tray",
+      "option_ids": [],
+      "answer": "1"
     },
     {
       "question": "utility_organizers",
-      "asks": "Utility organizers (how many; 0 for none)",
-      "option_id": null,
-      "answer": "1",
-      "confirmed_with_client": false
+      "asks": "Utility",
+      "option_ids": [],
+      "answer": "1"
     }
   ],
   "design_rules": [

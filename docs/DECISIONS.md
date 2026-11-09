@@ -169,7 +169,7 @@ The owner tried the studio on a real job and asked for seven changes. The answer
   - the choice is saved on the appliance in the master copy; a range or cooktop saved before this has an appliance hood, which is what it already had (this replaces "ranges and cooktops always come with a hood", 2026-11-06);
   - the appliance's pop-up offers the three choices, and the plan label, the 3D view and the Customize list follow it. The tray now says "Range" and "Cooktop";
   - the layout builder leaves an appliance or millwork hood's space open and centred (HARD-007); a millwork hood is also reported, because the catalog has no millwork hood yet;
-  - a cabinet is a short upper with no shelf (`upper_no_shelf`), centred on the appliance and hung from the top line. **PROPOSED:** which cabinet the shop uses there is not confirmed. The 30" clear above the cooking surface (HARD-008) is reported as not checked: there is no counter height in the data yet.
+  - a cabinet is a short upper with no shelf (`upper_no_shelf`), centred on the appliance and hung from the top line. Owner confirmed (2026-11-09): this is the cabinet the shop uses there. The 30" clear above the cooking surface (HARD-008) is reported as not checked: there is no counter height in the data yet.
 - **Bathroom-type rooms:**
   - the tray offers a toilet (30"), a vanity sink (20"), a double vanity sink (60"), a tub (60") and a shower (48");
   - runs start base-only and 21" deep, for the 20 3/4" vanities.

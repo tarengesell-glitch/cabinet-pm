@@ -56,3 +56,24 @@ export function kitchenWithIsland(): Job {
 export function kitchenIntake(): RoomHandover {
   return structuredClone(handover) as RoomHandover;
 }
+
+/**
+ * The room drawing's layout numbers, copied from the designer's data/layout-rules.json on
+ * 2026-11-09 for these tests (the app hands the builder the real ones).
+ */
+export const LAYOUT_NUMBERS = {
+  openingClearance: inch(3),
+  upperBand: inch(13),
+  minRunLength: inch(9),
+  appliances: [
+    { kind: 'fridge', comesWithHood: false, ownUpper: true },
+    { kind: 'range', comesWithHood: true, ownUpper: false },
+    { kind: 'cooktop', comesWithHood: true, ownUpper: false },
+    { kind: 'wall_oven', comesWithHood: false, ownUpper: false },
+    { kind: 'sink', comesWithHood: false, ownUpper: false },
+    { kind: 'bar_sink', comesWithHood: false, ownUpper: false },
+    { kind: 'dishwasher', comesWithHood: false, ownUpper: false },
+    { kind: 'microwave', comesWithHood: false, ownUpper: false },
+    { kind: 'wine_fridge', comesWithHood: false, ownUpper: false },
+  ],
+} as const;

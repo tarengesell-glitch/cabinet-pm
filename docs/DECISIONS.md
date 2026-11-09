@@ -147,6 +147,41 @@ The owner's goal: lock in the wall measurements, openings, cabinet runs, room dr
   - the AI judge's instructions;
   - the "Not reviewed by AI" label when the call fails.
 
+### 2026-11-09: AI designer: layout builder (plan step 3)
+- **Built:** `src/modules/ai-design/model/engine/` (README "The layout builder"). It is ordinary code that fills a room with catalog cabinets at exact positions. It makes several options, each checked with the same checks as a human design and scored against the confirmed rules. Its data is `src/modules/ai-design/data/draft-rules.json`, each entry with its source.
+- **Appliance moves:** 24" at most, along their own wall, and only for a reason:
+  - centring the sink under its window (PREF-023);
+  - the least move that clears a fixed cabinet (function first, PRIN-011).
+
+  On the example kitchen, the builder moves the sink and dishwasher 3 1/2" to fit the dishwasher beside the corner cabinet, and the range 8 1/4" to clear the corner cabinet's leg.
+- **Checked:** every option passes every Core layout check. The catalog's only findings are the door style (left missing, owner 2026-11-09) and the corner cabinets' hinge side (CAT-2).
+- **Broken on purpose, then restored:**
+  - a dishwasher 1" from the sink;
+  - ignoring the 24" limit;
+  - uppers over the range.
+
+  Each made its test fail.
+- **PROPOSED (this session, not owner-decided), on the owner's review page:**
+  - **corner cabinets:** Lazy Susan uses the L-shaped corner base, and Double shelf uses the L-shaped base with adjustable shelves;
+  - **upper height:** 30" and 36" uppers are both offered as options, and the AI judge picks;
+  - **drawer levels:** the "moderate" and "maximum" cabinets that aren't drawer banks get a drawer over doors;
+  - **the ranking ladder:**
+    1. fewest blocks;
+    2. the client's choices;
+    3. owner strength words, strongest first ("extremely strong", "very strong", "strong", "a scored penalty", others);
+  - **reading PREF-021:** more than one one-off width in a run of three or more cabinets counts as "random";
+  - **cabinets beside a range or fridge space:** they get an applied finished end, with no extra 3/4" left;
+  - **islands:** cabinets stand on one side, backs on the island's line;
+  - **uppers:** they hang from the client's cabinet height, so their bottom height follows from the cabinet's standard height. No rule sets the space above the counter.
+- **New open questions:**
+  - **AD-4:** a 36" L-shaped corner base is longer than the 24" corner square the room drawing shows. Should the drawing show the corner cabinet's real legs, so appliances aren't placed in them?
+  - **AD-5:** how far above the counter should uppers start? No rule says. Today it follows from the cabinet height and the upper's standard height.
+- **Still open, and limiting the builder:**
+  - **CAT-1:** filler, tall and drawer-bank sizes. Leftovers under 8" and short pantry runs can't be filled.
+  - **CAT-2:** hinge side.
+  - **AD-1:** the fridge upper's depth.
+  - **DR-3:** how close counts as centred for an island fixture.
+
 ### 2026-11-09: Room geometry moved to Core (AI designer plan, step 2)
 - The room drawing's geometry (where cabinets can stand along a wall, corner cabinets, where uppers go, door and window clearances) moved unchanged from `designer/model/layout.ts` to Core (`src/core/layout/room-geometry.ts`). The AI designer may not import the designer, and two copies could disagree.
 - Core takes its numbers as inputs (rule 6): the opening clearance, the upper band's depth, the shortest run, and which appliances get their own upper. The designer passes them from its `layout-rules.json`, keeping the same function names, so no screen changed.
@@ -445,6 +480,8 @@ Five confirmed rules are now checked in the design tool (HARD-014, PREF-011, PRE
 
 ### From the AI designer plan (2026-11-09)
 - ~~**AD-1 The upper over a fridge.**~~ Answered 2026-11-09 (owner: "sounds good"): it stays a blocker on drafts until the shop names the cabinet and depth. The room drawing gives it 24" deep, but the catalog has no upper at that depth: `upper_no_shelf` is 12" deep, and its depth limits are not known (CAT-1). Until the shop says which cabinet and depth to use, a draft shows it as a blocker.
+- **AD-4 Corner cabinet legs.** A 36" L-shaped corner base reaches 36" along both walls, but the room drawing shows only the run depth (24") in the corner. Appliances drawn within those 36" have to be moved by the builder. Should the drawing show the real corner legs?
+- **AD-5 How high uppers start.** No rule sets the space between the counter and the uppers. Today it follows from the client's cabinet height and the upper's standard height (30" or 36"). Is there a minimum, or a usual height?
 - ~~**AD-2 Moved appliances and the client.**~~ Answered 2026-11-09 (owner): "A note on why it moved in the builder and final client approval is enough." The client does not re-confirm a move separately.
 - ~~**AD-3 Supabase access.**~~ Answered 2026-11-09: the platform's database is the Supabase project **cabinet-pm** (`https://btuwrakpnlutemfdxnve.supabase.co`, organization "Gesell/gray", region ca-central-1, Canada), chosen by the owner. The connector reaches it, so database changes are applied from these sessions and reviewed in a pull request. The earlier link (`kpbcqnnsjtdafxvvarfw`) is not used. The Netlify variables must hold this project's URL and publishable key.
 

@@ -227,7 +227,8 @@
           { "id": "flat", "label": "Flat panel" }, { "id": "door_panels", "label": "Matching door panels" }, { "id": "shiplap", "label": "Shiplap" }
         ] },
         { "key": "island_side_panel", "type": "image", "label": "Side panel", "art": "side_panel", "fidelity": "photo", "aspect": "5/3", "size": "sm", "options": [
-          { "id": "waterfall_stone", "label": "Waterfall stone" }, { "id": "detailed_short", "label": "Detailed short panel" }, { "id": "detailed_long", "label": "Detailed long panel" }
+          { "id": "waterfall_stone", "label": "Waterfall stone" }, { "id": "detailed_short", "label": "Detailed short panel" }, { "id": "detailed_long", "label": "Detailed long panel" },
+          { "id": "plain_gable", "label": "Plain gable", "desc": "A plain 3/4\" end panel" }, { "id": "deep_plain_gable", "label": "Deep plain gable", "desc": "A plain 1 1/2\" end panel" }
         ] }
       ]
     },
@@ -236,11 +237,12 @@
       "q": "What goes along the top of the cabinets?",
       "fields": [
         { "key": "top_trim_style", "type": "image", "label": "Top trim style", "short": "Top trim", "art": "top_trim", "fidelity": "photo", "aspect": "10/3", "size": "sm", "min": "220px", "sample": true, "options": [
-          { "id": "flat_band", "label": "Flat band" }, { "id": "crown", "label": "Crown" }, { "id": "stepped_crown", "label": "Stepped crown" }
+          { "id": "flat_band", "label": "Flat band" }, { "id": "crown", "label": "Crown" }, { "id": "stepped_crown", "label": "Stepped crown" }, { "id": "none", "label": "None", "desc": "Nothing along the top" }
         ] },
-        { "key": "top_trim_colour", "type": "chips", "label": "Colour", "short": "Top trim colour", "source": "trim_colours" },
+        { "key": "top_trim_colour", "type": "chips", "label": "Colour", "short": "Top trim colour", "source": "trim_colours",
+          "when": { "key": "top_trim_style", "not_in": ["none"] } },
         { "key": "top_trim_colour_other", "type": "swatch", "label": "Pick from the standard colours", "short": "Top trim other", "ask": "a top trim colour", "source": "all_doors", "indent": true,
-          "when": { "key": "top_trim_colour", "in": ["other"] } }
+          "when": { "all": [{ "key": "top_trim_style", "not_in": ["none"] }, { "key": "top_trim_colour", "in": ["other"] }] } }
       ]
     },
     {
@@ -248,12 +250,12 @@
       "q": "Light valance under the uppers", "help": "A valance hides the under-cabinet lights.",
       "fields": [
         { "key": "light_valance", "type": "image", "label": "Style", "short": "Valance", "art": "valance", "fidelity": "photo", "aspect": "10/3", "size": "sm", "min": "220px", "sample": true, "options": [
-          { "id": "flat", "label": "Flat" }, { "id": "shaped", "label": "Shaped" }, { "id": "hidden", "label": "Hidden" }
+          { "id": "flat", "label": "Flat" }, { "id": "shaped", "label": "Shaped" }, { "id": "hidden", "label": "Hidden" }, { "id": "none", "label": "None", "desc": "No valance" }
         ] },
         { "key": "light_valance_colour", "type": "chips", "label": "Colour", "short": "Valance colour", "source": "trim_colours",
-          "when": { "key": "light_valance", "not_in": ["hidden"] } },
+          "when": { "key": "light_valance", "not_in": ["hidden", "none"] } },
         { "key": "light_valance_colour_other", "type": "swatch", "label": "Pick from the standard colours", "short": "Valance other", "ask": "a valance colour", "source": "all_doors", "indent": true,
-          "when": { "all": [{ "key": "light_valance", "not_in": ["hidden"] }, { "key": "light_valance_colour", "in": ["other"] }] } }
+          "when": { "all": [{ "key": "light_valance", "not_in": ["hidden", "none"] }, { "key": "light_valance_colour", "in": ["other"] }] } }
       ]
     },
     {

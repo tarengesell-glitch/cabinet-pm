@@ -130,6 +130,24 @@ describe('the kitchen', () => {
     expect(x.fields(valance).map((f) => f.key)).not.toContain('light_valance_colour');
   });
 
+  it('offers "None" for top trim and the valance, and then asks no colour (owner, 2026-11-09)', () => {
+    const { x } = fresh();
+    const trim = def.steps.find((s) => s.id === 'top_trim')!;
+    const valance = def.steps.find((s) => s.id === 'valance')!;
+    expect(field('top_trim_style').options?.map((o) => o.id)).toContain('none');
+    expect(field('light_valance').options?.map((o) => o.id)).toEqual(['flat', 'shaped', 'hidden', 'none']);
+    x.pick('top_trim_style', 'crown');
+    expect(x.fields(trim).map((f) => f.key)).toEqual(['top_trim_style', 'top_trim_colour']);
+    x.pick('top_trim_style', 'none');
+    expect(x.fields(trim).map((f) => f.key)).toEqual(['top_trim_style']);
+    x.pick('light_valance', 'none');
+    expect(x.fields(valance).map((f) => f.key)).toEqual(['light_valance']);
+  });
+
+  it('offers plain and deep plain gables for the island ends (owner, 2026-11-09)', () => {
+    expect(field('island_side_panel').options?.map((o) => o.id)).toEqual(['waterfall_stone', 'detailed_short', 'detailed_long', 'plain_gable', 'deep_plain_gable']);
+  });
+
   it('filters the tones by material, and a colour from another tone stops counting (fails closed)', () => {
     const { x } = fresh();
     x.pick('material', 'wood');

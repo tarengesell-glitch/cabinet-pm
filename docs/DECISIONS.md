@@ -147,7 +147,20 @@ The owner's goal: lock in the wall measurements, openings, cabinet runs, room dr
   - the AI judge's instructions;
   - the "Not reviewed by AI" label when the call fails.
 
-### 2026-11-09: Real clients live only in the database (owner asked to add a real client)
+### 2026-11-09: Owner updates after trying a real job (round 3)
+The owner tried the studio on a real job and asked for seven changes. The answers:
+- **Island end panels:** two new side-panel choices, "Plain gable" (3/4") and "Deep plain gable" (1 1/2"). *Built (intake).*
+- **Top trim:** a "None" choice. *Built.*
+- **Light valance:** a "None" choice, with "Hidden" kept. With None or Hidden, no valance colour is asked. *Built.*
+- **Measurements on walls are inside measurements,** wall face to wall face. The plan showed, and typing set, the walls' centre-line length, which is why the ensuite didn't add up. *Next PR.*
+- **Interior walls are 4 1/2"**, not 5 1/2". New walls start at 4 1/2", and every existing wall changes to 4 1/2". *Next PR.*
+- **Distances while placing islands and appliances:** to the ends of the wall, the opposing wall, and the other things on the same wall.
+- **Over a range or cooktop**, the designer chooses Cabinet, Appliance hood or Millwork hood, on the appliance. A new one starts as Appliance hood.
+- **Bathroom-type rooms:**
+  - the tray offers a toilet (30"), a vanity sink (20"), a double vanity sink (60"), a tub (60") and a shower (48");
+  - runs start base-only and 21" deep, for the 20 3/4" vanities.
+
+ (owner asked to add a real client)
 - **The repository is public on GitHub, and the site's code reaches every visitor's browser.** So real client details (names, emails, phones, addresses) are **never** written in code, commits, pull requests or docs. That includes the demo-client file. They live only in the shared database (`customers`, owned by projects), where only signed-in staff can read them.
 - **The table:** `customers` (`supabase/migrations/20261109000004_customers.sql`).
   - Staff can read, add and change clients. No one can delete one.

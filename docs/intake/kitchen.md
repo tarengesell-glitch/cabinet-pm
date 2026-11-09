@@ -76,6 +76,7 @@ The outline above was turned into a clickable prototype and reviewed by the owne
   - **From the third room on**, matching an earlier room is the recommended path. Coordinate and contrast are still offered, based on a room the client picks.
   - **Every later room** gets the option to match the primary room's ceiling height, and its own inserts for its room type (placeholders until the owner fills them in, IK-7).
 - **Linked rooms:** when a choice that other rooms match is changed, the person must choose: "Match currently linked rooms" (they change too) or change only this room (the others keep their design and stop matching), or cancel.
+- **2026-11-09 (owner):** island side panels add "Plain gable" (3/4") and "Deep plain gable" (1 1/2"); top trim and light valance each add "None" (no colour is asked then; the valance's "Hidden" stays).
 
 ## Where each answer goes (PROPOSED)
 

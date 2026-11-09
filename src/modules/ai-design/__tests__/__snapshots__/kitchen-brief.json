@@ -2,7 +2,7 @@
   "brief_format": 1,
   "job_id": "00000000-0000-4000-8000-000000000001",
   "made_from": {
-    "master_copy_schema_version": 1,
+    "master_copy_schema_version": 2,
     "catalog": {
       "version": 1,
       "shop_id": "526e7ec9-47a3-5c86-9fd3-4db7010be90a",

@@ -40,6 +40,8 @@ What goes in:
   - pick an option a fixed-list question doesn't offer;
   - pick a layout with an island (the intake's `island` flag on the layout option) when the drawing has no island.
 
+A drawn island is never refused for its layout: a peninsula is drawn as a floating wall and gets no island questions (owner, 2026-11-09, IK-18).
+
 The brief never fills in an answer. It reports; the draft run that calls it writes the alert (rule 7) once draft runs exist.
 
 Tests: `__tests__/brief.test.ts`, with an example kitchen with an island in `__tests__/example.ts`. The whole brief for it is saved in `__tests__/__snapshots__/kitchen-brief.json`; any change to the brief shows up there.

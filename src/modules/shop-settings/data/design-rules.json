@@ -455,7 +455,7 @@
       "kind": "preference",
       "topic": "clearance",
       "title": "Walkways 42\" to 48\"",
-      "says": "Under 36\": breaks a very strong minimum. 36\" to 42\": possible, below preferred. 42\" to 48\": preferred. Over 48\": breaks a very strong maximum.",
+      "says": "Under 36\": breaks a very strong minimum. 36\" to 42\": possible, below preferred. 42\" to 48\": preferred. Over 48\": breaks a very strong maximum. Measured from the countertop edge. The two minimums also apply between cabinets and a bare wall (owner, 2026-11-09).",
       "lengths": {
         "strong_min": "36",
         "preferred_min": "42",
@@ -466,11 +466,12 @@
       "closet_builder_status": "APPROVED",
       "here": {
         "status": "confirmed",
-        "note": "Owner review, 2026-11-08: Yes. \"The storage, kitchen and clearance rules are confirmed as true.\""
+        "note": "Owner review, 2026-11-08: Yes. \"The storage, kitchen and clearance rules are confirmed as true.\" Owner, 2026-11-09: walkways are measured \"from the countertop edge\"; the 36\" and 42\" minimums also apply between cabinets and a bare wall."
       },
       "related": [
         "PRIN-005",
-        "PRIN-013"
+        "PRIN-013",
+        "PREF-008"
       ],
       "design_tool": "suggestion"
     },
@@ -479,31 +480,31 @@
       "kind": "preference",
       "topic": "alignment",
       "title": "Islands line up with nearby runs",
-      "says": "Islands are sized and placed to line up with other runs. When an island's end is close to a wall run's end, they line up exactly (\"like snapping\").",
+      "says": "Islands are sized and placed to line up with other runs. When an island's end is within 5\" of lining up with a wall run's end, they line up exactly (\"like snapping\"), by resizing and placing cabinets.",
+      "lengths": {
+        "line_up_within": "5"
+      },
       "strength": "strong",
       "source": "Owner, 2026-10-05: \"Islands should be sized and positioned to line up with other runs of cabinetry.\"",
       "closet_builder_status": "APPROVED",
       "here": {
         "status": "confirmed",
-        "note": "Owner review, 2026-11-07: Yes."
+        "note": "Owner review, 2026-11-07: Yes. Owner, 2026-11-09: \"if it's within 5 inches of lining up, the design should strongly try to line it up by resizing and placing cabinets.\""
       },
-      "open": [
-        "What distance counts as close (Q-023)."
-      ],
       "design_tool": "suggestion"
     },
     {
       "id": "PREF-013",
       "kind": "preference",
       "topic": "alignment",
-      "title": "Fixtures roughly in line align exactly",
-      "says": "An island sink and a back-wall range that are roughly in line are lined up exactly.",
+      "title": "An island sink and a back-wall range line up exactly",
+      "says": "An island sink and a back-wall range are lined up exactly: 100% in line, not only when they are roughly in line.",
       "strength": "very strong",
       "source": "Owner, 2026-10-05.",
       "closet_builder_status": "APPROVED",
       "here": {
         "status": "confirmed",
-        "note": "Owner review, 2026-11-07: Yes."
+        "note": "Owner review, 2026-11-07: Yes. Owner, 2026-11-09: \"it's actually more of a strong preference that they are 100% lined up.\""
       },
       "design_tool": "suggestion"
     },
@@ -518,9 +519,12 @@
       "closet_builder_status": "APPROVED",
       "here": {
         "status": "confirmed",
-        "note": "Owner review, 2026-11-07: Yes."
+        "note": "Owner review, 2026-11-07: Yes. Owner, 2026-11-09: \"if it's close to being centred, it should be 100% centred. It's better that it's off centre than being simply just close to being centred.\""
       },
-      "design_tool": "suggestion"
+      "design_tool": "suggestion",
+      "open": [
+        "What distance counts as close to centred (DECISIONS DR-3)."
+      ]
     },
     {
       "id": "PREF-015",

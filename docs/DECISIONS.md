@@ -345,14 +345,17 @@ After walls, doors and windows, the person marks where cabinetry goes and where 
 - **CAT-2 Hinge side.** A cabinet whose width makes one door needs a hinge side. Should the hinge side be asked only then (a rule from the door width), or always?
 
 ### From the design-rule checks (2026-11-08)
-Three confirmed rules are now checked in the design tool (HARD-014, PREF-011 and PREF-023; see `src/modules/shop-settings/README.md`). These need a number before they can be checked; until then they are not checked at all:
-- **DR-1 Islands lining up (PREF-012).** How close must an island's end be to a wall run's end before it should line up exactly? (closet-builder's Q-023.)
-- **DR-2 Fixtures in line (PREF-013).** How far apart can an island sink and a back-wall range be and still count as "roughly in line"?
-- **DR-3 Island fixture centred (PREF-014).** How far off the island's centre can a sink or cooktop be and still count as "roughly centred"? Does one "near enough" distance serve DR-1 to DR-3 and PRIN-006, or is each its own?
-- **DR-4 Walkways (PREF-011).** Today they are measured from cabinet front to cabinet front, only between runs that face each other. Should they be measured from the countertop edge instead? And should the 36" and 42" minimums also apply between cabinets and a bare wall, for example an island 30" from a wall with no cabinets?
+Five confirmed rules are now checked in the design tool (HARD-014, PREF-011, PREF-012, PREF-013 and PREF-023; see `src/modules/shop-settings/README.md`).
+- ~~**DR-1 Islands lining up (PREF-012).**~~ Answered 2026-11-09: "if it's within 5 inches of lining up, the design should strongly try to line it up by resizing and placing cabinets." Recorded as the rule's `line_up_within`.
+- ~~**DR-2 Fixtures in line (PREF-013).**~~ Answered 2026-11-09: "a strong preference that they are 100% lined up". There is no "roughly": any miss is a suggestion.
+- **DR-3 Island fixture centred (PREF-014).** Partly answered 2026-11-09: "if it's close to being centred, it should be 100% centred. It's better that it's off centre than being simply just close to being centred." **Still open: what distance counts as "close"?** For example, is it the same 5" as islands lining up (DR-1)? Until then PREF-014 is not checked.
+- ~~**DR-4 Walkways (PREF-011).**~~ Answered 2026-11-09: measured from the countertop edge; the 36" and 42" minimums also apply between cabinets and a bare wall.
 - **PROPOSED (this session, not owner-decided):**
   - HARD-014 is checked as "an all-pantry run stands in front of a window", from the owner's rough-layout rule (2026-11-06). Only actual overlap counts; the 3" clearance stays a drawing rule in the designer.
   - PREF-023 flags any sink in front of a window that is not exactly centred, the owner's own notice rule (2026-11-07). Only `sink` counts, not the bar sink.
+  - The countertop edge for walkways is the run's front plus PREF-008's 1" overhang. The run's depth is taken as reaching the cabinet fronts. Every run with base cabinets has a countertop, except all pantry; islands get the 1" on both sides. Seating overhangs on islands are not in the rules yet.
+  - The 48" walkway maximum applies only between two cabinet runs, not to a bare wall (the owner extended only the minimums).
+  - PREF-013's "back-wall range" is a `range` on a wall parallel to the island; a wall cooktop is not counted.
 
 ### From the owner's workflow (2026-10-27)
 - **CV-2 More than one colony.** Will each colony have its own Cabinet Vision library (so its own catalog mappings), or will all colonies share one library? And does each have its own prices?

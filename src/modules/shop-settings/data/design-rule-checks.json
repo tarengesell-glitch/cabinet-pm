@@ -2,6 +2,14 @@
   "source": "Settings the design-rule checks need beyond design-rules.json. Every length the checks use comes from design-rules.json; this file only names things in the master copy.",
   "sink_kinds": {
     "value": ["sink"],
-    "source": "Owner, 2026-11-06 and 2026-11-07 (DECISIONS \"Rough layout\"): a sink dropped near a window centres under it, and a sink in front of a window but off centre gets a notice. The bar sink is not centred under windows in the rough layout, so it is not listed."
+    "source": "Owner, 2026-11-06 and 2026-11-07 (DECISIONS \"Rough layout\"): a sink dropped near a window centres under it, and a sink in front of a window but off centre gets a notice. The bar sink is not centred under windows in the rough layout, so it is not listed. Also the island sink of PREF-013."
+  },
+  "back_wall_range_kinds": {
+    "value": ["range"],
+    "source": "PREF-013 as the owner worded it (2026-10-05, confirmed 2026-11-07 and 2026-11-09): \"an island sink and a back-wall range\". A wall cooktop is not listed, because the rule names a range."
+  },
+  "countertop_run_kinds": {
+    "value": ["base", "base_upper", "base_upper_pantry"],
+    "source": "PROPOSED (2026-11-09, not owner-decided): the cabinet runs that carry a countertop, so their walkway is measured from the countertop edge (owner, 2026-11-09). Every run with base cabinets except all pantry and upper only."
   }
 }

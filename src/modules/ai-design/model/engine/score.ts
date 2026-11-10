@@ -40,7 +40,8 @@ export function scoreOption(built: BuiltRoom, config: DraftConfig, rules: Design
   const random = [...groups.values()].filter((ws) => ws.length >= 3 && ws.filter((w) => ws.indexOf(w) === ws.lastIndexOf(w)).length > 1);
   line('PREF-021', random.length ? 'broken' : 'met', random.length ? `${random.length} run(s) mix several one-off widths: ${random.map((ws) => inches(ws)).join(' | ')}.` : 'Each run repeats a small set of widths.');
 
-  // Equal widths either side of a focal point (PREF-019): the sink base, and the cooking space (base and upper).
+  // Equal widths either side of a focal point (PREF-019): the sink base, the cooking space (base),
+  // and over it the hood with its clear space each side, or the cabinet over the cooking (upper).
   const touching = (s: Slot, edge: Length, side: 'low' | 'high', layer: Slot['layer']) =>
     built.slots.find(
       (o) =>
@@ -58,10 +59,8 @@ export function scoreOption(built: BuiltRoom, config: DraftConfig, rules: Design
     if (a && b && a.role === 'divided' && b.role === 'divided' && a.width !== b.width) unequal.push(`${what}: ${formatInches(a.width)} | ${formatInches(b.width)}`);
   };
   for (const s of built.slots.filter((x) => x.role === 'sink_base')) focal(s.wallId, { start: s.start, end: s.start + s.width }, 'base', 'either side of the sink');
-  for (const c of built.cooking) {
-    focal(c.wallId, c.span, 'base', 'either side of the cooktop');
-    focal(c.wallId, c.span, 'upper', 'either side of the hood');
-  }
+  for (const c of built.cooking) focal(c.wallId, c.span, 'base', 'either side of the cooktop');
+  for (const f of built.upperFocal) focal(f.wallId, f.span, 'upper', 'either side of the hood');
   line('PREF-019', unequal.length ? 'broken' : 'met', unequal.length ? `Unequal: ${unequal.join('; ')}.` : 'The cabinets either side of each focal point match (or one side is not a plain cabinet).');
 
   // The sink centred under its window (PREF-023).

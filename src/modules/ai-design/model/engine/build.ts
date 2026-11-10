@@ -12,6 +12,13 @@
  * widths the catalog accepts (split.ts). Uppers skip windows, leave the hood space centred on the
  * cooktop (HARD-007) and put a cabinet centred over the fridge (HARD-006).
  *
+ * The owner's fixes after trying a real job (2026-11-10, DECISIONS "Fixes after trying a real
+ * job"), with their numbers in data/draft-rules.json "clearances": a corner is the L-shaped corner
+ * cabinet even when no corner insert is chosen; an appliance or millwork hood has clear space each
+ * side, with uppers of the same width either side of it, or of a cabinet over the cooking
+ * (PREF-019); the cabinet over a fridge comes down to just above the fridge; every fridge has a
+ * full-height panel each side (part still open, AD-6); every island's back has a back panel.
+ *
  * Pure and repeatable (P5): no clock, no randomness, no AI. Anything it can't do is an issue with
  * a plain reason, and the option is still returned with it (BUILD_SPEC 5.7: never hidden).
  */
@@ -61,7 +68,9 @@ export type SlotRole =
   | 'pantry'
   | 'fridge_upper'
   | 'cooking_upper'
-  | 'upper_corner';
+  | 'upper_corner'
+  | 'fridge_panel'
+  | 'island_back';
 
 /** One cabinet along a wall, before it becomes a placed item. */
 export interface Slot {
@@ -78,6 +87,8 @@ export interface Slot {
   /** Ends with nothing beside them (no wall, no cabinet): they get an applied finished end. */
   openLow: boolean;
   openHigh: boolean;
+  /** On the far side of an island's line: its back panel. */
+  readonly back?: true;
 }
 
 /** What the scorecard needs to know about where things are. */
@@ -88,6 +99,8 @@ export interface BuiltRoom {
   readonly issues: readonly Issue[];
   /** Where the cooking appliances and sinks are, by wall. */
   readonly cooking: readonly { readonly wallId: string; readonly span: Span }[];
+  /** What the uppers flank over each range or cooktop: a hood with its clear space each side, or the cabinet over it (PREF-019). */
+  readonly upperFocal: readonly { readonly wallId: string; readonly span: Span }[];
   readonly upperTop: Length | null;
   readonly level: DrawerLevelId | null;
 }
@@ -146,15 +159,19 @@ export function buildOption(input: BuildInput, choices: OptionChoices): BuiltRoo
   const levelAnswer = input.answers.get('drawer_level');
   const level: DrawerLevelId | null = levelAnswer === 'minimum' || levelAnswer === 'moderate' || levelAnswer === 'maximum' ? levelAnswer : null;
   if (level === null) problem('block', { kind: 'room', id: room.room_id }, 'The design choices have no drawer level, so which base cabinets get drawers can\'t be decided.');
+  // Corners where runs overlap are L-shaped corner cabinets, even with no corner insert chosen (owner, 2026-11-10).
   const cornerAnswer = input.answers.get('corner_insert');
-  const cornerItem = cornerAnswer !== undefined ? (config.cornerInserts[cornerAnswer] ?? null) : null;
+  const cornerItem = cornerAnswer === undefined ? config.cornerDefault : (config.cornerInserts[cornerAnswer] ?? null);
+  const cl = config.clearances;
   const garbageCabinet = input.answers.get('garbage_recycling') === 'yes' && input.answers.get('garbage_location') === 'dedicated_cabinet';
 
   const corners = cornerCabinets(room, layout.upperBand);
   const ownUpperKinds = new Set(layout.appliances.filter((a) => a.ownUpper).map((a) => a.kind));
   const slots: Slot[] = [];
   const cooking: { wallId: string; span: Span }[] = [];
+  const upperFocal: { wallId: string; span: Span }[] = [];
   let garbagePlaced = false;
+  let defaultCornerUsed = false;
 
   const add = (s: Omit<Slot, 'openLow' | 'openHigh'>): Slot => {
     const slot: Slot = { ...s, openLow: false, openHigh: false };
@@ -187,8 +204,9 @@ export function buildOption(input: BuildInput, choices: OptionChoices): BuiltRoo
         const endCorner = corners.find((c) => c.base && c.endingWallId === wall.wall_id && runAtEnd(room, wall) === run);
         const startCorner = corners.find((c) => c.base && c.startingWallId === wall.wall_id && runAtStart(room, wall) === run);
         if (!pantryRun && endCorner) {
-          if (!cornerItem) problem('block', runRef, 'The design choices don\'t say what goes in the corner cabinets, so the corner is left empty.');
+          if (!cornerItem) problem('block', runRef, `The design choices' corner answer "${cornerAnswer}" has no corner cabinet in the builder's data, so the corner is left empty.`);
           else {
+            if (cornerAnswer === undefined) defaultCornerUsed = true;
             const w = standard(cornerItem, 'width');
             fixed.push(add({ wallId: wall.wall_id, runId: run.run_id, layer: 'base', role: 'corner', start: hi - w, width: w, item: cornerItem, depth: standard(cornerItem, 'depth'), elevation: 0, height: standard(cornerItem, 'height') }));
             hi -= w;
@@ -325,14 +343,35 @@ export function buildOption(input: BuildInput, choices: OptionChoices): BuiltRoo
             // Freestanding appliances (range, fridge, wine fridge…) take their own space; nothing is built there.
             const name = a.kind.replace(/_/g, ' ');
             if (!kindInfo(a.kind)) problem('warn', { kind: 'appliance', id: a.placement_id }, `The builder has no rule for a "${a.kind}", so its space is left open.`);
-            const d = fit(span, new Set([a.placement_id]));
-            if (d === null || !shift([a.placement_id], d, 'PRIN-011', why(name, d ?? 0))) {
+            // A fridge has a full-height panel on each side (owner, 2026-11-10): room for both is looked for first.
+            const panelled = cl.fridgePanelKinds.includes(a.kind);
+            const pw = standard(config.items.fridgePanel, 'width');
+            const ignore = new Set([a.placement_id]);
+            const withPanels = panelled ? fit({ start: span.start - pw, end: span.end + pw }, ignore) : null;
+            const d = withPanels ?? fit(span, ignore);
+            if (d === null || !shift([a.placement_id], d, 'PRIN-011', why(withPanels !== null && d !== 0 ? `${name} with a panel each side` : name, d ?? 0))) {
               problem('block', { kind: 'appliance', id: a.placement_id }, `The ${name} overlaps cabinets or the end of the run, and moving it up to ${formatInches(config.maxMove)} doesn't clear them.`);
               gaps.push({ start: Math.max(span.start, lo), end: Math.min(span.end, hi) });
             } else {
               done.add(a.placement_id);
               gaps.push({ start: span.start + d, end: span.end + d });
               if (COOKING.has(a.kind)) cooking.push({ wallId: wall.wall_id, span: { start: span.start + d, end: span.end + d } });
+              if (panelled) {
+                for (const side of ['low', 'high'] as const) {
+                  const p = side === 'low' ? { start: span.start + d - pw, end: span.start + d } : { start: span.end + d, end: span.end + d + pw };
+                  const where = side === 'low' ? 'toward the wall\'s start' : 'toward the wall\'s end';
+                  const clash = [...fixed.filter((f) => f.layer !== 'upper').map((f) => ({ start: f.start, end: f.start + f.width })), ...gaps].some((o) => overlap(o, p));
+                  if (p.start < lo || p.end > hi || clash) {
+                    problem('block', { kind: 'appliance', id: a.placement_id }, `There is no room for the ${name}'s panel on its side ${where}: move the ${name} ${formatInches(pw)} away from the corner, the wall or the end of the run.`);
+                    continue;
+                  }
+                  if (upperTop === null) {
+                    problem('block', { kind: 'appliance', id: a.placement_id }, `The ${name}'s panel ${where} goes up to the cabinets' top line, and no cabinet height is chosen, so it can't be sized.`);
+                    continue;
+                  }
+                  fixed.push(add({ wallId: wall.wall_id, runId: run.run_id, layer: 'tall', role: 'fridge_panel', start: p.start, width: pw, item: config.items.fridgePanel, depth: cl.fridgePanelDepth, elevation: 0, height: upperTop }));
+                }
+              }
             }
           }
         }
@@ -341,6 +380,11 @@ export function buildOption(input: BuildInput, choices: OptionChoices): BuiltRoo
         const taken = [...fixed.filter((f) => f.layer !== 'upper').map((f) => ({ start: f.start, end: f.start + f.width })), ...gaps].sort((x, y) => x.start - y.start);
         for (const free of subtract({ start: lo, end: hi }, taken)) {
           fillBase(free, pantryRun, wall, run, choices.split, input, add, problem);
+        }
+        // An island's back is covered by a finished back panel, as long as the run (owner, 2026-11-10).
+        if (wall.kind === 'floating' && !pantryRun) {
+          const bp = config.items.islandBackPanel;
+          add({ wallId: wall.wall_id, runId: run.run_id, layer: 'base', role: 'island_back', start: seg.start, width: len(seg), item: bp, depth: standard(bp, 'depth'), elevation: 0, height: standard(bp, 'height'), back: true });
         }
         markOpenEnds(slots, wall.wall_id, run.run_id, ['base', 'tall'], openEdges, gaps);
       }
@@ -358,14 +402,24 @@ export function buildOption(input: BuildInput, choices: OptionChoices): BuiltRoo
         // (HARD-007), or a cabinet centred on it. A placement from before the choice has a hood.
         const cookers = wall.appliances.map(cur).filter((a) => kindInfo(a.kind)?.comesWithHood);
         const overOf = (a: (typeof cookers)[number]) => a.above ?? 'appliance_hood';
-        const hoods = cookers.filter((a) => overOf(a) !== 'cabinet').map((a) => ({ start: a.offset, end: applianceEnd(a) }));
+        // An appliance or millwork hood has clear space each side; a cabinet over the cooking has none (owner, 2026-11-10).
+        const focalOf = (a: (typeof cookers)[number]): Span => (overOf(a) === 'cabinet' ? { start: a.offset, end: applianceEnd(a) } : { start: a.offset - cl.hoodSide, end: applianceEnd(a) + cl.hoodSide });
+        const hoods = cookers.filter((a) => overOf(a) !== 'cabinet').map(focalOf);
         const endCorner = corners.find((c) => c.upper && c.endingWallId === wall.wall_id && runAtEnd(room, wall) === run);
         const startCorner = corners.find((c) => c.upper && c.startingWallId === wall.wall_id && runAtStart(room, wall) === run);
         const uc = config.items.upperCorner;
-        const cuts: Span[] = cookers.map((a) => ({ start: a.offset, end: applianceEnd(a) }));
+        const cuts: Span[] = cookers.map(focalOf);
+        const focals = cookers.filter((a) => overlap({ start: a.offset, end: applianceEnd(a) }, seg)).map(focalOf);
+        upperFocal.push(...focals.map((span) => ({ wallId: wall.wall_id, span })));
         const openEdges: Length[] = [];
-        /** Edges where an upper meets another cabinet (the upper corner, the cabinet over the fridge): no end allowance. */
+        /** Edges where an upper meets another cabinet (the upper corner, the cabinet over the fridge, a fridge panel): no end allowance. */
         const closedEdges = new Set<Length>();
+        // The fridge panels stand to the top line, so the uppers stop at them.
+        for (const p of slots.filter((s) => s.wallId === wall.wall_id && s.role === 'fridge_panel')) {
+          cuts.push({ start: p.start, end: p.start + p.width });
+          closedEdges.add(p.start);
+          closedEdges.add(p.start + p.width);
+        }
         if (endCorner) {
           const w = standard(uc, 'width');
           add({ wallId: wall.wall_id, runId: run.run_id, layer: 'upper', role: 'upper_corner', start: seg.end - w, width: w, item: uc, depth: standard(uc, 'depth'), elevation: top - standard(uc, 'height'), height: standard(uc, 'height') });
@@ -377,17 +431,26 @@ export function buildOption(input: BuildInput, choices: OptionChoices): BuiltRoo
           closedEdges.add(seg.start + standard(uc, 'depth'));
         }
 
-        // The cabinet over the fridge, centred on it (HARD-006).
+        // The cabinet over the fridge, centred on it (HARD-006), down to just above the fridge (owner, 2026-11-10).
         for (const f of wall.appliances.map(cur).filter((a) => ownUpperKinds.has(a.kind) && overlap({ start: a.offset, end: applianceEnd(a) }, seg))) {
           const fu = config.items.fridgeUpper;
           if (!widthAllowed(fu, f.width.value)) {
             problem('block', { kind: 'appliance', id: f.placement_id }, `The catalog has no ${fu.name} ${formatInches(f.width.value)} wide for over the fridge.`);
             continue;
           }
-          add({ wallId: wall.wall_id, runId: run.run_id, layer: 'upper', role: 'fridge_upper', start: f.offset, width: f.width.value, item: fu, depth: standard(fu, 'depth'), elevation: top - standard(fu, 'height'), height: standard(fu, 'height') });
+          const bottom = cl.fridgeHeight + cl.overFridge;
+          if (top <= bottom) {
+            problem('block', { kind: 'appliance', id: f.placement_id }, `The cabinets end at ${formatInches(top)}, which leaves no room for a cabinet over the fridge (it starts ${formatInches(cl.overFridge)} above the fridge's rough ${formatInches(cl.fridgeHeight)}).`);
+            continue;
+          }
+          add({ wallId: wall.wall_id, runId: run.run_id, layer: 'upper', role: 'fridge_upper', start: f.offset, width: f.width.value, item: fu, depth: standard(fu, 'depth'), elevation: bottom, height: top - bottom });
           closedEdges.add(f.offset);
           closedEdges.add(applianceEnd(f));
-          problem('warn', { kind: 'appliance', id: f.placement_id }, `The cabinet over the fridge is drafted ${formatInches(standard(fu, 'depth'))} deep: the catalog has no deeper one yet (DECISIONS AD-1).`);
+          problem(
+            'warn',
+            { kind: 'appliance', id: f.placement_id },
+            `The cabinet over the fridge is drafted ${formatInches(standard(fu, 'depth'))} deep: the catalog has no deeper one yet (DECISIONS AD-1). It starts ${formatInches(cl.overFridge)} above the fridge's rough ${formatInches(cl.fridgeHeight)} height until the fridge's spec is confirmed (OA-4).`,
+          );
         }
 
         for (const a of cookers.filter((x) => overlap({ start: x.offset, end: applianceEnd(x) }, seg))) {
@@ -407,6 +470,7 @@ export function buildOption(input: BuildInput, choices: OptionChoices): BuiltRoo
 
         const wf = config.items.wallFiller;
         const wfW = standard(wf, 'width');
+        const trimmed: { raw: Span; free: Span }[] = [];
         for (const piece of pieceBase.flatMap((p) => subtract(p, cuts))) {
           let lo = piece.start;
           let hi = piece.end;
@@ -424,13 +488,31 @@ export function buildOption(input: BuildInput, choices: OptionChoices): BuiltRoo
             hi -= config.numbers.endAllowance;
             openEdges.push(hi);
           }
-          fillUpper({ start: lo, end: hi }, wall, run, upperItem, top - uh, uh, choices, input, slots, add, problem);
+          trimmed.push({ raw: piece, free: { start: lo, end: hi } });
         }
+        // The uppers either side of a hood, or of the cabinet over the cooking, are the same width (PREF-019, HARD-007).
+        const flankLow = new Map<number, Length>();
+        const flankHigh = new Map<number, Length>();
+        const limits = upperLimits(upperItem, input);
+        for (const f of focals) {
+          const i = trimmed.findIndex((t) => t.raw.end === f.start);
+          const j = trimmed.findIndex((t) => t.raw.start === f.end);
+          if (i < 0 || j < 0 || limits === null) continue;
+          const w = equalFlank(len(trimmed[i]!.free), len(trimmed[j]!.free), limits, choices.split, input);
+          if (w === null) {
+            problem('warn', runRef, `The uppers either side of the space over the cooking at ${formatInches(f.start)}–${formatInches(f.end)} can't be made the same width (PREF-019).`);
+            continue;
+          }
+          flankHigh.set(i, w);
+          flankLow.set(j, w);
+        }
+        trimmed.forEach((t, k) => fillUpper(t.free, wall, run, upperItem, top - uh, uh, choices, input, slots, add, problem, { low: flankLow.get(k) ?? 0, high: flankHigh.get(k) ?? 0 }));
         markOpenEnds(slots, wall.wall_id, run.run_id, ['upper'], openEdges, hoods);
       }
     }
   }
 
+  if (defaultCornerUsed) problem('warn', { kind: 'room', id: room.room_id }, `No corner insert is chosen, so each corner is the L-shaped ${cornerItem!.name} (owner, 2026-11-10).`);
   if (garbageCabinet && !garbagePlaced) problem('warn', { kind: 'room', id: room.room_id }, 'The client asked for a garbage cabinet, but there was no room beside the sink for it.');
   assignBaseTypes(slots, cooking, room, config, level, problem);
   const moved: Room = { ...room, walls: room.walls.map((w) => ({ ...w, appliances: w.appliances.map(cur) })) };
@@ -445,11 +527,11 @@ export function buildOption(input: BuildInput, choices: OptionChoices): BuiltRoo
       ruleId: m.reasons[0]!.ruleId,
       why: `${m.kind.replace(/_/g, ' ')}: moved ${formatInches(Math.abs(m.to - m.from))} ${m.to > m.from ? 'toward the wall\'s end' : 'toward the wall\'s start'}. ${m.reasons.map((r) => r.why).join(' ')}`,
     }));
-  return { room: moved, slots, moves, issues, cooking, upperTop, level };
+  return { room: moved, slots, moves, issues, cooking, upperFocal, upperTop, level };
 }
 
 function describeRole(role: SlotRole): string {
-  return { divided: 'cabinet', sink_base: 'sink base', dishwasher: 'dishwasher opening', garbage: 'garbage pull-out', under_cooktop: 'cabinet under the cooktop', filler: 'filler', corner: 'corner cabinet', wall_oven: 'wall oven cabinet', pantry: 'pantry', fridge_upper: 'cabinet over the fridge', cooking_upper: 'cabinet over the range or cooktop', upper_corner: 'upper corner cabinet' }[role];
+  return { divided: 'cabinet', sink_base: 'sink base', dishwasher: 'dishwasher opening', garbage: 'garbage pull-out', under_cooktop: 'cabinet under the cooktop', filler: 'filler', corner: 'corner cabinet', wall_oven: 'wall oven cabinet', pantry: 'pantry', fridge_upper: 'cabinet over the fridge', cooking_upper: 'cabinet over the range or cooktop', upper_corner: 'upper corner cabinet', fridge_panel: 'fridge panel', island_back: 'island back panel' }[role];
 }
 
 /** Moves a sink to centre under its window when the option asks for it and the rules allow (PREF-023). */
@@ -576,16 +658,23 @@ function fillUpper(
   slots: readonly Slot[],
   add: (s: Omit<Slot, 'openLow' | 'openHigh'>) => Slot,
   problem: (s: 'block' | 'warn', ref: Issue['ref'], m: string) => void,
+  flank: { readonly low: Length; readonly high: Length } = { low: 0, high: 0 },
 ): void {
   const total = len(free);
   if (total <= 0) return;
-  const range = widthRange(item);
   const ref = { kind: 'run' as const, id: run.run_id };
-  if (!range) {
+  const limits = upperLimits(item, input);
+  if (!limits) {
     problem('block', ref, `${item.name} is made in one width only, so the uppers can't be fitted.`);
     return;
   }
-  const limits = { min: Math.max(range.min, input.config.numbers.minUpper), max: Math.min(range.max, input.config.numbers.maxCabinet), step: range.step };
+  // The same-width uppers beside a hood (PREF-019) go first, at the ends; the rest is filled between them.
+  if ((flank.low > 0 || flank.high > 0) && flank.low + flank.high <= total) {
+    if (flank.low > 0) add({ wallId: wall.wall_id, runId: run.run_id, layer: 'upper', role: 'divided', start: free.start, width: flank.low, item, depth: standard(item, 'depth'), elevation, height });
+    if (flank.high > 0) add({ wallId: wall.wall_id, runId: run.run_id, layer: 'upper', role: 'divided', start: free.end - flank.high, width: flank.high, item, depth: standard(item, 'depth'), elevation, height });
+    fillUpper({ start: free.start + flank.low, end: free.end - flank.high }, wall, run, item, elevation, height, choices, input, slots, add, problem);
+    return;
+  }
   if (total < limits.min) {
     problem('warn', ref, `${formatInches(total)} between ${formatInches(free.start)} and ${formatInches(free.end)} is too narrow for an upper, so it is left open.`);
     return;
@@ -594,7 +683,7 @@ function fillUpper(
   if (choices.upperSplit === 'match_bases') {
     // Line the uppers up with the cabinets below (PREF-018, PREF-020): cut where the bases meet.
     const cuts = slots
-      .filter((s) => s.wallId === wall.wall_id && s.layer !== 'upper')
+      .filter((s) => s.wallId === wall.wall_id && s.layer !== 'upper' && !s.back)
       .flatMap((s) => [s.start, s.start + s.width])
       .filter((x) => x > free.start && x < free.end);
     const points = [free.start, ...[...new Set(cuts)].sort((a, b) => a - b), free.end];
@@ -617,10 +706,31 @@ function fillUpper(
   }
 }
 
+/** The widths an upper can be, or null when the catalog makes it in one width only. */
+function upperLimits(item: CatalogItem, input: BuildInput): WidthLimits | null {
+  const range = widthRange(item);
+  if (!range) return null;
+  return { min: Math.max(range.min, input.config.numbers.minUpper), max: Math.min(range.max, input.config.numbers.maxCabinet), step: range.step };
+}
+
+/**
+ * One width for the uppers either side of a hood (PREF-019): the narrower of the two the option's
+ * own split would put there, or else the widest that leaves both sides fillable. Null when none does.
+ */
+function equalFlank(a: Length, b: Length, limits: WidthLimits, strategy: SplitStrategy, input: BuildInput): Length | null {
+  const onStep = (t: Length) => t - (t % limits.step);
+  const fillable = (t: Length) => onStep(t) === 0 || (onStep(t) >= limits.min && firstSplit(onStep(t), strategy, limits, input) !== null);
+  const natA = firstSplit(onStep(a), strategy, limits, input)?.at(-1);
+  const natB = firstSplit(onStep(b), strategy, limits, input)?.[0];
+  const candidates: Length[] = natA !== undefined && natB !== undefined ? [Math.min(natA, natB)] : [];
+  for (let w = onStep(Math.min(a, b, limits.max)); w >= limits.min; w -= limits.step) candidates.push(w);
+  return candidates.find((w) => w >= limits.min && w <= limits.max && w % limits.step === 0 && w <= a && w <= b && fillable(a - w) && fillable(b - w)) ?? null;
+}
+
 /** Ends at an open run end, or beside an appliance space, have nothing beside them (CB-FACT-10). */
 function markOpenEnds(slots: Slot[], wallId: string, runId: string, layers: readonly Layer[], openEdges: readonly Length[], spaces: readonly Span[]): void {
   for (const s of slots) {
-    if (s.wallId !== wallId || s.runId !== runId || !layers.includes(s.layer) || s.role === 'filler') continue;
+    if (s.wallId !== wallId || s.runId !== runId || !layers.includes(s.layer) || s.role === 'filler' || s.role === 'fridge_panel' || s.back) continue;
     const lo = s.start;
     const hi = s.start + s.width;
     if (openEdges.includes(lo) || spaces.some((g) => g.end === lo)) s.openLow = true;
@@ -694,7 +804,8 @@ export function toPlacedItems(built: BuiltRoom, config: DraftConfig, seed: strin
         width: s.width,
         height: s.height,
         depth: s.depth,
-        position: { wall_id: s.wallId, side: itemSide, offset: s.start, elevation: s.elevation, setback: 0 },
+        // An island's back panel stands on the far side of its line (owner, 2026-11-10).
+        position: { wall_id: s.wallId, side: s.back ? 'right' : itemSide, offset: s.start, elevation: s.elevation, setback: 0 },
         item_selections: selections as Selections,
         modifications: [],
         origin: { placed_by: 'ai', last_edited_by: 'ai', approved: false },

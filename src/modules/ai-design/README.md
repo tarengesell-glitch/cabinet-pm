@@ -101,15 +101,18 @@ Core schema 2 now has all of this (DECISIONS "Placed cabinets in the master copy
 There are two reasons today: centring the sink under its window (PREF-023), and the least move that clears a fixed cabinet, such as a corner cabinet (function first, PRIN-011).
 
 **How a room is filled (fixed things first, PREF-015):**
-1. **Corners.** Where runs meet, the corner cabinet goes on the wall whose run ends there; the next wall starts after its leg. The upper corner works the same way.
-2. **Sink and dishwasher.** The sink base is centred on the sink. The dishwasher opening touches it (HARD-005). A dedicated garbage pull-out, if asked for, goes on the sink's other side (PREF-030). A cooktop gets a base under it, a wall oven its tall cabinet, and other appliances keep their space open.
+1. **Corners.** Where runs meet, an L-shaped corner cabinet goes on the wall whose run ends there; the next wall starts after its leg. The upper corner works the same way. With no corner insert chosen, it is still the L-shaped Corner base, and the draft says so (owner, 2026-11-10); before, the corner was left empty and blocked.
+2. **Sink and dishwasher.** The sink base is centred on the sink. The dishwasher opening touches it (HARD-005). A dedicated garbage pull-out, if asked for, goes on the sink's other side (PREF-030). A cooktop gets a base under it, a wall oven its tall cabinet, and other appliances keep their space open. **A fridge gets a full-height panel on each side** (owner, 2026-11-10): ¾" wide, 26" deep, from the floor to the top line, drafted as the Tall filler until the shop names its part (AD-6, PROPOSED). The fridge may move to make room for them. A panel with no room is a block that says how far to move the fridge; it is never skipped.
 3. **Ends.** A wall end gets a ¾" filler. An open end keeps ¾" for an applied finished end, set on the cabinet's end choice (CB-FACT-10, CB-FACT-25).
 4. **The rest.** The rest is divided into cabinets the catalog accepts (`split.ts`), in one of five ways: equal; full 32" plus one; even with wider ends; as many 30" drawer banks as fit; or one cabinet up to 38". If a way doesn't fit a stretch, the next is tried.
-5. **Base types.** These follow the client's drawer level, in the intake's own words. Four-drawer banks go beside the cooktop first (PREF-007), then by the sink (PREF-006).
-6. **Uppers.** They:
+5. **Island backs.** Every island run gets the catalog's Island back panel on the far side of the island's line, as long as the run (owner, 2026-11-10).
+6. **Base types.** These follow the client's drawer level, in the intake's own words. Four-drawer banks go beside the cooktop first (PREF-007), then by the sink (PREF-006).
+7. **Uppers.** They:
    - skip windows;
-   - over a range or cooktop, follow the designer's choice (owner, 2026-11-09): leave an appliance or millwork hood's space exactly over it, so it is centred (HARD-007), or centre a short cabinet over it (`cooking_upper` in the data: the short upper with no shelf, owner-confirmed), reporting that the 30" clearance (HARD-008) can't be checked yet;
-   - put the cabinet over the fridge centred on it (HARD-006);
+   - over a range or cooktop, follow the designer's choice (owner, 2026-11-09): leave an appliance or millwork hood's space centred over it (HARD-007), with 2" clear each side (owner, 2026-11-10), or centre a short cabinet over it (`cooking_upper` in the data: the short upper with no shelf, owner-confirmed), reporting that the 30" clearance (HARD-008) can't be checked yet;
+   - make the uppers either side of the hood (or of the cabinet over the cooking) the same width (PREF-019): the narrower of the two the option's split would give, or else the widest that leaves both sides fillable; if none works, a warning says so;
+   - put the cabinet over the fridge centred on it (HARD-006), from 2" above the fridge up to the top line (owner, 2026-11-10). The fridge is taken as the rough 70" until its spec is confirmed (OA-4, PROPOSED in the data), and the draft says so;
+   - stop at the fridge panels;
    - can line up with the bases below, or be divided on their own;
    - hang from the client's cabinet height, never above the ceiling.
 
@@ -127,11 +130,14 @@ Identical results are merged. Each option has:
 
 Options are ranked by the PROPOSED ladder: fewest blocks, then the client's choices, then the fewest broken preferences of the strongest wording.
 
+The 2026-11-10 numbers (2" each side of a hood, 2" over the fridge, the 26" panel depth, which appliances get panels, the rough fridge height) are in `data/draft-rules.json` "clearances", with their sources. They are the same as the designer's placeholder (`placeholder-draft.json` "clearances").
+
 **What it can't do yet, said on every draft it affects:**
 - **Door style and hinge side.** These stay missing until the intake's choices are mapped (owner, 2026-11-09) and CAT-2 is answered.
 - **Sizes not known yet (CAT-1).** Fillers are ¾" only and talls are 30" × 84" only, so small leftovers and short pantry runs can't be filled. Drawer banks are 30" only.
-- **The cabinet over the fridge** is 12" deep, not 24" (AD-1).
-- **Islands** get cabinets on one side, backs on the island's line. Back and side panels are not drawn yet.
+- **The cabinet over the fridge** is 12" deep, not 24" (AD-1). Its height (top line less 72") and the fridge panels' 26" depth and full height are outside the catalog's known sizes, so the catalog check flags them until the shop gives those limits (CAT-1, AD-6).
+- **The island back panel** is as long as the run; the catalog doesn't know its width limits yet, so the catalog check flags it (CAT-1).
+- **Islands** get cabinets on one side, backs on the island's line, and the back panel on the other side. Island side (end) panels are not drawn yet: the open ends get an applied finished end.
 - **A "base, upper + pantry" run** is drafted as base + upper.
 
 Tests: `__tests__/engine.test.ts` and `split.test.ts`. They check, on the example kitchen and on a test wall:
@@ -140,8 +146,10 @@ Tests: `__tests__/engine.test.ts` and `split.test.ts`. They check, on the exampl
 - the dishwasher always touches the sink;
 - moves stay along the wall, at most 24";
 - the sink is centred under the window;
-- the hood and fridge spaces are kept;
-- the corner and the ends are right;
+- the hood and fridge spaces are kept, with 2" clear each side of a hood and equal uppers either side;
+- the cabinet over the fridge starts 2" above it, and the fridge has a 26"-deep full-height panel each side (or a block when there is no room);
+- the corner is L-shaped even with no corner insert, and the ends are right;
+- every island has its back panel;
 - the builder refuses what it should.
 
 ## Next (the plan approved 2026-11-09)

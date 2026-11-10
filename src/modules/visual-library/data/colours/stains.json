@@ -1,0 +1,8 @@
+{
+  "id": "stains",
+  "label": "Stains",
+  "source": "Awaiting the owner: which stain line the shop uses, and the list (IK-22). Each stain is shown on every wood species (owner, 2026-11-10). Nothing here is made up.",
+  "status": "awaiting_owner",
+  "applies_to": ["red_oak_rift", "red_oak_rotary", "white_oak_rift", "white_oak_rotary", "maple", "walnut_rift", "walnut_rotary", "cherry"],
+  "colours": []
+}

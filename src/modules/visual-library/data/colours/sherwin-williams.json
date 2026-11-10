@@ -1,0 +1,8 @@
+{
+  "id": "sherwin_williams",
+  "label": "Sherwin-Williams paint colours",
+  "source": "Awaiting the owner: a cabinet shortlist (about 40 to 80) from Sherwin-Williams' published colours, each with its SW code and hex value (IK-21). Nothing here is made up.",
+  "status": "awaiting_owner",
+  "applies_to": ["painted"],
+  "colours": []
+}

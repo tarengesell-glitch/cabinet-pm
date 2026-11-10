@@ -57,8 +57,9 @@ describe('the placeholder fill (no AI)', () => {
       if (c.code !== null) expect(CURRENT_CATALOG.items.some((i) => i.code === c.code)).toBe(true);
       expect(c.reviewed).toBe(false);
     }
+    // Cabinets never overlap each other. An appliance drawn into a corner cabinet's space is shown, with a note.
     const rows = new Map<string, typeof d.cabinets>();
-    for (const c of d.cabinets) rows.set(`${c.runId}/${c.layer}`, [...(rows.get(`${c.runId}/${c.layer}`) ?? []), c]);
+    for (const c of d.cabinets.filter((x) => x.code !== null && !x.back)) rows.set(`${c.runId}/${c.layer}`, [...(rows.get(`${c.runId}/${c.layer}`) ?? []), c]);
     for (const row of rows.values()) {
       const sorted = [...row].sort((a, b) => a.offset - b.offset);
       for (let i = 1; i < sorted.length; i++) expect(sorted[i]!.offset).toBeGreaterThanOrEqual(sorted[i - 1]!.offset + sorted[i - 1]!.width);
@@ -183,5 +184,123 @@ describe('heights', () => {
     expect(high.notes.join(' ')).toMatch(/above the .* ceiling/);
     const none = draft({ cabinetTop: null });
     expect(none.notes.join(' ')).toMatch(/No cabinet height was chosen/);
+  });
+});
+
+/** The example kitchen with wall 1 cleared (no window, no appliances) and given these appliances. */
+const wallOneWith = (...apps: readonly { kind: string; offset: number; width: number }[]): Room => {
+  const r = kitchen();
+  const template = r.walls.flatMap((w) => w.appliances).find((a) => a.kind === 'range')!;
+  const plain = { ...template };
+  delete plain.above;
+  return {
+    ...r,
+    walls: r.walls.map((w, i) =>
+      i === 0
+        ? {
+            ...w,
+            openings: [],
+            appliances: apps.map((a, k) => ({ ...plain, placement_id: `00000000-0000-4000-8000-${String(900 + k).padStart(12, '0')}`, kind: a.kind, offset: a.offset, width: { ...plain.width, value: a.width }, paired_with: null })),
+          }
+        : { ...w, appliances: w.appliances.filter((a) => a.kind !== 'range') },
+    ),
+  };
+};
+const draftOf = (room: Room, p?: Partial<DraftPreferences>): PlaceholderDesign => {
+  const r = draftPlaceholder(room, prefs(p), ids);
+  if (!r.ok) throw new Error(r.reason);
+  return r.value;
+};
+
+describe('owner fixes, 2026-11-10 (after trying a real job)', () => {
+  it('makes every corner where runs overlap an L-shaped 90-degree corner cabinet, never a blind corner', () => {
+    for (const [insert, code] of [
+      [null, 'corner_base'],
+      ['lazy_susan', 'corner_base'],
+      ['double_shelf', 'corner_base_adjustable'],
+    ] as const) {
+      const d = draft({ cornerInsert: insert });
+      expect(d.cabinets.filter((c) => c.layer === 'base' && c.code?.startsWith('corner_')).map((c) => c.code)).toEqual([code]);
+      expect(d.cabinets.some((c) => c.code === 'blind_corner_base')).toBe(false);
+      expect(d.notes.join(' ')).toMatch(/L-shaped corner cabinets/);
+    }
+    // The wall that ends at the corner stops where the L's other leg starts (its depth along this wall).
+    const d = draft({ cornerInsert: null });
+    const room = kitchen();
+    const wallA = room.walls[0]!.wall_id;
+    const lastBase = Math.max(...d.cabinets.filter((c) => c.wallId === wallA && c.layer === 'base').map((c) => c.offset + c.width));
+    const corner = d.cabinets.find((c) => c.code === 'corner_base')!;
+    expect(corner.wallId).toBe(room.walls[1]!.wall_id);
+    expect(lastBase).toBeLessThanOrEqual(144 * IN - 9 * IN / 4 - 36 * IN);
+    expect(d.cabinets.find((c) => c.code === 'upper_corner_90')).toBeDefined();
+  });
+
+  it('leaves 2" clear each side of a hood, with the same width of upper either side', () => {
+    const d = draftOf(wallOneWith({ kind: 'range', offset: 60 * IN, width: 30 * IN }));
+    const wallA = kitchen().walls[0]!.wall_id;
+    const uppers = d.cabinets.filter((c) => c.wallId === wallA && c.layer === 'upper' && c.code !== null).sort((a, b) => a.offset - b.offset);
+    const left = uppers.filter((c) => c.offset + c.width <= 60 * IN).at(-1)!;
+    const right = uppers.find((c) => c.offset >= 90 * IN)!;
+    expect(left.offset + left.width).toBe(58 * IN);
+    expect(right.offset).toBe(92 * IN);
+    expect(left.code).toBe('upper_doors');
+    expect(right.width).toBe(left.width);
+    expect(uppers.some((c) => c.offset < 92 * IN && c.offset + c.width > 58 * IN)).toBe(false);
+  });
+
+  it('puts a full-height 26" panel on each side of a fridge, and the cabinet over it 2" above the fridge', () => {
+    const d = draftOf(wallOneWith({ kind: 'fridge', offset: 60 * IN, width: 36 * IN }));
+    const s = DRAFT_SETTINGS.ok ? DRAFT_SETTINGS.value : null;
+    const panels = d.cabinets.filter((c) => c.code === 'tall_filler').sort((a, b) => a.offset - b.offset);
+    expect(panels.map((p) => [p.offset, p.width, p.depth, p.elevation, p.height])).toEqual([
+      [60 * IN - 48, 48, 26 * IN, 0, d.upperTop],
+      [96 * IN, 48, 26 * IN, 0, d.upperTop],
+    ]);
+    const over = d.cabinets.find((c) => c.code === 'upper_no_shelf' && c.depth !== null)!;
+    expect([over.offset, over.width]).toEqual([60 * IN, 36 * IN]);
+    expect(over.elevation).toBe(s!.visual.fridgeHeight + 2 * IN);
+    expect(over.elevation + over.height).toBe(d.upperTop);
+    // Nothing else stands where the panels are.
+    for (const p of panels) expect(d.cabinets.filter((c) => c !== p && c.wallId === p.wallId && c.code !== null && c.offset < p.offset + p.width && c.offset + c.width > p.offset)).toEqual([]);
+    expect(d.notes.join(' ')).toMatch(/full-height panel/);
+  });
+
+  it('puts the dishwasher touching the sink base, and draws it once (inside its opening)', () => {
+    const d = draft();
+    const sb = d.cabinets.find((c) => c.code === 'sink_base')!;
+    const dw = d.cabinets.find((c) => c.code === 'dishwasher_opening')!;
+    expect(dw.offset === sb.offset + sb.width || dw.offset + dw.width === sb.offset).toBe(true);
+    const views = cabinetViews(placed());
+    expect(views.filter((v) => v.appliance === 'dishwasher')).toEqual([]);
+    expect(views.filter((v) => v.code === 'dishwasher_opening')).toHaveLength(1);
+  });
+
+  it('covers an island’s back with a finished back panel on the far side of its line', () => {
+    const r = kitchen();
+    const island = {
+      ...r.walls[0]!,
+      wall_id: '00000000-0000-4000-8000-000000000105',
+      kind: 'floating' as const,
+      start_point: { x: 36 * IN, y: 66 * IN },
+      end_point: { x: 108 * IN, y: 66 * IN },
+      thickness: null,
+      openings: [],
+      obstacles: [],
+      runs: [{ run_id: '00000000-0000-4000-8000-000000000604', kind: 'base' as const, offset: 0, length: 72 * IN, depth: 36 * IN }],
+      appliances: [],
+    };
+    const room = { ...r, walls: [...r.walls, island] };
+    const d = draftOf(room);
+    const backs = d.cabinets.filter((c) => c.back);
+    expect(backs.map((c) => [c.code, c.wallId, c.offset, c.width])).toEqual([['island_back_panel', island.wall_id, 0, 72 * IN]]);
+    const items = placeholderItems(room, d);
+    if (!items.ok) throw new Error(items.reason);
+    const panel = items.value.find((i) => i.position.wall_id === island.wall_id && i.position.side === 'right')!;
+    expect(panel.depth).toBe(48);
+    expect(items.value.filter((i) => i.position.wall_id === island.wall_id && i.position.side === 'left').length).toBeGreaterThan(0);
+    const job = { ...examples.kitchen(), rooms: [{ ...room, items: items.value }] };
+    expect(JobSchema.safeParse(job).success).toBe(true);
+    expect(runChecks(ITEM_CHECKS, job, {}).issues).toEqual([]);
+    expect(cabinetViews({ ...room, items: items.value }).filter((v) => v.back)).toHaveLength(1);
   });
 });

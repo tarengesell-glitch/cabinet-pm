@@ -9,7 +9,7 @@ import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import type { Room, Wall } from '@/core/index';
-import { direction, halfThickness, insideNormal, wallLength } from '../model/layout';
+import { direction, halfThickness, insideNormal, insideSpan, wallLength } from '../model/layout';
 import type { CabinetView } from '../model/cabinets';
 import { DRAFT_SETTINGS, isHood, itemByCode, standard } from '../model/placeholder-draft';
 import { GOLD } from './theme';
@@ -425,7 +425,15 @@ function cabinet(s: Scene3D, c: CabinetView, room: Room, look: FinishLook, isSel
       y += h;
     }
   };
-  const counterTop = (h: number) => b(w, counterT, d + inch(v.counterOverhang), [0, h + counterT / 2, inch(v.counterOverhang) / 2], counter);
+  // Every counter has the same front line, the base cabinets' depth plus the overhang, measured
+  // from the wall (so a deeper box, like the dishwasher opening, doesn't break the run). On an
+  // island the counter also covers the back panel behind the cabinets.
+  const oh = inch(v.counterOverhang);
+  const baseD = inch(standard('base_doors', 'depth') ?? 24 * IN);
+  const backExtra = island ? inch(standard('island_back_panel', 'depth') ?? 0) + oh : 0;
+  const counterBox = (h: number, x0: number, x1: number, z0: number, z1: number) => b(x1 - x0, counterT, z1 - z0, [(x0 + x1) / 2, h + counterT / 2, (z0 + z1) / 2], counter);
+  const counterTop = (h: number) => counterBox(h, -w / 2, w / 2, -d / 2 - backExtra, -d / 2 + baseD + oh);
+  const baseTop = inch(standard('base_doors', 'height') ?? 34 * IN);
 
   if (c.appliance === 'millwork_hood') {
     // A millwork hood: a box in the door finish (no catalog item yet; drawn for the look only).
@@ -454,10 +462,65 @@ function cabinet(s: Scene3D, c: CabinetView, room: Room, look: FinishLook, isSel
     // Heights come from the design, so every upper and tall cabinet reaches the same top line.
     const h = inch(c.height);
     const front0 = item.front[0];
-    if (item.type === 'filler' || item.type === 'panel') {
+    if (c.back) {
+      // An island's back panel: behind the island's line, from the floor, in the island's finish.
+      b(w, h, d, [0, h / 2, -d], finish);
+    } else if ((item.type === 'filler' || item.type === 'panel') && c.layer === 'base' && top > baseTop + 0.01) {
+      // A full-height panel or filler (beside a fridge or a pantry): from the floor to the top line.
+      b(w, top, d, [0, top / 2, 0], finish);
+    } else if (item.type === 'filler' || item.type === 'panel') {
       const y0 = c.layer === 'upper' ? inch(c.elevation) : toe;
       b(w, top - y0, d, [0, (y0 + top) / 2, 0], finish);
       if (c.layer === 'base') counterTop(h);
+    } else if (item.type === 'corner_base' || item.type === 'corner_wall') {
+      // An L-shaped 90-degree corner cabinet: one leg along this wall, the other along the wall it
+      // meets, each as deep as the cabinets beside it, with a door on each inside face.
+      const u = direction(wall);
+      const n = insideNormal(room, wall);
+      const sign = -n.y * u.x + n.x * u.y >= 0 ? 1 : -1;
+      const span = insideSpan(room, wall);
+      const atHigh = c.offset > span.start + IN && c.offset + c.width >= span.end - IN;
+      const cs = (atHigh ? 1 : -1) * sign;
+      const inward = -cs;
+      const cx0 = (cs * w) / 2;
+      const legD = Math.min(d, w, inch(standard(c.layer === 'upper' ? 'upper_doors' : 'base_doors', 'depth') ?? 12 * IN));
+      const xr = (a: number, z: number): [number, number] => [Math.min(cx0 + inward * a, cx0 + inward * z), Math.max(cx0 + inward * a, cx0 + inward * z)];
+      const upper = c.layer === 'upper';
+      const y0 = upper ? inch(c.elevation) : toe;
+      const zFace = -d / 2 + legD;
+      const block = (x: [number, number], z0: number, z1: number, yA: number, yB: number, key: string, shadow = true) => b(x[1] - x[0], yB - yA, z1 - z0, [(x[0] + x[1]) / 2, (yA + yB) / 2, (z0 + z1) / 2], key, shadow);
+      block([-w / 2, w / 2], -d / 2, zFace, y0, top, carcass);
+      block(xr(0, legD), zFace, d / 2, y0, top, carcass);
+      if (!upper) {
+        block([-w / 2, w / 2], -d / 2, zFace - 3, 0, toe, `plain:${SURROUNDINGS.plinth}`, false);
+        block(xr(0, legD - 3), zFace - 3, d / 2, 0, toe, `plain:${SURROUNDINGS.plinth}`, false);
+        counterBox(h, -w / 2, w / 2, -d / 2, zFace + oh);
+        const rx = xr(0, legD + oh);
+        counterBox(h, rx[0], rx[1], zFace + oh, d / 2);
+      }
+      // The door on this wall's face, beside the other leg.
+      const [fx0, fx1] = xr(legD, w);
+      if (fx1 - fx0 > 1) doorsIn(fx0, fx1, y0, top, 2 * zFace, upper);
+      // The door on the other leg's face, turned to face along this wall.
+      const fw = d - legD;
+      if (fw > 1) {
+        const face = new THREE.Group();
+        face.position.set(cx0 + inward * legD, 0, (zFace + d / 2) / 2);
+        face.rotation.y = inward > 0 ? Math.PI / 2 : -Math.PI / 2;
+        front(face, fw - GAP, top - y0 - GAP, [0, (y0 + top) / 2, DOOR_T / 2], false);
+        // The handle by the inside corner, where the two doors meet.
+        hardware(face, (inward > 0 ? 1 : -1) * (fw / 2 - 1.6), upper ? y0 + 5 : top - 5, DOOR_T, look.doorOrient === 'vertical', false);
+        g.add(face);
+      }
+    } else if (item.type === 'appliance_opening') {
+      // The dishwasher in its opening: a plain stainless door flush with the cabinet doors (no panel
+      // unless one is chosen), the tub behind it, a recessed toe kick and the run's counter over it.
+      const inner = h - toe;
+      b(w - 0.5, inner - 0.5, d - DOOR_T - 0.75, [0, toe + inner / 2, -DOOR_T / 2 - 0.375], `plain:${SURROUNDINGS.black}`);
+      b(w - GAP, inner - GAP, DOOR_T, [0, toe + inner / 2, d / 2 - DOOR_T / 2], `steel:${SURROUNDINGS.steel}`);
+      b(Math.max(1, w - 6), 0.6, 0.8, [0, h - 3.5, d / 2 + 0.4], `steel:${SURROUNDINGS.steel}`);
+      b(w - 1, toe, d - 3, [0, toe / 2, -1.5], `plain:${SURROUNDINGS.plinth}`, false);
+      counterTop(h);
     } else if (c.layer === 'upper') {
       const y0 = inch(c.elevation);
       b(w, h, d, [0, y0 + h / 2, 0], carcass);
@@ -475,17 +538,15 @@ function cabinet(s: Scene3D, c: CabinetView, room: Room, look: FinishLook, isSel
         doorsIn(-w / 2, w / 2, toe, h - 6, d, false);
       } else if (item.code === 'garbage_pullout' || front0?.kind === 'pullout') drawers([inner], d, toe);
       else doorsIn(-w / 2, w / 2, toe, h, d, false);
-      if (item.type !== 'tall' && item.type !== 'appliance_opening') counterTop(h);
-      if (item.type === 'appliance_opening') {
-        b(w - 0.25, inner, d, [0, toe + inner / 2, 0], `steel:${SURROUNDINGS.steel}`);
-        counterTop(h);
-      }
+      if (item.type !== 'tall') counterTop(h);
       if (c.code === 'sink_base') b(Math.min(28, w - 6), 0.3, 16, [0, h + counterT + 0.02, 1], `steel:${SURROUNDINGS.steel}`);
     }
   }
 
   if (isSelected) {
     // A warm gold glow on the cabinet itself, plus its outline, so the selection is easy to see.
+    // No see-through box around it: one larger than the cabinet poked out of the island's back and
+    // looked like a fault in the drawing (owner, 2026-11-10).
     g.traverse((o) => {
       const mesh = o as THREE.Mesh;
       if (!mesh.isMesh) return;
@@ -501,12 +562,9 @@ function cabinet(s: Scene3D, c: CabinetView, room: Room, look: FinishLook, isSel
     const b3 = new THREE.Box3().setFromObject(g);
     const sz = b3.getSize(new THREE.Vector3());
     const ctr = b3.getCenter(new THREE.Vector3());
-    const edges = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(sz.x + 0.8, sz.y + 0.8, sz.z + 0.8)), new THREE.LineBasicMaterial({ color: GOLD }));
+    const edges = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(sz.x + 0.3, sz.y + 0.3, sz.z + 0.3)), new THREE.LineBasicMaterial({ color: GOLD }));
     edges.position.copy(ctr);
     g.add(edges);
-    const glow = new THREE.Mesh(new THREE.BoxGeometry(sz.x + 1.4, sz.y + 1.4, sz.z + 1.4), new THREE.MeshBasicMaterial({ color: GOLD, transparent: true, opacity: 0.22, depthWrite: false }));
-    glow.position.copy(ctr);
-    g.add(glow);
   }
   const p = placement(room, wall, c.offset, c.width, depthBase);
   g.position.copy(p.at);

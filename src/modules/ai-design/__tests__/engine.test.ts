@@ -18,6 +18,8 @@ const inch = (n: number): Length => {
 const code = new Map(CURRENT_CATALOG.items.map((i) => [i.id, i.code]));
 const of = (items: readonly PlacedItem[], c: string) => items.filter((i) => code.get(i.catalog_item_id) === c);
 const end = (i: PlacedItem) => i.position.offset + i.width;
+/** The catalog's limits for these aren't known yet (CAT-1, AD-6), so the size check flags the sizes the owner asked for (2026-11-10). */
+const SIZED_BY_OWNER = new Set(['island_back_panel', 'tall_filler', 'upper_no_shelf']);
 
 function answersFor(job: Job) {
   const brief = buildDesignBrief({ job, roomId: KITCHEN_ROOM_ID, catalog: CURRENT_CATALOG, designRules: DESIGN_RULES, intakeDefinition, intake: kitchenIntake() });
@@ -79,8 +81,14 @@ describe('the layout builder', () => {
         expect(JobSchema.safeParse({ ...job, rooms: [o.room] }).success).toBe(true);
         expect(o.room.items.length).toBeGreaterThan(0);
         expect(o.issues.filter((i) => i.check_id.startsWith('layout.'))).toEqual([]);
-        // The only catalog findings are the choices left as blockers until the intake is mapped (owner, 2026-11-09) and CAT-2.
-        for (const i of o.issues.filter((x) => x.check_id.startsWith('catalog.'))) expect(i.message).toMatch(/needs a choice for “(Door style|Hinge side \(single door\))”\.$/);
+        // The only catalog findings are the choices left as blockers until the intake is mapped (owner, 2026-11-09) and CAT-2,
+        // and the sizes of the panels and the cabinet over the fridge whose limits aren't known yet (owner, 2026-11-10; CAT-1, AD-6).
+        for (const i of o.issues.filter((x) => x.check_id.startsWith('catalog.'))) {
+          if (/needs a choice for “(Door style|Hinge side \(single door\))”\.$/.test(i.message)) continue;
+          const item = o.room.items.find((x) => x.item_instance_id === i.ref.id)!;
+          expect(SIZED_BY_OWNER.has(code.get(item.catalog_item_id)!)).toBe(true);
+          expect(i.message).toMatch(/^The (smallest (width|height|depth) for|largest (width|height|depth) for|size step for) .+ isn’t known yet/);
+        }
         for (const item of o.room.items) expect(item.origin).toEqual({ placed_by: 'ai', last_edited_by: 'ai', approved: false });
       }
     }
@@ -140,6 +148,98 @@ describe('the layout builder', () => {
     }
   });
 
+  it('hangs the cabinet over the fridge 2" above it, up to the top line (owner, 2026-11-10)', () => {
+    const job = wallC(40, 'fridge');
+    const top = job.rooms[0]!.ceiling_height.value;
+    for (const o of drafted(input(job)).options) {
+      const [over] = of(o.room.items, 'upper_no_shelf');
+      expect(over?.position.elevation).toBe(inch(72)); // the fridge's rough 70" (OA-4) + 2"
+      expect(over!.position.elevation + over!.height).toBe(top);
+      expect(o.issues.some((i) => i.message.includes('rough 70" height until the fridge\'s spec is confirmed (OA-4)'))).toBe(true);
+    }
+    // With the cabinets ending below 72", there is no room for it, and it says so.
+    const low = drafted(input(job, { cabinetTop: inch(72) })).options[0]!;
+    expect(of(low.room.items, 'upper_no_shelf')).toEqual([]);
+    expect(low.issues.map((i) => i.message)).toContain('The cabinets end at 72", which leaves no room for a cabinet over the fridge (it starts 2" above the fridge\'s rough 70").');
+  });
+
+  it('puts a full-height panel 26" deep on each side of the fridge, and the uppers stop at it (owner, 2026-11-10)', () => {
+    const job = wallC(40, 'fridge');
+    const top = job.rooms[0]!.ceiling_height.value;
+    for (const o of drafted(input(job)).options) {
+      const wall = o.room.walls[2]!;
+      const fridge = wall.appliances.find((a) => a.kind === 'fridge')!;
+      const panels = of(o.room.items, 'tall_filler').sort((x, y) => x.position.offset - y.position.offset);
+      expect(panels.map((p) => [p.position.offset, p.width, p.depth, p.position.elevation, p.height])).toEqual([
+        [fridge.offset - inch(0.75), inch(0.75), inch(26), 0, top],
+        [fridge.offset + fridge.width.value, inch(0.75), inch(26), 0, top],
+      ]);
+      const covered = (x: PlacedItem) => panels.some((p) => x !== p && x.position.offset < end(p) && end(x) > p.position.offset);
+      expect(o.room.items.filter((x) => x.position.wall_id === wall.wall_id && covered(x))).toEqual([]);
+    }
+  });
+
+  it('reports a fridge panel that has no room, instead of skipping it', () => {
+    // A run just as long as the fridge and its two open ends' allowances: the fridge fits, its panels don't.
+    const allowance = DESIGN_RULES.rules.find((r) => r.id === 'CB-FACT-25')!.lengths['end_allowance'];
+    if (typeof allowance !== 'number') throw new Error('CB-FACT-25 has no end allowance.');
+    const job = wallC(40, 'fridge');
+    const room = job.rooms[0]!;
+    const walls = room.walls.map((w, i) =>
+      i === 2 ? { ...w, runs: w.runs.map((r) => ({ ...r, offset: inch(60), length: inch(36) + 2 * allowance })), appliances: w.appliances.filter((a) => a.kind === 'fridge').map((a) => ({ ...a, offset: inch(60) + allowance })) } : w,
+    );
+    const o = drafted(input(JobSchema.parse({ ...job, rooms: [{ ...room, walls }] }))).options[0]!;
+    expect(o.issues.filter((i) => i.severity === 'block').map((i) => i.message)).toEqual(
+      expect.arrayContaining([
+        'There is no room for the fridge\'s panel on its side toward the wall\'s start: move the fridge 3/4" away from the corner, the wall or the end of the run.',
+        'There is no room for the fridge\'s panel on its side toward the wall\'s end: move the fridge 3/4" away from the corner, the wall or the end of the run.',
+      ]),
+    );
+  });
+
+  it('leaves 2" clear each side of a hood, with uppers of the same width either side (PREF-019, owner 2026-11-10)', () => {
+    const withRange = (above: 'appliance_hood' | 'millwork_hood' | 'cabinet'): Job => {
+      const job = wallC(40);
+      const room = job.rooms[0]!;
+      const walls = room.walls.map((w, i) => (i === 2 ? { ...w, openings: [], appliances: w.appliances.map((a) => (a.kind === 'range' ? { ...a, offset: inch(100), above } : a)) } : w));
+      return JobSchema.parse({ ...job, rooms: [{ ...room, walls }] });
+    };
+    for (const above of ['appliance_hood', 'millwork_hood', 'cabinet'] as const) {
+      const clear = above === 'cabinet' ? 0 : inch(2);
+      for (const o of drafted(input(withRange(above))).options) {
+        const wall = o.room.walls[2]!;
+        const range = wall.appliances.find((a) => a.kind === 'range')!;
+        const uppers = o.room.items.filter((i) => i.position.wall_id === wall.wall_id && i.position.elevation > 0 && !(above === 'cabinet' && i.position.offset === range.offset));
+        const left = uppers.filter((u) => end(u) <= range.offset).sort((x, y) => end(y) - end(x))[0]!;
+        const right = uppers.filter((u) => u.position.offset >= range.offset + range.width.value).sort((x, y) => x.position.offset - y.position.offset)[0]!;
+        // Nothing in the clear space, and the uppers either side are the same width.
+        expect(range.offset - end(left)).toBeGreaterThanOrEqual(clear);
+        expect(right.position.offset - (range.offset + range.width.value)).toBeGreaterThanOrEqual(clear);
+        expect(left.width).toBe(right.width);
+        expect(o.scorecard.find((l) => l.ruleId === 'PREF-019')?.result).toBe('met');
+      }
+    }
+  });
+
+  it('makes a corner the L-shaped corner cabinet even when no corner insert is chosen (owner, 2026-11-10)', () => {
+    const answers = answersFor(kitchenWithIsland()).filter((a) => a.question !== 'corner_insert');
+    for (const o of drafted(input(kitchenWithIsland(), { answers })).options) {
+      expect(of(o.room.items, 'corner_base')).toHaveLength(1);
+      expect(o.issues.some((i) => i.message.includes('corner is left empty'))).toBe(false);
+      expect(o.issues.map((i) => i.message)).toContain('No corner insert is chosen, so each corner is the L-shaped Corner base (owner, 2026-11-10).');
+    }
+  });
+
+  it('covers every island\'s back with an Island back panel as long as its run (owner, 2026-11-10)', () => {
+    for (const o of drafted().options) {
+      const island = o.room.walls.find((w) => w.kind === 'floating')!;
+      const backs = of(o.room.items, 'island_back_panel');
+      expect(backs.map((b) => [b.position.wall_id, b.position.side, b.position.offset, b.width, b.position.elevation])).toEqual([[island.wall_id, 'right', 0, inch(72), 0]]);
+      // The island's cabinets stay on its other side.
+      expect(o.room.items.filter((i) => i.position.wall_id === island.wall_id && i.position.side === 'right')).toHaveLength(1);
+    }
+  });
+
   it('follows what the designer chose over the range: a cabinet centred on it, or a millwork hood left open (owner, 2026-11-09)', () => {
     const withAbove = (above: 'cabinet' | 'millwork_hood'): Job => {
       const job = wallC(40);
@@ -176,7 +276,7 @@ describe('the layout builder', () => {
   it('finishes open ends and puts a filler at a wall (CB-FACT-10)', () => {
     const o = drafted().options[0]!;
     const island = o.room.walls.find((w) => w.kind === 'floating')!;
-    const onIsland = o.room.items.filter((i) => i.position.wall_id === island.wall_id).sort((x, y) => x.position.offset - y.position.offset);
+    const onIsland = o.room.items.filter((i) => i.position.wall_id === island.wall_id && i.position.side === 'left').sort((x, y) => x.position.offset - y.position.offset);
     expect(onIsland[0]!.item_selections['end_right']).toBe('applied_finished'); // the island's start: facing it, on the right
     expect(onIsland.at(-1)!.item_selections['end_left']).toBe('applied_finished');
     const a = o.room.walls[0]!;

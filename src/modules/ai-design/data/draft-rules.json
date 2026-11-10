@@ -27,13 +27,37 @@
     "cooking_upper": { "code": "upper_no_shelf", "status": "confirmed", "source": "Owner, 2026-11-09: when Cabinet is chosen over a range or cooktop, it is the catalog's short upper with no shelf (\"A short upper with no shelf\")." },
     "wall_oven": { "code": "tall_oven", "status": "confirmed", "source": "Catalog: \"A drawer at the bottom, an open space for a wall oven, and doors on top.\"" },
     "pantry": { "code": "tall_pantry", "status": "confirmed", "source": "Catalog: tall pantry." },
-    "upper_corner": { "code": "upper_corner_90", "status": "confirmed", "source": "Catalog: \"The standard upper corner cabinet.\"" }
+    "upper_corner": { "code": "upper_corner_90", "status": "confirmed", "source": "Catalog: \"The standard upper corner cabinet.\"" },
+    "island_back_panel": { "code": "island_back_panel", "status": "confirmed", "source": "Owner, 2026-11-10 (chat, DECISIONS \"2026-11-10: Fixes after trying a real job\"): an island's back is always covered by a finished back panel, the catalog's Island back panel, on the far side of the island's line, as long as the run." },
+    "fridge_panel": { "code": "tall_filler", "status": "proposed", "source": "Owner, 2026-11-10: a 3/4\" panel, full height and full depth, on each side of every fridge. The shop's library has no fridge panel, so it is drafted as the Tall filler at the panel's depth and the cabinets' full height until the shop names its part (DECISIONS AD-6, PROPOSED). Its size limits are not known (CAT-1), so the catalog check flags it." }
   },
   "corner_inserts": {
     "status": "proposed",
     "source": "This session's reading of the catalog for the intake's corner answer (no mapping existed). Lazy Susan: the L-shaped corner base (door on the inside corner), where a carousel sits. Double shelf: the same L-shaped base with adjustable shelves. Both are L-shaped, so a corner always has access (PREF-033). For the owner to confirm.",
     "lazy_susan": "corner_base",
-    "double_shelf": "corner_base_adjustable"
+    "double_shelf": "corner_base_adjustable",
+    "no_answer": {
+      "code": "corner_base",
+      "status": "confirmed",
+      "source": "Owner, 2026-11-10 (chat, DECISIONS \"2026-11-10: Fixes after trying a real job\"): corners where runs overlap default to the L-shaped 90-degree corner cabinet, never a blind corner, even when no corner insert is chosen: the catalog's Corner base."
+    }
+  },
+  "clearances": {
+    "status": "confirmed",
+    "source": "Owner, 2026-11-10 (chat, after trying a real job; DECISIONS \"2026-11-10: Fixes after trying a real job\"). The same numbers the designer's placeholder uses (src/modules/designer/data/placeholder-draft.json \"clearances\").",
+    "hood_side": "2",
+    "hood_side_note": "Clear space between an appliance or millwork hood and the upper on each side (\"2\\\" each side\"); not for a cabinet over the range. The uppers either side of the hood, or of the cabinet over the cooking, are the same width (PREF-019, HARD-007).",
+    "over_fridge": "2",
+    "over_fridge_note": "The cabinet over a fridge comes down to 2\" above the fridge (\"should only have 2 inches of clearance over a fridge\").",
+    "fridge_panel_depth": "26",
+    "fridge_panel_depth_note": "\"26 inches to go past the depth of adjacent counters\". Full height: from the floor to the cabinets' top line. 3/4\" thick: the panel part's standard width.",
+    "fridge_panel_kinds": ["fridge"],
+    "fridge_panel_kinds_note": "\"A fridge always has a full-height, full-depth panel on each side\": the room drawing's appliance kinds that get the panels.",
+    "fridge_height": {
+      "value": "70",
+      "status": "proposed",
+      "source": "The owner's Kitchen Studio prototype's rough fridge height, as the designer's placeholder uses it (placeholder-draft.json visual.appliances.fridge_height), until the fridge's spec is confirmed (OA-4). Used only to hang the cabinet over the fridge."
+    }
   },
   "drawer_levels": {
     "source": "The intake's own option wording (src/modules/intake/data/intake-v1.json, owner-reviewed prototype, 2026-11-08). Minimum: \"A drawer on top of every base cabinet, one bank of 4 drawers and one bank of 3.\" Moderate: \"About 60–70% of base cabinets are drawer banks: two banks of 4, the rest banks of 3.\" Maximum: \"Drawers in every base cabinet.\" Drawer banks are made in 30\" only until the shop gives their limits (CAT-1).",

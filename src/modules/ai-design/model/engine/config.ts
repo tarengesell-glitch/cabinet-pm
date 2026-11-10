@@ -40,8 +40,23 @@ const FileSchema = z.strictObject({
     wall_oven: Role,
     pantry: Role,
     upper_corner: Role,
+    island_back_panel: Role,
+    fridge_panel: Role,
   }),
-  corner_inserts: z.strictObject({ status: Status, source: z.string().min(1), lazy_susan: z.string(), double_shelf: z.string() }),
+  corner_inserts: z.strictObject({ status: Status, source: z.string().min(1), lazy_susan: z.string(), double_shelf: z.string(), no_answer: Role }),
+  clearances: z.strictObject({
+    status: Status,
+    source: z.string().min(1),
+    hood_side: z.string(),
+    hood_side_note: z.string().min(1),
+    over_fridge: z.string(),
+    over_fridge_note: z.string().min(1),
+    fridge_panel_depth: z.string(),
+    fridge_panel_depth_note: z.string().min(1),
+    fridge_panel_kinds: z.array(z.string().min(1)).min(1),
+    fridge_panel_kinds_note: z.string().min(1),
+    fridge_height: z.strictObject({ value: z.string(), status: Status, source: z.string().min(1) }),
+  }),
   drawer_levels: z.strictObject({ source: z.string().min(1), minimum: Level, moderate: Level, maximum: Level }),
   ranking: z.strictObject({ status: Status, source: z.string().min(1), strength_order: z.array(z.string()).min(1) }),
 });
@@ -89,8 +104,23 @@ export interface DraftConfig {
     readonly wallOven: CatalogItem;
     readonly pantry: CatalogItem;
     readonly upperCorner: CatalogItem;
+    /** Covers an island's back (owner, 2026-11-10). */
+    readonly islandBackPanel: CatalogItem;
+    /** The part drafted as the panel each side of a fridge (DECISIONS AD-6, proposed). */
+    readonly fridgePanel: CatalogItem;
   };
   readonly cornerInserts: Readonly<Record<string, CatalogItem>>;
+  /** The L-shaped corner cabinet used when no corner insert is chosen (owner, 2026-11-10). */
+  readonly cornerDefault: CatalogItem;
+  /** The owner's clearances and panels (2026-11-10), in 1/64". */
+  readonly clearances: {
+    readonly hoodSide: Length;
+    readonly overFridge: Length;
+    readonly fridgePanelDepth: Length;
+    readonly fridgePanelKinds: readonly string[];
+    /** Rough until the fridge's spec is confirmed (OA-4). */
+    readonly fridgeHeight: Length;
+  };
   readonly drawerLevels: Readonly<Record<DrawerLevelId, DrawerLevel>>;
   readonly strengthOrder: readonly string[];
   readonly numbers: RuleNumbers;
@@ -152,8 +182,18 @@ export function readDraftConfig(catalog: Catalog, rules: DesignRules, data: unkn
       wallOven: item(i.wall_oven.code, 'wall_oven'),
       pantry: item(i.pantry.code, 'pantry'),
       upperCorner: item(i.upper_corner.code, 'upper_corner'),
+      islandBackPanel: item(i.island_back_panel.code, 'island_back_panel'),
+      fridgePanel: item(i.fridge_panel.code, 'fridge_panel'),
     },
     cornerInserts: { lazy_susan: item(d.corner_inserts.lazy_susan, 'corner_inserts.lazy_susan'), double_shelf: item(d.corner_inserts.double_shelf, 'corner_inserts.double_shelf') },
+    cornerDefault: item(d.corner_inserts.no_answer.code, 'corner_inserts.no_answer'),
+    clearances: {
+      hoodSide: length(d.clearances.hood_side, 'clearances.hood_side'),
+      overFridge: length(d.clearances.over_fridge, 'clearances.over_fridge'),
+      fridgePanelDepth: length(d.clearances.fridge_panel_depth, 'clearances.fridge_panel_depth'),
+      fridgePanelKinds: d.clearances.fridge_panel_kinds,
+      fridgeHeight: length(d.clearances.fridge_height.value, 'clearances.fridge_height'),
+    },
     drawerLevels: {
       minimum: { banksOf4: d.drawer_levels.minimum.banks_of_4, banksOf3: d.drawer_levels.minimum.banks_of_3, moreBanks: d.drawer_levels.minimum.more_banks },
       moderate: { banksOf4: d.drawer_levels.moderate.banks_of_4, banksOf3: d.drawer_levels.moderate.banks_of_3, moreBanks: d.drawer_levels.moderate.more_banks },
@@ -175,6 +215,8 @@ export function readDraftConfig(catalog: Catalog, rules: DesignRules, data: unkn
     proposed: [
       ...(i.uppers.status === 'proposed' ? ['which upper height suits the room (30" or 36") is weighed as an option'] : []),
       ...(d.corner_inserts.status === 'proposed' ? ['the corner cabinet used for the client\'s corner choice'] : []),
+      ...(i.fridge_panel.status === 'proposed' ? ['the Tall filler drafted as the panel each side of a fridge (DECISIONS AD-6)'] : []),
+      ...(d.clearances.fridge_height.status === 'proposed' ? [`the fridge's rough ${d.clearances.fridge_height.value}" height, used to hang the cabinet over it, until its spec is confirmed (OA-4)`] : []),
       ...(['moderate', 'maximum'] as const).filter((l) => d.drawer_levels[l].status === 'proposed').map((l) => `the "${l}" drawer level's cabinets that are not drawer banks`),
       ...(d.ranking.status === 'proposed' ? ['how options are ranked'] : []),
     ],

@@ -96,6 +96,15 @@ The controls and behaviour are unchanged. The look follows the owner's Kitchen S
 
 ## The placeholder AI design and the customize screens (2026-11-08)
 - `model/placeholder-draft.ts` is a **placeholder for the AI design step**: no AI, a fixed recipe from the owner's prototype. It fills each cabinet run with catalog cabinets: corner cabinets where runs meet, a sink base under the sink, the dishwasher and other appliances in their spots, equal cabinets in whole steps with a filler for the rest, uppers that skip windows and stop for the hood, a deeper upper over the fridge, whatever the designer chose over a range or cooktop (an appliance hood, a millwork hood drawn as a box, or a short cabinet hung from the top line; owner, 2026-11-09), and drawer banks by the drawer level. The recipe's numbers are in `data/placeholder-draft.json` (marked PLACEHOLDER). Tested in `__tests__/placeholder-draft.test.ts`.
+- **Owner fixes after trying a real job (2026-11-10; DECISIONS, same date):**
+  - L-shaped 90-degree corner cabinets wherever runs overlap, drawn as an L in 3D;
+  - a finished back panel on every island;
+  - the dishwasher touching the sink base and drawn once, as a flush stainless door under one continuous counter;
+  - 2" clear each side of a hood, with the same width of upper either side;
+  - the cabinet over a fridge 2" above it;
+  - a full-height 26" panel on each side of every fridge (drafted as the Tall filler until the shop names the part, AD-6);
+  - a tight outline for a selected cabinet;
+  - appliances that run into a corner or past their run are drawn and reported, never skipped.
 - Its layout is written into the room's **master copy as placed items** (Core schema 2; `model/cabinets.ts` turns it into `PlacedItem`s, `ui/placeholder-store.ts` saves it, with job status `ai_draft`). Customize reads and saves the master copy; `cabinetViews` works out each cabinet's run and layer, plus the appliances and hoods, every time. The room drawing's checks include Core's item checks.
 - `ui/Customize.tsx`: the settings pane (Room · Run · Cabinet · Checks) and `ui/Stage3D.tsx`, the studio-lit 3D view (three.js). Cabinet heights and depths come from the catalog, finishes from the room's design choices. Cabinets the placeholder put down carry a dashed mark until a person changes or approves them.
 - `ui/FrontIcon.tsx`: a small front picture of a cabinet type, from the catalog's front data, used across the customize panel.

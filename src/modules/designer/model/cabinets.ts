@@ -19,6 +19,8 @@ import { DRAFT_SETTINGS, itemByCode, standard, type PlaceholderCabinet, type Pla
 export type CabinetView = PlaceholderCabinet;
 
 const UPPER_TYPES = new Set(['wall', 'corner_wall']);
+/** Panels and fillers cover or close up cabinets; they never house an appliance (an island's back panel runs behind it). */
+const SKINS = new Set(['panel', 'filler']);
 export const itemOf = (item: PlacedItem): CatalogItem | null => catalogItem(CURRENT_CATALOG, item.catalog_item_id);
 export const isUpper = (item: PlacedItem): boolean => UPPER_TYPES.has(itemOf(item)?.type ?? '') || (item.position.elevation > 0 && itemOf(item)?.type === 'filler');
 /** A cabinet counts as reviewed once a designer approved it or changed it. */
@@ -56,6 +58,8 @@ export function cabinetViews(room: Room): CabinetView[] {
       elevation: item.position.elevation,
       height: item.height,
       reviewed: reviewed(item),
+      // An island's cabinets stand on its left side; the right side is its back (the back panel).
+      ...(wall?.kind === 'floating' && item.position.side === 'right' ? { back: true } : {}),
     });
   }
   const top = upperTopOf(room);
@@ -64,9 +68,12 @@ export function cabinetViews(room: Room): CabinetView[] {
     for (const a of wall.appliances) {
       const runId = runAt(wall, a.offset, a.width.value) ?? '';
       // A sink, dishwasher or wall oven stands inside a cabinet (sink base, opening, tall oven):
-      // the cabinet shows it, so the appliance isn't drawn again.
+      // the cabinet shows it, so the appliance isn't drawn again. The cabinet may sit a little off
+      // the appliance's drawn place (a dishwasher touching a wider sink base), so it counts when it
+      // holds the appliance's middle; drawing both put two boxes in one place.
+      const middle = a.offset + a.width.value / 2;
       const housed = room.items.some(
-        (i) => i.position.wall_id === wall.wall_id && !isUpper(i) && i.position.offset <= a.offset && a.offset + a.width.value <= i.position.offset + i.width,
+        (i) => i.position.wall_id === wall.wall_id && !isUpper(i) && !SKINS.has(itemOf(i)?.type ?? '') && i.position.offset < middle && middle < i.position.offset + i.width,
       );
       if (!housed) out.push({ id: a.placement_id, code: null, appliance: a.kind, wallId: wall.wall_id, runId, layer: 'base', offset: a.offset, width: a.width.value, depth: null, elevation: 0, height: 0, reviewed: true });
       // An appliance or millwork hood over a range or cooktop; a cabinet there is a placed item.
@@ -95,8 +102,9 @@ export function placeholderItems(room: Room, design: PlaceholderDesign): Result<
       width: c.width,
       height: c.height,
       depth,
-      // On a room wall, the room's side, against the wall; on a floating wall, its left side, backed onto the line.
-      position: { wall_id: c.wallId, side: wall.kind === 'room' ? inside : 'left', offset: c.offset, elevation: c.elevation, setback: 0 },
+      // On a room wall, the room's side, against the wall; on a floating wall, its left side, backed
+      // onto the line, and the island's back panel on the right side, covering their backs.
+      position: { wall_id: c.wallId, side: wall.kind === 'room' ? inside : c.back ? 'right' : 'left', offset: c.offset, elevation: c.elevation, setback: 0 },
       item_selections: {},
       modifications: [],
       origin: { placed_by: 'ai', last_edited_by: 'ai', approved: false },

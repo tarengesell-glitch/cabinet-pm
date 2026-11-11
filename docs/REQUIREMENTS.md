@@ -15,7 +15,7 @@ Last checked against `DECISIONS.md` and the code: 2026-11-11.
 
 **Status words.** Approval: **Approved** (with its evidence), **PROPOSED** (a session's choice waiting for the owner), **Open** (no answer yet; the question's ID is in DECISIONS "Open questions"). Build: **Built**, **Partly built**, **Placeholder** (runs, but stands in for the real thing), **Parked** (kept, not run), **Not built**. The two are independent: PROPOSED-but-built and Approved-but-not-built are both normal.
 
-**Keeping it current.** When a decision is approved, replaced or built, update its line here in the same pull request as the DECISIONS entry or the code.
+**Keeping it current.** Root `CLAUDE.md` "Docs": a changed requirement is edited in place here, with its evidence added to DECISIONS in the same pull request (never two current versions); a change in build status updates its status here.
 
 ## Spec text that has been replaced
 

@@ -26,7 +26,7 @@ A cabinet design and CAD handoff platform for our own residential cabinetry sale
 
 ## Decisions you make, and decisions you don't
 - **Yours (routine engineering; mention them in the report):** where code goes within the rules, structure and naming, refactors needed for the change, how to test, wiring up an approved behaviour, error-message wording, performance, additive contract changes.
-- **The owner's** (add an open question to `docs/DECISIONS.md`, mark any stand-in PROPOSED, and ask): any size, clearance, option, price, role, status or rule value; what blocks or only warns; anything new the client or designer sees beyond what was asked ("less is more", `docs/ux/UX_BRIEF.md`); a change to an approved requirement; handling of real client data.
+- **The owner's** (add an open question to `docs/DECISIONS.md`, mark any stand-in PROPOSED, and ask): any size, clearance, option, price, role, status or rule value; what blocks or only warns; anything new the client or designer sees beyond what was asked ("less is more", `docs/ux/UX_BRIEF.md`); a change to an approved requirement; handling of real client data. **An explicit owner request authorizes the behaviour it clearly specifies:** build it, and record it as approved (the request is the evidence). Ask only about material choices it leaves unanswered; never ask the owner to approve the same request again.
 - **The shop's** (through the owner): which library part or template to use, size limits, construction, and how the CAD program behaves (rule 9).
 
 ## Hard rules
@@ -58,6 +58,9 @@ A cabinet design and CAD handoff platform for our own residential cabinetry sale
 
 ## Docs
 Each doc has one job (the list: `docs/PROJECT_MAP.md` "Which doc answers what"). Update docs only when something meaningful changes: behaviour the owner can see, a rule or number, a module's `contract.ts`, or the workflow. A new or changed decision goes in `docs/DECISIONS.md` **and** its line in `docs/REQUIREMENTS.md`; module behaviour in its README; what runs and where code, data and tests live in `docs/PROJECT_MAP.md`. Link to the authoritative place instead of repeating it. Refactors, test-only changes and small fixes within existing behaviour need none.
+- **When an approved requirement changes,** edit its existing entry in `docs/REQUIREMENTS.md` and record the approval evidence in `docs/DECISIONS.md`, in the same pull request. Never leave two current versions of a requirement.
+- **Implementation progress goes in the pull request.** When a requirement's build status changes, update its status in `docs/REQUIREMENTS.md`; don't add a session narrative to `docs/DECISIONS.md`, which records decisions and their evidence.
+- **Environment limits are observations, not project facts.** When a doc records that something couldn't be reached (the live database, a website, a service), say where and when it was observed (for example "from a Claude cloud session, 2026-11-09"), never "sessions can't…" as a lasting rule.
 
 ## Branches
 Merging into `main` deploys the live site. Work on a branch from the latest `main` (restart it from `main` if it was already merged), open a pull request, and merge it yourself only after the checks above pass. Never push straight to `main`. Delete the branch after merging. Report the checks run and the pull request link.

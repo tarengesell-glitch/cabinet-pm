@@ -96,6 +96,8 @@ test('the placeholder AI design lays out the drawn room, then the customize scre
   // When every room is laid out, it moves on by itself.
   await expect(step(page, 'Customize')).toHaveAttribute('aria-current', 'step', { timeout: 15_000 });
   await expect(page.getByTestId('stage-3d').locator('canvas')).toBeVisible();
+  // A fresh design saves every cabinet's ends, so there is nothing to set by hand.
+  await expect(page.getByTestId('ends-missing')).toHaveCount(0);
   await expect(page.getByText('Live pricing not connected yet')).toBeVisible();
   const toReview = page.getByText(/^\d+ placements to review$/);
   await expect(toReview).toBeVisible();
@@ -128,6 +130,30 @@ test('the placeholder AI design lays out the drawn room, then the customize scre
   await step(page, 'AI design').click();
   await expect(page.getByRole('heading', { name: 'Your design is ready' })).toBeVisible();
   await page.getByRole('button', { name: 'Open the customizer' }).click();
+  await expect(page.getByText('Every placement reviewed')).toBeVisible();
+
+  // A design saved before cabinet ends were: said plainly, and its ends set only when asked.
+  await page.evaluate(() => {
+    for (const k of Object.keys(localStorage)) {
+      const v = localStorage.getItem(k);
+      if (!v || !v.includes('"end_left"')) continue;
+      const d = JSON.parse(v) as { job?: { rooms: { items: { item_selections: Record<string, string> }[] }[] } };
+      for (const r of d.job?.rooms ?? [])
+        for (const i of r.items) {
+          delete i.item_selections['end_left'];
+          delete i.item_selections['end_right'];
+        }
+      localStorage.setItem(k, JSON.stringify(d));
+    }
+  });
+  await page.reload();
+  await page.getByRole('button', { name: /Start laying out room dimensions/ }).click();
+  await step(page, 'AI design').click();
+  await page.getByRole('button', { name: 'Open the customizer' }).click();
+  await expect(page.getByTestId('ends-missing')).toContainText('designed before cabinet ends were saved');
+  await page.getByRole('button', { name: 'Set their ends from the layout' }).click();
+  await expect(page.getByText('Cabinet ends saved.')).toBeVisible();
+  await expect(page.getByTestId('ends-missing')).toHaveCount(0);
   await expect(page.getByText('Every placement reviewed')).toBeVisible();
 });
 

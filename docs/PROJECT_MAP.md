@@ -1,6 +1,6 @@
 # Project map
 
-What actually runs, where each rule lives, which tests cover it, and what is still open. Read this before anything else in `docs/`. Keep it current: update it when what runs, where a rule lives or where a test lives changes. Last checked 2026-11-11 (after PRs #57 and #59).
+What actually runs, where each rule lives, which tests cover it, and what is still open. Read this before anything else in `docs/`. Keep it current: update it when what runs, where a rule lives or where a test lives changes. Last checked 2026-11-11 (after PRs #57 and #59, and the cabinet ends change).
 
 ## The live path: a saved job to the 3D view
 1. **Saved job:** the shared database (Supabase, `src/app/sync/`) or a test-job file (`src/app/studio/test-data.ts`, the studio's "Test data" menu). Each room's master copy is kept by `src/modules/designer/ui/placeholder-store.ts`.
@@ -30,6 +30,7 @@ What actually runs, where each rule lives, which tests cover it, and what is sti
 | Wall thickness, standard openings, door swing | `src/modules/designer/data/standard-sizes.json` | |
 | Run depths, appliance widths, island sizes, what goes over a range, bathroom fixture sets | `src/modules/designer/data/layout-rules.json` | The 24" base depth appears twice here (`run_depths.base` and `room_sets.kitchen.base_depth`). |
 | **Live builder:** which catalog part goes where, drawer levels, widths, hood and fridge clearances, fridge panel, island back panel, bathroom vanities | `src/modules/designer/data/placeholder-draft.json` | Has PROPOSED entries (see "Unresolved"). |
+| Cabinet ends (`end_left` / `end_right`): the rule's values and which cabinet types get them | `placeholder-draft.json` "ends"; worked out only in `src/modules/designer/model/ends.ts` | Saved on each cabinet; the 3D view draws only what is saved. Left/right PROPOSED (END-1); corner cabinets unset (END-2). |
 | 3D-only sizes (toe kick, counter, rough appliance shapes) | `placeholder-draft.json` "visual" | Visual only; never sent to the shop. A few small drawing sizes are in `Stage3D.tsx` itself. |
 | Design choices (the intake questions and options) | `src/modules/intake/data/intake-v1.json` | |
 | Room and layout checks (walls, runs, items) | `src/core/layout/` | |
@@ -42,7 +43,8 @@ What actually runs, where each rule lives, which tests cover it, and what is sti
 | Area | Unit tests | Browser tests |
 |---|---|---|
 | Live builder | `designer/__tests__/placeholder-draft.test.ts` (uses `real-kitchen.ts`, an anonymised real kitchen) | `e2e/studio.spec.ts` ("the placeholder AI design lays out…", about 1 min) |
-| 3D view | `designer/__tests__/stage3d.test.ts` | `e2e/studio.spec.ts` (only checks that the 3D view appears) |
+| 3D view | `designer/__tests__/stage3d.test.ts` | `e2e/studio.spec.ts` (checks that the 3D view appears) |
+| Cabinet ends | `designer/__tests__/ends.test.ts` (the real kitchen's ends as before, layout changes, older designs, saving and opening again) | `e2e/studio.spec.ts` (an older design's ends set when asked) |
 | Room drawing, runs, appliances | `designer/__tests__/editor.test.ts`, `layout.test.ts`, `room-master-copy.test.ts` | `e2e/room-drawing.spec.ts`, `e2e/rough-layout.spec.ts` |
 | Design choices | `intake/__tests__/engine.test.ts` | `e2e/intake.spec.ts` |
 | Saving to the shared database, autosave | `src/app/sync/__tests__/job-sync.test.ts` | |
@@ -61,6 +63,7 @@ Timings (measured 2026-11-10, one run in a cloud session): lint 3.9 s, typecheck
 - **Bathroom vanity choices** (`placeholder-draft.json` `cabinets.bath`, PR-57c): PROPOSED by a session, not approved by the owner.
 - **The fridge panel as the Tall filler** (AD-6) and **the fridge's rough 70" height** (OA-4): PROPOSED.
 - **Copying layout fixes into the parked AI layout builder:** deferred (DECISIONS 2026-11-11). Not to be picked up unless the owner asks. (Pull request #59 had already copied the round-2 hood fixes in, including the PROPOSED 1 1/2" filler as `draft-rules.json` `clearances.flank_filler_max`.)
+- **Cabinet ends:** which side is "left" (END-1, PROPOSED), corner cabinets' ends (END-2, not set), an island's waterfall or detailed sides (END-3).
 - Every other open question: `docs/DECISIONS.md` "Open questions".
 
 ## Which doc answers what

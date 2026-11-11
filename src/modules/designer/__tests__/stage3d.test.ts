@@ -1,14 +1,16 @@
 import { describe, expect, it } from 'vitest';
-import type { Room } from '@/core/index';
-import { cabinetViews, placeholderItems } from '../model/cabinets';
+import { Box3, Vector3 } from 'three';
+import { cabinetViews, placeholderItems, type CabinetView } from '../model/cabinets';
+import { endOpen, withRuleEnds, type Context } from '../model/ends';
 import { cornerCabinets } from '../model/layout';
 import { draftPlaceholder } from '../model/placeholder-draft';
-import { counters, endOpen, type Context, type FinishLook } from '../ui/Stage3D';
+import { counters, finishedEnds, type FinishLook } from '../ui/Stage3D';
 import { realKitchenRoom } from './real-kitchen';
 
 const IN = 64;
 let n = 0;
-const ids = () => `00000000-0000-4000-8000-${String(++n).padStart(12, '0')}`;
+// Not the fixture's own ID pattern, so a cabinet never shares an ID with an appliance.
+const ids = () => `dddddddd-0000-4000-8000-${String(++n).padStart(12, '0')}`;
 const LOOK: FinishLook = { door: '#eeeeee', baseDoor: '#eeeeee', island: '#666666', counter: '#cccccc', style: 'transitional', doorHw: 'handle', drawerHw: 'handle', pullFinish: '#111111', knobFinish: '#111111', doorOrient: 'vertical', drawerTop: false, islandBack: 'door_panels', islandSide: 'detailed_short' };
 
 /** The real kitchen as the 3D view sees it, after the placeholder lays it out. */
@@ -18,8 +20,10 @@ function scene(): Context {
   if (!d.ok) throw new Error(d.reason);
   const items = placeholderItems(room, d.value);
   if (!items.ok) throw new Error(items.reason);
-  const placed: Room = { ...room, items: items.value };
-  return { room: placed, all: cabinetViews(placed), corners: cornerCabinets(placed) };
+  // As the design step saves it: with every cabinet's ends worked out (model/ends.ts).
+  const placed = withRuleEnds({ ...room, items: items.value });
+  if (!placed.ok) throw new Error(placed.reason);
+  return { room: placed.value, all: cabinetViews(placed.value), corners: cornerCabinets(placed.value) };
 }
 
 describe('the 3D view (owner, 2026-11-10)', () => {
@@ -51,5 +55,21 @@ describe('the 3D view (owner, 2026-11-10)', () => {
     const isl = base(island.wall_id);
     expect(endOpen(ctx, isl[0]!, island, isl[0]!.offset, 'low')).toBe(true);
     expect(endOpen(ctx, isl[0]!, island, isl[0]!.offset + isl[0]!.width, 'high')).toBe(false);
+  });
+
+  it('draws finished ends from the saved choice, not from the layout, and the counter follows it', () => {
+    const ctx = scene();
+    const island = ctx.room.walls[5]!;
+    const first = ctx.all.filter((c) => c.wallId === island.wall_id && c.code !== null && !c.back).sort((a, b) => a.offset - b.offset)[0]!;
+    expect(finishedEnds(first)).toEqual(['low']);
+    const top = (all: readonly CabinetView[]) => counters({ mats: new Map() }, { ...ctx, all }, LOOK).find((g) => g.userData['wallId'] === island.wall_id)!;
+    const width = (g: ReturnType<typeof top>) => new Box3().setFromObject(g).getSize(new Vector3()).x;
+    // Saved as unfinished on purpose: no finished end drawn, and the counter stops flush.
+    const plain = { ...first, ends: { low: 'unfinished', high: first.ends!.high } };
+    expect(finishedEnds(plain)).toEqual([]);
+    const all = ctx.all.map((c) => (c === first ? plain : c));
+    expect(width(top(ctx.all)) - width(top(all))).toBeCloseTo(1, 5);
+    // Saved as a finished end by request: drawn like the applied one.
+    expect(finishedEnds({ ...first, ends: { low: 'finished', high: null } })).toEqual(['low']);
   });
 });

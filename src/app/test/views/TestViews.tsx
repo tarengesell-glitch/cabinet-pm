@@ -10,32 +10,39 @@ import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 import { JobSchema, type Room } from '@/core/index';
 import { PREVIEW_USER } from '@/platform/index';
-import { draftRoom, importRoomData, type DraftPreferences } from '@/modules/designer/contract';
-import type { CameraView, FinishLook } from '@/modules/designer/ui/index';
+import { draftRoom, importRoomData, type DesignChoices } from '@/modules/designer/contract';
+import type { CameraView } from '@/modules/designer/ui/index';
 
 const RoomViews = dynamic(() => import('@/modules/designer/ui/index').then((m) => m.RoomViews), { ssr: false });
 
 /** Where the screenshot command leaves the job to show. */
 export const TEST_VIEWS_KEY = 'cabinet-pm.test-views.job';
 
-/** Fixed design choices for the screenshots (drawer banks, a Lazy Susan corner, a garbage cabinet, cabinets to the ceiling). */
-const PREFS: DraftPreferences = { drawers: 'maximum', cornerInsert: 'lazy_susan', garbage: 'dedicated_cabinet', cabinetTop: 'ceiling', roomSet: 'kitchen' };
-
-/** A fixed look for the screenshots (placeholder colours, island door panels and detailed sides), so they compare. */
-const LOOK: FinishLook = {
-  door: '#eeebe4',
-  baseDoor: '#c9c6be',
-  island: '#5b6b73',
-  counter: '#d8d4cc',
-  style: 'transitional',
-  doorHw: 'handle',
-  drawerHw: 'handle',
-  pullFinish: '#262626',
-  knobFinish: '#262626',
-  doorOrient: 'vertical',
-  drawerTop: false,
-  islandBack: 'door_panels',
-  islandSide: 'detailed_short',
+/**
+ * Fixed design choices for the screenshots, so they compare: drawer banks, a Lazy Susan corner, a
+ * garbage cabinet, cabinets to the ceiling, placeholder colours, island door panels and detailed sides.
+ */
+const CHOICES: DesignChoices = {
+  roomKind: 'kitchen',
+  cabinetTop: 'ceiling',
+  drawerLevel: { status: 'chosen', option_id: 'maximum' },
+  cornerInsert: 'lazy_susan',
+  garbage: 'dedicated_cabinet',
+  islandBackPanel: { status: 'chosen', option_id: 'door_panels' },
+  islandSidePanel: { status: 'chosen', option_id: 'detailed_short' },
+  look: {
+    door: '#eeebe4',
+    baseDoor: '#c9c6be',
+    island: '#5b6b73',
+    counter: '#d8d4cc',
+    style: 'transitional',
+    doorHw: 'handle',
+    drawerHw: 'handle',
+    pullFinish: '#262626',
+    knobFinish: '#262626',
+    doorOrient: 'vertical',
+    drawerTop: false,
+  },
 };
 
 export function TestViews() {
@@ -60,7 +67,7 @@ export function TestViews() {
       // The real design step, as the studio runs it: the layout with its ends, saved in this browser.
       const kept = importRoomData(drawn.room_id, { drawing: { job: job.data, wallDefaults: null }, design: null });
       if (kept) return setState({ problem: kept });
-      const room = draftRoom(drawn.room_id, PREFS, PREVIEW_USER.id);
+      const room = draftRoom(drawn.room_id, CHOICES, PREVIEW_USER.id);
       if (!room.ok) return setState({ problem: room.reason });
       setState({ room: room.value, view });
     });
@@ -75,7 +82,7 @@ export function TestViews() {
     );
   return (
     <div style={{ position: 'fixed', inset: 0, background: '#f4f2ee' }}>
-      <RoomViews room={state.room} look={LOOK} view={state.view} />
+      <RoomViews room={state.room} choices={CHOICES} view={state.view} />
     </div>
   );
 }

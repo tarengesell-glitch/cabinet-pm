@@ -6,7 +6,7 @@
  * The anonymised real kitchen (src/modules/designer/__tests__/real-kitchen.ts) is left in the
  * browser; the test page (/test/views/) runs the real design step on it and shows one view.
  * Each view is captured twice from a fresh page and the two must be identical, so a picture
- * always means the same framing. Pictures go to test-results/views/.
+ * always means the same framing. Pictures go to views-output/.
  */
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
@@ -14,7 +14,8 @@ import { wallLetter } from '../src/core/index';
 import { realKitchen } from '../src/modules/designer/__tests__/real-kitchen';
 
 const KEY = 'cabinet-pm.test-views.job';
-const OUT = 'test-results/views';
+// Its own folder: every Playwright run empties test-results/, which would lose them.
+const OUT = 'views-output';
 const job = realKitchen();
 const VIEWS = ['overall', ...job.rooms[0]!.walls.flatMap((w, i) => (w.kind === 'room' ? [`wall-${wallLetter(i)}`] : [])), 'island'];
 

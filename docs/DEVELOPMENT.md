@@ -44,7 +44,7 @@ Measured 2026-11-10 in a cloud session, one run each:
 `npm run check` runs all of them in order (about 3 min 40 s). When to run what, and when to break a check on purpose: root `CLAUDE.md` "Checks".
 
 ## Pictures of the 3D view (`npm run views`)
-Takes pictures of the anonymised real kitchen (`src/modules/designer/__tests__/real-kitchen.ts`) at fixed camera views: `overall` (the 3D view's starting view), each room wall straight on (`wall-A` to `wall-E`) and `island` (from behind one end). They land in `test-results/views/<view>.png`. About 2½ minutes; starts its own dev server on port 3200 (`VIEWS_PORT` changes it).
+Takes pictures of the anonymised real kitchen (`src/modules/designer/__tests__/real-kitchen.ts`) at fixed camera views: `overall` (the 3D view's starting view), each room wall straight on (`wall-A` to `wall-E`) and `island` (from behind one end). They land in `views-output/<view>.png`. About 2½ minutes; starts its own dev server on port 3200 (`VIEWS_PORT` changes it).
 
 - **When:** after a change to the layout, the cabinet ends or the 3D drawing, to see the result without dragging the camera; and to compare before and after (run it on both, the file names stay the same). Look for the hood's clear space and equal uppers, finished ends (end panels to the floor), toe kicks, and one counter per stretch.
 - **What it checks:** that each view draws without a problem, and that two captures of the same view are identical (the same framing every time). It checks no measurement: the unit tests do (`designer/__tests__/`).

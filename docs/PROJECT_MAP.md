@@ -9,7 +9,7 @@ What actually runs, where each rule lives, which tests cover it, and what is sti
 4. **Into the master copy:** `designer/model/cabinets.ts` (`placeholderItems`) turns the layout into placed items, saved as an AI draft version.
 5. **Customize and 3D:** `designer/ui/Customize.tsx` reads the placed items (`cabinetViews` in `cabinets.ts`) and draws them in `designer/ui/Stage3D.tsx` (three.js). Its one camera start is `fit()`.
 
-**User-visible layout or 3D fixes go in the designer module (steps 3 to 5).**
+**A fix goes in the module that owns the behaviour.** For layout or 3D problems in the studio that is the designer (steps 3 to 5); for design choices it is `intake`, for cabinet sizes `catalog`, for shop rules `shop-settings`, for saving and sync the app's `src/app/sync/` (see "Where the rules live"). If it's unclear which module owns it, ask.
 
 ## Placeholder, parked and unused code
 | Code | Status |
@@ -67,7 +67,7 @@ Timings (measured 2026-11-10, one run in a cloud session): lint 3.9 s, typecheck
 | Question | Read |
 |---|---|
 | What the owner wants (authority) | `docs/BUILD_SPEC.md`, the sections for your area, and the owner amendments OA-1 to OA-10 at the top |
-| What has been decided | `docs/DECISIONS.md`: search it for your topic; newest entries per topic win. The "Open questions" section is at the end. |
+| What has been decided | `docs/DECISIONS.md`: search it for your topic. The latest **explicitly approved** decision that applies governs. A PROPOSED choice or an open question never overrides an approved rule, however recent. If it's unclear which decision applies, or whether it was approved, flag it (an open question, and say so in your report) rather than guess. The "Open questions" section is at the end. |
 | Which module may import which | `docs/ARCHITECTURE.md` "Dependency rules" |
 | Who owns which table | `docs/DATA_MODEL.md` |
 | Build order and phases | `docs/BUILD_PLAN.md` |

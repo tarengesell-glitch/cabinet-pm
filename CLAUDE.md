@@ -5,11 +5,18 @@ A cabinet design and CAD handoff platform for our own residential cabinetry sale
 ## Read first, then only what the task needs
 1. **`docs/PROJECT_MAP.md`**: what runs, what is placeholder or parked, where each rule lives, which tests cover it, what is unresolved, and which doc answers what.
 2. The `CLAUDE.md` and `README.md` of the module you are changing.
-3. Only the doc sections your task touches. Search `docs/DECISIONS.md` for your topic; don't read it whole.
+3. Only the doc sections your task touches; search `docs/DECISIONS.md` rather than reading it whole.
 
-When docs disagree, `docs/BUILD_SPEC.md` wins, then the "Decided" list in `docs/DECISIONS.md`. PROPOSED is not authority. Say so when you find a conflict.
+When docs disagree, `docs/BUILD_SPEC.md` wins, then the latest **explicitly approved** decision in `docs/DECISIONS.md` that applies. A PROPOSED choice or open question never overrides an approved rule. If it's unclear which applies, flag it; don't guess.
 
-**The app runs the designer's placeholder builder** (`src/modules/designer/model/placeholder-draft.ts`); fixes the owner can see go there. The AI layout builder (`src/modules/ai-design/model/engine/`) is parked: don't change it or copy fixes into it unless the owner asks.
+**The app runs the designer's placeholder builder** (`src/modules/designer/model/placeholder-draft.ts`), so layout fixes go there. The AI layout builder (`src/modules/ai-design/model/engine/`) is parked: don't change it or copy fixes into it unless the owner asks.
+
+## A typical small fix
+1. Find the module that owns the behaviour (`docs/PROJECT_MAP.md`). Example: a layout or 3D problem in the studio is the designer's. If it's unclear or spans modules, ask first.
+2. Read that module's `CLAUDE.md` and README, and the decisions on that topic.
+3. Change that module, with a test, running the "while working" checks.
+4. Update docs only if the change is meaningful (see "Docs").
+5. Run `npm run check` on the final code, then open the pull request.
 
 ## Hard rules
 1. **Stay in the module you were asked to change.** You may also update `docs/` and its README to record the change. If code elsewhere needs changing, stop and explain.
@@ -34,7 +41,7 @@ When docs disagree, `docs/BUILD_SPEC.md` wins, then the "Decided" list in `docs/
 - **Before merging:** `npm run check` on the final code (about 3 min 40 s; it is the only gate, there is no CI). If you change code afterwards, re-run the focused checks for that change, then `npm run check` again.
 - **Docs-only change:** no `npm run check`; check each changed doc and link by hand.
 - **Breaking a check on purpose** (show it fails, then restore it) is for new guardrails: boundary or lint rules, the vendor-name check, golden tests. Not for ordinary new tests.
-- Report what you actually ran. Details and timings: `docs/DEVELOPMENT.md`.
+- Report what you ran. Details and timings: `docs/DEVELOPMENT.md`.
 
 ## Docs
 Update docs only when something meaningful changes: behaviour the owner can see, a rule or number, a module's `contract.ts`, or the workflow. Decisions and PROPOSED choices go in `docs/DECISIONS.md`; module behaviour in its README; what runs and where rules or tests live in `docs/PROJECT_MAP.md`. Refactors, test-only changes and small fixes within existing behaviour need none.

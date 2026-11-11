@@ -2,7 +2,7 @@
 
 Add new decisions at the bottom of the right list, with the date. Only the owner (Taren) decides. A PROPOSED item stays open until the owner says yes.
 
-**Finding the current rule without reading the history:** start at `docs/PROJECT_MAP.md` (what runs, where each rule lives, what is unresolved), then search this file for your topic. Entries are dated; on the same topic, the newest entry wins. Older entries are kept as history, not rewritten.
+**Finding the current rule without reading the history:** start at `docs/PROJECT_MAP.md` (what runs, where each rule lives, what is unresolved), then search this file for your topic. Entries are dated. On a topic, the latest **explicitly approved** decision that applies governs. A PROPOSED choice or an open question never overrides an approved rule, however recent. If it's unclear which decision applies, or whether it was approved, flag it (an open question, and say so in your report) rather than guess. Older entries are kept as history, not rewritten.
 
 ## Decided
 
@@ -123,7 +123,7 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 - Room capture is pulled ahead of Phase 5 (BUILD_PLAN). Order: scaffold (1a), then Core walls and openings, then the Designer drawing screen.
 
 ### 2026-11-11: The live builder, and less routine work per change (owner, chat, 2026-11-11)
-- **The app runs the designer's placeholder builder** (`src/modules/designer/model/placeholder-draft.ts`, `data/placeholder-draft.json`). Fixes the owner can see go there.
+- **The app runs the designer's placeholder builder** (`src/modules/designer/model/placeholder-draft.ts`, `data/placeholder-draft.json`). Layout fixes the owner can see go there; other fixes go in the module that owns the behaviour (`docs/PROJECT_MAP.md`).
 - **The AI layout builder is parked** (`src/modules/ai-design/model/engine/`, `data/draft-rules.json`). Nothing in the app runs it. It is kept, not deleted, and not changed unless the owner asks for work on it. **Deferred:** copying the placeholder's latest layout fixes into it (the "Not changed yet" item under round 2 below, and the follow-up task that session suggested). Not to be picked up automatically. Why: the 2026-11-10 fixes were built twice the same day (pull requests #54 and #55), once in code nothing runs.
 - **Less routine per change.** Sessions read `docs/PROJECT_MAP.md` and the module's own notes, then only the doc sections the task needs, instead of the whole doc set. Docs are updated when behaviour, a rule, an interface or the workflow changes, not every time. Quick checks (about 16 s) while working; the full `npm run check` (about 3 min 40 s) on the final code before merging, and again if code changes after it. Breaking a check on purpose is for new guardrails, not every new test. Details in root `CLAUDE.md` and `docs/DEVELOPMENT.md`.
 - Module notes said "only edit files inside this folder", while the root asked for doc updates outside it. Now: code stays in the module; recording the change in `docs/` and the module README is allowed.

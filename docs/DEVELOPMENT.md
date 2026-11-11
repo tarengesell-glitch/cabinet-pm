@@ -14,15 +14,33 @@ Stop `npm run dev` (Control + C) before `npm run check`: Next.js allows only one
 | Command | What it does |
 |---|---|
 | `npm run dev` | Runs the app at http://localhost:3000 |
-| `npm run check` | **The gate before every push** (there is no CI). It runs each command below in order and stops at the first failure. |
+| `npm run check` | **The gate before merging** (there is no CI). Run it on the final code. It runs each command below in order and stops at the first failure. |
 | `npm run lint` | ESLint. Also enforces the dependency table and contracts-only (eslint-plugin-boundaries), core purity, no AI SDKs in core or adapters, no clock or randomness in core and adapter writers/readers, and no empty `catch` anywhere. |
 | `npm run typecheck` | TypeScript, strict. |
 | `npm run boundaries` | dependency-cruiser: a second, independent check of the dependency table, contracts-only, core's allowed packages and no AI SDKs in core or adapters. |
 | `npm run vendor-names` | Fails if the CAD vendor's name or file format appears outside the allowed folders (CLAUDE.md rule 3). |
 | `npm run test` | Vitest unit and golden tests (`src/**/__tests__/*.test.ts`). |
-| `npm run build` | The production build, exactly as Netlify runs it: plain web pages in `out/`. In the gate so a push never breaks the live site. |
+| `npm run build` | The production build, exactly as Netlify runs it: plain web pages in `out/`. In the gate so a merge never breaks the live site. |
 | `npm run test:static` | Serves `out/` the way Netlify does (`scripts/serve-static.mjs`) and opens the pages in a browser (`e2e-static/`). Catches a build that would show "Page not found" on the live site. |
 | `npm run test:e2e` | Playwright UI tests (`e2e/`), on an iPad landscape viewport. Starts its own dev server on port 3100 (`E2E_PORT` changes it). |
+
+## Which checks when
+Measured 2026-11-10 in a cloud session, one run each:
+
+| Check | Time | During a change | Before merging |
+|---|---|---|---|
+| `lint` | 3.9 s | yes | yes |
+| `typecheck` | 7.1 s | yes | yes |
+| `boundaries` | 1.2 s | yes | yes |
+| `vendor-names` | 0.2 s | yes | yes |
+| `test` (unit, 357 tests) | 3.3 s | yes | yes |
+| `build` | 15.2 s | when you change pages, routing or config | yes |
+| `test:static` | 7.9 s | with `build` | yes |
+| `test:e2e` (63 browser tests) | 185.5 s | only the file for the screen you changed: `npx playwright test e2e/studio.spec.ts` (studio, about 1 min alone); `room-drawing`, `rough-layout`, `intake`, `office` likewise | yes |
+
+`npm run check` runs all of them in order (about 3 min 40 s). Run it on the final code before merging. If code changes after that run (a review fix, a follow-up), run the focused checks for the change and then `npm run check` again. A docs-only change needs no `npm run check`: check each changed doc and link by hand.
+
+**Breaking a check on purpose** (show it fails, restore it) is worth it when the check is a guardrail whose silence would hide a problem: a new boundary or lint rule, the vendor-name check, a golden test for a mapping, a new module's import rules (below). An ordinary new unit or browser test doesn't need it.
 
 ## Where the rules live
 - `tools/architecture.cjs`: the dependency table from `docs/ARCHITECTURE.md`, written as data. Both `eslint.config.js` and `.dependency-cruiser.cjs` read it, so the two checks can't drift apart. Change it only when ARCHITECTURE changes, and never to make a violation pass.

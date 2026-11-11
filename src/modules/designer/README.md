@@ -1,5 +1,7 @@
 # designer
 
+**This module holds the builder the app runs** (the placeholder design, `model/placeholder-draft.ts`) and the 3D view. The live path, rule locations and tests: `docs/PROJECT_MAP.md`.
+
 Room capture (walls, angles, ceiling height, openings, obstacles, utilities) and visual editing of the layout. Draws only from the master copy, offers only the shop's catalog items, shows validation live, marks AI-placed vs designer-changed items.
 
 See `CLAUDE.md` in this folder for the rules.
@@ -110,7 +112,7 @@ The controls and behaviour are unchanged. The look follows the owner's Kitchen S
   - the hood's 2" clear space and the **equal uppers either side (PREF-019)** now work when the range stands in a run of its own; the uppers either side are one width, and the **base beside the range is sized so its edge lines up with the upper above it**. When one side is a little longer, up to 1 1/2" of it is a filler at that side's far end, so each side keeps one cabinet (`fill.flank_filler_max`, PROPOSED);
   - **bathrooms use the vanities** (`cabinets.bath`, PROPOSED), so the cabinet types offered in Customize are the vanity types;
   - in 3D: **applied finished ends from the floor** on every end with nothing beside it (beside a range, an island end), **toe kicks in the cabinet's door finish**, **one counter per stretch of touching cabinets** (no breaks at the dishwasher or on the island), the **island back panel and sides drawn as chosen** (matching door panels lined up with the cabinets in front, shiplap; detailed or waterfall sides), **brighter light**, a camera that **moves** (right-drag, Shift-drag, two fingers, arrow keys), **zooms toward the pointer** and **turns around a double-clicked point**;
-  - **Open doors** no longer starts over and over: on the live site the autosave re-renders the studio every few seconds, which rebuilt the 3D view and reset the doors. The view now rebuilds only when the room or its look really changes, and doors keep their angle across a rebuild.
+  - **Open doors** no longer starts over and over: on the live site the autosave re-renders the studio every few seconds, which rebuilt the 3D view and reset the doors. The view now rebuilds only when the room or its look really changes, and doors keep their angle across a rebuild. Tested in code only: not yet checked on the live site with the real autosave (DECISIONS PR-57a).
   - Tested in `__tests__/placeholder-draft.test.ts` and `__tests__/stage3d.test.ts`, on the real kitchen's walls (`__tests__/real-kitchen.ts`, no client details).
 - Its layout is written into the room's **master copy as placed items** (Core schema 2; `model/cabinets.ts` turns it into `PlacedItem`s, `ui/placeholder-store.ts` saves it, with job status `ai_draft`). Customize reads and saves the master copy; `cabinetViews` works out each cabinet's run and layer, plus the appliances and hoods, every time. The room drawing's checks include Core's item checks.
 - `ui/Customize.tsx`: the settings pane (Room · Run · Cabinet · Checks) and `ui/Stage3D.tsx`, the studio-lit 3D view (three.js). Cabinet heights and depths come from the catalog, finishes from the room's design choices. Cabinets the placeholder put down carry a dashed mark until a person changes or approves them.

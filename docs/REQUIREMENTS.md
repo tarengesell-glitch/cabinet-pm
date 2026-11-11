@@ -98,7 +98,7 @@ The app's design step runs the designer's **placeholder** builder (no AI): **App
 - Where uppers start (54" above the floor). **Open** (AD-5). Placeholder value: `visual.upper_bottom`. **Despite the "visual" label, it sets saved cabinet positions** (see "Known discrepancies").
 - Bathroom vanity choices. **PROPOSED** (PR-57c). Built.
 - Drawer levels per intake choice. Prototype recipe, not a reviewed rule.
-- The builder and the 3D view read the design choices through one interpretation (intake `roomChoices`, checked by the designer); the intake's answers stay the only copy. An unknown drawer level stops the design step and "Re-draft this run" with the reason and replaces nothing; an unknown island panel is drawn plain only as a stand-in, with a notice. **Approved** (2026-11-11 "Design choices read in one place"). Built. Other unknown choice values: **Open** (DC-1). A "choices changed since drafting" notice: deferred.
+- The builder and the 3D view read the design choices through one interpretation (intake `roomDesignInputs`, checked by the designer); the intake's answers stay the only copy. An unknown drawer level stops the design step and "Re-draft this run" with the reason and replaces nothing; an unknown island panel is drawn plain only as a stand-in, with a notice. **Approved** (2026-11-11 "Design choices read in one place"). Built. Other unknown choice values: **Open** (DC-1). A "choices changed since drafting" notice: deferred.
 
 ### Cabinet ends
 - Unfinished beside a wall or cabinet (filler at every wall); applied finished at an open end by default; finished by request. **Approved** (2026-11-07, CB-FACT-10). Built (`designer/model/ends.ts`).

@@ -4,8 +4,8 @@ Navigation: what actually runs, where each rule's data and code live, and which 
 
 ## The live path: a saved job to the 3D view
 1. **Saved job:** the shared database (Supabase, `src/app/sync/`) or a test-job file (`src/app/studio/test-data.ts`, the studio's "Test data" menu). Each room's master copy is kept by `src/modules/designer/ui/placeholder-store.ts`.
-2. **Studio:** `src/app/studio/Studio.tsx` steps through the design choices (`intake` module), the room drawing, the design step and Customize.
-3. **Design step:** `src/app/studio/AiStep.tsx` calls `draftRoom` (`designer/ui/placeholder-store.ts`), which runs the **placeholder builder**: `src/modules/designer/model/placeholder-draft.ts`. No AI is called; the animation is a placeholder. The design choices reach it, and the 3D view, through one read: the intake's `roomChoices` (`intake/model/choices.ts`) interprets the answers; the studio hands the result to the designer as `DesignChoices`, which `designer/model/choices.ts` checks (`layoutPreferences` for the builder, `islandPanelsOf` for the 3D view). A new choice is added to the intake's data, `roomChoices`, `DesignChoices` and the code that uses it; the studio doesn't change.
+2. **Studio:** `src/app/studio/Studio.tsx` steps through the design choices (`intake` module), the room drawing, the design step and Customize. Each room's choices are read by intake's `roomDesignInputs` when a later step needs them, and handed on unchanged as the designer's `DesignChoices`: the room kind to the drawing, the whole record to the design step and to Customize.
+3. **Design step:** `src/app/studio/AiStep.tsx` calls `draftRoom` (`designer/ui/placeholder-store.ts`), which runs the **placeholder builder**: `src/modules/designer/model/placeholder-draft.ts`. No AI is called; the animation is a placeholder. The design choices reach it as the designer's `DesignChoices`, which `designer/model/choices.ts` checks before use (`layoutPreferences` for the builder, `islandPanelsOf` for the 3D view). A new choice is added to intake's data, `roomDesignInputs` (`intake/model/design-inputs.ts`), `DesignChoices` and the code that uses it; the studio doesn't change.
 4. **Into the master copy:** `designer/model/cabinets.ts` (`placeholderItems`) turns the layout into placed items, saved as an AI draft version.
 5. **Customize and 3D:** `designer/ui/Customize.tsx` reads the placed items (`cabinetViews` in `cabinets.ts`) and draws them in `designer/ui/Stage3D.tsx` (three.js). Its one camera start is `fit()`.
 
@@ -33,7 +33,7 @@ Navigation: what actually runs, where each rule's data and code live, and which 
 | **Live builder:** which catalog part goes where, drawer levels, widths, hood and fridge clearances, fridge panel, island back panel, bathroom vanities | `src/modules/designer/data/placeholder-draft.json` | Has PROPOSED entries (see "Unresolved"). |
 | Cabinet ends (`end_left` / `end_right`): the rule's values and which cabinet types get them | `placeholder-draft.json` "ends"; worked out only in `src/modules/designer/model/ends.ts` | Saved on each cabinet; the 3D view draws only what is saved. Left/right PROPOSED (END-1); corner cabinets unset (END-2). |
 | Placeholder heights and 3D drawing sizes (where uppers start, the fridge's rough height, toe kick, counter, rough appliance shapes) | `placeholder-draft.json` "visual" | **Not all visual only:** `upper_bottom` and `appliances.fridge_height` also set saved cabinet heights and elevations (`REQUIREMENTS.md` "Known discrepancies"). A few small drawing sizes are in `Stage3D.tsx` itself. |
-| Design choices (the intake questions and options) | `src/modules/intake/data/intake-v1.json` | |
+| Design choices (the intake questions and options) | `src/modules/intake/data/intake-v1.json` | The answers are the only saved copy. How other steps read them: `src/modules/intake/model/design-inputs.ts` (`roomDesignInputs`); add a new choice the builder or 3D view needs there. |
 | Room and layout checks (walls, runs, items) | `src/core/layout/` | |
 | Units (1/64 inch) | `src/core/units.ts` | |
 | Module dependency table | `tools/architecture.cjs` (from `docs/ARCHITECTURE.md`) | |
@@ -47,7 +47,7 @@ Navigation: what actually runs, where each rule's data and code live, and which 
 | 3D view | `designer/__tests__/stage3d.test.ts` | `e2e/studio.spec.ts` (checks that the 3D view appears) |
 | Cabinet ends | `designer/__tests__/ends.test.ts` (the real kitchen's ends as before, layout changes, older designs, saving and opening again) | `e2e/studio.spec.ts` (an older design's ends set when asked) |
 | Room drawing, runs, appliances | `designer/__tests__/editor.test.ts`, `layout.test.ts`, `room-master-copy.test.ts` | `e2e/room-drawing.spec.ts`, `e2e/rough-layout.spec.ts` |
-| Design choices | `intake/__tests__/engine.test.ts`, `choices.test.ts`; the designer's checks of them: `designer/__tests__/choices.test.ts` | `e2e/intake.spec.ts` |
+| Design choices | `intake/__tests__/engine.test.ts`, `design-inputs.test.ts` (each room's design inputs as the studio read them before), `design-inputs-status.test.ts`; the designer's checks of them: `designer/__tests__/choices.test.ts` | `e2e/intake.spec.ts` |
 | Saving to the shared database, autosave, clashes | `src/app/sync/__tests__/job-sync.test.ts` (against the store's MOCKED in-memory database; live-database access depends on the session's environment, `docs/DEVELOPMENT.md`) | |
 | Clients (real records) | `src/modules/projects/__tests__/customers.test.ts` | `e2e/office.spec.ts` (demo clients only: browser tests run without the database) |
 | Database rules (versions, audit, staff only) | tested against the real project in rolled-back transactions (`src/platform/README.md`), not in `npm run test` | |

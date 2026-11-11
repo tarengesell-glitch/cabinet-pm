@@ -1,0 +1,279 @@
+[
+  {
+    "name": "island kitchen with a bathroom and an office",
+    "rooms": [
+      {
+        "room_id": "kitchen-room",
+        "room_type": "kitchen",
+        "prefs": {
+          "drawers": "maximum",
+          "cornerInsert": "lazy_susan",
+          "garbage": "dedicated_cabinet",
+          "roomSet": "kitchen",
+          "cabinetTop": 6144
+        },
+        "roomSet": "kitchen",
+        "look": {
+          "door": "#EDE9E0",
+          "baseDoor": "#EDE9E0",
+          "island": "#EDE9E0",
+          "counter": "#A9A39B",
+          "style": "country",
+          "wood": false,
+          "doorHw": "handle",
+          "drawerHw": "handle",
+          "pullFinish": "#A7A8A4",
+          "knobFinish": "#B39257",
+          "doorOrient": "horizontal",
+          "drawerTop": true,
+          "drawers": "maximum",
+          "toCeiling": false,
+          "topTrim": "crown",
+          "trimHex": "#EDE9E0",
+          "valance": "shaped",
+          "valanceHex": "#EDE9E0",
+          "islandBack": "door_panels",
+          "islandSide": "detailed_short",
+          "plain": false,
+          "counters": true
+        }
+      },
+      {
+        "room_id": "bath-room",
+        "room_type": "main_bath",
+        "prefs": {
+          "drawers": null,
+          "cornerInsert": null,
+          "garbage": "none",
+          "roomSet": "bath",
+          "cabinetTop": 6144
+        },
+        "roomSet": "bath",
+        "look": {
+          "door": "#EDE9E0",
+          "baseDoor": "#EDE9E0",
+          "island": "#EDE9E0",
+          "counter": "#A9A39B",
+          "style": "country",
+          "wood": false,
+          "doorHw": "handle",
+          "drawerHw": "handle",
+          "pullFinish": "#A7A8A4",
+          "knobFinish": "#B39257",
+          "doorOrient": "horizontal",
+          "drawerTop": true,
+          "drawers": "minimum",
+          "toCeiling": false,
+          "topTrim": "crown",
+          "trimHex": "#EDE9E0",
+          "valance": "shaped",
+          "valanceHex": "#EDE9E0",
+          "islandBack": null,
+          "islandSide": null,
+          "plain": true,
+          "counters": true
+        }
+      },
+      {
+        "room_id": "office-room",
+        "room_type": "office_1",
+        "prefs": {
+          "drawers": null,
+          "cornerInsert": null,
+          "garbage": "none",
+          "roomSet": "kitchen",
+          "cabinetTop": 6144
+        },
+        "roomSet": "kitchen",
+        "look": {
+          "door": "#EDE9E0",
+          "baseDoor": "#EDE9E0",
+          "island": "#EDE9E0",
+          "counter": "#A9A39B",
+          "style": "country",
+          "wood": false,
+          "doorHw": "handle",
+          "drawerHw": "handle",
+          "pullFinish": "#A7A8A4",
+          "knobFinish": "#B39257",
+          "doorOrient": "horizontal",
+          "drawerTop": true,
+          "drawers": "minimum",
+          "toCeiling": false,
+          "topTrim": "crown",
+          "trimHex": "#EDE9E0",
+          "valance": "shaped",
+          "valanceHex": "#EDE9E0",
+          "islandBack": null,
+          "islandSide": null,
+          "plain": true,
+          "counters": true
+        }
+      }
+    ]
+  },
+  {
+    "name": "galley kitchen to the ceiling, garbage under the sink",
+    "rooms": [
+      {
+        "room_id": "kitchen-room",
+        "room_type": "kitchen",
+        "prefs": {
+          "drawers": "minimum",
+          "cornerInsert": "double_shelf",
+          "garbage": "under_sink",
+          "roomSet": "kitchen",
+          "cabinetTop": "ceiling"
+        },
+        "roomSet": "kitchen",
+        "look": {
+          "door": "#EDE9E0",
+          "baseDoor": "#EDE9E0",
+          "island": "#EDE9E0",
+          "counter": "#A9A39B",
+          "style": "country",
+          "wood": false,
+          "doorHw": "handle",
+          "drawerHw": "handle",
+          "pullFinish": "#A7A8A4",
+          "knobFinish": "#B39257",
+          "doorOrient": "horizontal",
+          "drawerTop": true,
+          "drawers": "minimum",
+          "toCeiling": true,
+          "topTrim": "crown",
+          "trimHex": "#EDE9E0",
+          "valance": "shaped",
+          "valanceHex": "#EDE9E0",
+          "islandBack": null,
+          "islandSide": null,
+          "plain": false,
+          "counters": true
+        }
+      }
+    ]
+  },
+  {
+    "name": "two islands, shiplap and waterfall sides, no garbage pull-out",
+    "rooms": [
+      {
+        "room_id": "kitchen-room",
+        "room_type": "kitchen",
+        "prefs": {
+          "drawers": "moderate",
+          "cornerInsert": "lazy_susan",
+          "garbage": "none",
+          "roomSet": "kitchen",
+          "cabinetTop": 7680
+        },
+        "roomSet": "kitchen",
+        "look": {
+          "door": "#EDE9E0",
+          "baseDoor": "#EDE9E0",
+          "island": "#EDE9E0",
+          "counter": "#A9A39B",
+          "style": "country",
+          "wood": false,
+          "doorHw": "handle",
+          "drawerHw": "handle",
+          "pullFinish": "#A7A8A4",
+          "knobFinish": "#B39257",
+          "doorOrient": "horizontal",
+          "drawerTop": true,
+          "drawers": "moderate",
+          "toCeiling": false,
+          "topTrim": "crown",
+          "trimHex": "#EDE9E0",
+          "valance": "shaped",
+          "valanceHex": "#EDE9E0",
+          "islandBack": "shiplap",
+          "islandSide": "waterfall_stone",
+          "plain": false,
+          "counters": true
+        }
+      }
+    ]
+  },
+  {
+    "name": "island with a flat back and plain gable sides",
+    "rooms": [
+      {
+        "room_id": "kitchen-room",
+        "room_type": "kitchen",
+        "prefs": {
+          "drawers": "moderate",
+          "cornerInsert": "lazy_susan",
+          "garbage": "none",
+          "roomSet": "kitchen",
+          "cabinetTop": 6144
+        },
+        "roomSet": "kitchen",
+        "look": {
+          "door": "#EDE9E0",
+          "baseDoor": "#EDE9E0",
+          "island": "#EDE9E0",
+          "counter": "#A9A39B",
+          "style": "country",
+          "wood": false,
+          "doorHw": "handle",
+          "drawerHw": "handle",
+          "pullFinish": "#A7A8A4",
+          "knobFinish": "#B39257",
+          "doorOrient": "horizontal",
+          "drawerTop": true,
+          "drawers": "moderate",
+          "toCeiling": false,
+          "topTrim": "crown",
+          "trimHex": "#EDE9E0",
+          "valance": "shaped",
+          "valanceHex": "#EDE9E0",
+          "islandBack": "flat",
+          "islandSide": "plain_gable",
+          "plain": false,
+          "counters": true
+        }
+      }
+    ]
+  },
+  {
+    "name": "nothing answered yet",
+    "rooms": [
+      {
+        "room_id": "kitchen-room",
+        "room_type": "kitchen",
+        "prefs": {
+          "drawers": null,
+          "cornerInsert": null,
+          "garbage": "none",
+          "roomSet": "kitchen",
+          "cabinetTop": null
+        },
+        "roomSet": "kitchen",
+        "look": {
+          "door": "#DAD6CE",
+          "baseDoor": "#DAD6CE",
+          "island": "#DAD6CE",
+          "counter": "#B4ADA3",
+          "style": "modern",
+          "wood": false,
+          "doorHw": "handle",
+          "drawerHw": "handle",
+          "pullFinish": "#262626",
+          "knobFinish": "#262626",
+          "doorOrient": "vertical",
+          "drawerTop": false,
+          "drawers": "minimum",
+          "toCeiling": false,
+          "topTrim": null,
+          "trimHex": "#DAD6CE",
+          "valance": null,
+          "valanceHex": "#DAD6CE",
+          "islandBack": null,
+          "islandSide": null,
+          "plain": false,
+          "counters": true
+        }
+      }
+    ]
+  }
+]

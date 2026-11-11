@@ -119,9 +119,9 @@ export interface StudioRoom {
   readonly onChange?: () => void;
   /**
    * Which kind of room it is, for its fixtures and cabinet depths (owner, 2026-11-09): "bath" for
-   * bathroom-type rooms, "kitchen" otherwise. From the design choices (`DesignChoices.roomSet`), through the app.
+   * bathroom-type rooms, "kitchen" otherwise. From the design choices (`DesignChoices.roomKind`), through the app.
    */
-  readonly roomSet?: DesignChoices['roomSet'] | null;
+  readonly roomSet?: DesignChoices['roomKind'] | null;
 }
 
 export function RoomCapture({ user, studio }: { user: User; studio?: StudioRoom }) {

@@ -17,7 +17,16 @@ let n = 0;
 const ids = () => `eeeeeeee-0000-4000-8000-${String(++n).padStart(12, '0')}`;
 const MAX: DraftPreferences = { drawers: 'maximum', cornerInsert: 'lazy_susan', garbage: 'dedicated_cabinet', cabinetTop: 'ceiling', roomSet: 'kitchen' };
 /** The same choices as the design step receives them from the design choices. */
-const MAX_CHOICES: DesignChoices = { ...MAX, drawerLevel: { status: 'chosen', option_id: 'maximum' }, islandBackPanel: { status: 'unanswered' }, islandSidePanel: { status: 'unanswered' } };
+const MAX_CHOICES: DesignChoices = {
+  roomKind: 'kitchen',
+  cabinetTop: 'ceiling',
+  drawerLevel: { status: 'chosen', option_id: 'maximum' },
+  cornerInsert: 'lazy_susan',
+  garbage: 'dedicated_cabinet',
+  islandBackPanel: { status: 'unanswered' },
+  islandSidePanel: { status: 'unanswered' },
+  look: { door: '#eeeeee', baseDoor: '#eeeeee', island: '#666666', counter: '#cccccc', style: 'transitional', doorHw: 'handle', drawerHw: 'handle', pullFinish: '#111111', knobFinish: '#111111', doorOrient: 'vertical', drawerTop: false },
+};
 const PLAIN: DraftPreferences = { drawers: null, cornerInsert: null, garbage: 'none', cabinetTop: null, roomSet: 'kitchen' };
 
 /** The real kitchen laid out by the placeholder, without ends (as an older design was saved). */

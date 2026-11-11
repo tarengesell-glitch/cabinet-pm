@@ -13,23 +13,10 @@ import { cornerCabinets, direction, halfThickness, insideNormal, insideSpan, wal
 import type { CabinetView } from '../model/cabinets';
 import { endOpen, TOUCH, type Context } from '../model/ends';
 import { DRAFT_SETTINGS, isHood, itemByCode, standard } from '../model/placeholder-draft';
-import type { IslandPanels, PanelLook } from '../model/choices';
+import type { FinishLook, IslandPanels, PanelLook } from '../model/choices';
 import { GOLD } from './theme';
 
-/** How the room looks, from the design choices (the intake's look). */
-export interface FinishLook {
-  readonly door: string;
-  readonly baseDoor: string;
-  readonly island: string;
-  readonly counter: string;
-  readonly style: string;
-  readonly doorHw: 'handle' | 'knob' | 'none';
-  readonly drawerHw: 'handle' | 'knob' | 'none';
-  readonly pullFinish: string;
-  readonly knobFinish: string;
-  readonly doorOrient: 'vertical' | 'horizontal';
-  readonly drawerTop: boolean;
-}
+export type { FinishLook } from '../model/choices';
 
 /** The look as the drawing uses it: the finish plus the island panels it can show as chosen (null: plain). */
 export interface DrawLook extends FinishLook {

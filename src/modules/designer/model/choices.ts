@@ -5,7 +5,8 @@
  * the builder or the 3D view doesn't know is never quietly treated as another one.
  *
  * Layout choices become the builder's `DraftPreferences` (`layoutPreferences`); appearance-only
- * choices (the island panels) go to the 3D view (`islandPanelsOf`) and never into the builder.
+ * choices (the look and the island panels) go to the 3D view (`islandPanelsOf`) and never into the
+ * builder.
  */
 import { refuse, type Length, type Result } from '@/core/index';
 import type { DraftPreferences, DrawerLevel } from './placeholder-draft';
@@ -17,9 +18,24 @@ export type DesignChoice =
   | { readonly status: 'not_applicable' }
   | { readonly status: 'unrecognized'; readonly value: string };
 
+/** How the room looks, from the design choices: colours, door style and hardware. */
+export interface FinishLook {
+  readonly door: string;
+  readonly baseDoor: string;
+  readonly island: string;
+  readonly counter: string;
+  readonly style: string;
+  readonly doorHw: 'handle' | 'knob' | 'none';
+  readonly drawerHw: 'handle' | 'knob' | 'none';
+  readonly pullFinish: string;
+  readonly knobFinish: string;
+  readonly doorOrient: 'vertical' | 'horizontal';
+  readonly drawerTop: boolean;
+}
+
 export interface DesignChoices {
-  /** Which cabinets the room uses: a bathroom's vanities or the kitchen's. */
-  readonly roomSet: 'kitchen' | 'bath';
+  /** Which cabinets, fixtures and depths the room uses: a bathroom's or the kitchen's. */
+  readonly roomKind: 'kitchen' | 'bath';
   /** How tall the cabinets go: a length, the ceiling, or null when not chosen. */
   readonly cabinetTop: Length | 'ceiling' | null;
   readonly drawerLevel: DesignChoice;
@@ -28,6 +44,7 @@ export interface DesignChoices {
   readonly garbage: 'none' | 'under_sink' | 'dedicated_cabinet';
   readonly islandBackPanel: DesignChoice;
   readonly islandSidePanel: DesignChoice;
+  readonly look: FinishLook;
 }
 
 /** The drawer levels the layout recipe has (placeholder-draft.ts, `applyDrawerLevel`). */
@@ -66,7 +83,7 @@ export function layoutPreferences(c: DesignChoices): Result<DraftPreferences> {
     default:
       return refuse('The drawer level in the design choices can’t be read.');
   }
-  return { ok: true, value: { drawers, cornerInsert: c.cornerInsert, garbage: c.garbage, cabinetTop: c.cabinetTop, roomSet: c.roomSet } };
+  return { ok: true, value: { drawers, cornerInsert: c.cornerInsert, garbage: c.garbage, cabinetTop: c.cabinetTop, roomSet: c.roomKind } };
 }
 
 /** How the 3D view shows one island panel: as chosen, plain (nothing chosen or no island), or a value it can't show. */

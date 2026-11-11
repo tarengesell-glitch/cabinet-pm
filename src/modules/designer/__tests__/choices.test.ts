@@ -14,17 +14,18 @@ let n = 0;
 const ids = () => `cccccccc-0000-4000-8000-${String(++n).padStart(12, '0')}`;
 const chosen = (option_id: string): DesignChoice => ({ status: 'chosen', option_id });
 const NONE: DesignChoice = { status: 'not_applicable' };
+const LOOK: FinishLook = { door: '#eeeeee', baseDoor: '#eeeeee', island: '#666666', counter: '#cccccc', style: 'transitional', doorHw: 'handle', drawerHw: 'handle', pullFinish: '#111111', knobFinish: '#111111', doorOrient: 'vertical', drawerTop: false };
 const choices = (c: Partial<DesignChoices> = {}): DesignChoices => ({
-  roomSet: 'kitchen',
+  roomKind: 'kitchen',
   cabinetTop: 'ceiling',
   drawerLevel: chosen('maximum'),
   cornerInsert: 'lazy_susan',
   garbage: 'dedicated_cabinet',
   islandBackPanel: chosen('door_panels'),
   islandSidePanel: chosen('detailed_short'),
+  look: LOOK,
   ...c,
 });
-const LOOK: FinishLook = { door: '#eeeeee', baseDoor: '#eeeeee', island: '#666666', counter: '#cccccc', style: 'transitional', doorHw: 'handle', drawerHw: 'handle', pullFinish: '#111111', knobFinish: '#111111', doorOrient: 'vertical', drawerTop: false };
 
 const prefs = (c: DesignChoices): DraftPreferences => {
   const p = layoutPreferences(c);
@@ -52,7 +53,7 @@ describe('the layout choices (the builder’s input)', () => {
 
   it('keeps plain door cabinets (no drawer level) when the drawer level is unanswered or doesn’t apply', () => {
     expect(prefs(choices({ drawerLevel: { status: 'unanswered' } })).drawers).toBeNull();
-    expect(prefs(choices({ drawerLevel: NONE, roomSet: 'bath' })).drawers).toBeNull();
+    expect(prefs(choices({ drawerLevel: NONE, roomKind: 'bath' })).drawers).toBeNull();
   });
 
   it('refuses a saved drawer level that isn’t an option, or one the recipe doesn’t have, with the reason', () => {

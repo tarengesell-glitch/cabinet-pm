@@ -55,6 +55,15 @@
     "fridge_panel": "tall_filler",
     "panels_note": "Owner, 2026-11-10 (chat): an island's back is always covered by a finished back panel (the catalog's Island back panel), and a fridge always has a full-height, full-depth panel on each side. The catalog has no fridge panel, so it is drafted as the Tall filler at the panel's depth until the shop names its part (DECISIONS AD-6, PROPOSED). Its size limits are not known yet (CAT-1), so the catalog check flags it."
   },
+  "ends": {
+    "source": "DECISIONS 2026-11-07 \"The cabinet catalog\" (decided): ends are a setting on each cabinet: Unfinished beside a wall or cabinet (with a filler at every wall); an open end gets an Applied finished end by default, or a Finished end by request. Shop design rule CB-FACT-10. Owner, 2026-11-10 (round 2): every end with nothing beside it, beside a range and an island's ends included, is covered from the floor to the top.",
+    "open": "applied_finished",
+    "closed": "unfinished",
+    "finished": ["applied_finished", "finished"],
+    "types": ["base", "vanity", "wall", "tall"],
+    "types_note": "The catalog types whose ends the builder sets: the cabinets the 3D view draws ends on. Corner cabinets (corner_base, corner_wall) also offer end_left and end_right, but which leg is which, and whether an L-shaped corner cabinet can have an open end, isn't decided: their ends are left for the designer (DECISIONS open question END-2).",
+    "orientation_note": "PROPOSED (2026-11-11, not decided): end_left and end_right are as seen standing in front of the cabinet, facing its doors. The catalog doesn't say; to confirm with the shop before the import file is written (DECISIONS open question END-1)."
+  },
   "visual": {
     "note": "For drawing the 3D view only (visual approximation, BUILD_SPEC 5.5); never sent to the shop.",
     "toe_kick_height": "4",

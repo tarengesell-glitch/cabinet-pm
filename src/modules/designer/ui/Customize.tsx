@@ -13,6 +13,7 @@ import { formatInches, ITEM_CHECKS, runChecks, type Room } from '@/core/index';
 import { can, type User } from '@/platform/index';
 import { catalogItemCheck, CURRENT_CATALOG } from '@/modules/catalog/contract';
 import { cabinetViews, editItems, placeholderItems, replaceRunItems, upperTopOf, type CabinetView, type ItemEdit } from '../model/cabinets';
+import { fillEnds, refreshEnds, reviewEnds } from '../model/ends';
 import { room as roomOf, wallLabel, type Draft } from '../model/editor';
 import { RUN_KIND_LABEL } from '../model/layout';
 import { applianceType, LAYOUT_RULES } from '../model/layout-rules';
@@ -75,6 +76,8 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
   /** The screens' view of the master copy: cabinets with their runs, plus appliances and hoods. */
   const design = useMemo(() => (draft && room ? { cabinets: cabinetViews(room), notes: placeholderNotes(draft), upperTop: upperTopOf(room) } : null), [draft, room]);
 
+  /** Cabinets whose saved ends don't match the layout: none saved yet (an older design), or different. */
+  const endReview = useMemo(() => (room ? reviewEnds(room) : null), [room]);
   const onChange = cr.onChange;
   /** Saves a changed room into the master copy, with a history entry. */
   const keep = useCallback(
@@ -93,7 +96,10 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
   );
   const edit = (e: ItemEdit): boolean => {
     if (!room || !canEdit) return false;
-    const r = editItems(room, e);
+    const edited = editItems(room, e);
+    // A width or type change can change what is beside a cabinet: ends that follow the layout are
+    // worked out again; any other saved end is kept (model/ends.ts).
+    const r = edited.ok && e.kind !== 'approve' ? refreshEnds(room, edited.value) : edited;
     if (!r.ok) {
       setMessage({ kind: 'error', text: r.reason });
       return false;
@@ -101,6 +107,12 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
     setMessage(null);
     const summary = e.kind === 'approve' ? `Approved ${e.ids.length} cabinet${e.ids.length === 1 ? '' : 's'}` : e.kind === 'type' ? 'Changed a cabinet’s type' : 'Changed a cabinet’s width';
     return keep(r.value, summary, 'designer');
+  };
+
+  /** Saves ends a person asked to set (older designs, or ends out of date), as a designer change. */
+  const saveEnds = (r: ReturnType<typeof fillEnds>, summary: string) => {
+    if (!r.ok) return setMessage({ kind: 'error', text: r.reason });
+    if (keep(r.value, summary, 'designer')) setMessage({ kind: 'notice', text: 'Cabinet ends saved.' });
   };
 
   const designRef = useRef(design);
@@ -208,6 +220,34 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
             <p className={message.kind === 'error' ? s.error : s.notice} role="status">
               {message.text}
             </p>
+          )}
+          {endReview && !endReview.ok && (
+            <p className={s.error} role="alert">
+              {endReview.reason}
+            </p>
+          )}
+          {endReview?.ok && endReview.value.missing.length > 0 && (
+            <div className={s.notice} role="status" data-testid="ends-missing">
+              <p>
+                {endReview.value.missing.length} cabinet{endReview.value.missing.length === 1 ? ' was' : 's were'} designed before cabinet ends were saved, so the 3D view shows no finished ends on {endReview.value.missing.length === 1 ? 'it' : 'them'}. Setting them works
+                out each one’s left and right end from the layout (unfinished against a wall, cabinet or panel; an applied finished end where nothing is beside it) and saves a new version. Nothing else on
+                the cabinets changes.
+              </p>
+              <button className={s.btn} disabled={!canEdit} onClick={() => room && endReview.ok && saveEnds(fillEnds(room, endReview.value.missing), 'Set cabinet ends from the layout (older design)')}>
+                Set their ends from the layout
+              </button>
+            </div>
+          )}
+          {endReview?.ok && endReview.value.differ.length > 0 && (
+            <div className={s.notice} role="status" data-testid="ends-differ">
+              <p>
+                {endReview.value.differ.length} cabinet{endReview.value.differ.length === 1 ? ' has an end' : 's have ends'} that differ from what the layout gives now: either chosen on purpose, or out of date after the
+                room drawing changed. Updating replaces only those ends.
+              </p>
+              <button className={s.btn} disabled={!canEdit} onClick={() => room && endReview.ok && saveEnds(fillEnds(room, endReview.value.differ), 'Updated cabinet ends to match the layout')}>
+                Update them to match the layout
+              </button>
+            </div>
           )}
           {tab === 'room' && (
             <>
@@ -332,7 +372,9 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
                       if (!fresh.ok) return setMessage({ kind: 'error', text: fresh.reason });
                       const items = placeholderItems(room, fresh.value);
                       if (!items.ok) return setMessage({ kind: 'error', text: items.reason });
-                      if (keep(replaceRunItems(room, items.value, run.run.run_id), 'Placeholder layout (no AI was used) of one run', 'ai'))
+                      const next = refreshEnds(room, replaceRunItems(room, items.value, run.run.run_id));
+                      if (!next.ok) return setMessage({ kind: 'error', text: next.reason });
+                      if (keep(next.value, 'Placeholder layout (no AI was used) of one run', 'ai'))
                         setMessage({ kind: 'notice', text: 'Run re-drafted with the placeholder recipe.' });
                     }}
                   >
@@ -375,7 +417,7 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
               ) : (
                 <p className={s.empty}>Nothing to fix.</p>
               )}
-              <p className={s.hint}>Core’s layout checks and the catalog’s checks, on the room’s master copy. The placeholder doesn’t choose door style, ends or hinge sides yet, so those show as missing choices.</p>
+              <p className={s.hint}>Core’s layout checks and the catalog’s checks, on the room’s master copy. The placeholder doesn’t choose door style or hinge sides yet, so those show as missing choices. It sets each cabinet’s ends from the layout, except an L-shaped corner cabinet’s, which wait for a decision.</p>
             </section>
           )}
         </div>

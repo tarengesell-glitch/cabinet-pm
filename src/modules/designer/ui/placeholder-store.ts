@@ -7,6 +7,7 @@
 import { type Job, type Result, type Room } from '@/core/index';
 import { placeholderItems } from '../model/cabinets';
 import { loadJob, room as roomOf, upgradeStoredDraft, type Draft } from '../model/editor';
+import { withRuleEnds } from '../model/ends';
 import { draftPlaceholder, type DraftPreferences } from '../model/placeholder-draft';
 import { readStored, storageKey, writeStored } from './storage';
 
@@ -71,7 +72,10 @@ export function draftRoom(roomKey: string, prefs: DraftPreferences, userId: stri
   if (!design.ok) return design;
   const items = placeholderItems(room, design.value);
   if (!items.ok) return items;
-  const saved = saveRoom(roomKey, d.value, { ...room, items: items.value }, [PLACEHOLDER, ...design.value.notes].join(' · '), 'ai', userId, 'ai_draft');
+  // Every cabinet's ends, worked out once and saved with it (the 3D view draws what is saved).
+  const ended = withRuleEnds({ ...room, items: items.value });
+  if (!ended.ok) return ended;
+  const saved = saveRoom(roomKey, d.value, ended.value, [PLACEHOLDER, ...design.value.notes].join(' · '), 'ai', userId, 'ai_draft');
   return saved.ok ? { ok: true, value: roomOf(saved.value) } : saved;
 }
 

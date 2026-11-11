@@ -16,7 +16,26 @@ import { applianceEnd } from './layout';
 import { DRAFT_SETTINGS, itemByCode, standard, type PlaceholderCabinet, type PlaceholderDesign } from './placeholder-draft';
 
 /** A cabinet, appliance or hood as the screens show it. */
-export type CabinetView = PlaceholderCabinet;
+export type CabinetView = PlaceholderCabinet & {
+  /**
+   * A placed cabinet's saved end values at its low and high end along the wall (the catalog's
+   * end_left / end_right, null when not chosen); absent for appliances, hoods and items with no ends.
+   * The 3D view draws a finished end only from these (model/ends.ts decides them).
+   */
+  readonly ends?: { readonly low: string | null; readonly high: string | null };
+};
+
+export type EndOption = 'end_left' | 'end_right';
+
+/**
+ * Which catalog end option is a cabinet's end at the low or high end of its wall (the wall's start
+ * or end). PROPOSED (DECISIONS END-1): left and right as seen standing in front of the cabinet,
+ * facing its doors. A cabinet on the wall's left side faces to the left of the wall's direction,
+ * so its left end is toward the wall's end.
+ */
+export function endOption(side: 'left' | 'right', at: 'low' | 'high'): EndOption {
+  return (side === 'left') === (at === 'high') ? 'end_left' : 'end_right';
+}
 
 const UPPER_TYPES = new Set(['wall', 'corner_wall']);
 /** Panels and fillers cover or close up cabinets; they never house an appliance (an island's back panel runs behind it). */
@@ -45,6 +64,9 @@ export function cabinetViews(room: Room): CabinetView[] {
   const out: CabinetView[] = [];
   for (const item of room.items) {
     const wall = room.walls.find((w) => w.wall_id === item.position.wall_id);
+    const cat = itemOf(item);
+    const saved = (at: 'low' | 'high'): string | null => item.item_selections[endOption(item.position.side, at)] ?? null;
+    const hasEnds = cat !== null && (cat.options.includes('end_left') || cat.options.includes('end_right'));
     out.push({
       id: item.item_instance_id,
       code: itemOf(item)?.code ?? null,
@@ -60,6 +82,7 @@ export function cabinetViews(room: Room): CabinetView[] {
       reviewed: reviewed(item),
       // An island's cabinets stand on its left side; the right side is its back (the back panel).
       ...(wall?.kind === 'floating' && item.position.side === 'right' ? { back: true } : {}),
+      ...(hasEnds ? { ends: { low: saved('low'), high: saved('high') } } : {}),
     });
   }
   const top = upperTopOf(room);

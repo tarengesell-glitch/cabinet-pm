@@ -9,8 +9,9 @@ import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import type { Room, Wall } from '@/core/index';
-import { cornerCabinets, direction, halfThickness, insideNormal, insideSpan, wallLength, type CornerCabinet } from '../model/layout';
+import { cornerCabinets, direction, halfThickness, insideNormal, insideSpan, wallLength } from '../model/layout';
 import type { CabinetView } from '../model/cabinets';
+import { endOpen, TOUCH, type Context } from '../model/ends';
 import { DRAFT_SETTINGS, isHood, itemByCode, standard } from '../model/placeholder-draft';
 import { GOLD } from './theme';
 
@@ -381,15 +382,6 @@ function placement(room: Room, wall: Wall, offset: number, width: number, depth:
   return { at: floor(x, y), angle: Math.atan2(n.x, -n.y) };
 }
 
-/** What a cabinet needs to know about the rest of the room: its neighbours and the corners. */
-export interface Context {
-  readonly room: Room;
-  readonly all: readonly CabinetView[];
-  readonly corners: readonly CornerCabinet[];
-}
-
-/** 1/32": closer than this counts as touching. */
-const TOUCH = 2;
 const NO_COUNTER = new Set(['fridge', 'range', 'hood', 'millwork_hood', 'toilet', 'tub', 'shower']);
 const COUNTER_TYPES = new Set(['base', 'vanity', 'appliance_opening']);
 
@@ -401,29 +393,17 @@ function alongSign(room: Room, wall: Wall): number {
 }
 
 /**
- * Whether a cabinet's end at `edge` has nothing beside it: no cabinet, panel or filler at the same
- * height touching it, no wall, and not the other leg of an L-shaped corner cabinet. Such an end gets
- * an applied finished end (CB-FACT-10). Appliances don't cover an end: one beside a range is finished.
+ * Which ends of a cabinet the 3D view covers with a finished end: only the ends whose saved value
+ * (end_left / end_right, worked out by model/ends.ts) is a finished one. A cabinet with no saved
+ * value (an older design) shows none; Customize says so.
  */
-export function endOpen(ctx: Context, c: CabinetView, wall: Wall, edge: number, side: 'low' | 'high', withAppliances = false): boolean {
-  const top = c.elevation + c.height;
-  const touching = ctx.all.some(
-    (o) =>
-      o !== c &&
-      o.wallId === c.wallId &&
-      !o.back &&
-      (o.code !== null ? o.elevation < top && c.elevation < o.elevation + o.height : withAppliances && o.layer === c.layer) &&
-      (side === 'low' ? Math.abs(o.offset + o.width - edge) <= TOUCH : Math.abs(o.offset - edge) <= TOUCH),
-  );
-  if (touching) return false;
-  if (wall.kind !== 'room') return true;
-  const sp = insideSpan(ctx.room, wall);
-  if (side === 'low' ? edge <= sp.start + TOUCH : edge >= sp.end - TOUCH) return false;
-  const corner = ctx.corners.find((k) => (side === 'high' ? k.endingWallId : k.startingWallId) === wall.wall_id && (c.layer === 'upper' ? k.upper : k.base));
-  if (!corner) return true;
-  const legs = ctx.all.filter((o) => o.wallId !== wall.wall_id && o.layer === c.layer && o.code !== null && (itemByCode(o.code)?.type ?? '').startsWith('corner')).map((o) => o.depth ?? (o.code ? standard(o.code, 'depth') : null) ?? 0);
-  const leg = legs.length ? Math.max(...legs) : 0;
-  return side === 'high' ? edge < sp.end - leg - TOUCH : edge > sp.start + leg + TOUCH;
+export function finishedEnds(c: CabinetView): ('low' | 'high')[] {
+  if (!DRAFT_SETTINGS.ok || !c.ends) return [];
+  const finished = DRAFT_SETTINGS.value.ends.finished;
+  return (['low', 'high'] as const).filter((at) => {
+    const v = at === 'low' ? c.ends!.low : c.ends!.high;
+    return v !== null && finished.has(v);
+  });
 }
 
 /**
@@ -467,8 +447,11 @@ export function counters(s: Pick<Scene3D, 'mats'>, ctx: Context, look: FinishLoo
     for (const r of runs) {
       const h = inch(r.height ?? baseH);
       const d = inch(r.depth ?? standard('base_doors', 'depth') ?? 24 * IN);
-      const ohLow = endOpen(ctx, r.first, wall, r.start, 'low', true) ? oh : 0;
-      const ohHigh = endOpen(ctx, r.last, wall, r.end, 'high', true) ? oh : 0;
+      // The counter overhangs an end with nothing beside it, not even an appliance (HARD-011). A
+      // cabinet with saved ends overhangs only past a finished one, so the top follows the saved end.
+      const overhangs = (c: CabinetView, edge: number, at: 'low' | 'high') => endOpen(ctx, c, wall, edge, at, true) && (!c.ends || finishedEnds(c).includes(at));
+      const ohLow = overhangs(r.first, r.start, 'low') ? oh : 0;
+      const ohHigh = overhangs(r.last, r.end, 'high') ? oh : 0;
       const g = new THREE.Group();
       g.userData['wallId'] = wall.wall_id;
       g.userData['span'] = [r.start, r.end];
@@ -694,17 +677,14 @@ function cabinet(s: Scene3D, c: CabinetView, ctx: Context, look: FinishLook, isS
     }
   }
 
-  // Applied finished ends: an end with nothing beside it is covered from the floor (base and tall)
-  // or the cabinet's bottom (upper) to its top, flush with the doors (owner, 2026-11-10: "Applied
-  // finished ends should go to the floor"). An island's ends follow its side panel choice.
+  // Finished ends, as saved on the cabinet (model/ends.ts decides them): covered from the floor
+  // (base and tall) or the cabinet's bottom (upper) to its top, flush with the doors (owner,
+  // 2026-11-10: "Applied finished ends should go to the floor"). An island's ends follow its side
+  // panel choice. Drawn only on the straight cabinets; an L-shaped corner cabinet's ends aren't drawn.
   const ENDED = new Set(['base', 'vanity', 'wall', 'tall']);
   if (item && !c.back && ENDED.has(item.type)) {
     const y0 = c.layer === 'upper' ? inch(c.elevation) : 0;
-    for (const [side, edge] of [
-      ['low', c.offset],
-      ['high', c.offset + c.width],
-    ] as const) {
-      if (!endOpen(ctx, c, wall, edge, side)) continue;
+    for (const side of finishedEnds(c)) {
       const x = (side === 'low' ? -sign : sign) * (w / 2 - 0.37);
       if (island && c.layer === 'base' && look.islandSide === 'waterfall_stone') {
         b(counterT, top + counterT - y0, d + DOOR_T + oh, [(side === 'low' ? -sign : sign) * (w / 2 + counterT / 2), (y0 + top + counterT) / 2, (DOOR_T + oh) / 2], counter);

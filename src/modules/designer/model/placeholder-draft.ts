@@ -77,6 +77,17 @@ export interface DraftSettings {
     readonly overFridge: Length;
     readonly fridgePanelDepth: Length;
   };
+  /** The finished-end rule (decided 2026-11-07, CB-FACT-10): catalog values for end_left / end_right. */
+  readonly ends: {
+    /** The value for an end with nothing beside it. */
+    readonly open: string;
+    /** The value for an end against a wall, a cabinet, a panel or a corner leg. */
+    readonly closed: string;
+    /** The values that cover an end (the 3D view draws a finished end for these). */
+    readonly finished: ReadonlySet<string>;
+    /** The catalog types whose ends the builder sets. */
+    readonly types: ReadonlySet<string>;
+  };
   readonly visual: {
     readonly toeKick: Length;
     readonly counter: Length;
@@ -144,6 +155,17 @@ function readSettings(): Result<DraftSettings> {
   ];
   const missing = all.filter((c) => !CURRENT_CATALOG.items.some((i) => i.code === c));
   if (missing.length) return { ok: false, reason: `placeholder-draft.json names cabinet types the catalog doesn't have: ${missing.join(', ')}` };
+  // The end values must be choices the catalog offers for both ends.
+  for (const code of ['end_left', 'end_right']) {
+    const option = CURRENT_CATALOG.options.find((o) => o.code === code);
+    if (!option) return { ok: false, reason: `The catalog has no "${code}" option, so the builder can't set cabinet ends.` };
+    const bad = [data.ends.open, data.ends.closed, ...data.ends.finished].filter((v) => !option.values.some((x) => x.code === v));
+    if (bad.length) return { ok: false, reason: `placeholder-draft.json "ends" names values the catalog's ${option.name} doesn't offer: ${bad.join(', ')}` };
+  }
+  const unknownTypes = data.ends.types.filter((t) => !CURRENT_CATALOG.items.some((i) => i.type === t));
+  if (unknownTypes.length) return { ok: false, reason: `placeholder-draft.json "ends" names cabinet types the catalog doesn't have: ${unknownTypes.join(', ')}` };
+  if (!data.ends.finished.includes(data.ends.open) || data.ends.finished.includes(data.ends.closed))
+    return { ok: false, reason: 'placeholder-draft.json "ends": the open-end value must be a finished one, and the closed-end value must not be.' };
   return {
     ok: true,
     value: {
@@ -153,6 +175,7 @@ function readSettings(): Result<DraftSettings> {
       narrowBelow: out['narrow_below']!,
       codes,
       clearances: { hoodSide: out['hood_side']!, overFridge: out['over_fridge']!, fridgePanelDepth: out['fridge_panel_depth']! },
+      ends: { open: data.ends.open, closed: data.ends.closed, finished: new Set(data.ends.finished), types: new Set(data.ends.types) },
       visual: {
         toeKick: out['toe_kick_height']!,
         counter: out['counter_thickness']!,

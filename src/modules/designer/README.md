@@ -121,6 +121,14 @@ The controls and behaviour are unchanged. The look follows the owner's Kitchen S
 - `ui/PlanThumb.tsx`: a small plan of a drawn room, for the studio's AI step and the client page.
 - Contract: `draftRoom`, `exportRoomData` / `importRoomData`, and the `DraftPreferences` type. Screens: `Customize`, `PlanThumb`.
 
+### Cabinet ends (2026-11-11)
+- **One decision, saved on the cabinet.** `model/ends.ts` decides each cabinet's `end_left` / `end_right` from the layout, by the decided rule in `data/placeholder-draft.json` "ends" (DECISIONS 2026-11-07, CB-FACT-10): unfinished against a wall, a cabinet, a panel or filler, or a corner cabinet's leg; an applied finished end where nothing is beside it (beside a range or a window, an island's ends). The design step saves them with the cabinets. The 3D view only draws what is saved (`finishedEnds` in `ui/Stage3D.tsx`), and the counter overhangs only past a saved finished end with no appliance beside it. On the real kitchen the drawing is unchanged.
+- **Left and right** are as seen standing in front of the cabinet, facing its doors (PROPOSED, DECISIONS END-1).
+- **Not set:** L-shaped corner cabinets' ends (END-2); the Checks tab still lists them as choices to make. Fillers, panels and the dishwasher opening have no end option.
+- **After a layout change** (a width, a type, a run laid out again) an end is worked out again only while it still follows the rule; an end that differs (a finished end by request) is kept, and every other choice on the cabinet stays.
+- **Older designs** (saved before ends were) are not changed on opening: Customize says how many cabinets have no saved ends (the 3D view shows no finished ends on them) and sets them only when someone presses "Set their ends from the layout". Ends that differ from the layout, for example after the room drawing changed, are listed the same way with "Update them to match the layout".
+- Tested in `__tests__/ends.test.ts` (the real kitchen as before, walls, cabinets, the fridge panel, the range, the island, a turned room, layout changes, older designs, saving and opening again), `__tests__/stage3d.test.ts` and `e2e/studio.spec.ts`.
+
 ## What the preview does not do yet
 - **The browser keeps the working copy** (`localStorage`). Inside the design studio, the app saves it to the shared database as you work (2026-11-09, `src/app/sync/`); the standalone room preview (`/rooms/preview`) still keeps it in this browser only, and says so. If the browser won't store it, a red banner says the work isn't being kept.
 - **Who changed what:** `saveRoom` and `draftRoom` take the signed-in person's ID for the room's history (the preview user without the database).

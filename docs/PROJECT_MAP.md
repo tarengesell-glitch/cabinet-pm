@@ -63,7 +63,8 @@ Timings (measured 2026-11-10, one run in a cloud session): lint 3.9 s, typecheck
 - **Bathroom vanity choices** (`placeholder-draft.json` `cabinets.bath`, PR-57c): PROPOSED by a session, not approved by the owner.
 - **The fridge panel as the Tall filler** (AD-6) and **the fridge's rough 70" height** (OA-4): PROPOSED.
 - **Copying layout fixes into the parked AI layout builder:** deferred (DECISIONS 2026-11-11). Not to be picked up unless the owner asks. (Pull request #59 had already copied the round-2 hood fixes in, including the PROPOSED 1 1/2" filler as `draft-rules.json` `clearances.flank_filler_max`.)
-- **Cabinet ends:** which side is "left" (END-1, PROPOSED), corner cabinets' ends (END-2, not set), an island's waterfall or detailed sides (END-3).
+- **Cabinet ends:** which side is "left" (END-1, PROPOSED); corner cabinets' ends (END-2, not set); an island's waterfall or detailed sides (END-3).
+- **Cabinet ends, limitation:** the saved design doesn't record whether an end was set by the rule or by a person, so a person's choice equal to the rule's earlier value would be worked out again after a layout change. No screen sets ends yet; END-4 lists what manual end editing needs first.
 - Every other open question: `docs/DECISIONS.md` "Open questions".
 
 ## Which doc answers what

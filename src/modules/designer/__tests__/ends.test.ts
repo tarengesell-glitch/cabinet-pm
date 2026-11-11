@@ -136,7 +136,7 @@ describe('cabinet ends after a layout change', () => {
     expect(after.items.find((i) => i.item_instance_id === base.item_instance_id)!.item_selections['end_right']).toBe('applied_finished');
   });
 
-  it('keeps an end chosen on purpose, and every other choice on the cabinet', () => {
+  it('keeps an end that differs from the rule (a finished end by request), and every other choice on the cabinet', () => {
     const start = ended(laidOut(MAX));
     const { base, dw } = wallB(start);
     const chosen = { ...base, item_selections: { ...base.item_selections, end_left: 'finished', door_style: 'shaker' } };

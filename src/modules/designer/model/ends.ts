@@ -8,10 +8,12 @@
  * against a wall, a cabinet, a panel or a corner cabinet's leg is unfinished; an end with nothing
  * beside it (an appliance or a window doesn't count) gets an applied finished end.
  *
- * Saved values are never overwritten silently: after a layout change only ends that still follow
- * the rule are worked out again (`refreshEnds`); a value that differs from the rule (a finished
- * end by request) is kept. Cabinets saved before ends were stored are listed by `reviewEnds` and
- * filled only when a person asks (`fillEnds`).
+ * After a layout change, an end whose saved value equals what the rule gave before the change is
+ * worked out again (`refreshEnds`); a value that differs from the rule (a finished end by request)
+ * is kept. Limitation: the saved design doesn't record who set an end, so a person's choice that
+ * equals the rule's old value would be worked out again too. No screen sets ends yet; manual end
+ * editing must first record each end's origin (DECISIONS END-4). Cabinets saved before ends were
+ * stored are listed by `reviewEnds` and filled only when a person asks (`fillEnds`).
  */
 import type { PlacedItem, Result, Room, Wall } from '@/core/index';
 import { cabinetViews, endOption, itemOf, type CabinetView, type EndOption } from './cabinets';
@@ -102,7 +104,8 @@ export function withRuleEnds(room: Room): Result<Room> {
  * The ends after a layout change (a width, a cabinet type, a run laid out again). A new cabinet
  * gets the rule's ends. An existing cabinet's end is worked out again only while it still follows
  * the rule (its saved value is what the rule gave before the change); a different value (a
- * finished end by request) is kept, and a missing one stays missing for `reviewEnds`.
+ * finished end by request) is kept, and a missing one stays missing for `reviewEnds`. A person's
+ * choice equal to the rule's old value can't be told apart and is worked out again (END-4).
  */
 export function refreshEnds(before: Room, after: Room): Result<Room> {
   const was = ruleEnds(before);

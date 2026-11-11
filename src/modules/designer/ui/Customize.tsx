@@ -98,7 +98,7 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
     if (!room || !canEdit) return false;
     const edited = editItems(room, e);
     // A width or type change can change what is beside a cabinet: ends that follow the layout are
-    // worked out again; any other saved end is kept (model/ends.ts).
+    // worked out again; an end that differs from the rule is kept (model/ends.ts, limitation END-4).
     const r = edited.ok && e.kind !== 'approve' ? refreshEnds(room, edited.value) : edited;
     if (!r.ok) {
       setMessage({ kind: 'error', text: r.reason });

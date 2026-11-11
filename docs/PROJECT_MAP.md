@@ -48,7 +48,7 @@ Navigation: what actually runs, where each rule's data and code live, and which 
 | Cabinet ends | `designer/__tests__/ends.test.ts` (the real kitchen's ends as before, layout changes, older designs, saving and opening again) | `e2e/studio.spec.ts` (an older design's ends set when asked) |
 | Room drawing, runs, appliances | `designer/__tests__/editor.test.ts`, `layout.test.ts`, `room-master-copy.test.ts` | `e2e/room-drawing.spec.ts`, `e2e/rough-layout.spec.ts` |
 | Design choices | `intake/__tests__/engine.test.ts` | `e2e/intake.spec.ts` |
-| Saving to the shared database, autosave, clashes | `src/app/sync/__tests__/job-sync.test.ts` (against the store's MOCKED in-memory database; the live database is not reachable from sessions) | |
+| Saving to the shared database, autosave, clashes | `src/app/sync/__tests__/job-sync.test.ts` (against the store's MOCKED in-memory database; live-database access depends on the session's environment, `docs/DEVELOPMENT.md`) | |
 | Clients (real records) | `src/modules/projects/__tests__/customers.test.ts` | `e2e/office.spec.ts` (demo clients only: browser tests run without the database) |
 | Database rules (versions, audit, staff only) | tested against the real project in rolled-back transactions (`src/platform/README.md`), not in `npm run test` | |
 | Studio flow and test-job files | | `e2e/studio.spec.ts` |

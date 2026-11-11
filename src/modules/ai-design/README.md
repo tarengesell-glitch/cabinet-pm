@@ -1,5 +1,7 @@
 # ai-design
 
+**Status 2026-11-11: the layout builder (`model/engine/`) is parked.** The app doesn't run it; the app runs the designer's placeholder builder. Don't change it or copy fixes into it unless the owner asks (DECISIONS 2026-11-11, `docs/PROJECT_MAP.md`). Its `data/draft-rules.json` repeats some of the placeholder's rules and differs on drawer levels; for anything the app shows, the placeholder's data counts.
+
 Drafts a layout into the master copy from the room, selections, intake answers, shop design rules and catalog. Drafts must pass the same validation as a human design and record a short explanation.
 
 Status: **the design brief** (2026-11-08), reading the real design choices since 2026-11-09 (IK-15). This is what the AI designer will read. Nothing calls an AI model yet, and nothing is drafted. See `CLAUDE.md` in this folder for the rules.

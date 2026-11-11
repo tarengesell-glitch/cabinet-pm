@@ -1,65 +1,48 @@
 # CLAUDE.md: rules for every AI coding session
 
-You are working on a cabinet design and CAD handoff platform for a residential cabinetry business. It runs sales, intake and design in its own software, keeps every job in our own **master copy** format, and hands finished designs to Cabinet Vision (through its ORDX import) for engineering and production, then reads the result back and checks it. **This platform does not engineer cabinets.**
+A cabinet design and CAD handoff platform for our own residential cabinetry sales. It runs intake and design, keeps every job in our own **master copy** format, and hands finished designs to the CAD program for engineering. **It does not engineer cabinets.** There is one manufacturing partner ("shop") today; the code must allow more.
 
-It is used only for our own sales, never sold. The manufacturing partner (a "shop") is a Hutterite colony: there is one today, and the code must allow more.
+## Read first, then only what the task needs
+1. **`docs/PROJECT_MAP.md`**: what runs, what is placeholder or parked, where each rule lives, which tests cover it, what is unresolved, and which doc answers what.
+2. The `CLAUDE.md` and `README.md` of the module you are changing.
+3. Only the doc sections your task touches. Search `docs/DECISIONS.md` for your topic; don't read it whole.
 
-The spec's owner amendments (OA-1 to OA-10, at the top of `docs/BUILD_SPEC.md`) add:
-- the visual intake;
-- photorealistic viewing and live pricing;
-- a push gated on client sign-off, confirmed appliances, a site measure and payment;
-- automatic library sync and read-back;
-- a conversation tally;
-- client reminders;
-- automatic ordering.
+When docs disagree, `docs/BUILD_SPEC.md` wins, then the "Decided" list in `docs/DECISIONS.md`. PROPOSED is not authority. Say so when you find a conflict.
 
-Before any work, read:
-- `docs/BUILD_SPEC.md` (the owner's spec; authority);
-- `docs/ARCHITECTURE.md`;
-- `docs/DATA_MODEL.md`;
-- `docs/DECISIONS.md`;
-- `docs/BUILD_PLAN.md`.
-
-For any UI work, also read `docs/ux/UX_BRIEF.md`. For anything touching the adapter, also read `docs/cabinet-vision/FORMAT_REFERENCE.md`.
-
-When docs disagree, `docs/BUILD_SPEC.md` wins. Then the "Decided" list in `docs/DECISIONS.md`. Anything marked PROPOSED is not authority. Say so when you find a conflict.
+**The app runs the designer's placeholder builder** (`src/modules/designer/model/placeholder-draft.ts`); fixes the owner can see go there. The AI layout builder (`src/modules/ai-design/model/engine/`) is parked: don't change it or copy fixes into it unless the owner asks.
 
 ## Hard rules
+1. **Stay in the module you were asked to change.** You may also update `docs/` and its README to record the change. If code elsewhere needs changing, stop and explain.
+2. **Dependencies point inward** (`docs/ARCHITECTURE.md`); modules import each other only through `contract.ts`. Never weaken the boundary checks.
+3. **Only the adapter knows the vendor:** "Cabinet Vision" and "ORDX" appear only in `docs/` and the `cabinet-vision/` folders of `src/adapters/`, `helpers/`, `golden/` and `samples/`. The catalog uses our own IDs.
+4. **The master copy is the single source of truth.** The editor draws only from it; pricing reads the catalog and the master copy, never the CAD program.
+5. **One owner per table** (`docs/DATA_MODEL.md`).
+6. **Data, not code.** Sizes, options, mappings, rules, prices, roles and statuses are data with a recorded source. Never hard-code or invent one.
+7. **Fail closed, fail loudly.** Anything missing, unmapped, out of range or ambiguous blocks the step with a plain reason: no empty `catch`, no silent defaults, no skipped records, no false success. Failures leave an alert until a person resolves it.
+8. **Translation is deterministic:** the writer and reader use no AI, clock or randomness.
+9. **Never guess how the CAD program behaves.** If the samples and format reference don't answer it, add an open question to `docs/DECISIONS.md` and stop. The format reference (`docs/cabinet-vision/FORMAT_REFERENCE.md`) is written in Phase 0 and doesn't exist yet; `DESK_RESEARCH.md` beside it is background, not authority.
+10. **Every translator fix comes with a golden test**, and ships only if the whole golden library passes.
+11. **Units:** lengths are exact integers of 1/64 inch (`src/core/`); convert only at the edges and refuse inexact conversions (millimetre input rounds, keeping the original). Money is integer cents, CAD.
+12. **Never overwrite history.** Versions are kept, a sent version is frozen, every write is audited.
+13. **Permissions:** every screen and action checks `can(user, permission)`; never role names.
+14. **No fake integrations:** a mocked connector says so in code and UI.
+15. **Ask, don't assume:** add uncovered requirements to `docs/DECISIONS.md` as questions.
+16. **Keep unresolved things unresolved:** a PROPOSED choice or an unchecked fix stays marked as one until the owner approves it or it is checked.
 
-1. **Stay inside the module you were asked to change.** Each module has its own `CLAUDE.md`. If a change elsewhere seems necessary, stop and explain what and why instead of doing it.
-2. **Dependencies point inward** (spec P2). Follow the dependency table in `docs/ARCHITECTURE.md`. Modules import each other only through `contract.ts`. The boundary checks enforce this; never disable or weaken them.
-3. **Only the adapter knows the vendor.** The words "Cabinet Vision" and "ORDX" never appear outside `src/adapters/cabinet-vision/`, `helpers/cabinet-vision/`, `golden/cabinet-vision/`, `samples/cabinet-vision/` and `docs/`. The catalog uses our own IDs, never CAD codes.
-4. **The master copy is the single source of truth** (P1). The editor draws only from it (P6). Pricing reads from the catalog and the master copy, never from Cabinet Vision.
-5. **One owner per piece of data.** Only the owning module writes a table (`docs/DATA_MODEL.md`).
-6. **Data, not code** (P3). Size ranges, increments, options, invalid combinations, mappings, design rules, prices, roles, permissions and statuses are data with a recorded source. Never hard-code them, and never make one up.
-7. **Fail closed, fail loudly** (P4). Anything missing, unmapped, out of range or ambiguous blocks the step with a plain-language reason. That means:
-   - no empty `catch`;
-   - no silent defaults (a missing price is never zero; a missing option is never "the usual one");
-   - no skipped records.
+## Checks
+- **While working:** `npm run lint`, `npm run typecheck`, `npm run boundaries`, `npm run vendor-names`, `npm run test` (about 16 s together), plus the one browser test file for a screen you changed (`npx playwright test e2e/<file>.spec.ts`).
+- **Before merging:** `npm run check` on the final code (about 3 min 40 s; it is the only gate, there is no CI). If you change code afterwards, re-run the focused checks for that change, then `npm run check` again.
+- **Docs-only change:** no `npm run check`; check each changed doc and link by hand.
+- **Breaking a check on purpose** (show it fails, then restore it) is for new guardrails: boundary or lint rules, the vendor-name check, golden tests. Not for ordinary new tests.
+- Report what you actually ran. Details and timings: `docs/DEVELOPMENT.md`.
 
-   Failures write an alert that stays until a person resolves it. Never show a success that isn't true.
-8. **Translation is deterministic** (P5). The writer and reader are ordinary code: no AI calls, no clock, no randomness. The same input gives the same bytes. AI drafts designs and writes code; it never translates at runtime and never changes mappings without review.
-9. **Never guess how Cabinet Vision behaves.** If the samples and format reference don't answer it, add an open question to `docs/DECISIONS.md` and stop.
-10. **Every translator fix comes with a golden test case**, and ships only if the whole golden library passes (spec section 8).
-11. **Units.** Every length is an exact integer in the base unit defined in `src/core/`. Convert only at the edges (display and adapters), and refuse inexact conversions. The base unit is 1/64 inch (DECISIONS U-1). The one exception: millimetre input is rounded to the nearest 1/64 inch, keeping the original value (DECISIONS U-2). Money is integer cents, CAD.
-12. **Never overwrite history.** Master copy versions, sent files, returned jobs, quotes and test runs are versioned. A version that has been sent is frozen. Every write goes through the audit log.
-13. **Permissions on everything.** Every screen and action checks `can(user, permission)` from `src/platform/`. Never check role names in code.
-14. **No fake integrations.** Mocked connectors are labelled as mocked in code and UI.
-15. **Ask, don't assume,** when the docs don't cover a requirement. Add the question to `docs/DECISIONS.md`.
+## Docs
+Update docs only when something meaningful changes: behaviour the owner can see, a rule or number, a module's `contract.ts`, or the workflow. Decisions and PROPOSED choices go in `docs/DECISIONS.md`; module behaviour in its README; what runs and where rules or tests live in `docs/PROJECT_MAP.md`. Refactors, test-only changes and small fixes within existing behaviour need none.
 
-## Workflow
+## Branches
+Merging into `main` deploys the live site. Work on a branch from the latest `main` (restart it from `main` if it was already merged), open a pull request, and merge it yourself only after the checks above pass. Never push straight to `main`. Delete the branch after merging. Report the checks run and the pull request link.
 
-- Small, focused changes. One module per session where possible.
-- Run `npm run check` before saying a task is done (once the scaffold exists). There is no CI, so this is the gate before every push. Report what was actually run.
+## Reports
+The owner, Taren, is not a programmer: plain English, short, only the questions that matter.
 
-## Branches, pull requests and merging
-
-- **`main` is the main branch.** It always holds the latest accepted work. Every change ends up there.
-- **Merging into `main` deploys the live site** (Netlify builds from `main`). Run `npm run build` as well as `npm run check` before merging anything that touches the app.
-- Start each piece of work on a new branch made from the latest `main`. You may create branches yourself.
-- When the work is done, run the checks (`npm run check`; for a docs-only change, also check every changed doc and link by hand). Then open a pull request into `main`, and merge it yourself **only if the checks passed**. Never merge on a failing or skipped check, and never push straight to `main`.
-- After merging, delete the work branch. If the branch you were given was already merged, start it again from the latest `main`.
-- In the report, say which checks ran, and give the pull request link.
-- For every new check or rule, break it on purpose, show that it fails, restore it, and say so in the report.
-- Update the module's `README.md` and `docs/DECISIONS.md` when behaviour or decisions change.
-- The owner, Taren, is not a programmer. Write reports and questions in plain English, short, with only the questions that matter.
+`AGENTS.md` (written by Next.js) points to Next.js's own docs; read them when you touch Next.js itself (routing, config, build).

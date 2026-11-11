@@ -16,7 +16,7 @@ Customers, leads, jobs, quotes, payments status, milestones and scheduling. Link
 - Release layer: the job is paid (block; "paid" is open, DECISIONS PAY-1).
 
 ## Rules for AI sessions in this module
-- Only edit files inside this folder unless explicitly told otherwise.
+- Only edit code inside this folder unless explicitly told otherwise. Recording the change in `docs/` and this folder's README is allowed (root `CLAUDE.md`, "Docs").
 - The public API is `contract.ts` only. Changing it is a breaking change: list every consumer and stop for approval first.
 - Business values come from data with a recorded source, never literals in code.
 - Every failure blocks the step and creates an alert. No silent catches, no defaults that hide missing data.

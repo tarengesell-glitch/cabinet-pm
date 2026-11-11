@@ -2,6 +2,8 @@
 
 Add new decisions at the bottom of the right list, with the date. Only the owner (Taren) decides. A PROPOSED item stays open until the owner says yes.
 
+**Finding the current rule without reading the history:** start at `docs/PROJECT_MAP.md` (what runs, where each rule lives, what is unresolved), then search this file for your topic. Entries are dated; on the same topic, the newest entry wins. Older entries are kept as history, not rewritten.
+
 ## Decided
 
 ### 2026-10-27: The Cabinet Vision build spec (`docs/BUILD_SPEC.md` v0.1)
@@ -120,6 +122,13 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 - **Room drawing, round 9 (owner, 2026-11-05): edge scrolling.** While drawing walls or dragging a handle, a cursor within 40 px of the plan's edge scrolls the plan that way, faster nearer the edge, as AutoCAD, SketchUp and Figma do. The wall or drag being made follows the cursor. It stops when the cursor moves back in.
 - Room capture is pulled ahead of Phase 5 (BUILD_PLAN). Order: scaffold (1a), then Core walls and openings, then the Designer drawing screen.
 
+### 2026-11-11: The live builder, and less routine work per change (owner, chat, 2026-11-11)
+- **The app runs the designer's placeholder builder** (`src/modules/designer/model/placeholder-draft.ts`, `data/placeholder-draft.json`). Fixes the owner can see go there.
+- **The AI layout builder is parked** (`src/modules/ai-design/model/engine/`, `data/draft-rules.json`). Nothing in the app runs it. It is kept, not deleted, and not changed unless the owner asks for work on it. **Deferred:** copying the placeholder's latest layout fixes into it (the "Not changed yet" item under round 2 below, and the follow-up task that session suggested). Not to be picked up automatically. Why: the 2026-11-10 fixes were built twice the same day (pull requests #54 and #55), once in code nothing runs.
+- **Less routine per change.** Sessions read `docs/PROJECT_MAP.md` and the module's own notes, then only the doc sections the task needs, instead of the whole doc set. Docs are updated when behaviour, a rule, an interface or the workflow changes, not every time. Quick checks (about 16 s) while working; the full `npm run check` (about 3 min 40 s) on the final code before merging, and again if code changes after it. Breaking a check on purpose is for new guardrails, not every new test. Details in root `CLAUDE.md` and `docs/DEVELOPMENT.md`.
+- Module notes said "only edit files inside this folder", while the root asked for doc updates outside it. Now: code stays in the module; recording the change in `docs/` and the module README is allowed.
+- Root `CLAUDE.md` pointed to `docs/cabinet-vision/FORMAT_REFERENCE.md`, which doesn't exist yet (Phase 0 writes it from real samples). It now says so.
+
 ### 2026-11-10: Fixes after trying a real job, round 2 (owner, chat, 2026-11-10)
 The owner tried the placeholder design on a real kitchen and sent pictures. Decided and built (designer: `data/placeholder-draft.json`, `model/placeholder-draft.ts`, `ui/Stage3D.tsx`, `ui/Customize.tsx`; intake: the room look now carries the island panel choices; studio: tells the placeholder which rooms are bathrooms):
 - **"Widths are custom and made to fit the space."** No more 3" steps with fillers: each space is split into equal cabinets on the catalog's 1/16" step. A filler only where a space is too narrow for a cabinet. A sliver under 1/16" (a run that doesn't land on the step) is left open and the notes say so.
@@ -128,9 +137,9 @@ The owner tried the placeholder design on a real kitchen and sent pictures. Deci
 - **Toe kicks match the colour of that cabinet's doors.**
 - **No counter breaks.** Each stretch of touching base cabinets has one counter at one height (a filler or the dishwasher opening was a different height, which made the breaks).
 - **The island's panels look as chosen** in the design choices: "Matching door panels" draws door panels on the back, lined up with the cabinets in front; shiplap, detailed and waterfall sides likewise.
-- **3D view:** brighter; the camera moves, zooms toward the pointer and turns around a double-clicked point; Open doors no longer repeats (the autosave's re-render was rebuilding the view).
+- **3D view:** brighter; the camera moves, zooms toward the pointer and turns around a double-clicked point; Open doors no longer repeats (the autosave's re-render was rebuilding the view). **Not yet checked on the live site with the real autosave** (tested in code only; see Open questions, PR-57).
 - **Bathrooms use the vanity cabinets**, so Customize offers vanity types there, not the kitchen's. PROPOSED: Vanity, drawer over doors for most (there is no doors-only vanity), the vanity sink, the vanity filler, and 3-drawer vanities for Maximum drawers.
-- **Not changed yet:** the AI layout builder (`src/modules/ai-design/`) already makes widths on the catalog's step, but doesn't yet carry the hood's equal uppers across runs or size the bases to line up with them.
+- **Not changed yet (deferred 2026-11-11: the AI layout builder is parked; see that entry):** the AI layout builder (`src/modules/ai-design/`) already makes widths on the catalog's step, but doesn't yet carry the hood's equal uppers across runs or size the bases to line up with them.
 
 ### 2026-11-10: Fixes after trying a real job (owner, chat, 2026-11-10)
 The owner compared the placeholder AI design with the 3D drawing on a real kitchen and listed seven problems. Decided and built (designer module: `data/placeholder-draft.json`, `model/placeholder-draft.ts`, `model/cabinets.ts`, `ui/Stage3D.tsx`):
@@ -561,6 +570,11 @@ Five confirmed rules are now checked in the design tool (HARD-014, PREF-011, PRE
 - **AD-5 How high uppers start.** No rule sets the space between the counter and the uppers. Today it follows from the client's cabinet height and the upper's standard height (30" or 36"). Is there a minimum, or a usual height?
 - ~~**AD-2 Moved appliances and the client.**~~ Answered 2026-11-09 (owner): "A note on why it moved in the builder and final client approval is enough." The client does not re-confirm a move separately.
 - ~~**AD-3 Supabase access.**~~ Answered 2026-11-09: the platform's database is the Supabase project **cabinet-pm** (`https://btuwrakpnlutemfdxnve.supabase.co`, organization "Gesell/gray", region ca-central-1, Canada), chosen by the owner. The connector reaches it, so database changes are applied from these sessions and reviewed in a pull request. The earlier link (`kpbcqnnsjtdafxvvarfw`) is not used. The Netlify variables must hold this project's URL and publishable key.
+
+### From the owner's second real-job review (pull request #57, 2026-11-10)
+- **PR-57a Open doors and the autosave.** The fix (the 3D view rebuilds only when the room or its look really changes) is tested in code, but no one has checked it on the live site with the real autosave running. Unverified until someone opens a saved job on the live site, waits through a few autosaves, and sees Open doors stay open.
+- **PR-57b The filler beside a hood, up to 1 1/2".** When one side of a hood is a little longer, up to 1 1/2" becomes a filler at that side's far end (`placeholder-draft.json` `fill.flank_filler_max`). PROPOSED by a session; not approved by the owner.
+- **PR-57c Bathroom vanity choices.** Vanity, drawer over doors for most bases; the vanity sink; the vanity filler; 3-drawer vanities for Maximum drawers (`placeholder-draft.json` `cabinets.bath`). PROPOSED by a session; not approved by the owner.
 
 ### From the spec (section 11)
 - **S-1** Which Cabinet Vision versions do target shops run, and does ORDX behave the same across them?

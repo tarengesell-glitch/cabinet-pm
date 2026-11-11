@@ -57,6 +57,11 @@
       "value": "70",
       "status": "proposed",
       "source": "The owner's Kitchen Studio prototype's rough fridge height, as the designer's placeholder uses it (placeholder-draft.json visual.appliances.fridge_height), until the fridge's spec is confirmed (OA-4). Used only to hang the cabinet over the fridge."
+    },
+    "flank_filler_max": {
+      "value": "1 1/2",
+      "status": "proposed",
+      "source": "DECISIONS \"2026-11-10: Fixes after trying a real job, round 2\": the uppers either side of a hood are one width (owner). PROPOSED there (not owner-decided): when one side is a little longer, the difference up to 1 1/2\" is a filler at that side's far end, so each side stays one cabinet. The same number the designer's placeholder uses (placeholder-draft.json fill.flank_filler_max). For the owner to confirm."
     }
   },
   "drawer_levels": {

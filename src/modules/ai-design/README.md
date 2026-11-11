@@ -110,7 +110,7 @@ There are two reasons today: centring the sink under its window (PREF-023), and 
 7. **Uppers.** They:
    - skip windows;
    - over a range or cooktop, follow the designer's choice (owner, 2026-11-09): leave an appliance or millwork hood's space centred over it (HARD-007), with 2" clear each side (owner, 2026-11-10), or centre a short cabinet over it (`cooking_upper` in the data: the short upper with no shelf, owner-confirmed), reporting that the 30" clearance (HARD-008) can't be checked yet;
-   - make the uppers either side of the hood (or of the cabinet over the cooking) the same width (PREF-019): the narrower of the two the option's split would give, or else the widest that leaves both sides fillable; if none works, a warning says so;
+   - make the uppers either side of the hood (or of the cabinet over the cooking) the same width (PREF-019): the narrower of the two the option's split would give, or else the widest that leaves both sides fillable; if none works, a warning says so. This is worked out for the whole wall, so it also works when the range stands in a base-only run of its own between two base + upper runs, as on the real job the owner tried (2026-11-10, DECISIONS "Fixes after trying a real job, round 2"). The base cabinet beside the range is cut so its outer edge lines up with the upper above (only where both parts stay at least the 12" drawer cabinet minimum, HARD-015). When one side is up to 1 1/2" longer, each side stays one upper of the same width and the difference is an upper filler at the longer side's far end (PROPOSED, `clearances.flank_filler_max`, the same as the placeholder);
    - put the cabinet over the fridge centred on it (HARD-006), from 2" above the fridge up to the top line (owner, 2026-11-10). The fridge is taken as the rough 70" until its spec is confirmed (OA-4, PROPOSED in the data), and the draft says so;
    - stop at the fridge panels;
    - can line up with the bases below, or be divided on their own;
@@ -130,7 +130,7 @@ Identical results are merged. Each option has:
 
 Options are ranked by the PROPOSED ladder: fewest blocks, then the client's choices, then the fewest broken preferences of the strongest wording.
 
-The 2026-11-10 numbers (2" each side of a hood, 2" over the fridge, the 26" panel depth, which appliances get panels, the rough fridge height) are in `data/draft-rules.json` "clearances", with their sources. They are the same as the designer's placeholder (`placeholder-draft.json` "clearances").
+The 2026-11-10 numbers (2" each side of a hood, 2" over the fridge, the 26" panel depth, which appliances get panels, the rough fridge height, the PROPOSED 1 1/2" largest filler beside a hood's flank upper) are in `data/draft-rules.json` "clearances", with their sources. They are the same as the designer's placeholder (`placeholder-draft.json` "clearances").
 
 **What it can't do yet, said on every draft it affects:**
 - **Door style and hinge side.** These stay missing until the intake's choices are mapped (owner, 2026-11-09) and CAT-2 is answered.

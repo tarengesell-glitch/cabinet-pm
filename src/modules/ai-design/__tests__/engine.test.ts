@@ -70,6 +70,35 @@ function wallC(sinkAt: number, with_: 'window' | 'fridge' = 'window'): Job {
   return JobSchema.parse({ ...job, rooms: [{ ...room, walls }] });
 }
 
+/**
+ * The example kitchen with only wall C (12') in use, as on the real job the owner tried on
+ * 2026-11-10: a base + upper run from the wall's start to `rangeAt`, a 30" range in a base-only
+ * run of its own, and a base + upper run from the range to `rightEnd`.
+ */
+function rangeInOwnRun(rangeAt: number, rightEnd = 144): Job {
+  const job = kitchenWithIsland();
+  const room = job.rooms[0]!;
+  const measured = (v: Length) => ({ value: v, provenance: 'unmeasured' as const, source_mm: null });
+  const id = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
+  const walls = room.walls
+    .filter((w) => w.kind === 'room')
+    .map((w, i) =>
+      i === 2
+        ? {
+            ...w,
+            openings: [],
+            runs: [
+              { run_id: id(891), kind: 'base_upper' as const, offset: 0, length: inch(rangeAt), depth: inch(24) },
+              { run_id: id(892), kind: 'base' as const, offset: inch(rangeAt), length: inch(30), depth: inch(24) },
+              { run_id: id(893), kind: 'base_upper' as const, offset: inch(rangeAt + 30), length: inch(rightEnd - rangeAt - 30), depth: inch(24) },
+            ],
+            appliances: [{ placement_id: id(894), kind: 'range', offset: inch(rangeAt), width: measured(inch(30)), paired_with: null }],
+          }
+        : { ...w, runs: [], appliances: [] },
+    );
+  return JobSchema.parse({ ...job, rooms: [{ ...room, walls }] });
+}
+
 describe('the layout builder', () => {
   it('gives the same options, in the same order, every time (P5)', () => {
     expect(JSON.stringify(drafted())).toBe(JSON.stringify(drafted()));
@@ -218,6 +247,47 @@ describe('the layout builder', () => {
         expect(left.width).toBe(right.width);
         expect(o.scorecard.find((l) => l.ruleId === 'PREF-019')?.result).toBe('met');
       }
+    }
+  });
+
+  it('pairs the uppers either side of a range standing in a run of its own, and lines the bases up with them (owner, 2026-11-10)', () => {
+    for (const rangeAt of [56.5, 50, 60]) {
+      for (const o of drafted(input(rangeInOwnRun(rangeAt))).options) {
+        const wall = o.room.walls[2]!;
+        const range = wall.appliances.find((a) => a.kind === 'range')!;
+        const onWall = o.room.items.filter((i) => i.position.wall_id === wall.wall_id && code.get(i.catalog_item_id) !== 'wall_filler' && code.get(i.catalog_item_id) !== 'base_filler');
+        const uppers = onWall.filter((i) => i.position.elevation > 0);
+        const bases = onWall.filter((i) => i.position.elevation === 0);
+        const left = uppers.filter((u) => end(u) <= range.offset).sort((x, y) => end(y) - end(x))[0]!;
+        const right = uppers.filter((u) => u.position.offset >= range.offset + range.width.value).sort((x, y) => x.position.offset - y.position.offset)[0]!;
+        // The hood's 2" clear space each side, and the same width either side (PREF-019).
+        expect(range.offset - end(left)).toBeGreaterThanOrEqual(inch(2));
+        expect(right.position.offset - (range.offset + range.width.value)).toBeGreaterThanOrEqual(inch(2));
+        expect(left.width).toBe(right.width);
+        // The base beside the range reaches out to the flank upper's outer edge.
+        const baseLeft = bases.find((b) => end(b) === range.offset)!;
+        const baseRight = bases.find((b) => b.position.offset === range.offset + range.width.value)!;
+        expect(baseLeft.position.offset).toBe(left.position.offset);
+        expect(end(baseRight)).toBe(end(right));
+        expect(o.scorecard.find((l) => l.ruleId === 'PREF-019')?.result).toBe('met');
+        expect(o.issues.some((i) => i.message.includes("can't be made the same width"))).toBe(false);
+      }
+    }
+  });
+
+  it('keeps one upper each side of the hood with a small filler at the longer side\'s far end (PROPOSED, 2026-11-10)', () => {
+    // Left of the range: 35 1/4" for uppers; right: 34 1/4". One 34 1/4" upper each side and a 1" filler against the wall.
+    const { options, proposed } = drafted(input(rangeInOwnRun(41, 108.75)));
+    expect(proposed.some((p) => p.includes('1 1/2" at the far end of the longer side beside a hood'))).toBe(true);
+    for (const o of options) {
+      const wall = o.room.walls[2]!;
+      const uppers = o.room.items.filter((i) => i.position.wall_id === wall.wall_id && i.position.elevation > 0).sort((x, y) => x.position.offset - y.position.offset);
+      const plain = uppers.filter((u) => code.get(u.catalog_item_id) !== 'wall_filler');
+      expect(plain.map((u) => u.width)).toEqual([inch(34.25), inch(34.25)]);
+      expect(uppers.filter((u) => code.get(u.catalog_item_id) === 'wall_filler').map((u) => [u.position.offset, u.width])).toEqual([
+        [inch(2.25), inch(0.75)],
+        [inch(3), inch(1)],
+      ]);
     }
   });
 

@@ -60,7 +60,8 @@ The app's design studio (`/studio`) shows this screen as its first step (DECISIO
 - `startIntake(def, roomId)` and the `IntakeState` type.
 - `roughCeiling(def, state, roomId)`: the room's rough ceiling height as an exact length, for the room drawing to start from (IK-17). "Match the kitchen" follows the kitchen; no answer is refused with the reason.
 - `loadIntakeState(job?)`: the answers kept in this browser, for the studio. Each demo client's job keeps its own; without a job, the preview job's.
-- `roomLook(def, state, roomId)` and `roomSummary(def, state, roomId)`: a room's look (colours, door style, hardware) and its answers in words, for the customize screens.
+- `roomDesignInputs(def, state, roomId)`: a room's design choices as the other studio steps use them, read from the answers each time (nothing else is saved): `roomKind` ("bath" for the room types grouped as bathrooms, otherwise "kitchen"), `drawerLevel`, `cornerInsert`, `garbage`, `cabinetTop` (the rough cabinet height) and `look` (colours, door style, hardware, the island's back and side panels). An unanswered choice stays null (the garbage pull-out "none"). Null when the room isn't in the design choices. **A new design choice that the room drawing, the design step or the 3D view needs is added here** (`model/design-inputs.ts`), not read from the answers elsewhere. Tested against what the studio read before (`__tests__/design-inputs.test.ts`).
+- `roomSummary(def, state, roomId)`: a room's answers in words, for the customize screens.
 - `intakeHandover(def, state)`: one record per room, with its `room_type`, `name`, `complete`, `design_from` and `answers`. Each answer carries the option ID and its label as the client saw it, or a count, the picked IDs and labels, typed text, or a length in the base unit. Only questions that apply are included. An unanswered question is left out, never filled in.
 
 ## Not yet

@@ -1,6 +1,6 @@
 # Project map
 
-What actually runs, where each rule lives, which tests cover it, and what is still open. Read this before anything else in `docs/`. Keep it current: update it when what runs, where a rule lives or where a test lives changes. Last checked 2026-11-11 (after PR #57).
+What actually runs, where each rule lives, which tests cover it, and what is still open. Read this before anything else in `docs/`. Keep it current: update it when what runs, where a rule lives or where a test lives changes. Last checked 2026-11-11 (after PRs #57 and #59).
 
 ## The live path: a saved job to the 3D view
 1. **Saved job:** the shared database (Supabase, `src/app/sync/`) or a test-job file (`src/app/studio/test-data.ts`, the studio's "Test data" menu). Each room's master copy is kept by `src/modules/designer/ui/placeholder-store.ts`.
@@ -60,7 +60,7 @@ Timings (measured 2026-11-10, one run in a cloud session): lint 3.9 s, typecheck
 - **The filler beside a hood, up to 1 1/2"** (`placeholder-draft.json` `fill.flank_filler_max`, PR-57b): PROPOSED by a session, not approved by the owner.
 - **Bathroom vanity choices** (`placeholder-draft.json` `cabinets.bath`, PR-57c): PROPOSED by a session, not approved by the owner.
 - **The fridge panel as the Tall filler** (AD-6) and **the fridge's rough 70" height** (OA-4): PROPOSED.
-- **Copying the latest layout fixes into the parked AI layout builder:** deferred (DECISIONS 2026-11-11). Not to be picked up unless the owner asks.
+- **Copying layout fixes into the parked AI layout builder:** deferred (DECISIONS 2026-11-11). Not to be picked up unless the owner asks. (Pull request #59 had already copied the round-2 hood fixes in, including the PROPOSED 1 1/2" filler as `draft-rules.json` `clearances.flank_filler_max`.)
 - Every other open question: `docs/DECISIONS.md` "Open questions".
 
 ## Which doc answers what

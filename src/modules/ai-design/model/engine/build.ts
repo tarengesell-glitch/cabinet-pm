@@ -183,15 +183,23 @@ export function buildOption(input: BuildInput, choices: OptionChoices): BuiltRoo
     const inside = insideSpan(room, wall);
     const { before, after } = neighbours(room, wall);
 
-    for (const run of [...wall.runs].sort((x, y) => x.offset - y.offset)) {
-      const seg: Span = { start: Math.max(run.offset, inside.start), end: Math.min(runEnd(run), inside.end) };
-      if (len(seg) <= 0) continue;
-      const runRef = { kind: 'run' as const, id: run.run_id };
-      const touching = (at: Length, upper: boolean) =>
-        wall.runs.some((o) => o !== run && (o.offset === at || runEnd(o) === at) && (upper ? hasUpper(o.kind) || o.kind === 'pantry' : hasBase(o.kind)));
-      const atWall = (at: Length, low: boolean) => wall.kind === 'room' && (low ? at <= inside.start && before !== null : at >= inside.end && after !== null);
+    const runs = [...wall.runs].sort((x, y) => x.offset - y.offset);
+    const atWall = (at: Length, low: boolean) => wall.kind === 'room' && (low ? at <= inside.start && before !== null : at >= inside.end && after !== null);
+    const context = (run: Run) => ({
+      seg: { start: Math.max(run.offset, inside.start), end: Math.min(runEnd(run), inside.end) } as Span,
+      runRef: { kind: 'run' as const, id: run.run_id },
+      touching: (at: Length, upper: boolean) =>
+        wall.runs.some((o) => o !== run && (o.offset === at || runEnd(o) === at) && (upper ? hasUpper(o.kind) || o.kind === 'pantry' : hasBase(o.kind))),
+    });
+    /** Base stretches left to divide once the uppers are planned, so the bases can line up with the uppers beside a hood (owner, 2026-11-10). */
+    const baseFills: { run: Run; pantryRun: boolean; free: Span[]; openEdges: Length[]; gaps: Span[] }[] = [];
+    /** Each run's upper stretches, planned before any is filled, so the uppers either side of a hood pair up across runs. */
+    const upperFills: { run: Run; trimmed: { raw: Span; free: Span }[]; elevation: Length; height: Length; openEdges: Length[] }[] = [];
 
-      // ---- The base layer (or the talls of an all-pantry run) ----------------------------------
+    // ---- The base layer (or the talls of an all-pantry run), every run on the wall --------------
+    for (const run of runs) {
+      const { seg, runRef, touching } = context(run);
+      if (len(seg) <= 0) continue;
       if (hasBase(run.kind)) {
         const pantryRun = run.kind === 'pantry';
         if (run.kind === 'base_upper_pantry') problem('warn', runRef, 'Where the pantry goes in a "base, upper + pantry" run isn\'t decided yet, so it is drafted as base + upper.');
@@ -376,20 +384,34 @@ export function buildOption(input: BuildInput, choices: OptionChoices): BuiltRoo
           }
         }
 
-        // The rest of the run is divided into cabinets.
+        // The rest of the run is divided into cabinets once the uppers are planned (below).
         const taken = [...fixed.filter((f) => f.layer !== 'upper').map((f) => ({ start: f.start, end: f.start + f.width })), ...gaps].sort((x, y) => x.start - y.start);
-        for (const free of subtract({ start: lo, end: hi }, taken)) {
-          fillBase(free, pantryRun, wall, run, choices.split, input, add, problem);
-        }
+        baseFills.push({ run, pantryRun, free: subtract({ start: lo, end: hi }, taken), openEdges, gaps });
         // An island's back is covered by a finished back panel, as long as the run (owner, 2026-11-10).
         if (wall.kind === 'floating' && !pantryRun) {
           const bp = config.items.islandBackPanel;
           add({ wallId: wall.wall_id, runId: run.run_id, layer: 'base', role: 'island_back', start: seg.start, width: len(seg), item: bp, depth: standard(bp, 'depth'), elevation: 0, height: standard(bp, 'height'), back: true });
         }
-        markOpenEnds(slots, wall.wall_id, run.run_id, ['base', 'tall'], openEdges, gaps);
       }
+    }
 
-      // ---- The upper layer ---------------------------------------------------------------------
+    // Over a range or cooktop goes what the designer chose (owner, 2026-11-09): an appliance or
+    // millwork hood, whose space is left open exactly the appliance's width so it is centred
+    // (HARD-007), or a cabinet centred on it. A placement from before the choice has a hood.
+    // Worked out for the whole wall, whichever run the range or cooktop stands in: a range in a
+    // base-only run of its own still gets its clear space and its equal uppers (owner, 2026-11-10).
+    const cookers = wall.appliances.map(cur).filter((a) => kindInfo(a.kind)?.comesWithHood);
+    const overOf = (a: (typeof cookers)[number]) => a.above ?? 'appliance_hood';
+    // An appliance or millwork hood has clear space each side; a cabinet over the cooking has none (owner, 2026-11-10).
+    const focalOf = (a: (typeof cookers)[number]): Span => (overOf(a) === 'cabinet' ? { start: a.offset, end: applianceEnd(a) } : { start: a.offset - cl.hoodSide, end: applianceEnd(a) + cl.hoodSide });
+    const hoods = cookers.filter((a) => overOf(a) !== 'cabinet').map(focalOf);
+    const focals = cookers.map(focalOf);
+    if (upperTop !== null && runs.some((r) => hasUpper(r.kind))) upperFocal.push(...focals.map((span) => ({ wallId: wall.wall_id, span })));
+
+    // ---- The upper layer, planned for every run on the wall --------------------------------------
+    for (const run of runs) {
+      const { seg, touching } = context(run);
+      if (len(seg) <= 0) continue;
       if (hasUpper(run.kind) && upperTop !== null) {
         const top = upperTop;
         const uh = standard(upperItem, 'height');
@@ -397,20 +419,10 @@ export function buildOption(input: BuildInput, choices: OptionChoices): BuiltRoo
           run.kind === 'upper'
             ? subtract(seg, windowSpans(wall))
             : upperPieces({ ...wall, appliances: wall.appliances.map(cur) }, run, { minRun: layout.minRunLength, ownUpperKinds }).map((p) => ({ start: Math.max(p.start, seg.start), end: Math.min(p.end, seg.end) }));
-        // Over a range or cooktop goes what the designer chose (owner, 2026-11-09): an appliance or
-        // millwork hood, whose space is left open exactly the appliance's width so it is centred
-        // (HARD-007), or a cabinet centred on it. A placement from before the choice has a hood.
-        const cookers = wall.appliances.map(cur).filter((a) => kindInfo(a.kind)?.comesWithHood);
-        const overOf = (a: (typeof cookers)[number]) => a.above ?? 'appliance_hood';
-        // An appliance or millwork hood has clear space each side; a cabinet over the cooking has none (owner, 2026-11-10).
-        const focalOf = (a: (typeof cookers)[number]): Span => (overOf(a) === 'cabinet' ? { start: a.offset, end: applianceEnd(a) } : { start: a.offset - cl.hoodSide, end: applianceEnd(a) + cl.hoodSide });
-        const hoods = cookers.filter((a) => overOf(a) !== 'cabinet').map(focalOf);
         const endCorner = corners.find((c) => c.upper && c.endingWallId === wall.wall_id && runAtEnd(room, wall) === run);
         const startCorner = corners.find((c) => c.upper && c.startingWallId === wall.wall_id && runAtStart(room, wall) === run);
         const uc = config.items.upperCorner;
-        const cuts: Span[] = cookers.map(focalOf);
-        const focals = cookers.filter((a) => overlap({ start: a.offset, end: applianceEnd(a) }, seg)).map(focalOf);
-        upperFocal.push(...focals.map((span) => ({ wallId: wall.wall_id, span })));
+        const cuts: Span[] = [...focals];
         const openEdges: Length[] = [];
         /** Edges where an upper meets another cabinet (the upper corner, the cabinet over the fridge, a fridge panel): no end allowance. */
         const closedEdges = new Set<Length>();
@@ -490,25 +502,39 @@ export function buildOption(input: BuildInput, choices: OptionChoices): BuiltRoo
           }
           trimmed.push({ raw: piece, free: { start: lo, end: hi } });
         }
-        // The uppers either side of a hood, or of the cabinet over the cooking, are the same width (PREF-019, HARD-007).
-        const flankLow = new Map<number, Length>();
-        const flankHigh = new Map<number, Length>();
-        const limits = upperLimits(upperItem, input);
-        for (const f of focals) {
-          const i = trimmed.findIndex((t) => t.raw.end === f.start);
-          const j = trimmed.findIndex((t) => t.raw.start === f.end);
-          if (i < 0 || j < 0 || limits === null) continue;
-          const w = equalFlank(len(trimmed[i]!.free), len(trimmed[j]!.free), limits, choices.split, input);
-          if (w === null) {
-            problem('warn', runRef, `The uppers either side of the space over the cooking at ${formatInches(f.start)}–${formatInches(f.end)} can't be made the same width (PREF-019).`);
-            continue;
-          }
-          flankHigh.set(i, w);
-          flankLow.set(j, w);
-        }
-        trimmed.forEach((t, k) => fillUpper(t.free, wall, run, upperItem, top - uh, uh, choices, input, slots, add, problem, { low: flankLow.get(k) ?? 0, high: flankHigh.get(k) ?? 0 }));
-        markOpenEnds(slots, wall.wall_id, run.run_id, ['upper'], openEdges, hoods);
+        upperFills.push({ run, trimmed, elevation: top - uh, height: uh, openEdges });
       }
+    }
+
+    // The uppers either side of a hood, or of the cabinet over the cooking, are the same width
+    // (PREF-019, HARD-007), even when they stand on the runs either side of the range's own run;
+    // the base cabinets below are cut to line up with them (owner, 2026-11-10).
+    const flankLow = new Map<object, Length>();
+    const flankHigh = new Map<object, Length>();
+    const lineUp: Length[] = [];
+    const limits = upperLimits(upperItem, input);
+    const allTrimmed = upperFills.flatMap((u) => u.trimmed.map((t) => ({ t, run: u.run })));
+    for (const f of focals) {
+      const lo = allTrimmed.find((x) => x.t.raw.end === f.start);
+      const hi = allTrimmed.find((x) => x.t.raw.start === f.end);
+      if (!lo || !hi || limits === null) continue;
+      const w = equalFlank(len(lo.t.free), len(hi.t.free), limits, choices.split, input);
+      if (w === null) {
+        problem('warn', { kind: 'run', id: lo.run.run_id }, `The uppers either side of the space over the cooking at ${formatInches(f.start)}–${formatInches(f.end)} can't be made the same width (PREF-019).`);
+        continue;
+      }
+      flankHigh.set(lo.t, w);
+      flankLow.set(hi.t, w);
+      lineUp.push(lo.t.free.end - w, hi.t.free.start + w);
+    }
+
+    for (const b of baseFills) {
+      for (const free of b.free) for (const part of splitAt(free, b.pantryRun ? [] : lineUp, config.numbers.minDrawerCabinet)) fillBase(part, b.pantryRun, wall, b.run, choices.split, input, add, problem);
+      markOpenEnds(slots, wall.wall_id, b.run.run_id, ['base', 'tall'], b.openEdges, b.gaps);
+    }
+    for (const u of upperFills) {
+      for (const t of u.trimmed) fillUpper(t.free, wall, u.run, upperItem, u.elevation, u.height, choices, input, slots, add, problem, { low: flankLow.get(t) ?? 0, high: flankHigh.get(t) ?? 0 });
+      markOpenEnds(slots, wall.wall_id, u.run.run_id, ['upper'], u.openEdges, hoods);
     }
   }
 
@@ -672,6 +698,14 @@ function fillUpper(
   if ((flank.low > 0 || flank.high > 0) && flank.low + flank.high <= total) {
     if (flank.low > 0) add({ wallId: wall.wall_id, runId: run.run_id, layer: 'upper', role: 'divided', start: free.start, width: flank.low, item, depth: standard(item, 'depth'), elevation, height });
     if (flank.high > 0) add({ wallId: wall.wall_id, runId: run.run_id, layer: 'upper', role: 'divided', start: free.end - flank.high, width: flank.high, item, depth: standard(item, 'depth'), elevation, height });
+    // A side a little longer than the other keeps its one cabinet, with a filler at its far end (PROPOSED, 2026-11-10).
+    const rest = total - flank.low - flank.high;
+    const wf = input.config.items.wallFiller;
+    if (rest > 0 && rest < limits.min && rest <= input.config.clearances.flankFillerMax && rest % limits.step === 0) {
+      const wfH = standard(wf, 'height');
+      add({ wallId: wall.wall_id, runId: run.run_id, layer: 'upper', role: 'filler', start: free.start + flank.low, width: rest, item: wf, depth: standard(wf, 'depth'), elevation: elevation + height - wfH, height: wfH });
+      return;
+    }
     fillUpper({ start: free.start + flank.low, end: free.end - flank.high }, wall, run, item, elevation, height, choices, input, slots, add, problem);
     return;
   }
@@ -715,16 +749,37 @@ function upperLimits(item: CatalogItem, input: BuildInput): WidthLimits | null {
 
 /**
  * One width for the uppers either side of a hood (PREF-019): the narrower of the two the option's
- * own split would put there, or else the widest that leaves both sides fillable. Null when none does.
+ * own split would put there, or else the widest that leaves both sides fillable. A side's rest is
+ * fillable when it is nothing, a stretch that divides into uppers, or a filler no wider than the
+ * data's flank filler (PROPOSED, 2026-11-10) at that side's far end; when the sides differ by no
+ * more than that, each side is one cabinet first. Null when no width does.
  */
 function equalFlank(a: Length, b: Length, limits: WidthLimits, strategy: SplitStrategy, input: BuildInput): Length | null {
   const onStep = (t: Length) => t - (t % limits.step);
-  const fillable = (t: Length) => onStep(t) === 0 || (onStep(t) >= limits.min && firstSplit(onStep(t), strategy, limits, input) !== null);
+  const fillable = (t: Length) => onStep(t) === 0 || onStep(t) <= input.config.clearances.flankFillerMax || (onStep(t) >= limits.min && firstSplit(onStep(t), strategy, limits, input) !== null);
   const natA = firstSplit(onStep(a), strategy, limits, input)?.at(-1);
   const natB = firstSplit(onStep(b), strategy, limits, input)?.[0];
-  const candidates: Length[] = natA !== undefined && natB !== undefined ? [Math.min(natA, natB)] : [];
+  const candidates: Length[] = [];
+  // A side a little longer than the other (up to the flank filler) stays one cabinet, the same width as the other side's.
+  const diff = Math.abs(onStep(a) - onStep(b));
+  if (diff > 0 && diff <= input.config.clearances.flankFillerMax) candidates.push(onStep(Math.min(a, b)));
+  if (natA !== undefined && natB !== undefined) candidates.push(Math.min(natA, natB));
   for (let w = onStep(Math.min(a, b, limits.max)); w >= limits.min; w -= limits.step) candidates.push(w);
   return candidates.find((w) => w >= limits.min && w <= limits.max && w % limits.step === 0 && w <= a && w <= b && fillable(a - w) && fillable(b - w)) ?? null;
+}
+
+/** A stretch cut where the uppers beside a hood end, so the bases below line up with them; every part stays at least `minPart`. */
+function splitAt(gap: Span, points: readonly Length[], minPart: Length): Span[] {
+  const out: Span[] = [];
+  let at = gap.start;
+  for (const p of [...new Set(points)].sort((x, y) => x - y)) {
+    if (p - at >= minPart && gap.end - p >= minPart) {
+      out.push({ start: at, end: p });
+      at = p;
+    }
+  }
+  out.push({ start: at, end: gap.end });
+  return out;
 }
 
 /** Ends at an open run end, or beside an appliance space, have nothing beside them (CB-FACT-10). */

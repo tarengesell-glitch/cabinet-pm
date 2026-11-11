@@ -1,10 +1,18 @@
 # Decisions
 
-Add new decisions at the bottom of the right list, with the date. Only the owner (Taren) decides. A PROPOSED item stays open until the owner says yes.
+The history of decisions and the evidence of the owner's approval. Only the owner (Taren) decides. A PROPOSED item stays open until the owner says yes.
 
-**Finding the current rule without reading the history:** start at `docs/PROJECT_MAP.md` (what runs, where each rule lives, what is unresolved), then search this file for your topic. Entries are dated. On a topic, the latest **explicitly approved** decision that applies governs. A PROPOSED choice or an open question never overrides an approved rule, however recent. If it's unclear which decision applies, or whether it was approved, flag it (an open question, and say so in your report) rather than guess. Older entries are kept as history, not rewritten.
+**Today's rules are in `docs/REQUIREMENTS.md`**, by topic, each pointing back to its entry here; which rule wins is set out there ("How to read this"). Search this file only for an entry those requirements cite, or to add one.
+
+**Adding a decision:** add a dated entry at the top of "Decided" (newest first), or a question under "Open questions", and update its line in `docs/REQUIREMENTS.md` in the same pull request. Older entries are kept as history, not rewritten; when an answer or replacement arrives, strike the old line through and point to the new entry.
 
 ## Decided
+
+### 2026-11-11: How current requirements are read, and working across modules (owner, chat, 2026-11-11)
+- **Current requirements are kept apart from the history.** `docs/REQUIREMENTS.md` lists today's requirements by topic, each with its approval status and its build status kept separate, and points back to its evidence here. This file stays the history and the approval evidence. Approval is never inferred from code.
+- **"BUILD_SPEC always wins" is resolved:** an explicitly approved owner decision that changes a requirement replaces it, including the spec's own text; the spec is not edited, and the replaced parts are listed in `docs/REQUIREMENTS.md`. The spec still wins over the documents derived from it, PROPOSED choices and code. No approved product requirement was changed by this.
+- **Working across modules:** a change may touch every module the requested behaviour needs, through contracts and within the dependency table. Crossing a folder boundary alone needs no approval. Changes to business requirements, the dependency policy, or destructive data handling still need a decision. Routine engineering choices are the session's; business decisions are the owner's or the shop's (root `CLAUDE.md`). This replaces "stay in the module you were asked to change" (2026-11-11 "The live builder, and less routine work per change") and the module notes' "stop for approval" before a contract change.
+- **Open doors and the autosave (PR-57a): owner-confirmed.** The owner reports that Open doors no longer restarts in their own use of the live app. This is the owner's check on the live site, not an automated test with the real autosave.
 
 ### 2026-10-27: The Cabinet Vision build spec (`docs/BUILD_SPEC.md` v0.1)
 - The platform does sales, intake and design: room capture, selections, an AI first draft, and a visual editor. Cabinet Vision engineers the job and makes the production files. This replaces the 2026-10-24 plan, where Mozaik was the design tool.
@@ -124,7 +132,7 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 
 ### 2026-11-11: Cabinet ends saved on each cabinet (owner: "one authoritative finished-end decision, shared by the saved design and the rendering")
 - **Built (designer):** the decided ends rule (2026-11-07 "The cabinet catalog", CB-FACT-10, and round 2 2026-11-10) is worked out once, in `src/modules/designer/model/ends.ts`, from data in `data/placeholder-draft.json` "ends", and saved on each cabinet as the catalog's `end_left` / `end_right`. The 3D view draws only what is saved, and the counter overhangs only past a saved finished end (HARD-011). Before, the 3D view worked ends out while drawing and the saved design had none. On the real kitchen the 3D view is unchanged (every shape compared before and after).
-- **After a layout change** an end is worked out again when its saved value equals what the rule gave before the change; an end that differs is kept. Corrected 2026-11-11: this does not protect every person's choice. TToday every saved end comes from the rule (no screen sets one). Requirements for manual end editing: END-4. **Older designs** aren't changed on opening: Customize lists cabinets with no saved ends and sets them only when someone asks; ends that differ from the layout (for example after the room drawing changed) are listed the same way.
+- **After a layout change** an end is worked out again when its saved value equals what the rule gave before the change; an end that differs is kept. Corrected 2026-11-11: this does not protect every person's choice. Today every saved end comes from the rule (no screen sets one). Requirements for manual end editing: END-4. **Older designs** aren't changed on opening: Customize lists cabinets with no saved ends and sets them only when someone asks; ends that differ from the layout (for example after the room drawing changed) are listed the same way.
 - A Finished end (by request) is drawn like an applied one: the 3D view is a visual approximation.
 - **Not decided, so not set or PROPOSED:** END-1 (which side is left), END-2 (corner cabinets' ends), END-3 (an island's waterfall or detailed sides). See Open questions.
 
@@ -143,7 +151,7 @@ The owner tried the placeholder design on a real kitchen and sent pictures. Deci
 - **Toe kicks match the colour of that cabinet's doors.**
 - **No counter breaks.** Each stretch of touching base cabinets has one counter at one height (a filler or the dishwasher opening was a different height, which made the breaks).
 - **The island's panels look as chosen** in the design choices: "Matching door panels" draws door panels on the back, lined up with the cabinets in front; shiplap, detailed and waterfall sides likewise.
-- **3D view:** brighter; the camera moves, zooms toward the pointer and turns around a double-clicked point; Open doors no longer repeats (the autosave's re-render was rebuilding the view). **Not yet checked on the live site with the real autosave** (tested in code only; see Open questions, PR-57).
+- **3D view:** brighter; the camera moves, zooms toward the pointer and turns around a double-clicked point; Open doors no longer repeats (the autosave's re-render was rebuilding the view). **Not yet checked on the live site with the real autosave** (tested in code only; see Open questions, PR-57). *Owner-confirmed on the live app 2026-11-11 (PR-57a).*
 - **Bathrooms use the vanity cabinets**, so Customize offers vanity types there, not the kitchen's. PROPOSED: Vanity, drawer over doors for most (there is no doors-only vanity), the vanity sink, the vanity filler, and 3-drawer vanities for Maximum drawers.
 - **The AI layout builder takes this on too** (`src/modules/ai-design/model/engine/build.ts`, 2026-11-11; nothing runs it yet): the hood's clear space and equal uppers are worked out for the whole wall, so a range in a base-only run of its own between two base + upper runs gets them, and the base beside the range is cut to line up with the upper above. The PROPOSED 1 1/2" filler at the longer side's far end is in its `data/draft-rules.json` "clearances.flank_filler_max", PROPOSED as here. It already made widths on the catalog's step.
   (Pull request #59 copied this into the parked builder on 2026-11-11, before the 2026-11-11 parking decision was merged. Any further copying is deferred; see that entry.)
@@ -223,7 +231,7 @@ The owner tried the studio on a real job and asked for seven changes. The answer
   - a toilet, tub or shower stands on the floor: no run is made under it, and the "appliances on runs" check leaves it out;
   - **PROPOSED:** other room types use the kitchen's tray until the owner says otherwise.
 
- (owner asked to add a real client)
+### 2026-11-09: Real clients live only in the database (owner asked to add a real client)
 - **The repository is public on GitHub, and the site's code reaches every visitor's browser.** So real client details (names, emails, phones, addresses) are **never** written in code, commits, pull requests or docs. That includes the demo-client file. They live only in the shared database (`customers`, owned by projects), where only signed-in staff can read them.
 - **The table:** `customers` (`supabase/migrations/20261109000004_customers.sql`).
   - Staff can read, add and change clients. No one can delete one.
@@ -589,7 +597,7 @@ Five confirmed rules are now checked in the design tool (HARD-014, PREF-011, PRE
 - **END-3 An island's waterfall or detailed sides.** Where an island's end is open, the cabinet is saved with an Applied finished end, and the 3D view draws the island side as chosen in the design choices (waterfall stone, or a detailed panel over the end). Is a waterfall or detailed side the same shop part as the Applied finished end, or another part with the cabinet's end Unfinished behind it?
 
 ### From the owner's second real-job review (pull request #57, 2026-11-10)
-- **PR-57a Open doors and the autosave.** The fix (the 3D view rebuilds only when the room or its look really changes) is tested in code, but no one has checked it on the live site with the real autosave running. Unverified until someone opens a saved job on the live site, waits through a few autosaves, and sees Open doors stay open.
+- ~~**PR-57a Open doors and the autosave.**~~ Owner-confirmed 2026-11-11: in the owner's own use of the live app, Open doors no longer restarts (the owner's check, not an automated autosave test). The question was: the fix (the 3D view rebuilds only when the room or its look really changes) is tested in code, but no one has checked it on the live site with the real autosave running. Unverified until someone opens a saved job on the live site, waits through a few autosaves, and sees Open doors stay open.
 - **PR-57b The filler beside a hood, up to 1 1/2".** When one side of a hood is a little longer, up to 1 1/2" becomes a filler at that side's far end (`placeholder-draft.json` `fill.flank_filler_max`). PROPOSED by a session; not approved by the owner.
 - **PR-57c Bathroom vanity choices.** Vanity, drawer over doors for most bases; the vanity sink; the vanity filler; 3-drawer vanities for Maximum drawers (`placeholder-draft.json` `cabinets.bath`). PROPOSED by a session; not approved by the owner.
 

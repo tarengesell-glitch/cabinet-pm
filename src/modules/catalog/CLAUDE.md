@@ -18,9 +18,4 @@ Our own list of what can be designed: item types, allowed size ranges and increm
 - Buildability checks (block): item exists for the shop, sizes in range and on increment, required selections present, no invalid option combinations.
 
 ## Rules for AI sessions in this module
-- Only edit code inside this folder unless explicitly told otherwise. Recording the change in `docs/` and this folder's README is allowed (root `CLAUDE.md`, "Docs").
-- The public API is `contract.ts` only. Changing it is a breaking change: list every consumer and stop for approval first.
-- Business values come from data with a recorded source, never literals in code.
-- Every failure blocks the step and creates an alert. No silent catches, no defaults that hide missing data.
-- Never name a CAD vendor outside its adapter folder.
-- Tests live in `__tests__/` inside this folder.
+The root `CLAUDE.md` applies in full, including "Working across modules": change other modules when the requested behaviour needs it, through their contracts and within the dependency table. Tests live in `__tests__/` inside this folder.

@@ -6,7 +6,9 @@
 - Playwright needs a Chromium. Install it once with `npx playwright install chromium`, or set `PLAYWRIGHT_CHROMIUM_PATH` to an existing Chromium binary.
 
 ## Trying the app
-`npm run dev`, then open http://localhost:3000/rooms/preview for the room drawing preview. See `src/modules/designer/README.md` for what it does.
+`npm run dev`, then open http://localhost:3000 (Today), http://localhost:3000/studio (the design studio), http://localhost:3000/intake or http://localhost:3000/rooms/preview (the standalone previews).
+
+**Where work is kept.** The live site saves the studio's work to the shared database (Supabase, `src/app/sync/README.md`) for signed-in staff. A build without `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` (for example a developer's machine or the automated tests) keeps work in the browser only and says so on screen, with a labelled preview user. The standalone `/intake` and `/rooms/preview` pages are browser-only everywhere. Saving and sync rules are tested with the store's MOCKED in-memory database (`src/app/sync/__tests__/job-sync.test.ts`). Whether a session can also reach the live database depends on its environment: on 2026-11-09 the app's live connection couldn't be reached from a Claude cloud session (network policy), while the Supabase connector could. If yours can't, the owner checks the fix on the live site.
 
 Stop `npm run dev` (Control + C) before `npm run check`: Next.js allows only one dev server per project folder, and the browser tests start their own.
 
@@ -38,9 +40,7 @@ Measured 2026-11-10 in a cloud session, one run each:
 | `test:static` | 7.9 s | with `build` | yes |
 | `test:e2e` (63 browser tests) | 185.5 s | only the file for the screen you changed: `npx playwright test e2e/studio.spec.ts` (studio, about 1 min alone); `room-drawing`, `rough-layout`, `intake`, `office` likewise | yes |
 
-`npm run check` runs all of them in order (about 3 min 40 s). Run it on the final code before merging. If code changes after that run (a review fix, a follow-up), run the focused checks for the change and then `npm run check` again. A docs-only change needs no `npm run check`: check each changed doc and link by hand.
-
-**Breaking a check on purpose** (show it fails, restore it) is worth it when the check is a guardrail whose silence would hide a problem: a new boundary or lint rule, the vendor-name check, a golden test for a mapping, a new module's import rules (below). An ordinary new unit or browser test doesn't need it.
+`npm run check` runs all of them in order (about 3 min 40 s). When to run what, and when to break a check on purpose: root `CLAUDE.md` "Checks".
 
 ## Where the rules live
 - `tools/architecture.cjs`: the dependency table from `docs/ARCHITECTURE.md`, written as data. Both `eslint.config.js` and `.dependency-cruiser.cjs` read it, so the two checks can't drift apart. Change it only when ARCHITECTURE changes, and never to make a violation pass.
@@ -76,5 +76,5 @@ Create `src/connectors/<name>/contract.ts`. Connectors may import core and platf
 
 ## The live site (Netlify)
 - `netlify.toml` tells Netlify how to build: `npm run build` on Node 22, then publish the `out/` folder as plain web pages. No Next.js server is involved.
-- Netlify deploys from `main`, so every merge into `main` updates the live site (see CLAUDE.md "Branches, pull requests and merging").
-- The site is public to anyone with its address. It holds no data: each visitor's room stays in their own browser.
+- Netlify deploys from `main`, so every merge into `main` updates the live site (root `CLAUDE.md` "Branches").
+- The pages are public to anyone with the address, and their code reaches every visitor's browser (so no real client details in code). The data is not in the pages: it is in the shared database, readable only by signed-in staff (`src/platform/README.md`). Netlify's settings hold the database address and publishable key.

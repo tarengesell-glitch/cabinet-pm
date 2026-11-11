@@ -11,7 +11,7 @@ const IN = 64;
 let n = 0;
 // Not the fixture's own ID pattern, so a cabinet never shares an ID with an appliance.
 const ids = () => `dddddddd-0000-4000-8000-${String(++n).padStart(12, '0')}`;
-const LOOK: FinishLook = { door: '#eeeeee', baseDoor: '#eeeeee', island: '#666666', counter: '#cccccc', style: 'transitional', doorHw: 'handle', drawerHw: 'handle', pullFinish: '#111111', knobFinish: '#111111', doorOrient: 'vertical', drawerTop: false, islandBack: 'door_panels', islandSide: 'detailed_short' };
+const LOOK: FinishLook = { door: '#eeeeee', baseDoor: '#eeeeee', island: '#666666', counter: '#cccccc', style: 'transitional', doorHw: 'handle', drawerHw: 'handle', pullFinish: '#111111', knobFinish: '#111111', doorOrient: 'vertical', drawerTop: false };
 
 /** The real kitchen as the 3D view sees it, after the placeholder lays it out. */
 function scene(): Context {

@@ -17,22 +17,22 @@ import { fillEnds, refreshEnds, reviewEnds } from '../model/ends';
 import { room as roomOf, wallLabel, type Draft } from '../model/editor';
 import { RUN_KIND_LABEL } from '../model/layout';
 import { applianceType, LAYOUT_RULES } from '../model/layout-rules';
-import { DRAFT_SETTINGS, draftPlaceholder, itemByCode, runOf, standard, type DraftPreferences } from '../model/placeholder-draft';
+import { islandPanelsOf, layoutPreferences, type DesignChoices } from '../model/choices';
+import { DRAFT_SETTINGS, draftPlaceholder, itemByCode, runOf, standard } from '../model/placeholder-draft';
 import { parseSize } from './parseSize';
 import { placeholderNotes, saveRoom, storedDraft } from './placeholder-store';
 import { FrontIcon } from './FrontIcon';
-import { Stage3D, type FinishLook } from './Stage3D';
+import { Stage3D } from './Stage3D';
 import s from './Customize.module.css';
 
 export interface CustomizeRoom {
   /** The room's ID in the design choices; its drawing and design are kept under it. */
   readonly key: string;
   readonly name: string;
-  readonly look: FinishLook;
   /** The room's design choices, in words, for the Room tab. */
   readonly choices: readonly { readonly label: string; readonly value: string }[];
-  /** What the placeholder recipe reads from the design choices (for re-drafting a run). */
-  readonly prefs: DraftPreferences;
+  /** The room's design choices for the layout (re-drafting a run) and the 3D view (the look, the island panels), checked here before use. */
+  readonly designChoices: DesignChoices;
   /** Opens the design choices for this room. */
   readonly onEditChoices: () => void;
   /** Called after every saved change. */
@@ -63,6 +63,9 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
   const [fitToken, setFitToken] = useState(0);
   const [message, setMessage] = useState<{ kind: 'error' | 'notice'; text: string } | null>(null);
   const [approveArmed, setApproveArmed] = useState(false);
+  /** The choices, checked: a layout is made only from usable ones; a panel the 3D view can't show is reported. */
+  const layoutPrefs = layoutPreferences(cr.designChoices);
+  const panels = islandPanelsOf(cr.designChoices);
 
   useEffect(() => {
     const d = storedDraft(cr.key);
@@ -249,6 +252,13 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
               </button>
             </div>
           )}
+          {panels.problems.length > 0 && (
+            <div className={s.notice} role="status" data-testid="panel-problems">
+              {panels.problems.map((p) => (
+                <p key={p}>{p}</p>
+              ))}
+            </div>
+          )}
           {tab === 'room' && (
             <>
               <div className={s.tiles}>
@@ -269,11 +279,11 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
                 <h3 className={s.h3}>Finishes</h3>
                 <div className={s.swatches}>
                   {[
-                    { name: 'Cabinets', hex: cr.look.door },
-                    ...(cr.look.baseDoor !== cr.look.door ? [{ name: 'Base', hex: cr.look.baseDoor }] : []),
-                    ...(cr.look.island !== cr.look.door ? [{ name: 'Island', hex: cr.look.island }] : []),
-                    { name: 'Counter', hex: cr.look.counter },
-                    { name: cr.look.doorHw === 'knob' ? 'Knobs' : 'Handles', hex: cr.look.doorHw === 'knob' ? cr.look.knobFinish : cr.look.pullFinish },
+                    { name: 'Cabinets', hex: cr.designChoices.look.door },
+                    ...(cr.designChoices.look.baseDoor !== cr.designChoices.look.door ? [{ name: 'Base', hex: cr.designChoices.look.baseDoor }] : []),
+                    ...(cr.designChoices.look.island !== cr.designChoices.look.door ? [{ name: 'Island', hex: cr.designChoices.look.island }] : []),
+                    { name: 'Counter', hex: cr.designChoices.look.counter },
+                    { name: cr.designChoices.look.doorHw === 'knob' ? 'Knobs' : 'Handles', hex: cr.designChoices.look.doorHw === 'knob' ? cr.designChoices.look.knobFinish : cr.designChoices.look.pullFinish },
                   ].map((f) => (
                     <span key={f.name} className={s.swatch}>
                       <i style={{ background: f.hex }} />
@@ -282,7 +292,7 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
                   ))}
                   <span className={s.swatch}>
                     <span className={s.swatchIcon}>
-                      <FrontIcon item={itemByCode('base_doors')} width={30} height={34} size={34} finish={cr.look.door} />
+                      <FrontIcon item={itemByCode('base_doors')} width={30} height={34} size={34} finish={cr.designChoices.look.door} />
                     </span>
                     Door style
                   </span>
@@ -352,7 +362,7 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
                             onClick={() => pick(c.id)}
                           >
                             <span className={s.chipIcon}>
-                              <FrontIcon item={c.code ? itemByCode(c.code) : null} appliance={c.appliance} width={c.width} height={c.height || 34 * 64} size={30} selected={selected === c.id} finish={cr.look.door} />
+                              <FrontIcon item={c.code ? itemByCode(c.code) : null} appliance={c.appliance} width={c.width} height={c.height || 34 * 64} size={30} selected={selected === c.id} finish={cr.designChoices.look.door} />
                             </span>
                             <span className={s.chipW}>{c.code === null ? '' : formatInches(c.width).replace('"', '')}</span>
                             {!c.reviewed && c.code !== null && <i aria-hidden="true" />}
@@ -366,9 +376,11 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
                 <div>
                   <button
                     className={s.btn}
-                    disabled={!canEdit}
+                    disabled={!canEdit || !layoutPrefs.ok}
+                    title={layoutPrefs.ok ? undefined : layoutPrefs.reason}
                     onClick={() => {
-                      const fresh = draftPlaceholder(room, cr.prefs, () => crypto.randomUUID());
+                      if (!layoutPrefs.ok) return setMessage({ kind: 'error', text: layoutPrefs.reason });
+                      const fresh = draftPlaceholder(room, layoutPrefs.value, () => crypto.randomUUID());
                       if (!fresh.ok) return setMessage({ kind: 'error', text: fresh.reason });
                       const items = placeholderItems(room, fresh.value);
                       if (!items.ok) return setMessage({ kind: 'error', text: items.reason });
@@ -380,6 +392,11 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
                   >
                     Re-draft this run
                   </button>
+                  {!layoutPrefs.ok && (
+                    <p className={s.hint} data-testid="redraft-blocked">
+                      Can’t re-draft: {layoutPrefs.reason}
+                    </p>
+                  )}
                 </div>
               </>
             ))}
@@ -396,7 +413,7 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
                 onEdit={edit}
                 onTypeChange={(code) => edit({ kind: 'type', id: sel.id, code })}
                 row={design.cabinets.filter((c) => c.runId === sel.runId && c.layer === sel.layer).sort((a, b) => a.offset - b.offset)}
-                finish={cr.look.door}
+                finish={cr.designChoices.look.door}
                 onPick={pick}
                 itemType={selItem?.type ?? null}
               />
@@ -423,7 +440,7 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
         </div>
       </section>
       <section className={s.stageCol} aria-label="3D view">
-        <Stage3D room={room} cabinets={design.cabinets} look={cr.look} selected={selected} doorsOpen={doorsOpen} fitToken={fitToken} onPick={pick} onError={show3dError} />
+        <Stage3D room={room} cabinets={design.cabinets} look={cr.designChoices.look} panels={panels} selected={selected} doorsOpen={doorsOpen} fitToken={fitToken} onPick={pick} onError={show3dError} />
         <div className={s.hudTop}>
           <div className={s.hudCard}>
             <div className={s.label}>Live preview</div>

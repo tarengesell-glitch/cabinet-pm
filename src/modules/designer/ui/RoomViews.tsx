@@ -7,10 +7,12 @@ import { useCallback, useMemo, useState } from 'react';
 import type { Room } from '@/core/index';
 import { cabinetViews } from '../model/cabinets';
 import type { CameraView } from './camera-views';
-import { Stage3D, type FinishLook } from './Stage3D';
+import { islandPanelsOf, type DesignChoices } from '../model/choices';
+import { Stage3D } from './Stage3D';
 
-export function RoomViews({ room, look, view }: { room: Room; look: FinishLook; view: CameraView }) {
+export function RoomViews({ room, choices, view }: { room: Room; choices: DesignChoices; view: CameraView }) {
   const cabinets = useMemo(() => cabinetViews(room), [room]);
+  const panels = islandPanelsOf(choices);
   const [problem, setProblem] = useState<string | null>(null);
   const onPick = useCallback(() => undefined, []);
   return (
@@ -20,7 +22,7 @@ export function RoomViews({ room, look, view }: { room: Room; look: FinishLook; 
           {problem}
         </p>
       )}
-      <Stage3D room={room} cabinets={cabinets} look={look} selected={null} doorsOpen={false} fitToken={0} view={view} onPick={onPick} onError={setProblem} />
+      <Stage3D room={room} cabinets={cabinets} look={choices.look} panels={panels} selected={null} doorsOpen={false} fitToken={0} view={view} onPick={onPick} onError={setProblem} />
     </>
   );
 }

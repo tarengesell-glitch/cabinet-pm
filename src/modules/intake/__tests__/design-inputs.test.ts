@@ -23,7 +23,7 @@ interface Captured {
 const before = capture as unknown as readonly Captured[];
 
 const asBefore = (i: RoomDesignInputs) => ({
-  prefs: { drawers: i.drawerLevel, cornerInsert: i.cornerInsert, garbage: i.garbage, roomSet: i.roomKind, cabinetTop: i.cabinetTop },
+  prefs: { drawers: i.drawerLevel.status === 'chosen' ? i.drawerLevel.option_id : null, cornerInsert: i.cornerInsert, garbage: i.garbage, roomSet: i.roomKind, cabinetTop: i.cabinetTop },
   roomSet: i.roomKind,
   look: i.look,
 });
@@ -41,6 +41,9 @@ describe('a room’s design inputs, read from its answers', () => {
         expect(now).not.toBeNull();
         const { prefs, roomSet, look } = was.rooms[j]!;
         expect(asBefore(now!)).toEqual(JSON.parse(JSON.stringify({ prefs, roomSet, look })));
+        // The island panels the 3D view drew before (from the look) are the ones chosen now.
+        const panel = (c: RoomDesignInputs['islandBackPanel']) => (c.status === 'chosen' ? c.option_id : null);
+        expect([panel(now!.islandBackPanel), panel(now!.islandSidePanel)]).toEqual([look?.islandBack ?? null, (look as { islandSide?: string | null } | null)?.islandSide ?? null]);
       }
     });
 
@@ -55,11 +58,11 @@ describe('a room’s design inputs, read from its answers', () => {
   it('reads the answers as they are now: a change after drafting shows at once, and nothing is kept elsewhere', () => {
     const state = all[0]!.state;
     const x = new Intake(def, structuredClone(state));
-    expect(roomDesignInputs(def, x.state, 'kitchen-room')?.drawerLevel).toBe('maximum');
+    expect(roomDesignInputs(def, x.state, 'kitchen-room')?.drawerLevel).toEqual({ status: 'chosen', option_id: 'maximum' });
     x.switchRoom(0); // the kitchen
     x.pick('drawer_level', 'minimum');
-    expect(roomDesignInputs(def, x.state, 'kitchen-room')?.drawerLevel).toBe('minimum');
-    expect(roomDesignInputs(def, state, 'kitchen-room')?.drawerLevel).toBe('maximum');
+    expect(roomDesignInputs(def, x.state, 'kitchen-room')?.drawerLevel).toEqual({ status: 'chosen', option_id: 'minimum' });
+    expect(roomDesignInputs(def, state, 'kitchen-room')?.drawerLevel).toEqual({ status: 'chosen', option_id: 'maximum' });
   });
 
   it('says plainly when the room isn’t in the design choices', () => {

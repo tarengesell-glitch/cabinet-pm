@@ -119,7 +119,7 @@ The controls and behaviour are unchanged. The look follows the owner's Kitchen S
 - `ui/FrontIcon.tsx`: a small front picture of a cabinet type, from the catalog's front data, used across the customize panel.
 - Heights: every upper and tall cabinet reaches the design's top line (`upperTop`), from the client's cabinet height.
 - `ui/PlanThumb.tsx`: a small plan of a drawn room, for the studio's AI step and the client page.
-- Contract: `draftRoom`, `exportRoomData` / `importRoomData`, and the `DraftPreferences` type. Screens: `Customize`, `PlanThumb`.
+- Contract: `draftRoom`, `exportRoomData` / `importRoomData`, and the design choices' input: `DesignChoices`, checked by `layoutPreferences` (the builder's `DraftPreferences`) and `islandPanelsOf` (the 3D view) in `model/choices.ts`. An unknown drawer level stops `draftRoom` and "Re-draft this run" before anything is replaced; an unknown island panel is drawn plain as a stand-in and Customize says so (DECISIONS 2026-11-11). Screens: `Customize`, `PlanThumb`.
 
 ### Cabinet ends (2026-11-11)
 - **One decision, saved on the cabinet.** `model/ends.ts` decides each cabinet's `end_left` / `end_right` from the layout, by the decided rule in `data/placeholder-draft.json` "ends" (DECISIONS 2026-11-07, CB-FACT-10): unfinished against a wall, a cabinet, a panel or filler, or a corner cabinet's leg; an applied finished end where nothing is beside it (beside a range or a window, an island's ends). The design step saves them with the cabinets. The 3D view only draws what is saved (`finishedEnds` in `ui/Stage3D.tsx`), and the counter overhangs only past a saved finished end with no appliance beside it. On the real kitchen the drawing is unchanged.

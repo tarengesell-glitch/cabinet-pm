@@ -14,7 +14,7 @@
 import Link from 'next/link';
 import { useCallback, useMemo, useState, type ReactNode } from 'react';
 import type { User } from '@/platform/index';
-import { roomDrawingStatus, type DraftPreferences, type RoomDrawingStatus } from '@/modules/designer/contract';
+import { layoutPreferences, roomDrawingStatus, type DesignChoices, type RoomDrawingStatus } from '@/modules/designer/contract';
 import { Customize, RoomCapture } from '@/modules/designer/ui/index';
 import { INTAKE_DEFINITION, intakeHandover, loadIntakeState, roomDesignInputs, roomSummary, roughCeiling, type IntakeState, type RoomDesignInputs, type RoomHandover } from '@/modules/intake/contract';
 import { IntakeScreen } from '@/modules/intake/ui/index';
@@ -38,10 +38,11 @@ const STANDALONE_NEXT = { href: '/rooms/preview/', label: 'Next: walls, cabinets
 const drawingDone = (st: RoomDrawingStatus | undefined): boolean => st?.kind === 'drawn' && st.walls > 0 && st.runs > 0 && st.problems === 0;
 
 /**
- * The placeholder recipe's preferences, field for field from the room's design inputs. The intake
- * reads the answers (`roomDesignInputs`); nothing is interpreted here.
+ * The room's design inputs as the designer takes them. The intake reads the answers
+ * (`roomDesignInputs`) and the designer checks them before use (`layoutPreferences`,
+ * `islandPanelsOf`); nothing is interpreted here. The assignment keeps the two contracts in step.
  */
-const draftPrefs = (i: RoomDesignInputs): DraftPreferences => ({ drawers: i.drawerLevel, cornerInsert: i.cornerInsert, garbage: i.garbage, roomSet: i.roomKind, cabinetTop: i.cabinetTop });
+const designChoices = (i: RoomDesignInputs): DesignChoices => i;
 
 function readIntake(job: string | null): IntakeState | null {
   const loaded = loadIntakeState(job);
@@ -95,7 +96,17 @@ export function Studio({ user, saveStatus, client }: { user: User; saveStatus: R
   const notDrawn = rooms.filter((r) => !drawingDone(drawings.get(r.room_id)));
   const drawingReason =
     rooms.length === 0 ? 'Make the design choices first.' : missingChoices.length > 0 ? `Finish the design choices for ${missingChoices.map((r) => r.name.toLowerCase()).join(', ')} first.` : null;
-  const aiReason = drawingReason ?? (notDrawn.length > 0 ? `Draw the walls and cabinet runs of the ${notDrawn.map((r) => r.name.toLowerCase()).join(', ')} first, with no problems.` : null);
+  /** The first room whose choices can't be used for a layout, with the designer's reason (read only once everything else is ready). */
+  const unusable = (): string | null => {
+    for (const r of rooms) {
+      const inputs = inputsOf(r.room_id);
+      const p = inputs ? layoutPreferences(designChoices(inputs)) : null;
+      if (!p) return `The design choices for the ${r.name.toLowerCase()} can’t be read.`;
+      if (!p.ok) return `The ${r.name.toLowerCase()} can’t be laid out from its design choices: ${p.reason}`;
+    }
+    return null;
+  };
+  const aiReason = drawingReason ?? (notDrawn.length > 0 ? `Draw the walls and cabinet runs of the ${notDrawn.map((r) => r.name.toLowerCase()).join(', ')} first, with no problems.` : unusable());
   const customizeReason = rooms.length > 0 && rooms.every((r) => designed.has(r.room_id)) ? null : 'Run the AI design step first.';
 
   const onIntakeChange = useCallback((state: IntakeState) => {
@@ -196,7 +207,7 @@ export function Studio({ user, saveStatus, client }: { user: User; saveStatus: R
         )}
         {stage === 'ai' && unreadable.length === 0 && (
           <AiStep
-            rooms={aiRooms.flatMap(({ room, inputs }) => (inputs ? [{ id: room.room_id, name: room.name, prefs: draftPrefs(inputs) }] : []))}
+            rooms={aiRooms.flatMap(({ room, inputs }) => (inputs ? [{ id: room.room_id, name: room.name, choices: { ok: true as const, value: designChoices(inputs) } }] : []))}
             alreadyDesigned={rooms.length > 0 && rooms.every((r) => designed.has(r.room_id))}
             userId={user.id}
             onDrafted={bump}
@@ -213,9 +224,8 @@ export function Studio({ user, saveStatus, client }: { user: User; saveStatus: R
             room={{
               key: current.room_id,
               name: current.name,
-              look: currentInputs.look,
               choices,
-              prefs: draftPrefs(currentInputs),
+              designChoices: designChoices(currentInputs),
               onEditChoices: () => setStage('choices'),
               onChange: bump,
             }}

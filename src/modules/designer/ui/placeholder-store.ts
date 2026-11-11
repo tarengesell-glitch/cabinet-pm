@@ -8,7 +8,8 @@ import { type Job, type Result, type Room } from '@/core/index';
 import { placeholderItems } from '../model/cabinets';
 import { loadJob, room as roomOf, upgradeStoredDraft, type Draft } from '../model/editor';
 import { withRuleEnds } from '../model/ends';
-import { draftPlaceholder, type DraftPreferences } from '../model/placeholder-draft';
+import { layoutPreferences, type DesignChoices } from '../model/choices';
+import { draftPlaceholder } from '../model/placeholder-draft';
 import { readStored, storageKey, writeStored } from './storage';
 
 /** History entries the placeholder writes start with this, so its notes can be found again. */
@@ -64,11 +65,14 @@ export function saveRoom(
  * The studio's AI design step (a PLACEHOLDER, no AI): lays out the room's runs with catalog
  * cabinets and writes them into its master copy as an AI draft, replacing any cabinets it had.
  */
-export function draftRoom(roomKey: string, prefs: DraftPreferences, userId: string): Result<Room> {
+export function draftRoom(roomKey: string, choices: DesignChoices, userId: string): Result<Room> {
+  // Checked first: a choice the recipe can't use leaves the saved design exactly as it was.
+  const prefs = layoutPreferences(choices);
+  if (!prefs.ok) return prefs;
   const d = storedDraft(roomKey);
   if (!d.ok) return d;
   const room = roomOf(d.value);
-  const design = draftPlaceholder(room, prefs, () => crypto.randomUUID());
+  const design = draftPlaceholder(room, prefs.value, () => crypto.randomUUID());
   if (!design.ok) return design;
   const items = placeholderItems(room, design.value);
   if (!items.ok) return items;

@@ -69,7 +69,9 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
     if (roomOf(d.value).items.length === 0) return setProblem('This room has no cabinets yet. Run the AI design step first.');
     setDraft(d.value);
   }, [cr.key]);
-  const room: Room | null = draft ? roomOf(draft) : null;
+  // Worked out once per saved copy: a new room object on every render rebuilt the 3D view each
+  // time, which restarted the doors' opening over and over (owner, 2026-11-10).
+  const room: Room | null = useMemo(() => (draft ? roomOf(draft) : null), [draft]);
   /** The screens' view of the master copy: cabinets with their runs, plus appliances and hoods. */
   const design = useMemo(() => (draft && room ? { cabinets: cabinetViews(room), notes: placeholderNotes(draft), upperTop: upperTopOf(room) } : null), [draft, room]);
 
@@ -418,7 +420,7 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
               </span>
             )}
           </div>
-          <div className={s.hint3d}>Click a cabinet · drag to turn · scroll to zoom</div>
+          <div className={s.hint3d}>Click a cabinet · drag to turn · right-drag or Shift-drag to move · scroll to zoom · double-click to look there</div>
         </div>
       </section>
     </div>

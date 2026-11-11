@@ -5,11 +5,11 @@
  * the cabinets are a placeholder until Core holds them). Sizes come from the catalog; finishes from
  * the client's design choices. A visual approximation (BUILD_SPEC 5.5): 1 unit = 1 inch.
  */
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import type { Room, Wall } from '@/core/index';
-import { direction, halfThickness, insideNormal, insideSpan, wallLength } from '../model/layout';
+import { cornerCabinets, direction, halfThickness, insideNormal, insideSpan, wallLength, type CornerCabinet } from '../model/layout';
 import type { CabinetView } from '../model/cabinets';
 import { DRAFT_SETTINGS, isHood, itemByCode, standard } from '../model/placeholder-draft';
 import { GOLD } from './theme';
@@ -27,6 +27,9 @@ export interface FinishLook {
   readonly knobFinish: string;
   readonly doorOrient: 'vertical' | 'horizontal';
   readonly drawerTop: boolean;
+  /** The island's back and side panels as chosen ("door_panels", "shiplap", "waterfall_stone"…), or null. */
+  readonly islandBack: string | null;
+  readonly islandSide: string | null;
 }
 
 const IN = 64;
@@ -91,7 +94,8 @@ export function Stage3D(props: {
     }
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 0.92;
+    // Brighter than the prototype's studio, so the cabinets read clearly (owner, 2026-11-10: "fairly dark").
+    renderer.toneMappingExposure = 1.25;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFShadowMap;
     // The canvas is drawn at the screen's pixel density and shown at the size of its box.
@@ -100,10 +104,13 @@ export function Stage3D(props: {
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(32, 1, 1, 8000);
     const controls = new OrbitControls(camera, renderer.domElement);
-    Object.assign(controls, { enableDamping: true, dampingFactor: 0.08, enablePan: false, minPolarAngle: 0.15, maxPolarAngle: Math.PI / 2 - 0.05 });
+    // Turn (drag), move (right-drag, Shift-drag, two fingers or the arrow keys) and zoom toward the
+    // pointer, so any corner can be looked at closely (owner, 2026-11-10: "the camera position seems fixed").
+    Object.assign(controls, { enableDamping: true, dampingFactor: 0.08, enablePan: true, screenSpacePanning: true, zoomToCursor: true, keyPanSpeed: 20, minPolarAngle: 0.05, maxPolarAngle: Math.PI / 2 - 0.02 });
+    controls.listenToKeyEvents(window);
     // Studio light: a soft box environment plus a low sun through the window (prototype).
     const env = new THREE.Scene();
-    env.add(new THREE.Mesh(new THREE.BoxGeometry(100, 100, 100), new THREE.MeshBasicMaterial({ color: 0x7d7a76, side: THREE.BackSide })));
+    env.add(new THREE.Mesh(new THREE.BoxGeometry(100, 100, 100), new THREE.MeshBasicMaterial({ color: 0xa29e97, side: THREE.BackSide })));
     const softbox = (w: number, h: number, pos: [number, number, number], k: number) => {
       const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: new THREE.Color(k, k * 0.98, k * 0.95), side: THREE.DoubleSide }));
       m.position.set(...pos);
@@ -116,12 +123,12 @@ export function Stage3D(props: {
     const pm = new THREE.PMREMGenerator(renderer);
     scene.environment = pm.fromScene(env, 0.035).texture;
     pm.dispose();
-    const sun = new THREE.DirectionalLight(0xfff1dc, 1.35);
+    const sun = new THREE.DirectionalLight(0xfff1dc, 1.6);
     sun.castShadow = true;
     sun.shadow.mapSize.set(2048, 2048);
     sun.shadow.bias = -0.0002;
     sun.shadow.normalBias = 0.6;
-    scene.add(sun, sun.target, new THREE.HemisphereLight(0xffffff, 0xd9d3c9, 0.45));
+    scene.add(sun, sun.target, new THREE.HemisphereLight(0xffffff, 0xd9d3c9, 0.95), new THREE.AmbientLight(0xffffff, 0.25));
     const s: Scene3D = { renderer, scene, camera, controls, sun, root: null, doors: [], walls: [], mats: new Map(), centre: new THREE.Vector3(), facing: new THREE.Vector3(0, 0, 1), span: 200, fitted: false };
     s3.current = s;
 
@@ -150,8 +157,19 @@ export function Stage3D(props: {
         if (o) return onPick.current(String(o.userData['cabId']));
       }
     };
+    // A double-click turns the view around the point under the pointer.
+    const onDouble = (e: MouseEvent) => {
+      if (!s.root) return;
+      const r = el.getBoundingClientRect();
+      ray.setFromCamera(new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1), camera);
+      const hit = ray.intersectObjects(s.root.children, true)[0];
+      if (!hit) return;
+      camera.position.add(hit.point.clone().sub(controls.target));
+      controls.target.copy(hit.point);
+    };
     renderer.domElement.addEventListener('pointerdown', onDown);
     renderer.domElement.addEventListener('pointerup', onUp);
+    renderer.domElement.addEventListener('dblclick', onDouble);
 
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let raf = 0;
@@ -179,6 +197,8 @@ export function Stage3D(props: {
       ro.disconnect();
       renderer.domElement.removeEventListener('pointerdown', onDown);
       renderer.domElement.removeEventListener('pointerup', onUp);
+      renderer.domElement.removeEventListener('dblclick', onDouble);
+      controls.stopListenToKeyEvents();
       controls.dispose();
       s.root?.traverse((o) => (o as THREE.Mesh).geometry?.dispose());
       for (const m of s.mats.values()) m.dispose();
@@ -188,11 +208,16 @@ export function Stage3D(props: {
     };
   }, [onError]);
 
-  // Rebuild the room whenever it, its design or its look changes.
-  const { room, cabinets, look, selected } = props;
+  // Rebuild the room whenever it, its design or its look changes. The look is compared by value:
+  // the screen hands a new but equal one on every render.
+  const { room, cabinets, selected } = props;
+  const lookKey = JSON.stringify(props.look);
+  const look = useMemo(() => JSON.parse(lookKey) as FinishLook, [lookKey]);
   useEffect(() => {
     const s = s3.current;
     if (!s) return;
+    // Doors keep how far open they are across a rebuild (a selection, an edit), so they never start over.
+    const angles = new Map(s.doors.map((d) => [String(d.userData['key']), d.userData['angle'] as number]));
     if (s.root) {
       s.scene.remove(s.root);
       s.root.traverse((o) => (o as THREE.Mesh).geometry?.dispose());
@@ -201,9 +226,16 @@ export function Stage3D(props: {
     s.walls = [];
     const root = new THREE.Group();
     buildRoom(s, root, room);
+    const ctx: Context = { room, all: cabinets, corners: cornerCabinets(room) };
     for (const c of cabinets) {
-      const g = cabinet(s, c, room, look, c.id === selected);
+      const g = cabinet(s, c, ctx, look, c.id === selected);
       if (g) root.add(g);
+    }
+    for (const g of counters(s, ctx, look)) root.add(g);
+    for (const d of s.doors) {
+      const a = angles.get(String(d.userData['key'])) ?? (doorsOpen.current ? (d.userData['dir'] as number) * 1.75 : 0);
+      d.userData['angle'] = a;
+      d.rotation.y = a;
     }
     s.root = root;
     s.scene.add(root);
@@ -262,7 +294,7 @@ function fit(s: Scene3D): void {
   s.controls.update();
 }
 
-function mat(s: Scene3D, key: string): THREE.Material {
+function mat(s: Pick<Scene3D, 'mats'>, key: string): THREE.Material {
   const have = s.mats.get(key);
   if (have) return have;
   const [kind, hex = '#888888'] = key.split(':');
@@ -283,7 +315,7 @@ function mat(s: Scene3D, key: string): THREE.Material {
   return m;
 }
 
-function box(s: Scene3D, parent: THREE.Object3D, w: number, h: number, d: number, pos: [number, number, number], key: string, shadow = true): THREE.Mesh {
+function box(s: Pick<Scene3D, 'mats'>, parent: THREE.Object3D, w: number, h: number, d: number, pos: [number, number, number], key: string, shadow = true): THREE.Mesh {
   const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat(s, key));
   mesh.position.set(...pos);
   mesh.castShadow = shadow;
@@ -349,11 +381,116 @@ function placement(room: Room, wall: Wall, offset: number, width: number, depth:
   return { at: floor(x, y), angle: Math.atan2(n.x, -n.y) };
 }
 
-function cabinet(s: Scene3D, c: CabinetView, room: Room, look: FinishLook, isSelected: boolean): THREE.Group | null {
+/** What a cabinet needs to know about the rest of the room: its neighbours and the corners. */
+export interface Context {
+  readonly room: Room;
+  readonly all: readonly CabinetView[];
+  readonly corners: readonly CornerCabinet[];
+}
+
+/** 1/32": closer than this counts as touching. */
+const TOUCH = 2;
+const NO_COUNTER = new Set(['fridge', 'range', 'hood', 'millwork_hood', 'toilet', 'tub', 'shower']);
+const COUNTER_TYPES = new Set(['base', 'vanity', 'appliance_opening']);
+
+/** Which way a wall's offsets run in a cabinet's own frame: +1 when local +x is toward the wall's end. */
+function alongSign(room: Room, wall: Wall): number {
+  const u = direction(wall);
+  const n = insideNormal(room, wall);
+  return -n.y * u.x + n.x * u.y >= 0 ? 1 : -1;
+}
+
+/**
+ * Whether a cabinet's end at `edge` has nothing beside it: no cabinet, panel or filler at the same
+ * height touching it, no wall, and not the other leg of an L-shaped corner cabinet. Such an end gets
+ * an applied finished end (CB-FACT-10). Appliances don't cover an end: one beside a range is finished.
+ */
+export function endOpen(ctx: Context, c: CabinetView, wall: Wall, edge: number, side: 'low' | 'high', withAppliances = false): boolean {
+  const top = c.elevation + c.height;
+  const touching = ctx.all.some(
+    (o) =>
+      o !== c &&
+      o.wallId === c.wallId &&
+      !o.back &&
+      (o.code !== null ? o.elevation < top && c.elevation < o.elevation + o.height : withAppliances && o.layer === c.layer) &&
+      (side === 'low' ? Math.abs(o.offset + o.width - edge) <= TOUCH : Math.abs(o.offset - edge) <= TOUCH),
+  );
+  if (touching) return false;
+  if (wall.kind !== 'room') return true;
+  const sp = insideSpan(ctx.room, wall);
+  if (side === 'low' ? edge <= sp.start + TOUCH : edge >= sp.end - TOUCH) return false;
+  const corner = ctx.corners.find((k) => (side === 'high' ? k.endingWallId : k.startingWallId) === wall.wall_id && (c.layer === 'upper' ? k.upper : k.base));
+  if (!corner) return true;
+  const legs = ctx.all.filter((o) => o.wallId !== wall.wall_id && o.layer === c.layer && o.code !== null && (itemByCode(o.code)?.type ?? '').startsWith('corner')).map((o) => o.depth ?? (o.code ? standard(o.code, 'depth') : null) ?? 0);
+  const leg = legs.length ? Math.max(...legs) : 0;
+  return side === 'high' ? edge < sp.end - leg - TOUCH : edge > sp.start + leg + TOUCH;
+}
+
+/**
+ * The counters: one top for each stretch of base cabinets that touch, so there is no break where a
+ * cabinet, a filler or the dishwasher opening meets the next (owner, 2026-11-10). Every top has the
+ * same front line (the base depth plus the overhang) and the stretch's tallest base cabinet's height;
+ * an island's also covers its back panel, and an end with nothing beside it gets the overhang too.
+ */
+export function counters(s: Pick<Scene3D, 'mats'>, ctx: Context, look: FinishLook): THREE.Group[] {
+  if (!DRAFT_SETTINGS.ok) return [];
+  const v = DRAFT_SETTINGS.value.visual;
+  const counterT = inch(v.counter);
+  const oh = inch(v.counterOverhang);
+  const baseH = standard('base_doors', 'height') ?? 34 * IN;
+  const out: THREE.Group[] = [];
+  for (const wall of ctx.room.walls) {
+    const tops = ctx.all
+      .filter((c) => {
+        if (c.wallId !== wall.wall_id || c.layer !== 'base' || c.back) return false;
+        if (c.code === null) return c.appliance !== null && !NO_COUNTER.has(c.appliance);
+        const t = itemByCode(c.code)?.type ?? '';
+        return COUNTER_TYPES.has(t) || ((t === 'filler' || t === 'panel') && c.elevation === 0 && c.height <= baseH + TOUCH);
+      })
+      .sort((a, b) => a.offset - b.offset);
+    const runs: { start: number; end: number; height: number | null; depth: number | null; first: CabinetView; last: CabinetView }[] = [];
+    for (const c of tops) {
+      const t = c.code ? (itemByCode(c.code)?.type ?? '') : '';
+      const h = t === 'base' || t === 'vanity' ? c.height : null;
+      const d = t === 'base' || t === 'vanity' ? (c.depth ?? (c.code ? standard(c.code, 'depth') : null)) : null;
+      const last = runs[runs.length - 1];
+      if (last && Math.abs(c.offset - last.end) <= TOUCH) {
+        last.end = Math.max(last.end, c.offset + c.width);
+        last.height = h === null ? last.height : Math.max(last.height ?? 0, h);
+        last.depth = d === null ? last.depth : Math.max(last.depth ?? 0, d);
+        last.last = c;
+      } else runs.push({ start: c.offset, end: c.offset + c.width, height: h, depth: d, first: c, last: c });
+    }
+    const island = wall.kind === 'floating';
+    const backD = island ? inch(standard('island_back_panel', 'depth') ?? 0) + oh : 0;
+    const sign = alongSign(ctx.room, wall);
+    for (const r of runs) {
+      const h = inch(r.height ?? baseH);
+      const d = inch(r.depth ?? standard('base_doors', 'depth') ?? 24 * IN);
+      const ohLow = endOpen(ctx, r.first, wall, r.start, 'low', true) ? oh : 0;
+      const ohHigh = endOpen(ctx, r.last, wall, r.end, 'high', true) ? oh : 0;
+      const g = new THREE.Group();
+      g.userData['wallId'] = wall.wall_id;
+      g.userData['span'] = [r.start, r.end];
+      const p = placement(ctx.room, wall, r.start, r.end - r.start, 0);
+      g.position.copy(p.at);
+      g.rotation.y = p.angle;
+      const w = inch(r.end - r.start) + ohLow + ohHigh;
+      box(s, g, w, counterT, d + oh + backD, [(sign * (ohHigh - ohLow)) / 2, h + counterT / 2, (d + oh - backD) / 2], `counter:${look.counter}`);
+      out.push(g);
+    }
+  }
+  return out;
+}
+
+function cabinet(s: Scene3D, c: CabinetView, ctx: Context, look: FinishLook, isSelected: boolean): THREE.Group | null {
   if (!DRAFT_SETTINGS.ok) return null;
   const v = DRAFT_SETTINGS.value.visual;
+  const room = ctx.room;
   const wall = room.walls.find((w) => w.wall_id === c.wallId);
   if (!wall) return null;
+  const sign = alongSign(room, wall);
+  let doorN = 0;
   const item = c.code ? itemByCode(c.code) : null;
   const w = inch(c.width);
   const toe = inch(v.toeKick);
@@ -411,7 +548,7 @@ function cabinet(s: Scene3D, c: CabinetView, room: Room, look: FinishLook, isSel
       const cx = dir === 1 ? dw / 2 + GAP / 2 : -dw / 2 - GAP / 2;
       front(pv, dw, dh, [cx, cy, -DOOR_T / 2], false);
       hardware(pv, cx + (dir === 1 ? dw / 2 - 1.6 : -dw / 2 + 1.6), upper ? y0 + 5 : y1 - 5, 0, look.doorOrient === 'vertical', false);
-      pv.userData = { dir: -dir, angle: 0 };
+      pv.userData = { dir: -dir, angle: 0, key: `${c.id}:${doorN++}` };
       s.doors.push(pv);
       g.add(pv);
     }
@@ -425,15 +562,12 @@ function cabinet(s: Scene3D, c: CabinetView, room: Room, look: FinishLook, isSel
       y += h;
     }
   };
-  // Every counter has the same front line, the base cabinets' depth plus the overhang, measured
-  // from the wall (so a deeper box, like the dishwasher opening, doesn't break the run). On an
-  // island the counter also covers the back panel behind the cabinets.
+  // The counters are drawn per stretch (counters()); an L-shaped corner cabinet draws its own.
   const oh = inch(v.counterOverhang);
-  const baseD = inch(standard('base_doors', 'depth') ?? 24 * IN);
-  const backExtra = island ? inch(standard('island_back_panel', 'depth') ?? 0) + oh : 0;
   const counterBox = (h: number, x0: number, x1: number, z0: number, z1: number) => b(x1 - x0, counterT, z1 - z0, [(x0 + x1) / 2, h + counterT / 2, (z0 + z1) / 2], counter);
-  const counterTop = (h: number) => counterBox(h, -w / 2, w / 2, -d / 2 - backExtra, -d / 2 + baseD + oh);
   const baseTop = inch(standard('base_doors', 'height') ?? 34 * IN);
+  // Toe kicks are in the cabinet's own door finish (owner, 2026-11-10: "they should match the colour of that cabinet's doors").
+  const kick = finish;
 
   if (c.appliance === 'millwork_hood') {
     // A millwork hood: a box in the door finish (no catalog item yet; drawn for the look only).
@@ -455,7 +589,6 @@ function cabinet(s: Scene3D, c: CabinetView, room: Room, look: FinishLook, isSel
       // A cooktop, microwave, wine fridge or anything else: a box with a dark front, under the counter.
       b(w, baseH - toe, d, [0, toe + (baseH - toe) / 2, 0], c.appliance === 'cooktop' ? carcass : `steel:${SURROUNDINGS.steel}`);
       b(w - 3, Math.min(14, baseH - toe - 4), 0.6, [0, toe + (baseH - toe) / 2, d / 2 + 0.2], `plain:${SURROUNDINGS.glass}`);
-      counterTop(baseH);
       if (c.appliance === 'cooktop') b(w - 6, 0.3, d - 4, [0, baseH + counterT + 0.15, 0], `plain:${SURROUNDINGS.glass}`);
     }
   } else if (item) {
@@ -463,15 +596,35 @@ function cabinet(s: Scene3D, c: CabinetView, room: Room, look: FinishLook, isSel
     const h = inch(c.height);
     const front0 = item.front[0];
     if (c.back) {
-      // An island's back panel: behind the island's line, from the floor, in the island's finish.
+      // An island's back panel: behind the island's line, from the floor, in the island's finish,
+      // looking as chosen (owner, 2026-11-10): door panels lined up with the cabinets in front, or shiplap.
       b(w, h, d, [0, h / 2, -d], finish);
+      const face = new THREE.Group();
+      face.position.set(0, 0, -1.5 * d);
+      face.rotation.y = Math.PI;
+      g.add(face);
+      if (look.islandBack === 'door_panels') {
+        const fronts = ctx.all.filter((o) => o.wallId === c.wallId && !o.back && o.layer === 'base' && o.code !== null && o.offset < c.offset + c.width && o.offset + o.width > c.offset);
+        const spans = fronts.length ? fronts.map((o) => [Math.max(o.offset, c.offset), Math.min(o.offset + o.width, c.offset + c.width)] as const) : [[c.offset, c.offset + c.width] as const];
+        for (const [a, z] of spans) {
+          const sw = inch(z - a);
+          const count = sw > 24 ? 2 : 1;
+          for (let k = 0; k < count; k++) {
+            // Along the panel from its low end, then into the back face's frame (turned half way round).
+            const centre = -sign * (inch(a - c.offset) + (sw / count) * (k + 0.5) - w / 2);
+            front(face, sw / count - GAP, h - toe - GAP, [centre, toe + (h - toe) / 2, DOOR_T / 2], false);
+          }
+        }
+      } else if (look.islandBack === 'shiplap') {
+        for (let x = -w / 2; x < w / 2 - 0.5; x += 6) box(s, face, Math.min(5.85, w / 2 - x), h - 0.2, 0.3, [x + Math.min(5.85, w / 2 - x) / 2, h / 2, 0.15], finish);
+      }
     } else if ((item.type === 'filler' || item.type === 'panel') && c.layer === 'base' && top > baseTop + 0.01) {
       // A full-height panel or filler (beside a fridge or a pantry): from the floor to the top line.
       b(w, top, d, [0, top / 2, 0], finish);
     } else if (item.type === 'filler' || item.type === 'panel') {
-      const y0 = c.layer === 'upper' ? inch(c.elevation) : toe;
+      // A filler or panel stands on the floor (base) or hangs with the uppers, in the door finish.
+      const y0 = c.layer === 'upper' ? inch(c.elevation) : 0;
       b(w, top - y0, d, [0, (y0 + top) / 2, 0], finish);
-      if (c.layer === 'base') counterTop(h);
     } else if (item.type === 'corner_base' || item.type === 'corner_wall') {
       // An L-shaped 90-degree corner cabinet: one leg along this wall, the other along the wall it
       // meets, each as deep as the cabinets beside it, with a door on each inside face.
@@ -492,8 +645,8 @@ function cabinet(s: Scene3D, c: CabinetView, room: Room, look: FinishLook, isSel
       block([-w / 2, w / 2], -d / 2, zFace, y0, top, carcass);
       block(xr(0, legD), zFace, d / 2, y0, top, carcass);
       if (!upper) {
-        block([-w / 2, w / 2], -d / 2, zFace - 3, 0, toe, `plain:${SURROUNDINGS.plinth}`, false);
-        block(xr(0, legD - 3), zFace - 3, d / 2, 0, toe, `plain:${SURROUNDINGS.plinth}`, false);
+        block([-w / 2, w / 2], -d / 2, zFace - 3, 0, toe, kick, false);
+        block(xr(0, legD - 3), zFace - 3, d / 2, 0, toe, kick, false);
         counterBox(h, -w / 2, w / 2, -d / 2, zFace + oh);
         const rx = xr(0, legD + oh);
         counterBox(h, rx[0], rx[1], zFace + oh, d / 2);
@@ -519,15 +672,14 @@ function cabinet(s: Scene3D, c: CabinetView, room: Room, look: FinishLook, isSel
       b(w - 0.5, inner - 0.5, d - DOOR_T - 0.75, [0, toe + inner / 2, -DOOR_T / 2 - 0.375], `plain:${SURROUNDINGS.black}`);
       b(w - GAP, inner - GAP, DOOR_T, [0, toe + inner / 2, d / 2 - DOOR_T / 2], `steel:${SURROUNDINGS.steel}`);
       b(Math.max(1, w - 6), 0.6, 0.8, [0, h - 3.5, d / 2 + 0.4], `steel:${SURROUNDINGS.steel}`);
-      b(w - 1, toe, d - 3, [0, toe / 2, -1.5], `plain:${SURROUNDINGS.plinth}`, false);
-      counterTop(h);
+      b(w - 1, toe, d - 3, [0, toe / 2, -1.5], kick, false);
     } else if (c.layer === 'upper') {
       const y0 = inch(c.elevation);
       b(w, h, d, [0, y0 + h / 2, 0], carcass);
       doorsIn(-w / 2, w / 2, y0, top, d, true);
     } else {
       b(w, h - toe, d, [0, toe + (h - toe) / 2, 0], carcass);
-      b(w - 1, toe, d - 3, [0, toe / 2, -1.5], `plain:${SURROUNDINGS.plinth}`, false);
+      b(w, toe, d - 3, [0, toe / 2, -1.5], kick, false);
       const inner = h - toe;
       if (front0?.kind === 'drawers' && (front0.count ?? 1) >= 3) drawers(Array.from({ length: front0.count ?? 3 }, () => inner / (front0.count ?? 3)), d, toe);
       else if (front0?.kind === 'drawers' && (front0.count ?? 1) === 2) {
@@ -538,8 +690,35 @@ function cabinet(s: Scene3D, c: CabinetView, room: Room, look: FinishLook, isSel
         doorsIn(-w / 2, w / 2, toe, h - 6, d, false);
       } else if (item.code === 'garbage_pullout' || front0?.kind === 'pullout') drawers([inner], d, toe);
       else doorsIn(-w / 2, w / 2, toe, h, d, false);
-      if (item.type !== 'tall') counterTop(h);
       if (c.code === 'sink_base') b(Math.min(28, w - 6), 0.3, 16, [0, h + counterT + 0.02, 1], `steel:${SURROUNDINGS.steel}`);
+    }
+  }
+
+  // Applied finished ends: an end with nothing beside it is covered from the floor (base and tall)
+  // or the cabinet's bottom (upper) to its top, flush with the doors (owner, 2026-11-10: "Applied
+  // finished ends should go to the floor"). An island's ends follow its side panel choice.
+  const ENDED = new Set(['base', 'vanity', 'wall', 'tall']);
+  if (item && !c.back && ENDED.has(item.type)) {
+    const y0 = c.layer === 'upper' ? inch(c.elevation) : 0;
+    for (const [side, edge] of [
+      ['low', c.offset],
+      ['high', c.offset + c.width],
+    ] as const) {
+      if (!endOpen(ctx, c, wall, edge, side)) continue;
+      const x = (side === 'low' ? -sign : sign) * (w / 2 - 0.37);
+      if (island && c.layer === 'base' && look.islandSide === 'waterfall_stone') {
+        b(counterT, top + counterT - y0, d + DOOR_T + oh, [(side === 'low' ? -sign : sign) * (w / 2 + counterT / 2), (y0 + top + counterT) / 2, (DOOR_T + oh) / 2], counter);
+        continue;
+      }
+      b(0.76, top - y0, d + DOOR_T, [x, (y0 + top) / 2, DOOR_T / 2], finish);
+      if (island && c.layer === 'base' && (look.islandSide === 'detailed_short' || look.islandSide === 'detailed_long')) {
+        const face = new THREE.Group();
+        const out = side === 'low' ? -sign : sign;
+        face.position.set(out * (w / 2 + 0.01), 0, DOOR_T / 2);
+        face.rotation.y = out > 0 ? Math.PI / 2 : -Math.PI / 2;
+        front(face, d + DOOR_T - 1.5, top - y0 - (look.islandSide === 'detailed_short' ? toe : 0) - 1.5, [0, (top + y0 + (look.islandSide === 'detailed_short' ? toe : 0)) / 2, DOOR_T / 2], false);
+        g.add(face);
+      }
     }
   }
 

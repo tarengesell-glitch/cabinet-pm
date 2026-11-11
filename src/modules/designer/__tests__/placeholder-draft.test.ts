@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { examples, type Room } from '@/core/index';
 import { CURRENT_CATALOG } from '@/modules/catalog/contract';
 import { ITEM_CHECKS, JobSchema, runChecks } from '@/core/index';
-import { DRAFT_SETTINGS, draftPlaceholder, fillWidths, type DraftPreferences, type PlaceholderDesign } from '../model/placeholder-draft';
+import { DRAFT_SETTINGS, draftPlaceholder, equalFlank, fillWidths, type DraftPreferences, type PlaceholderDesign } from '../model/placeholder-draft';
+import { realKitchenRoom } from './real-kitchen';
 import { cabinetViews, editItems, placeholderItems, replaceRunItems } from '../model/cabinets';
 import { LAYOUT_RULES } from '../model/layout-rules';
 
@@ -10,7 +11,7 @@ const IN = 64;
 const kitchen = (): Room => examples.kitchen().rooms[0]!;
 let n = 0;
 const ids = () => `00000000-0000-4000-8000-${String(++n).padStart(12, "0")}`;
-const prefs = (p: Partial<DraftPreferences> = {}): DraftPreferences => ({ drawers: 'minimum', cornerInsert: 'lazy_susan', garbage: 'none', cabinetTop: 'ceiling', ...p });
+const prefs = (p: Partial<DraftPreferences> = {}): DraftPreferences => ({ drawers: 'minimum', cornerInsert: 'lazy_susan', garbage: 'none', cabinetTop: 'ceiling', roomSet: 'kitchen', ...p });
 const draft = (p?: Partial<DraftPreferences>): PlaceholderDesign => {
   const r = draftPlaceholder(kitchen(), prefs(p), ids);
   if (!r.ok) throw new Error(r.reason);
@@ -248,6 +249,14 @@ describe('owner fixes, 2026-11-10 (after trying a real job)', () => {
     expect(uppers.some((c) => c.offset < 92 * IN && c.offset + c.width > 58 * IN)).toBe(false);
   });
 
+  it('splits the bases below so a joint lines up with the outer edge of each upper beside the hood (owner, 2026-11-10)', () => {
+    const d = draftOf(wallOneWith({ kind: 'range', offset: 60 * IN, width: 30 * IN }));
+    const wallA = kitchen().walls[0]!.wall_id;
+    const row = (layer: 'base' | 'upper') => d.cabinets.filter((c) => c.wallId === wallA && c.layer === layer && c.code !== null);
+    const left = row('upper').filter((c) => c.offset + c.width <= 60 * IN).sort((a, b) => b.offset - a.offset)[0]!;
+    expect(row('base').some((c) => c.offset === left.offset || c.offset + c.width === left.offset)).toBe(true);
+  });
+
   it('puts a full-height 26" panel on each side of a fridge, and the cabinet over it 2" above the fridge', () => {
     const d = draftOf(wallOneWith({ kind: 'fridge', offset: 60 * IN, width: 36 * IN }));
     const s = DRAFT_SETTINGS.ok ? DRAFT_SETTINGS.value : null;
@@ -304,3 +313,62 @@ describe('owner fixes, 2026-11-10 (after trying a real job)', () => {
     expect(cabinetViews({ ...room, items: items.value }).filter((v) => v.back)).toHaveLength(1);
   });
 });
+
+describe('owner fixes, 2026-11-10 round 2 (a real kitchen)', () => {
+  const real = (p: Partial<DraftPreferences> = {}) => {
+    const r = draftPlaceholder(realKitchenRoom(), prefs({ drawers: 'maximum', garbage: 'dedicated_cabinet', ...p }), ids);
+    if (!r.ok) throw new Error(r.reason);
+    return r.value;
+  };
+  const wallA = realKitchenRoom().walls[0]!;
+  const range = wallA.appliances.find((a) => a.kind === 'range')!;
+
+  it('makes cabinets to fit the space on the 1/16" step, not 3" steps with a filler ("Widths are custom and made to fit the space")', () => {
+    const s = DRAFT_SETTINGS.ok ? DRAFT_SETTINGS.value : null;
+    expect(s!.widthStep).toBe(4); // 1/16"
+    expect(fillWidths(29 * IN + 56, s!, 9 * IN)).toEqual({ widths: [29 * IN + 56], filler: 0 }); // 29 7/8": one cabinet
+    expect(fillWidths(94 * IN, s!, 9 * IN)).toEqual({ widths: [31 * IN + 24, 31 * IN + 20, 31 * IN + 20], filler: 0 });
+    expect(fillWidths(94 * IN + 2, s!, 9 * IN).filler).toBe(2); // only a sliver under one step is left over
+    // The real kitchen: no fillers but the one beside the hood's flank, against the corner.
+    const d = real();
+    const fillers = d.cabinets.filter((c) => c.code === 'base_filler' || c.code === 'wall_filler');
+    expect(fillers.map((f) => [f.wallId, f.width])).toEqual([[wallA.wall_id, 26]]);
+  });
+
+  it('cuts the uppers back 2" from a hood even when the range stands in a run of its own', () => {
+    const uppers = real().cabinets.filter((c) => c.wallId === wallA.wall_id && c.layer === 'upper' && c.code !== null);
+    const near = uppers.filter((c) => c.offset < applianceEndOf(range) + 2 * IN && c.offset + c.width > range.offset - 2 * IN);
+    expect(near).toEqual([]);
+    const left = uppers.filter((c) => c.offset + c.width <= range.offset).sort((a, b) => b.offset - a.offset)[0]!;
+    const right = uppers.filter((c) => c.offset >= applianceEndOf(range)).sort((a, b) => a.offset - b.offset)[0]!;
+    expect(left.offset + left.width).toBe(range.offset - 2 * IN);
+    expect(right.offset).toBe(applianceEndOf(range) + 2 * IN);
+  });
+
+  it('makes the uppers either side of the hood one width, and sizes the base below to line up with them (PREF-019)', () => {
+    const d = real();
+    const at = (layer: 'base' | 'upper', side: 'low' | 'high') => {
+      const row = d.cabinets.filter((c) => c.wallId === wallA.wall_id && c.layer === layer && c.code !== null && c.code !== 'tall_filler' && !c.depth);
+      return side === 'low' ? row.filter((c) => c.offset + c.width <= range.offset).sort((a, b) => b.offset - a.offset)[0]! : row.filter((c) => c.offset >= applianceEndOf(range)).sort((a, b) => a.offset - b.offset)[0]!;
+    };
+    const [ul, ur] = [at('upper', 'low'), at('upper', 'high')];
+    expect(ul.width).toBe(ur.width);
+    expect(ul.width).toBe(27 * IN + 56); // one 27 7/8" upper each side, not split into narrow ones
+    // The base beside the range starts where the upper above it starts.
+    expect(at('base', 'low').offset).toBe(ul.offset);
+    expect(equalFlank(27 * IN + 56, 28 * IN + 16, DRAFT_SETTINGS.ok ? DRAFT_SETTINGS.value : (null as never), 9 * IN)).toBe(27 * IN + 56);
+  });
+
+  it('uses the vanities in a bathroom, never the kitchen\'s base cabinets', () => {
+    const r = kitchen();
+    const bath = { ...r, walls: r.walls.map((w) => ({ ...w, appliances: w.appliances.filter((a) => a.kind !== 'range' && a.kind !== 'fridge' && a.kind !== 'dishwasher').map((a) => (a.kind === 'sink' ? { ...a, kind: 'vanity_sink' } : a)) })) };
+    const d = draftPlaceholder(bath, prefs({ roomSet: 'bath', drawers: null }), ids);
+    if (!d.ok) throw new Error(d.reason);
+    const bases = d.value.cabinets.filter((c) => c.layer === 'base' && c.code !== null && !c.code.startsWith('corner') && c.code !== 'tall_pantry');
+    expect(bases.length).toBeGreaterThan(0);
+    expect(new Set(bases.map((c) => c.code))).toEqual(new Set(['vanity_sink', 'vanity_drawer_doors', ...(bases.some((c) => c.code === 'vanity_filler') ? ['vanity_filler'] : [])]));
+    expect(d.value.notes).toContain('Vanity cabinets, as this is a bathroom.');
+  });
+});
+
+const applianceEndOf = (a: { offset: number; width: { value: number } }) => a.offset + a.width.value;

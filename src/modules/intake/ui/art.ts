@@ -25,6 +25,9 @@ export interface Look {
   readonly trimHex: string;
   readonly valance: string | null;
   readonly valanceHex: string;
+  /** The island's back and side panels, as chosen (null when not chosen): the 3D view draws them. */
+  readonly islandBack: string | null;
+  readonly islandSide: string | null;
   /** Not a kitchen: no range or hood. */
   readonly plain: boolean;
   readonly counters: boolean;

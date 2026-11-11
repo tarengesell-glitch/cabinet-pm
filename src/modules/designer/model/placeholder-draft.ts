@@ -26,6 +26,8 @@ export interface DraftPreferences {
   readonly garbage: 'none' | 'under_sink' | 'dedicated_cabinet';
   /** How tall the cabinets go (intake's cabinet height): a length, the ceiling, or null when not chosen. */
   readonly cabinetTop: Length | 'ceiling' | null;
+  /** Which cabinets the room uses: a bathroom's vanities or the kitchen's (the design choices' room grouping). */
+  readonly roomSet: 'kitchen' | 'bath';
 }
 
 export interface PlaceholderCabinet {
@@ -65,6 +67,8 @@ export interface PlaceholderDesign {
 export interface DraftSettings {
   readonly largestWidth: Length;
   readonly widthStep: Length;
+  /** The widest filler that lets the uppers either side of a hood stay one cabinet each (PROPOSED). */
+  readonly flankFillerMax: Length;
   readonly codes: typeof data.cabinets;
   readonly narrowBelow: Length;
   /** Owner, 2026-11-10: the clear space beside a hood, over a fridge, and the fridge panels' depth. */
@@ -88,6 +92,7 @@ function readSettings(): Result<DraftSettings> {
   const lengths: Record<string, string> = {
     largest_width: data.fill.largest_width,
     width_step: data.fill.width_step,
+    flank_filler_max: data.fill.flank_filler_max,
     narrow_below: data.cabinets.base_by_drawer_level.minimum.narrow_below,
     toe_kick_height: data.visual.toe_kick_height,
     counter_thickness: data.visual.counter_thickness,
@@ -125,6 +130,10 @@ function readSettings(): Result<DraftSettings> {
     codes.upper_over_cooking,
     codes.upper_corner,
     codes.upper_filler,
+    codes.bath.base,
+    codes.bath.sink,
+    codes.bath.base_filler,
+    codes.bath.maximum,
     codes.base_by_drawer_level.minimum.most,
     codes.base_by_drawer_level.minimum.narrow,
     codes.base_by_drawer_level.minimum.one_bank_of_3,
@@ -140,6 +149,7 @@ function readSettings(): Result<DraftSettings> {
     value: {
       largestWidth: out['largest_width']!,
       widthStep: out['width_step']!,
+      flankFillerMax: out['flank_filler_max']!,
       narrowBelow: out['narrow_below']!,
       codes,
       clearances: { hoodSide: out['hood_side']!, overFridge: out['over_fridge']!, fridgePanelDepth: out['fridge_panel_depth']! },
@@ -171,24 +181,47 @@ export function standard(code: string, dim: 'width' | 'height' | 'depth', catalo
 }
 
 /**
- * The prototype's fill: equal cabinets no wider than the largest width, in whole steps, the
- * extra spread one step at a time from the left, and what is left over as a filler.
+ * Cabinets made to fit the space (owner, 2026-11-10: "Widths are custom and made to fit the
+ * space"): as few equal cabinets as fit under the largest width, on the catalog's width step, with
+ * any extra steps spread one each from the left. A space narrower than the shortest run is one filler.
+ * `filler` is what is left: the whole space when it is too narrow, otherwise under one step.
  */
 export function fillWidths(gap: Length, s: Pick<DraftSettings, 'largestWidth' | 'widthStep'>, minRun: Length): { widths: Length[]; filler: Length } {
   if (gap <= 0) return { widths: [], filler: 0 };
   if (gap < minRun) return { widths: [], filler: gap };
   const n = Math.ceil(gap / s.largestWidth);
-  const base = Math.min(s.largestWidth, Math.floor(gap / n / s.widthStep) * s.widthStep);
-  if (base <= 0) return { widths: [], filler: gap };
-  const widths = Array.from({ length: n }, () => base);
-  let rest = gap - base * n;
-  for (let k = 0; k < n && rest >= s.widthStep; k++) {
-    if (widths[k]! + s.widthStep <= s.largestWidth) {
-      widths[k] = widths[k]! + s.widthStep;
-      rest -= s.widthStep;
+  const steps = Math.floor(gap / s.widthStep);
+  const each = Math.floor(steps / n);
+  if (each <= 0) return { widths: [], filler: gap };
+  const extra = steps - each * n;
+  const widths = Array.from({ length: n }, (_, k) => (each + (k < extra ? 1 : 0)) * s.widthStep);
+  return { widths, filler: gap - steps * s.widthStep };
+}
+
+/**
+ * One width for the uppers either side of a hood (PREF-019): the widest, up to the largest
+ * cabinet, that leaves each side's rest nothing, a stretch long enough for cabinets, or a filler
+ * no wider than `flankFillerMax` at the far end.
+ */
+export function equalFlank(a: Length, b: Length, s: Pick<DraftSettings, 'largestWidth' | 'widthStep' | 'flankFillerMax'>, minRun: Length): Length | null {
+  const fine = (rest: Length) => rest < s.widthStep || rest >= minRun || rest <= s.flankFillerMax;
+  const cap = Math.min(a, b, s.largestWidth);
+  for (let w = cap - (cap % s.widthStep); w >= Math.min(minRun, cap) && w > 0; w -= s.widthStep) if (fine(a - w) && fine(b - w)) return w;
+  return null;
+}
+
+/** A stretch cut where the cabinets above it need a joint below them, keeping every part at least `minRun`. */
+function splitAt(gap: Span, points: readonly Length[], minRun: Length): Span[] {
+  const out: Span[] = [];
+  let at = gap.start;
+  for (const p of [...points].sort((x, y) => x - y)) {
+    if (p - at >= minRun && gap.end - p >= minRun) {
+      out.push({ start: at, end: p });
+      at = p;
     }
   }
-  return { widths, filler: rest };
+  out.push({ start: at, end: gap.end });
+  return out;
 }
 
 /**
@@ -221,6 +254,10 @@ export function draftPlaceholder(room: Room, prefs: DraftPreferences, newId: () 
     // Corners where runs overlap are L-shaped 90-degree corner cabinets (owner, 2026-11-10).
     const cornerCode = prefs.cornerInsert === 'lazy_susan' ? c.corner_lazy_susan : prefs.cornerInsert === 'double_shelf' ? c.corner_double_shelf : c.corner_default;
     const cl = s.clearances;
+    // Bathrooms use the vanity cabinets (owner, 2026-11-10); every other room the kitchen's.
+    const codes = prefs.roomSet === 'bath' ? { base: c.bath.base, sink: c.bath.sink, base_filler: c.bath.base_filler } : { base: c.base, sink: c.sink, base_filler: c.base_filler };
+    /** Slivers under one cabinet step where a stretch doesn't land on the step: said once in the notes. */
+    const leftOver = { total: 0 };
     const panelW = size(c.fridge_panel, 'width');
 
     for (const w of room.walls) {
@@ -243,7 +280,63 @@ export function draftPlaceholder(room: Room, prefs: DraftPreferences, newId: () 
           else notes.push(`There is no room for the fridge panel on the fridge's ${side === 'start' ? 'left' : 'right'} side of wall ${room.walls.indexOf(w) + 1}: move the fridge ${formatInches(panelW)} away from the corner or wall.`);
         }
       }
-      for (const run of sortedRuns(w)) {
+      const runs = sortedRuns(w);
+      const runOfSpan = (at: Span) => runs.find((r) => r.offset <= at.start && at.end <= runEnd(r)) ?? runs.find((r) => r.offset < at.end && at.start < runEnd(r)) ?? null;
+
+      // Over each range or cooktop on this wall, whichever run it stands in: a hood with 2" clear
+      // each side, or a cabinet (owner, 2026-11-09 and 2026-11-10). The uppers either side are cut back to it.
+      const focal: Span[] = [];
+      for (const a of w.appliances) {
+        const over = overOf(a, rules);
+        if (!over) continue;
+        const runId = runOfSpan({ start: a.offset, end: applianceEnd(a) })?.run_id ?? '';
+        if (over === 'appliance_hood' || over === 'millwork_hood') out.push({ id: newId(), code: null, appliance: over === 'appliance_hood' ? 'hood' : 'millwork_hood', layer: 'upper', offset: a.offset, width: a.width.value, depth: null, wallId: w.wall_id, runId });
+        if (over === 'cabinet') out.push({ id: newId(), code: c.upper_over_cooking, appliance: null, layer: 'upper', offset: a.offset, width: a.width.value, depth: null, hung: true, wallId: w.wall_id, runId });
+        const g = over === 'cabinet' ? 0 : cl.hoodSide;
+        focal.push({ start: a.offset - g, end: applianceEnd(a) + g });
+      }
+
+      // Where every run's uppers go, worked out before the bases so the bases can line up with them.
+      const plan = new Map<string, { pieces: Span[]; corner: Length | null }>();
+      for (const run of runs) {
+        if (!hasUpper(run.kind)) continue;
+        const atStart = run.offset <= span.start && startCorner !== null;
+        const atEnd = runEnd(run) >= span.end && endCorner !== null;
+        let pieces: Span[] =
+          run.kind === 'upper'
+            ? subtract({ start: Math.max(run.offset, span.start), end: Math.min(runEnd(run), span.end) }, w.kind === 'room' ? windowSpans(w) : [])
+            : upperPieces(w, run, rules);
+        let corner: Length | null = null;
+        if (atStart && startCorner?.upper && pieces[0] && pieces[0].start <= span.start) {
+          const cw = size(c.upper_corner, 'width');
+          corner = pieces[0].start;
+          pieces = subtract(pieces[0], [{ start: pieces[0].start, end: pieces[0].start + cw }]).concat(pieces.slice(1));
+        }
+        if (atEnd && endCorner?.upper) pieces = pieces.flatMap((p) => subtract(p, [{ start: span.end - size(c.upper_corner, 'depth'), end: span.end }]));
+        // The fridge panels stand to the top line; the hood or the cabinet over the cooking has its own space.
+        plan.set(run.run_id, { pieces: pieces.flatMap((p) => subtract(p, [...fridgePanels, ...focal])).filter((p) => p.end - p.start >= rules.minRunLength), corner });
+      }
+      // The uppers either side of a hood, or of the cabinet over the cooking, are the same width
+      // (PREF-019, HARD-007), and the base cabinets below are sized to line up with them (owner, 2026-11-10).
+      const allPieces = [...plan.values()].flatMap((x) => x.pieces);
+      const flankLow = new Map<Span, Length>();
+      const flankHigh = new Map<Span, Length>();
+      const lineUp: Length[] = [];
+      for (const f of focal) {
+        const lo = allPieces.find((p) => p.end === f.start);
+        const hi = allPieces.find((p) => p.start === f.end);
+        if (!lo || !hi) continue;
+        const flank = equalFlank(lo.end - lo.start, hi.end - hi.start, s, rules.minRunLength);
+        if (flank === null) {
+          notes.push(`The uppers either side of the hood on wall ${room.walls.indexOf(w) + 1} can't be made the same width.`);
+          continue;
+        }
+        flankHigh.set(lo, flank);
+        flankLow.set(hi, flank);
+        lineUp.push(lo.end - flank, hi.start + flank);
+      }
+
+      for (const run of runs) {
         const items: Draft[] = [];
         const add = (d: Omit<Draft, 'id'>) => items.push({ id: newId(), ...d });
         const atStart = run.offset <= span.start && startCorner !== null;
@@ -263,7 +356,7 @@ export function draftPlaceholder(room: Room, prefs: DraftPreferences, newId: () 
           const taken: Span[] = [];
           // Every appliance standing in this stretch, even one that pokes past its end (never skipped:
           // the layout checks then show the clash). Sinks first, so the dishwasher can touch the sink base.
-          const isSink = (k: string) => k === 'sink' || k === 'bar_sink';
+          const isSink = (k: string) => k === 'sink' || k === 'bar_sink' || k === 'vanity_sink' || k === 'double_vanity_sink';
           const aps = w.appliances
             .filter((a) => a.offset < to && applianceEnd(a) > from)
             .sort((a, b) => Number(isSink(b.kind)) - Number(isSink(a.kind)) || a.offset - b.offset);
@@ -279,7 +372,8 @@ export function draftPlaceholder(room: Room, prefs: DraftPreferences, newId: () 
             if (!isSink(a.kind) && !placedWithSink.has(a.placement_id) && (a.offset < from || applianceEnd(a) > to))
               notes.push(`The ${a.kind.replace(/_/g, ' ')} on wall ${room.walls.indexOf(w) + 1} runs ${formatInches(Math.max(from - a.offset, applianceEnd(a) - to))} into the corner cabinet or past the end of its run: move it on the room drawing.`);
             if (isSink(a.kind)) {
-              const sw = Math.max(aw, size(c.sink, 'width'));
+              const sinkCode = codes.sink;
+              const sw = Math.max(aw, size(sinkCode, 'width'));
               let o = Math.round(a.offset + aw / 2 - sw / 2);
               // The dishwasher paired with the sink touches the sink base, on its side (HARD-005).
               const dw = aps.find((d) => d.kind === 'dishwasher' && d.paired_with === a.placement_id) ?? null;
@@ -293,7 +387,7 @@ export function draftPlaceholder(room: Room, prefs: DraftPreferences, newId: () 
                 o += move;
                 notes.push(`The sink base${dw ? ' and dishwasher' : ''} on wall ${room.walls.indexOf(w) + 1} ${dw ? 'are' : 'is'} drawn ${formatInches(Math.abs(move))} ${move < 0 ? 'toward the wall’s start' : 'toward the wall’s end'} to clear the corner or the end of the run: move the sink on the room drawing to match.`);
               }
-              add({ code: c.sink, appliance: null, layer: 'base', offset: o, width: sw, depth: null });
+              add({ code: sinkCode, appliance: null, layer: 'base', offset: o, width: sw, depth: null });
               taken.push({ start: o, end: o + sw });
               if (dw) {
                 const dOff = dwHigh ? o + sw : o - dwW;
@@ -322,67 +416,33 @@ export function draftPlaceholder(room: Room, prefs: DraftPreferences, newId: () 
           }
           // An island's back is covered by a finished back panel (owner, 2026-11-10).
           if (w.kind === 'floating' && hasBase(run.kind) && to > from) add({ code: c.island_back_panel, appliance: null, layer: 'base', offset: from, width: to - from, depth: null, back: true });
-          const fillCode = run.kind === 'pantry' ? c.pantry : c.base;
-          for (const gap of subtract({ start: from, end: to }, taken)) fillGap(gap, fillCode, c.base_filler, 'base', add, s, rules);
+          const fillCode = run.kind === 'pantry' ? c.pantry : codes.base;
+          for (const gap of subtract({ start: from, end: to }, taken))
+            for (const part of splitAt(gap, lineUp, rules.minRunLength)) fillGap(part, fillCode, codes.base_filler, 'base', add, s, rules, leftOver);
         }
 
-        if (hasUpper(run.kind)) {
-          let pieces: Span[] =
-            run.kind === 'upper'
-              ? subtract({ start: Math.max(run.offset, span.start), end: Math.min(runEnd(run), span.end) }, w.kind === 'room' ? windowSpans(w) : [])
-              : upperPieces(w, run, rules);
-          if (atStart && startCorner?.upper && pieces[0] && pieces[0].start <= span.start) {
-            const cw = size(c.upper_corner, 'width');
-            add({ code: c.upper_corner, appliance: null, layer: 'upper', offset: pieces[0].start, width: cw, depth: null });
-            pieces = subtract(pieces[0], [{ start: pieces[0].start, end: pieces[0].start + cw }]).concat(pieces.slice(1));
-          }
-          if (atEnd && endCorner?.upper) pieces = pieces.flatMap((p) => subtract(p, [{ start: span.end - size(c.upper_corner, 'depth'), end: span.end }]));
-          // Hoods over ranges and cooktops; a deeper upper over a fridge (it is skipped by upperPieces).
-          // A hood has clear space each side (owner, 2026-11-10); the fridge panels stand to the top line.
-          const cuts: Span[] = [...fridgePanels];
-          const focal: Span[] = [];
+        const up = plan.get(run.run_id);
+        if (up) {
+          if (up.corner !== null) add({ code: c.upper_corner, appliance: null, layer: 'upper', offset: up.corner, width: size(c.upper_corner, 'width'), depth: null });
+          // A deeper upper over a fridge (upperPieces leaves its stretch out).
           for (const a of w.appliances) {
             const t = applianceType(rules, a.kind);
-            if (!t || a.offset < run.offset || applianceEnd(a) > runEnd(run)) continue;
-            // What goes over a range or cooktop is the designer's choice (owner, 2026-11-09).
-            const over = overOf(a, rules);
-            if (over === 'appliance_hood' || over === 'millwork_hood') add({ code: null, appliance: over === 'appliance_hood' ? 'hood' : 'millwork_hood', layer: 'upper', offset: a.offset, width: a.width.value, depth: null });
-            if (over === 'cabinet') add({ code: c.upper_over_cooking, appliance: null, layer: 'upper', offset: a.offset, width: a.width.value, depth: null, hung: true });
-            if (over) {
-              const g = over === 'cabinet' ? 0 : cl.hoodSide;
-              cuts.push({ start: a.offset - g, end: applianceEnd(a) + g });
-              focal.push({ start: a.offset - g, end: applianceEnd(a) + g });
-            }
-            if (t.upperAboveDepth !== null && run.kind !== 'upper') add({ code: c.upper_over_fridge, appliance: null, layer: 'upper', offset: a.offset, width: a.width.value, depth: t.upperAboveDepth });
+            if (!t || t.upperAboveDepth === null || run.kind === 'upper' || a.offset < run.offset || applianceEnd(a) > runEnd(run)) continue;
+            add({ code: c.upper_over_fridge, appliance: null, layer: 'upper', offset: a.offset, width: a.width.value, depth: t.upperAboveDepth });
           }
-          const left = pieces.flatMap((p) => subtract(p, cuts)).filter((p) => p.end - p.start >= rules.minRunLength);
-          // The uppers either side of a hood or the cabinet over the cooking are the same width (PREF-019, HARD-007).
-          const natural = (p: Span) => fillWidths(p.end - p.start, s, rules.minRunLength).widths;
-          const flankLow = new Map<Span, Length>();
-          const flankHigh = new Map<Span, Length>();
-          for (const f of focal) {
-            const lo = left.find((p) => p.end === f.start);
-            const hi = left.find((p) => p.start === f.end);
-            if (!lo || !hi) continue;
-            const a = natural(lo).slice(-1)[0];
-            const b = natural(hi)[0];
-            if (a === undefined || b === undefined) continue;
-            const flank = Math.min(a, b);
-            flankHigh.set(lo, flank);
-            flankLow.set(hi, flank);
-          }
-          for (const p of left) {
+          for (const p of up.pieces) {
             const fl = flankLow.get(p) ?? 0;
             const fh = flankHigh.get(p) ?? 0;
-            if (fl && fl + fh <= p.end - p.start) add({ code: c.upper, appliance: null, layer: 'upper', offset: p.start, width: fl, depth: null });
-            if (fh && fl + fh <= p.end - p.start) add({ code: c.upper, appliance: null, layer: 'upper', offset: p.end - fh, width: fh, depth: null });
             const ok = fl + fh <= p.end - p.start;
-            fillGap({ start: p.start + (ok ? fl : 0), end: p.end - (ok ? fh : 0) }, c.upper, c.upper_filler, 'upper', add, s, rules);
+            if (ok && fl) add({ code: c.upper, appliance: null, layer: 'upper', offset: p.start, width: fl, depth: null });
+            if (ok && fh) add({ code: c.upper, appliance: null, layer: 'upper', offset: p.end - fh, width: fh, depth: null });
+            fillGap({ start: p.start + (ok ? fl : 0), end: p.end - (ok ? fh : 0) }, c.upper, c.upper_filler, 'upper', add, s, rules, leftOver);
           }
         }
         for (const it of items) out.push({ ...it, wallId: w.wall_id, runId: run.run_id });
       }
     }
+    if (leftOver.total > 0) notes.push(`${formatInches(leftOver.total)} in all is left open where a stretch doesn't land on the ${formatInches(s.widthStep)} cabinet step.`);
 
     const wallIndex = (id: string) => room.walls.findIndex((w) => w.wall_id === id);
     // The top line: the client's cabinet height, never above the ceiling.
@@ -412,17 +472,17 @@ export function draftPlaceholder(room: Room, prefs: DraftPreferences, newId: () 
       return { elevation: bottom, height: upperTop - bottom };
     };
     if (prefs.garbage === 'dedicated_cabinet') {
-      const sink = out.find((x) => x.code === c.sink);
+      const sink = out.find((x) => x.code === codes.sink);
       // The nearest base cabinet beside the sink, with nothing but fillers between them.
       const between = (lo: Length, hi: Length) => out.filter((x) => sink && x.wallId === sink.wallId && x.layer === 'base' && x.offset < hi && x.offset + x.width > lo);
       const gapTo = (x: Draft): Length => (sink ? (x.offset >= sink.offset + sink.width ? x.offset - (sink.offset + sink.width) : sink.offset - (x.offset + x.width)) : 0);
       const beside =
         sink &&
         out
-          .filter((x) => x.code !== null && isBase(x.code, s) && x.wallId === sink.wallId && gapTo(x) >= 0)
+          .filter((x) => x.code === codes.base && x.wallId === sink.wallId && gapTo(x) >= 0)
           .filter((x) => {
             const [lo, hi] = x.offset >= sink.offset ? [sink.offset + sink.width, x.offset] : [x.offset + x.width, sink.offset];
-            return between(lo, hi).every((y) => y.code === c.base_filler);
+            return between(lo, hi).every((y) => y.code === codes.base_filler);
           })
           .sort((x, y) => gapTo(x) - gapTo(y) || x.offset - y.offset)[0];
       if (beside) {
@@ -430,8 +490,12 @@ export function draftPlaceholder(room: Room, prefs: DraftPreferences, newId: () 
         notes.push('A garbage pull-out in its own cabinet beside the sink, as asked.');
       }
     }
-    if (prefs.drawers) applyDrawerLevel(out, prefs.drawers, s);
-    if (out.some((x) => x.code === c.sink)) notes.push('Sink base under the sink, with the dishwasher beside it where one was placed.');
+    if (prefs.roomSet === 'bath') {
+      // A vanity's drawers (PROPOSED reading of the drawer level for vanities, placeholder-draft.json "bath").
+      if (prefs.drawers === 'maximum') for (const b of out) if (b.code === codes.base && fits(c.bath.maximum, b.width)) b.code = c.bath.maximum;
+    } else if (prefs.drawers) applyDrawerLevel(out, prefs.drawers, s);
+    if (prefs.roomSet === 'bath') notes.push('Vanity cabinets, as this is a bathroom.');
+    if (out.some((x) => x.code === codes.sink)) notes.push('Sink base under the sink, with the dishwasher beside it where one was placed.');
     notes.push(
       prefs.drawers === null
         ? 'No drawer level was chosen for this room, so its base cabinets are plain door cabinets.'
@@ -454,8 +518,8 @@ export function draftPlaceholder(room: Room, prefs: DraftPreferences, newId: () 
     if (out.some((x) => isHood(x.appliance))) notes.push(`A hood over the range or cooktop, with ${formatInches(cl.hoodSide)} clear each side and the same width of upper either side; uppers stop at windows and over the fridge.`);
     if (out.some((x) => x.appliance === 'millwork_hood')) notes.push('A millwork hood is drawn as a box: the catalog has no millwork hood yet.');
     if (out.some((x) => x.hung)) notes.push('A short cabinet over the range or cooktop, hung from the top line. The 30" clear above the cooking surface is not checked yet: there is no counter height in the data.');
-    const fillers = out.filter((x) => (x.code === c.base_filler || x.code === c.upper_filler) && !x.full).length;
-    if (fillers) notes.push(`Equal cabinets in whole steps, with ${fillers} filler${fillers === 1 ? '' : 's'} to take up the rest.`);
+    const fillers = out.filter((x) => (x.code === codes.base_filler || x.code === c.upper_filler) && !x.full).length;
+    notes.push(`Cabinets made to fit each space, in equal widths${fillers ? `, with ${fillers} filler${fillers === 1 ? '' : 's'} where a space is too narrow for a cabinet` : ''}.`);
 
     return {
       ok: true,
@@ -477,14 +541,16 @@ export function draftPlaceholder(room: Room, prefs: DraftPreferences, newId: () 
 
 class MissingSize extends Error {}
 
-function fillGap(gap: Span, code: string, fillerCode: string, layer: 'base' | 'upper', add: (d: Omit<Draft, 'id'>) => void, s: DraftSettings, rules: LayoutRules): void {
+function fillGap(gap: Span, code: string, fillerCode: string, layer: 'base' | 'upper', add: (d: Omit<Draft, 'id'>) => void, s: DraftSettings, rules: LayoutRules, leftOver: { total: Length }): void {
   const { widths, filler } = fillWidths(gap.end - gap.start, s, rules.minRunLength);
   let at = gap.start;
   for (const w of widths) {
     add({ code, appliance: null, layer, offset: at, width: w, depth: null });
     at += w;
   }
-  if (filler > 0) add({ code: fillerCode, appliance: null, layer, offset: at, width: filler, depth: null });
+  // A space too narrow for a cabinet is a filler; a sliver under one step beside cabinets is left open and said.
+  if (filler > 0 && widths.length === 0) add({ code: fillerCode, appliance: null, layer, offset: at, width: filler, depth: null });
+  else if (filler > 0) leftOver.total += filler;
 }
 
 const isBase = (code: string, s: DraftSettings): boolean => code === s.codes.base;

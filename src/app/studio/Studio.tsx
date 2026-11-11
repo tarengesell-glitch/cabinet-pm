@@ -50,6 +50,7 @@ function prefsOf(r: RoomHandover, intake: IntakeState | null): DraftPreferences 
     drawers: DRAWER_LEVELS.find((d) => d === drawers) ?? null,
     cornerInsert: option('corner_insert'),
     garbage: garbage === 'under_sink' || garbage === 'dedicated_cabinet' ? garbage : 'none',
+    roomSet: roomSetOf(r) === 'bath' ? 'bath' : 'kitchen',
     cabinetTop: (() => {
       if (!intake || !INTAKE_DEFINITION.ok) return null;
       const top = roughCabinetTop(INTAKE_DEFINITION.value, intake, r.room_id);

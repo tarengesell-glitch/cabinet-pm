@@ -1,9 +1,11 @@
 {
   "source": "PLACEHOLDER for the AI design step, from the owner's Kitchen Studio prototype (https://claude.ai/artifact/Tkd2r8vTUswCs3ioJnGjqg, 2026-11-08; owner: \"a placeholder AI design animation (with no actual AI design)\"). None of these numbers are the shop's: the AI designer will choose cabinets from the shop's design rules and catalog instead (OA-3). Cabinet types and their heights and depths come from the catalog.",
   "fill": {
-    "note": "The prototype's recipe: split each stretch into equal cabinets no wider than the largest width, in whole steps, and give what is left to a filler.",
+    "note": "Owner, 2026-11-10 (chat, after trying a real job): \"Widths are custom and made to fit the space\", not large increments with fillers. Each stretch is split into as few equal cabinets as fit under the largest width (the prototype's 36\"), on the catalog's width step (1/16\", catalog-v1.json, owner-review). A filler only where a space is too narrow for a cabinet. Replaces the prototype's 3\" steps with a filler for the rest.",
     "largest_width": "36",
-    "width_step": "3"
+    "width_step": "1/16",
+    "flank_filler_max": "1 1/2",
+    "flank_filler_note": "PROPOSED (2026-11-10, this session): the uppers either side of a hood are one width (PREF-019); when one side is a little longer, the difference up to this much is a filler at that side's far end (against the corner, fridge panel or wall), so each side keeps one cabinet instead of being split into narrow ones. For the owner to confirm."
   },
   "cabinets": {
     "note": "Catalog codes the placeholder uses, by job.",
@@ -37,6 +39,13 @@
     "corner_double_shelf": "corner_base_adjustable",
     "corner_default": "corner_base",
     "garbage": "garbage_pullout",
+    "bath": {
+      "note": "PROPOSED (2026-11-10): bathrooms use the catalog's vanities, not the kitchen's base cabinets (owner: the bathroom's cabinet types were pulling from the kitchen library). Vanity, drawer over doors for most (there is no doors-only vanity), the vanity sink under a vanity sink, the vanity filler, and 3-drawer vanities for the Maximum drawer level. For the owner to confirm.",
+      "base": "vanity_drawer_doors",
+      "sink": "vanity_sink",
+      "base_filler": "vanity_filler",
+      "maximum": "vanity_3_drawers"
+    },
     "upper": "upper_doors",
     "upper_over_fridge": "upper_no_shelf",
     "upper_over_cooking": "upper_no_shelf",

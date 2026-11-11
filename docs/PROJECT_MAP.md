@@ -5,7 +5,7 @@ Navigation: what actually runs, where each rule's data and code live, and which 
 ## The live path: a saved job to the 3D view
 1. **Saved job:** the shared database (Supabase, `src/app/sync/`) or a test-job file (`src/app/studio/test-data.ts`, the studio's "Test data" menu). Each room's master copy is kept by `src/modules/designer/ui/placeholder-store.ts`.
 2. **Studio:** `src/app/studio/Studio.tsx` steps through the design choices (`intake` module), the room drawing, the design step and Customize.
-3. **Design step:** `src/app/studio/AiStep.tsx` calls `draftRoom` (`designer/ui/placeholder-store.ts`), which runs the **placeholder builder**: `src/modules/designer/model/placeholder-draft.ts`. No AI is called; the animation is a placeholder. The design choices reach it as `DraftPreferences`, built from the intake's answers by `prefsOf` in `Studio.tsx`; a new choice that should change the layout goes through intake's data, that function and the designer's contract.
+3. **Design step:** `src/app/studio/AiStep.tsx` calls `draftRoom` (`designer/ui/placeholder-store.ts`), which runs the **placeholder builder**: `src/modules/designer/model/placeholder-draft.ts`. No AI is called; the animation is a placeholder. The design choices reach it, and the 3D view, through one read: the intake's `roomChoices` (`intake/model/choices.ts`) interprets the answers; the studio hands the result to the designer as `DesignChoices`, which `designer/model/choices.ts` checks (`layoutPreferences` for the builder, `islandPanelsOf` for the 3D view). A new choice is added to the intake's data, `roomChoices`, `DesignChoices` and the code that uses it; the studio doesn't change.
 4. **Into the master copy:** `designer/model/cabinets.ts` (`placeholderItems`) turns the layout into placed items, saved as an AI draft version.
 5. **Customize and 3D:** `designer/ui/Customize.tsx` reads the placed items (`cabinetViews` in `cabinets.ts`) and draws them in `designer/ui/Stage3D.tsx` (three.js). Its one camera start is `fit()`.
 
@@ -47,7 +47,7 @@ Navigation: what actually runs, where each rule's data and code live, and which 
 | 3D view | `designer/__tests__/stage3d.test.ts` | `e2e/studio.spec.ts` (checks that the 3D view appears) |
 | Cabinet ends | `designer/__tests__/ends.test.ts` (the real kitchen's ends as before, layout changes, older designs, saving and opening again) | `e2e/studio.spec.ts` (an older design's ends set when asked) |
 | Room drawing, runs, appliances | `designer/__tests__/editor.test.ts`, `layout.test.ts`, `room-master-copy.test.ts` | `e2e/room-drawing.spec.ts`, `e2e/rough-layout.spec.ts` |
-| Design choices | `intake/__tests__/engine.test.ts` | `e2e/intake.spec.ts` |
+| Design choices | `intake/__tests__/engine.test.ts`, `choices.test.ts`; the designer's checks of them: `designer/__tests__/choices.test.ts` | `e2e/intake.spec.ts` |
 | Saving to the shared database, autosave, clashes | `src/app/sync/__tests__/job-sync.test.ts` (against the store's MOCKED in-memory database; live-database access depends on the session's environment, `docs/DEVELOPMENT.md`) | |
 | Clients (real records) | `src/modules/projects/__tests__/customers.test.ts` | `e2e/office.spec.ts` (demo clients only: browser tests run without the database) |
 | Database rules (versions, audit, staff only) | tested against the real project in rolled-back transactions (`src/platform/README.md`), not in `npm run test` | |

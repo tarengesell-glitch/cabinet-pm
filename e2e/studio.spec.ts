@@ -155,6 +155,24 @@ test('the placeholder AI design lays out the drawn room, then the customize scre
   await expect(page.getByText('Cabinet ends saved.')).toBeVisible();
   await expect(page.getByTestId('ends-missing')).toHaveCount(0);
   await expect(page.getByText('Every placement reviewed')).toBeVisible();
+
+  // Saved choices that aren't options (an older or damaged save): the design still opens with its
+  // cabinets; the island panel is reported, and nothing is laid out again from the drawer level.
+  await page.evaluate(() => {
+    const key = 'cabinet-pm.intake-preview.v1.job.c2';
+    const st = JSON.parse(localStorage.getItem(key)!) as { rooms: { answers: Record<string, unknown> }[] };
+    Object.assign(st.rooms[0]!.answers, { shape: 'l_shape_island', drawer_level: 'lots', island_back_panel: 'beadboard', island_side_panel: 'waterfall_stone' });
+    localStorage.setItem(key, JSON.stringify(st));
+  });
+  await page.reload();
+  await expect(step(page, 'AI design')).toBeDisabled();
+  await step(page, 'Customize').click();
+  await expect(page.getByText('Every placement reviewed')).toBeVisible();
+  await expect(page.getByTestId('panel-problems')).toContainText('"beadboard"');
+  await expect(page.getByTestId('panel-problems')).toContainText('stand-in');
+  await page.getByRole('tab', { name: 'Run' }).click();
+  await expect(page.getByRole('button', { name: 'Re-draft this run' })).toBeDisabled();
+  await expect(page.getByTestId('redraft-blocked')).toContainText('"lots"');
 });
 
 test('Test data: save a job as the test start and load it into another job', async ({ page }) => {

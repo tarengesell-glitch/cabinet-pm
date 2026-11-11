@@ -61,6 +61,7 @@ The app's design studio (`/studio`) shows this screen as its first step (DECISIO
 - `roughCeiling(def, state, roomId)`: the room's rough ceiling height as an exact length, for the room drawing to start from (IK-17). "Match the kitchen" follows the kitchen; no answer is refused with the reason.
 - `loadIntakeState(job?)`: the answers kept in this browser, for the studio. Each demo client's job keeps its own; without a job, the preview job's.
 - `roomLook(def, state, roomId)` and `roomSummary(def, state, roomId)`: a room's look (colours, door style, hardware) and its answers in words, for the customize screens.
+- `roomChoices(def, state, roomId)`: the room's choices for building and drawing it (room set, cabinet height, drawer level, corner insert, garbage, island panels), worked out once. The drawer level and island panels say whether they are chosen, unanswered, not applicable, or unrecognized (a saved value that isn't an option, reported as it is). Nothing is saved or copied.
 - `intakeHandover(def, state)`: one record per room, with its `room_type`, `name`, `complete`, `design_from` and `answers`. Each answer carries the option ID and its label as the client saw it, or a count, the picked IDs and labels, typed text, or a length in the base unit. Only questions that apply are included. An unanswered question is left out, never filled in.
 
 ## Not yet

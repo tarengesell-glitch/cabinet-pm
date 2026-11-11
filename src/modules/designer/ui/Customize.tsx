@@ -17,7 +17,8 @@ import { fillEnds, refreshEnds, reviewEnds } from '../model/ends';
 import { room as roomOf, wallLabel, type Draft } from '../model/editor';
 import { RUN_KIND_LABEL } from '../model/layout';
 import { applianceType, LAYOUT_RULES } from '../model/layout-rules';
-import { DRAFT_SETTINGS, draftPlaceholder, itemByCode, runOf, standard, type DraftPreferences } from '../model/placeholder-draft';
+import { islandPanelsOf, layoutPreferences, type DesignChoices } from '../model/choices';
+import { DRAFT_SETTINGS, draftPlaceholder, itemByCode, runOf, standard } from '../model/placeholder-draft';
 import { parseSize } from './parseSize';
 import { placeholderNotes, saveRoom, storedDraft } from './placeholder-store';
 import { FrontIcon } from './FrontIcon';
@@ -31,8 +32,8 @@ export interface CustomizeRoom {
   readonly look: FinishLook;
   /** The room's design choices, in words, for the Room tab. */
   readonly choices: readonly { readonly label: string; readonly value: string }[];
-  /** What the placeholder recipe reads from the design choices (for re-drafting a run). */
-  readonly prefs: DraftPreferences;
+  /** The room's design choices for the layout (re-drafting a run) and the 3D view (island panels), checked here before use. */
+  readonly designChoices: DesignChoices;
   /** Opens the design choices for this room. */
   readonly onEditChoices: () => void;
   /** Called after every saved change. */
@@ -63,6 +64,9 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
   const [fitToken, setFitToken] = useState(0);
   const [message, setMessage] = useState<{ kind: 'error' | 'notice'; text: string } | null>(null);
   const [approveArmed, setApproveArmed] = useState(false);
+  /** The choices, checked: a layout is made only from usable ones; a panel the 3D view can't show is reported. */
+  const layoutPrefs = layoutPreferences(cr.designChoices);
+  const panels = islandPanelsOf(cr.designChoices);
 
   useEffect(() => {
     const d = storedDraft(cr.key);
@@ -249,6 +253,13 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
               </button>
             </div>
           )}
+          {panels.problems.length > 0 && (
+            <div className={s.notice} role="status" data-testid="panel-problems">
+              {panels.problems.map((p) => (
+                <p key={p}>{p}</p>
+              ))}
+            </div>
+          )}
           {tab === 'room' && (
             <>
               <div className={s.tiles}>
@@ -366,9 +377,11 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
                 <div>
                   <button
                     className={s.btn}
-                    disabled={!canEdit}
+                    disabled={!canEdit || !layoutPrefs.ok}
+                    title={layoutPrefs.ok ? undefined : layoutPrefs.reason}
                     onClick={() => {
-                      const fresh = draftPlaceholder(room, cr.prefs, () => crypto.randomUUID());
+                      if (!layoutPrefs.ok) return setMessage({ kind: 'error', text: layoutPrefs.reason });
+                      const fresh = draftPlaceholder(room, layoutPrefs.value, () => crypto.randomUUID());
                       if (!fresh.ok) return setMessage({ kind: 'error', text: fresh.reason });
                       const items = placeholderItems(room, fresh.value);
                       if (!items.ok) return setMessage({ kind: 'error', text: items.reason });
@@ -380,6 +393,11 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
                   >
                     Re-draft this run
                   </button>
+                  {!layoutPrefs.ok && (
+                    <p className={s.hint} data-testid="redraft-blocked">
+                      Can’t re-draft: {layoutPrefs.reason}
+                    </p>
+                  )}
                 </div>
               </>
             ))}
@@ -423,7 +441,7 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
         </div>
       </section>
       <section className={s.stageCol} aria-label="3D view">
-        <Stage3D room={room} cabinets={design.cabinets} look={cr.look} selected={selected} doorsOpen={doorsOpen} fitToken={fitToken} onPick={pick} onError={show3dError} />
+        <Stage3D room={room} cabinets={design.cabinets} look={cr.look} panels={panels} selected={selected} doorsOpen={doorsOpen} fitToken={fitToken} onPick={pick} onError={show3dError} />
         <div className={s.hudTop}>
           <div className={s.hudCard}>
             <div className={s.label}>Live preview</div>

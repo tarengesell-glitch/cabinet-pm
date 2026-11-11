@@ -14,9 +14,10 @@
 import Link from 'next/link';
 import { useCallback, useMemo, useState, type ReactNode } from 'react';
 import type { User } from '@/platform/index';
-import { roomDrawingStatus, type DraftPreferences, type DrawerLevel, type RoomDrawingStatus } from '@/modules/designer/contract';
+import { refuse, type Result } from '@/core/index';
+import { layoutPreferences, roomDrawingStatus, type DesignChoices, type RoomDrawingStatus } from '@/modules/designer/contract';
 import { Customize, RoomCapture } from '@/modules/designer/ui/index';
-import { INTAKE_DEFINITION, intakeHandover, loadIntakeState, roomLook, roomSummary, roughCabinetTop, roughCeiling, type IntakeState, type RoomHandover } from '@/modules/intake/contract';
+import { INTAKE_DEFINITION, intakeHandover, loadIntakeState, roomChoices, roomLook, roomSummary, roughCeiling, type IntakeState, type RoomHandover } from '@/modules/intake/contract';
 import { IntakeScreen } from '@/modules/intake/ui/index';
 import { clientHref, type ClientInfo } from '../clients';
 import { jobName } from '../demo-data';
@@ -33,41 +34,19 @@ const STEPS: readonly { readonly id: Stage; readonly name: string }[] = [
   { id: 'customize', name: 'Customize' },
 ];
 const STANDALONE_NEXT = { href: '/rooms/preview/', label: 'Next: walls, cabinets and appliances' } as const;
-const DRAWER_LEVELS: readonly DrawerLevel[] = ['minimum', 'moderate', 'maximum'];
 
 /** A room's drawing counts as done once it has walls and cabinet runs and no problems (owner, 2026-11-08). */
 const drawingDone = (st: RoomDrawingStatus | undefined): boolean => st?.kind === 'drawn' && st.walls > 0 && st.runs > 0 && st.problems === 0;
 
-/** What the placeholder recipe reads from a room's design choices. Missing answers stay missing. */
-function prefsOf(r: RoomHandover, intake: IntakeState | null): DraftPreferences {
-  const option = (k: string): string | null => {
-    const a = r.answers[k];
-    return a && 'option_id' in a ? a.option_id : null;
-  };
-  const drawers = option('drawer_level');
-  const garbage = option('garbage_recycling') === 'yes' ? option('garbage_location') : null;
-  return {
-    drawers: DRAWER_LEVELS.find((d) => d === drawers) ?? null,
-    cornerInsert: option('corner_insert'),
-    garbage: garbage === 'under_sink' || garbage === 'dedicated_cabinet' ? garbage : 'none',
-    roomSet: roomSetOf(r) === 'bath' ? 'bath' : 'kitchen',
-    cabinetTop: (() => {
-      if (!intake || !INTAKE_DEFINITION.ok) return null;
-      const top = roughCabinetTop(INTAKE_DEFINITION.value, intake, r.room_id);
-      return top.ok ? top.value : null;
-    })(),
-  };
-}
-
 /**
- * Which kind of room it is for the drawing's fixtures and depths (owner, 2026-11-09): rooms the
- * design choices group as bathrooms (their "bath" insert set) are "bath"; every other room uses the
- * kitchen's until the owner says otherwise.
+ * A room's design choices, as the intake interprets them, handed to the designer as they are (the
+ * designer checks them before use). Assigning the intake's record to the designer's input type
+ * keeps the two contracts in step at compile time.
  */
-function roomSetOf(r: RoomHandover): string {
-  if (!INTAKE_DEFINITION.ok) return 'kitchen';
-  const type = INTAKE_DEFINITION.value.intake.room_types.types.find((t) => t.id === r.room_type);
-  return type?.inserts === 'bath' ? 'bath' : 'kitchen';
+function designChoicesOf(intake: IntakeState | null, roomId: string): Result<DesignChoices> {
+  if (!intake) return refuse('There are no design choices for this job yet.');
+  if (!INTAKE_DEFINITION.ok) return refuse(`The design choices can’t be read: ${INTAKE_DEFINITION.reason}`);
+  return roomChoices(INTAKE_DEFINITION.value, intake, roomId);
 }
 
 function readIntake(job: string | null): IntakeState | null {
@@ -106,11 +85,21 @@ export function Studio({ user, saveStatus, client }: { user: User; saveStatus: R
     [rooms, drawings],
   );
 
+  const choices = useMemo(() => new Map(rooms.map((r) => [r.room_id, designChoicesOf(intake, r.room_id)] as const)), [rooms, intake]);
+  /** The first room whose choices can't be used for a layout, with the reason: the design step waits for it. */
+  const unusable = rooms
+    .map((r) => {
+      const c = choices.get(r.room_id);
+      const p = c?.ok ? layoutPreferences(c.value) : (c ?? refuse('No design choices.'));
+      return p.ok ? null : `The ${r.name.toLowerCase()}’s design choices can’t be used for a layout: ${p.reason}`;
+    })
+    .find((x) => x !== null);
   const missingChoices = rooms.filter((r) => !r.complete);
   const notDrawn = rooms.filter((r) => !drawingDone(drawings.get(r.room_id)));
   const drawingReason =
     rooms.length === 0 ? 'Make the design choices first.' : missingChoices.length > 0 ? `Finish the design choices for ${missingChoices.map((r) => r.name.toLowerCase()).join(', ')} first.` : null;
-  const aiReason = drawingReason ?? (notDrawn.length > 0 ? `Draw the walls and cabinet runs of the ${notDrawn.map((r) => r.name.toLowerCase()).join(', ')} first, with no problems.` : null);
+  const aiReason =
+    drawingReason ?? (notDrawn.length > 0 ? `Draw the walls and cabinet runs of the ${notDrawn.map((r) => r.name.toLowerCase()).join(', ')} first, with no problems.` : null) ?? unusable ?? null;
   const customizeReason = rooms.length > 0 && rooms.every((r) => designed.has(r.room_id)) ? null : 'Run the AI design step first.';
 
   const onIntakeChange = useCallback((state: IntakeState) => {
@@ -146,7 +135,8 @@ export function Studio({ user, saveStatus, client }: { user: User; saveStatus: R
   const drawingProblem = current ? drawings.get(current.room_id) : undefined;
 
   const look = current && intake && INTAKE_DEFINITION.ok ? roomLook(INTAKE_DEFINITION.value, intake, current.room_id) : null;
-  const choices = current && intake && INTAKE_DEFINITION.ok ? roomSummary(INTAKE_DEFINITION.value, intake, current.room_id) : [];
+  const summary = current && intake && INTAKE_DEFINITION.ok ? roomSummary(INTAKE_DEFINITION.value, intake, current.room_id) : [];
+  const currentChoices = current ? choices.get(current.room_id) : undefined;
 
   return (
     <div className={s.flow}>
@@ -198,12 +188,12 @@ export function Studio({ user, saveStatus, client }: { user: User; saveStatus: R
                 The {current.name.toLowerCase()}&apos;s drawing can&apos;t be read: {drawingProblem.reason}
               </p>
             )}
-            <RoomCapture key={current.room_id} user={user} studio={{ key: current.room_id, name: current.name, ceiling, onChange: bump, roomSet: roomSetOf(current) }} />
+            <RoomCapture key={current.room_id} user={user} studio={{ key: current.room_id, name: current.name, ceiling, onChange: bump, roomSet: currentChoices?.ok ? currentChoices.value.roomSet : null }} />
           </>
         )}
         {stage === 'ai' && (
           <AiStep
-            rooms={rooms.map((r) => ({ id: r.room_id, name: r.name, prefs: prefsOf(r, intake) }))}
+            rooms={rooms.map((r) => ({ id: r.room_id, name: r.name, choices: choices.get(r.room_id) ?? refuse('No design choices.') }))}
             alreadyDesigned={rooms.length > 0 && rooms.every((r) => designed.has(r.room_id))}
             userId={user.id}
             onDrafted={bump}
@@ -213,7 +203,12 @@ export function Studio({ user, saveStatus, client }: { user: User; saveStatus: R
             }}
           />
         )}
-        {stage === 'customize' && current && look && (
+        {stage === 'customize' && current && currentChoices && !currentChoices.ok && (
+          <p className={s.alert} role="alert">
+            The {current.name.toLowerCase()}&apos;s design choices can&apos;t be read: {currentChoices.reason}
+          </p>
+        )}
+        {stage === 'customize' && current && look && currentChoices?.ok && (
           <Customize
             key={current.room_id}
             user={user}
@@ -221,8 +216,8 @@ export function Studio({ user, saveStatus, client }: { user: User; saveStatus: R
               key: current.room_id,
               name: current.name,
               look,
-              choices,
-              prefs: prefsOf(current, intake),
+              choices: summary,
+              designChoices: currentChoices.value,
               onEditChoices: () => setStage('choices'),
               onChange: bump,
             }}

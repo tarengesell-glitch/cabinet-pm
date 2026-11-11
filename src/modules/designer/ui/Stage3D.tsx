@@ -13,6 +13,7 @@ import { cornerCabinets, direction, halfThickness, insideNormal, insideSpan, wal
 import type { CabinetView } from '../model/cabinets';
 import { endOpen, TOUCH, type Context } from '../model/ends';
 import { DRAFT_SETTINGS, isHood, itemByCode, standard } from '../model/placeholder-draft';
+import type { IslandPanels, PanelLook } from '../model/choices';
 import { GOLD } from './theme';
 
 /** How the room looks, from the design choices (the intake's look). */
@@ -28,10 +29,18 @@ export interface FinishLook {
   readonly knobFinish: string;
   readonly doorOrient: 'vertical' | 'horizontal';
   readonly drawerTop: boolean;
-  /** The island's back and side panels as chosen ("door_panels", "shiplap", "waterfall_stone"…), or null. */
+}
+
+/** The look as the drawing uses it: the finish plus the island panels it can show as chosen (null: plain). */
+export interface DrawLook extends FinishLook {
   readonly islandBack: string | null;
   readonly islandSide: string | null;
 }
+
+const chosenPanel = (p: PanelLook): string | null => (p.kind === 'chosen' ? p.option_id : null);
+
+/** The finish with the island panels: one the view can't show is drawn plain, and the screen says so (`IslandPanels.problems`). */
+export const drawLook = (look: FinishLook, panels: IslandPanels): DrawLook => ({ ...look, islandBack: chosenPanel(panels.back), islandSide: chosenPanel(panels.side) });
 
 const IN = 64;
 const inch = (v: number): number => v / IN;
@@ -65,6 +74,8 @@ export function Stage3D(props: {
   /** The room's cabinets, appliances and hoods, worked out from the master copy. */
   cabinets: readonly CabinetView[];
   look: FinishLook;
+  /** The island panels, checked by `islandPanelsOf`; one it can't show is drawn plain and reported by the screen. */
+  panels: IslandPanels;
   selected: string | null;
   doorsOpen: boolean;
   /** Bump to put the camera back to the starting view. */
@@ -212,8 +223,8 @@ export function Stage3D(props: {
   // Rebuild the room whenever it, its design or its look changes. The look is compared by value:
   // the screen hands a new but equal one on every render.
   const { room, cabinets, selected } = props;
-  const lookKey = JSON.stringify(props.look);
-  const look = useMemo(() => JSON.parse(lookKey) as FinishLook, [lookKey]);
+  const lookKey = JSON.stringify(drawLook(props.look, props.panels));
+  const look = useMemo(() => JSON.parse(lookKey) as DrawLook, [lookKey]);
   useEffect(() => {
     const s = s3.current;
     if (!s) return;
@@ -412,7 +423,7 @@ export function finishedEnds(c: CabinetView): ('low' | 'high')[] {
  * same front line (the base depth plus the overhang) and the stretch's tallest base cabinet's height;
  * an island's also covers its back panel, and an end with nothing beside it gets the overhang too.
  */
-export function counters(s: Pick<Scene3D, 'mats'>, ctx: Context, look: FinishLook): THREE.Group[] {
+export function counters(s: Pick<Scene3D, 'mats'>, ctx: Context, look: Pick<FinishLook, 'counter'>): THREE.Group[] {
   if (!DRAFT_SETTINGS.ok) return [];
   const v = DRAFT_SETTINGS.value.visual;
   const counterT = inch(v.counter);
@@ -466,7 +477,7 @@ export function counters(s: Pick<Scene3D, 'mats'>, ctx: Context, look: FinishLoo
   return out;
 }
 
-function cabinet(s: Scene3D, c: CabinetView, ctx: Context, look: FinishLook, isSelected: boolean): THREE.Group | null {
+export function cabinet(s: Pick<Scene3D, 'mats' | 'doors'>, c: CabinetView, ctx: Context, look: DrawLook, isSelected: boolean): THREE.Group | null {
   if (!DRAFT_SETTINGS.ok) return null;
   const v = DRAFT_SETTINGS.value.visual;
   const room = ctx.room;

@@ -8,6 +8,14 @@ The history of decisions and the evidence of the owner's approval. Only the owne
 
 ## Decided
 
+### 2026-11-11: Design choices read in one place; unknown drawer and island-panel values refused (owner, chat, 2026-11-11)
+- **Owner request (the evidence):** "Proceed with the proposed centralized interpretation of intake choices as one focused PR. Keep intake answers authoritative; don't put them into `room_selections` or create another saved copy. You have approval to replace silent fallbacks for unknown drawer and island-panel values with clear validation errors." Also: an invalid choice must not make a saved design inaccessible, erase cabinets or silently regenerate anything; an invalid island panel is shown as a limitation, never silently as a valid plain panel.
+- **Approved and built:** the intake works out a room's design choices once (`roomChoices`, intake contract), each as chosen, unanswered, not applicable or unrecognized (saved, but not one of the question's options). The intake's saved answers stay the only copy: `room_selections` is for catalog options and is not used for them. The designer checks the choices before use (`layoutPreferences`, `islandPanelsOf`, designer contract); the studio only hands them over.
+- **An unknown drawer level** (unrecognized, or one the layout recipe doesn't have) stops the design step and "Re-draft this run" with the reason, before any room's cabinets are replaced. Unanswered or not applicable stays as before: plain door cabinets. The saved design still opens.
+- **An unknown island back or side panel** is drawn plain only as a stand-in, and Customize says so. Unanswered, or no island, is plain as before.
+- **Deferred, not a blocker:** a notice that the room's choices changed since its layout was drafted. It would need the draft to record which choices it was made from. Not to be picked up automatically.
+- **Not changed (still quietly defaulted, as before):** an unknown corner insert, garbage location, room type or cabinet height. See Open questions DC-1.
+
 ### 2026-11-11: How current requirements are read, and working across modules (owner, chat, 2026-11-11)
 - **Current requirements are kept apart from the history.** `docs/REQUIREMENTS.md` lists today's requirements by topic, each with its approval status and its build status kept separate, and points back to its evidence here. This file stays the history and the approval evidence. Approval is never inferred from code.
 - **"BUILD_SPEC always wins" is resolved:** an explicitly approved owner decision that changes a requirement replaces it, including the spec's own text; the spec is not edited, and the replaced parts are listed in `docs/REQUIREMENTS.md`. The spec still wins over the documents derived from it, PROPOSED choices and code. No approved product requirement was changed by this.
@@ -522,6 +530,9 @@ After walls, doors and windows, the person marks where cabinetry goes and where 
 - ~~(2026-10-24) closet-builder is kept for reference only; no code is carried over.~~ Reopened as C-1, because a visual editor and room capture are back in scope.
 
 ## Open questions
+
+### Design choices (2026-11-11)
+- **DC-1 Other unknown choice values.** The 2026-11-11 approval covers the drawer level and the island panels. A saved corner insert, garbage location, room type or cabinet height that isn't one of its options is still treated as no answer (no corner insert, no garbage pull-out, the kitchen's cabinets, no cabinet height). Should those also stop the design step with the reason?
 
 ### Needed before Phase 1 code
 - **CV-1 Where does Cabinet Vision run, and who works in it?** Is it on a computer at the colony, operated by colony staff, or with you? How reliable is that computer's internet? The automatic library sync and read-back (OA-6) need something running on that computer. Phase 0's samples also come from there.

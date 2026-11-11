@@ -3,6 +3,7 @@ import { JobSchema, runChecks, type PlacedItem, type Room } from '@/core/index';
 import { catalogItemCheck, CURRENT_CATALOG } from '@/modules/catalog/contract';
 import { endOption, placeholderItems } from '../model/cabinets';
 import { endContext, fillEnds, refreshEnds, reviewEnds, withRuleEnds } from '../model/ends';
+import type { DesignChoices } from '../model/choices';
 import { draftPlaceholder, itemByCode, type DraftPreferences } from '../model/placeholder-draft';
 import { finishedEnds } from '../ui/Stage3D';
 import { draftRoom, storedDraft } from '../ui/placeholder-store';
@@ -15,6 +16,8 @@ let n = 0;
 // Not the fixture's own ID pattern, so a cabinet never shares an ID with an appliance.
 const ids = () => `eeeeeeee-0000-4000-8000-${String(++n).padStart(12, '0')}`;
 const MAX: DraftPreferences = { drawers: 'maximum', cornerInsert: 'lazy_susan', garbage: 'dedicated_cabinet', cabinetTop: 'ceiling', roomSet: 'kitchen' };
+/** The same choices as the design step receives them from the design choices. */
+const MAX_CHOICES: DesignChoices = { ...MAX, drawerLevel: { status: 'chosen', option_id: 'maximum' }, islandBackPanel: { status: 'unanswered' }, islandSidePanel: { status: 'unanswered' } };
 const PLAIN: DraftPreferences = { drawers: null, cornerInsert: null, garbage: 'none', cabinetTop: null, roomSet: 'kitchen' };
 
 /** The real kitchen laid out by the placeholder, without ends (as an older design was saved). */
@@ -202,7 +205,7 @@ describe('saving and opening again', () => {
 
   it('the design step saves each cabinet’s ends in the master copy, and they come back the same', () => {
     window.localStorage.setItem(storageKey(REAL_KITCHEN_ROOM_ID), JSON.stringify({ job: realKitchen(), wallDefaults: null }));
-    const drafted = ok(draftRoom(REAL_KITCHEN_ROOM_ID, MAX, 'ffffffff-0000-4000-8000-000000000001'));
+    const drafted = ok(draftRoom(REAL_KITCHEN_ROOM_ID, MAX_CHOICES, 'ffffffff-0000-4000-8000-000000000001'));
     const reopened = roomOf(ok(storedDraft(REAL_KITCHEN_ROOM_ID)));
     expect(JobSchema.safeParse(ok(storedDraft(REAL_KITCHEN_ROOM_ID)).job).success).toBe(true);
     const sel = (r: Room) => r.items.map((i) => [i.item_instance_id, i.item_selections] as const);

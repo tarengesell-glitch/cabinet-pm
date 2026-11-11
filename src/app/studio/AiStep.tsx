@@ -6,7 +6,8 @@
  * A room that can't be laid out stops the step with the reason (rule 7).
  */
 import { useEffect, useRef, useState } from 'react';
-import { draftRoom, type DraftPreferences } from '@/modules/designer/contract';
+import type { Result } from '@/core/index';
+import { draftRoom, layoutPreferences, type DesignChoices } from '@/modules/designer/contract';
 import { PlanThumb } from '@/modules/designer/ui/index';
 import s from './Studio.module.css';
 
@@ -14,7 +15,8 @@ const STEP_MS = 1500;
 const DONE_MS = 1100;
 
 export function AiStep(props: {
-  rooms: readonly { id: string; name: string; prefs: DraftPreferences }[];
+  /** Each room's design choices; every room's are checked before any room is laid out again. */
+  rooms: readonly { id: string; name: string; choices: Result<DesignChoices> }[];
   /** Every room already has a design: show it as done, and only draft again when asked. */
   alreadyDesigned: boolean;
   /** The person running the step, recorded in each room's history. */
@@ -38,10 +40,20 @@ export function AiStep(props: {
     const wait = reduce ? 150 : STEP_MS;
     let i = 0;
     let timer = 0;
+    // Every room's choices are checked first, so one that can't be used stops the step before any
+    // room's saved design is replaced.
+    for (const room of roomsRef.current) {
+      const p = room.choices.ok ? layoutPreferences(room.choices.value) : room.choices;
+      if (!p.ok) {
+        setError(`The ${room.name.toLowerCase()} can’t be laid out from its design choices: ${p.reason}`);
+        return;
+      }
+    }
     const tick = () => {
       const room = roomsRef.current[i];
       if (!room) return;
-      const r = draftRoom(room.id, room.prefs, props.userId);
+      if (!room.choices.ok) return setError(`The ${room.name.toLowerCase()} can’t be laid out from its design choices: ${room.choices.reason}`);
+      const r = draftRoom(room.id, room.choices.value, props.userId);
       if (!r.ok) {
         setError(`The ${room.name.toLowerCase()} couldn’t be laid out: ${r.reason}`);
         return;

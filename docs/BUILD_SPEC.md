@@ -3,6 +3,7 @@ Owner's spec, received from Taren on 2026-10-27, recorded word for word.
 It is the authority for scope, principles, modules, the master copy and the build phases.
 Owner amendments are added as dated rows in the "Owner amendments" table, without editing the original text.
 The other docs in docs/ turn it into folders, tables and sessions; where they disagree, this file wins.
+Exception (owner, 2026-11-11): a later, explicitly approved owner decision in docs/DECISIONS.md that changes a requirement here replaces it, as the amendments do. This text is not edited; docs/REQUIREMENTS.md lists what has been replaced and holds today's requirements.
 Change it only with the owner's yes, and bump the version line when you do.
 -->
 

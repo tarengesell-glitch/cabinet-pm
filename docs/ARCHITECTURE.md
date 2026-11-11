@@ -101,7 +101,7 @@ On top of the table:
 - `core/` defines the check interface. A check has an id, a layer (layout, buildability, design rules, translation preflight, approval) and a function `run(masterCopy, context) → Issue[]`.
 - An issue has a severity (`block` or `warn`), the item or wall it is about, and a plain-language message.
 - Each module provides its checks through its contract. `app/` registers them, so Core never knows who they are.
-- A shop can promote a design rule from warn to block. That setting is data in `shop-settings`.
+- A design rule's severity is data in `shop-settings`: each confirmed rule says whether the design tool won't let it be drawn, shows an error, or adds a suggestion (DECISIONS 2026-11-08 "Design rules reviewed", replacing the spec's "warn by default"). Whether design-rule findings stop the push is open (`docs/REQUIREMENTS.md` "What blocks at each stage").
 - **The push conditions (OA-5).** On top of the spec's layers, the gate has a **release** layer. Each condition is a check provided by its owning module:
 
   | Condition | Check provided by |

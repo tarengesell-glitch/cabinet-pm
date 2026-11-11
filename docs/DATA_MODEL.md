@@ -51,7 +51,7 @@ Core owns no tables. It owns the master copy *format*: Job, Room, Wall, PlacedIt
 
 ## shop-settings
 
-- **design_rules**: structured rule, plain-language description, default severity (warn), and the shop's promotion to block.
+- **design_rules**: structured rule, plain-language description, and its design-tool setting (won't let it be drawn, error, or suggestion; DECISIONS 2026-11-08 "Design rules reviewed"). Today a data file, `src/modules/shop-settings/data/design-rules.json`, not a table.
 - **default_selections**, **preferences**.
 
 ## visual-library

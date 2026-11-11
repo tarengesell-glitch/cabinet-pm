@@ -1,6 +1,6 @@
 # Build Plan
 
-The phases are `docs/BUILD_SPEC.md` section 10. Phases 9 and 10 and the additions to 2, 4, 5 and 7 come from the owner amendments (2026-10-27). This file breaks them into sessions: one Claude Code session per row, then review, test and commit before the next. Rule of thumb: if a session wants to touch more than one module, split it.
+The phases are `docs/BUILD_SPEC.md` section 10. Phases 9 and 10 and the additions to 2, 4, 5 and 7 come from the owner amendments (2026-10-27). This file breaks them into sessions: one Claude Code session per row, then review, test and commit before the next. Keep each session to one requested behaviour; it may touch every module that behaviour needs (root `CLAUDE.md` "Working across modules").
 
 "Owner" rows are done by you (and the shop), not by Claude.
 

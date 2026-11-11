@@ -59,6 +59,8 @@ export function lookOf(x: Intake): Look {
     trimHex: trim(x.effKey('top_trim_colour'), 'top_trim_colour_other'),
     valance: str(x.effKey('light_valance')) ?? null,
     valanceHex: trim(x.effKey('light_valance_colour'), 'light_valance_colour_other'),
+    islandBack: str(x.effKey('island_back_panel')) ?? null,
+    islandSide: str(x.effKey('island_side_panel')) ?? null,
     plain: !x.isPrimary(),
     counters: true,
   };

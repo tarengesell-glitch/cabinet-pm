@@ -12,6 +12,7 @@ import type { Room, Wall } from '@/core/index';
 import { cornerCabinets, direction, halfThickness, insideNormal, insideSpan, wallLength } from '../model/layout';
 import type { CabinetView } from '../model/cabinets';
 import { endOpen, TOUCH, type Context } from '../model/ends';
+import { cameraPose, FOV, roomFrame, viewName, type CameraPose, type CameraView } from './camera-views';
 import { DRAFT_SETTINGS, isHood, itemByCode, standard } from '../model/placeholder-draft';
 import { GOLD } from './theme';
 
@@ -53,10 +54,11 @@ interface Scene3D {
   doors: THREE.Group[];
   walls: { id: string; g: THREE.Object3D; n: THREE.Vector3; c: THREE.Vector3 }[];
   mats: Map<string, THREE.Material>;
-  centre: THREE.Vector3;
-  /** Where the starting view looks from: across the room, facing the wall with the most cabinets. */
-  facing: THREE.Vector3;
-  span: number;
+  /** The room and cabinets drawn now, for framing the camera (camera-views.ts). */
+  room: Room | null;
+  cabinets: readonly CabinetView[];
+  /** The view to tell the page about once a frame with it has been drawn (`data-view`). */
+  drawnView: string | null;
   fitted: boolean;
 }
 
@@ -69,6 +71,12 @@ export function Stage3D(props: {
   doorsOpen: boolean;
   /** Bump to put the camera back to the starting view. */
   fitToken: number;
+  /**
+   * A fixed view to show instead of the starting one (the screenshot command's page; the studio
+   * doesn't pass it). Once a frame with it is drawn, the view's name is set as `data-view` on the
+   * 3D view's box, so a test can wait for it instead of waiting a set time.
+   */
+  view?: CameraView;
   onPick: (id: string) => void;
   onError: (reason: string) => void;
 }) {
@@ -76,9 +84,11 @@ export function Stage3D(props: {
   const s3 = useRef<Scene3D | null>(null);
   const doorsOpen = useRef(props.doorsOpen);
   const onPick = useRef(props.onPick);
+  const viewRef = useRef(props.view);
   useEffect(() => {
     onPick.current = props.onPick;
     doorsOpen.current = props.doorsOpen;
+    viewRef.current = props.view;
   });
 
   // Set up once.
@@ -103,7 +113,7 @@ export function Stage3D(props: {
     Object.assign(renderer.domElement.style, { width: '100%', height: '100%', display: 'block' });
     el.appendChild(renderer.domElement);
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(32, 1, 1, 8000);
+    const camera = new THREE.PerspectiveCamera(FOV, 1, 1, 8000);
     const controls = new OrbitControls(camera, renderer.domElement);
     // Turn (drag), move (right-drag, Shift-drag, two fingers or the arrow keys) and zoom toward the
     // pointer, so any corner can be looked at closely (owner, 2026-11-10: "the camera position seems fixed").
@@ -130,7 +140,7 @@ export function Stage3D(props: {
     sun.shadow.bias = -0.0002;
     sun.shadow.normalBias = 0.6;
     scene.add(sun, sun.target, new THREE.HemisphereLight(0xffffff, 0xd9d3c9, 0.95), new THREE.AmbientLight(0xffffff, 0.25));
-    const s: Scene3D = { renderer, scene, camera, controls, sun, root: null, doors: [], walls: [], mats: new Map(), centre: new THREE.Vector3(), facing: new THREE.Vector3(0, 0, 1), span: 200, fitted: false };
+    const s: Scene3D = { renderer, scene, camera, controls, sun, root: null, doors: [], walls: [], mats: new Map(), room: null, cabinets: [], drawnView: null, fitted: false };
     s3.current = s;
 
     const size = () => {
@@ -190,6 +200,10 @@ export function Stage3D(props: {
       }
       for (const g of s.root?.children ?? []) if (g.userData['layer'] === 'upper') g.visible = !hidden.has(String(g.userData['wallId']));
       renderer.render(scene, camera);
+      if (s.drawnView !== null) {
+        el.dataset['view'] = s.drawnView;
+        s.drawnView = null;
+      }
       raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
@@ -240,39 +254,37 @@ export function Stage3D(props: {
     }
     s.root = root;
     s.scene.add(root);
+    s.room = room;
+    s.cabinets = cabinets;
     // Sun through the first window, if any; framing from the room's size.
-    const pts = room.walls.filter((w) => w.kind === 'room').flatMap((w) => [w.start_point, w.end_point]);
-    const xs = pts.map((p) => inch(p.x));
-    const zs = pts.map((p) => -inch(p.y));
-    const cx = xs.length ? (Math.min(...xs) + Math.max(...xs)) / 2 : 0;
-    const cz = zs.length ? (Math.min(...zs) + Math.max(...zs)) / 2 : 0;
-    s.span = xs.length ? Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...zs) - Math.min(...zs), 60) : 200;
-    s.centre.set(cx, 34, cz);
-    const widths = new Map<string, number>();
-    for (const c of cabinets) widths.set(c.wallId, (widths.get(c.wallId) ?? 0) + c.width);
-    const main = room.walls.filter((w) => w.kind === 'room').sort((a, b) => (widths.get(b.wall_id) ?? 0) - (widths.get(a.wall_id) ?? 0))[0];
-    if (main) {
-      const m = insideNormal(room, main);
-      s.facing.set(m.x, 0, -m.y);
-    }
+    const frame = roomFrame(room, cabinets);
+    const [cx, , cz] = frame.centre;
+    const span = frame.span;
     const win = room.walls.find((w) => w.openings.some((o) => o.kind === 'window'));
     const n = win ? insideNormal(room, win) : { x: -0.6, y: -0.8 };
     const el = (35 * Math.PI) / 180;
-    const dist = s.span * 2 + 200;
+    const dist = span * 2 + 200;
     s.sun.position.set(cx - n.x * Math.cos(el) * dist, Math.sin(el) * dist, cz + n.y * Math.cos(el) * dist);
     s.sun.target.position.set(cx, 0, cz);
-    Object.assign(s.sun.shadow.camera, { left: -s.span, right: s.span, top: s.span, bottom: -s.span, near: 10, far: dist * 2 });
+    Object.assign(s.sun.shadow.camera, { left: -span, right: span, top: span, bottom: -span, near: 10, far: dist * 2 });
     s.sun.shadow.camera.updateProjectionMatrix();
     if (!s.fitted) {
-      fit(s);
+      if (!show(s, viewRef.current ?? OVERALL, onError)) return;
       s.fitted = true;
     }
-  }, [room, cabinets, look, selected]);
+  }, [room, cabinets, look, selected, onError]);
 
   const fitToken = props.fitToken;
   useEffect(() => {
-    if (s3.current && fitToken > 0) fit(s3.current);
-  }, [fitToken]);
+    if (s3.current && fitToken > 0) show(s3.current, OVERALL, onError);
+  }, [fitToken, onError]);
+
+  // A fixed view, when one is asked for (by its name, so an equal view isn't shown again).
+  const viewKey = props.view ? viewName(props.view) : null;
+  useEffect(() => {
+    const s = s3.current;
+    if (s?.fitted && viewKey !== null && viewRef.current) show(s, viewRef.current, onError);
+  }, [viewKey, onError]);
 
   return (
     <div style={{ position: 'absolute', inset: 0 }}>
@@ -281,18 +293,26 @@ export function Stage3D(props: {
   );
 }
 
-function fit(s: Scene3D): void {
+const OVERALL: CameraView = { kind: 'overall' };
+
+/** Puts the camera at a fixed view (camera-views.ts). False, with the reason shown, when it can't be framed. */
+function show(s: Scene3D, view: CameraView, onError: (reason: string) => void): boolean {
+  if (!s.room) return false;
   const r = s.renderer.domElement.getBoundingClientRect();
-  const aspect = Math.max(0.5, r.width / Math.max(1, r.height));
-  const dist = (s.span / (2 * Math.tan((s.camera.fov * Math.PI) / 360)) / Math.min(1, aspect)) * 1.25 + 40;
-  // From across the room, a little to one side and above, looking at the main wall.
-  const el = 0.6;
-  const dir = s.facing.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), 0.45).multiplyScalar(Math.cos(el) * dist);
-  s.controls.target.copy(s.centre);
-  s.camera.position.set(s.centre.x + dir.x, s.centre.y + Math.sin(el) * dist, s.centre.z + dir.z);
-  s.controls.minDistance = dist * 0.25;
-  s.controls.maxDistance = dist * 2.2;
+  const pose: CameraPose | { problem: string } = cameraPose(s.room, s.cabinets, view, r.width / Math.max(1, r.height));
+  if ('problem' in pose) {
+    onError(pose.problem);
+    return false;
+  }
+  s.controls.target.set(...pose.target);
+  s.camera.position.set(...pose.position);
+  s.camera.near = pose.near;
+  s.camera.updateProjectionMatrix();
+  s.controls.minDistance = pose.minDistance;
+  s.controls.maxDistance = pose.maxDistance;
   s.controls.update();
+  s.drawnView = viewName(view);
+  return true;
 }
 
 function mat(s: Pick<Scene3D, 'mats'>, key: string): THREE.Material {

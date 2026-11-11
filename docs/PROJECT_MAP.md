@@ -7,7 +7,7 @@ Navigation: what actually runs, where each rule's data and code live, and which 
 2. **Studio:** `src/app/studio/Studio.tsx` steps through the design choices (`intake` module), the room drawing, the design step and Customize. Each room's choices are read by intake's `roomDesignInputs` when a later step needs them, and handed on: the room kind to the drawing, the builder's preferences to the design step, the look to Customize.
 3. **Design step:** `src/app/studio/AiStep.tsx` calls `draftRoom` (`designer/ui/placeholder-store.ts`), which runs the **placeholder builder**: `src/modules/designer/model/placeholder-draft.ts`. No AI is called; the animation is a placeholder. The design choices reach it as `DraftPreferences`, copied field for field in `Studio.tsx` from intake's `roomDesignInputs`; a new choice that should change the layout goes through intake's data, `roomDesignInputs` (`intake/model/design-inputs.ts`) and the designer's contract.
 4. **Into the master copy:** `designer/model/cabinets.ts` (`placeholderItems`) turns the layout into placed items, saved as an AI draft version.
-5. **Customize and 3D:** `designer/ui/Customize.tsx` reads the placed items (`cabinetViews` in `cabinets.ts`) and draws them in `designer/ui/Stage3D.tsx` (three.js). Its one camera start is `fit()`.
+5. **Customize and 3D:** `designer/ui/Customize.tsx` reads the placed items (`cabinetViews` in `cabinets.ts`) and draws them in `designer/ui/Stage3D.tsx` (three.js). Its starting view and the fixed views (each wall, the island) are in `designer/ui/camera-views.ts`.
 
 **Each piece of a change goes in the module that owns it.** For layout or 3D problems in the studio that is the designer (steps 3 to 5); for design choices it is `intake`, for cabinet sizes `catalog`, for shop rules `shop-settings`, for clients `projects`, for saving and sync the app's `src/app/sync/` (see "Where the rules live"). A change that needs several modules changes each of them, through their contracts (root `CLAUDE.md` "Working across modules").
 
@@ -44,7 +44,7 @@ Navigation: what actually runs, where each rule's data and code live, and which 
 | Area | Unit tests | Browser tests |
 |---|---|---|
 | Live builder | `designer/__tests__/placeholder-draft.test.ts` (uses `real-kitchen.ts`, an anonymised real kitchen) | `e2e/studio.spec.ts` ("the placeholder AI design lays out…", about 1 min) |
-| 3D view | `designer/__tests__/stage3d.test.ts` | `e2e/studio.spec.ts` (checks that the 3D view appears) |
+| 3D view | `designer/__tests__/stage3d.test.ts`, `camera-views.test.ts` (the fixed views' framing) | `e2e/studio.spec.ts` (checks that the 3D view appears); pictures by eye: `npm run views` (`views/capture.spec.ts`, docs/DEVELOPMENT.md) |
 | Cabinet ends | `designer/__tests__/ends.test.ts` (the real kitchen's ends as before, layout changes, older designs, saving and opening again) | `e2e/studio.spec.ts` (an older design's ends set when asked) |
 | Room drawing, runs, appliances | `designer/__tests__/editor.test.ts`, `layout.test.ts`, `room-master-copy.test.ts` | `e2e/room-drawing.spec.ts`, `e2e/rough-layout.spec.ts` |
 | Design choices | `intake/__tests__/engine.test.ts`, `design-inputs.test.ts` (each room's design inputs as the studio read them before) | `e2e/intake.spec.ts` |

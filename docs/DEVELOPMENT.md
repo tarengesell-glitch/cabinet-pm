@@ -25,6 +25,7 @@ Stop `npm run dev` (Control + C) before `npm run check`: Next.js allows only one
 | `npm run build` | The production build, exactly as Netlify runs it: plain web pages in `out/`. In the gate so a merge never breaks the live site. |
 | `npm run test:static` | Serves `out/` the way Netlify does (`scripts/serve-static.mjs`) and opens the pages in a browser (`e2e-static/`). Catches a build that would show "Page not found" on the live site. |
 | `npm run test:e2e` | Playwright UI tests (`e2e/`), on an iPad landscape viewport. Starts its own dev server on port 3100 (`E2E_PORT` changes it). |
+| `npm run views` | Pictures of the 3D view, for looking at by eye; **not** part of `npm run check` (below). |
 
 ## Which checks when
 Measured 2026-11-10 in a cloud session, one run each:
@@ -41,6 +42,13 @@ Measured 2026-11-10 in a cloud session, one run each:
 | `test:e2e` (63 browser tests) | 185.5 s | only the file for the screen you changed: `npx playwright test e2e/studio.spec.ts` (studio, about 1 min alone); `room-drawing`, `rough-layout`, `intake`, `office` likewise | yes |
 
 `npm run check` runs all of them in order (about 3 min 40 s). When to run what, and when to break a check on purpose: root `CLAUDE.md` "Checks".
+
+## Pictures of the 3D view (`npm run views`)
+Takes pictures of the anonymised real kitchen (`src/modules/designer/__tests__/real-kitchen.ts`) at fixed camera views: `overall` (the 3D view's starting view), each room wall straight on (`wall-A` to `wall-E`) and `island` (from behind one end). They land in `views-output/<view>.png`. About 2½ minutes; starts its own dev server on port 3200 (`VIEWS_PORT` changes it).
+
+- **When:** after a change to the layout, the cabinet ends or the 3D drawing, to see the result without dragging the camera; and to compare before and after (run it on both, the file names stay the same). Look for the hood's clear space and equal uppers, finished ends (end panels to the floor), toe kicks, and one counter per stretch.
+- **What it checks:** that each view draws without a problem, and that two captures of the same view are identical (the same framing every time). It checks no measurement: the unit tests do (`designer/__tests__/`).
+- **How:** `views/capture.spec.ts` leaves the drawn room (no cabinets) in the browser and opens the test page `/test/views/?view=…`, which runs the real design step (`draftRoom`) and shows that view (`RoomViews`). The 3D view sets `data-view` on its box once a frame at that view is drawn, so nothing waits a set time. The camera positions are in `src/modules/designer/ui/camera-views.ts`. On the live site the test page shows only a note.
 
 ## Where the rules live
 - `tools/architecture.cjs`: the dependency table from `docs/ARCHITECTURE.md`, written as data. Both `eslint.config.js` and `.dependency-cruiser.cjs` read it, so the two checks can't drift apart. Change it only when ARCHITECTURE changes, and never to make a violation pass.

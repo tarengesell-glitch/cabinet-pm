@@ -129,6 +129,11 @@ The controls and behaviour are unchanged. The look follows the owner's Kitchen S
 - **Older designs** (saved before ends were) are not changed on opening: Customize says how many cabinets have no saved ends (the 3D view shows no finished ends on them) and sets them only when someone presses "Set their ends from the layout". Ends that differ from the layout, for example after the room drawing changed, are listed the same way with "Update them to match the layout".
 - Tested in `__tests__/ends.test.ts` (the real kitchen as before, walls, cabinets, the fridge panel, the range, the island, a turned room, layout changes, older designs, saving and opening again), `__tests__/stage3d.test.ts` and `e2e/studio.spec.ts`.
 
+### Fixed camera views (2026-11-11)
+- `ui/camera-views.ts` works out where the camera stands for the starting view (the reset button's), each room wall seen straight on (everything nearer than that wall's cabinets, like an island, is clipped away) and the island from behind one end. Pure numbers from the room, so the same room always gets the same framing (`__tests__/camera-views.test.ts`).
+- `Stage3D` takes an optional `view`; Customize doesn't pass one, so the studio's 3D view and its controls are unchanged. Once a frame at a view is drawn, the box gets `data-view="<view>"`.
+- `ui/RoomViews.tsx` shows a room at one view, for the screenshot command (`npm run views`, docs/DEVELOPMENT.md) and its test page (`src/app/test/views/`).
+
 ## Saving, and what is not built yet
 - **Where the work is kept.** The browser keeps a working copy (`localStorage`). Inside the design studio the app saves it to the shared database as you work (2026-11-09, `src/app/sync/README.md`); without the database settings it stays in this browser and says so. The standalone room preview (`/rooms/preview`) always keeps it in this browser only, and says so. If the browser won't store it, a red banner says the work isn't being kept.
 - **Who changed what:** `saveRoom` and `draftRoom` take the signed-in person's ID for the room's history (the labelled preview user without the database).

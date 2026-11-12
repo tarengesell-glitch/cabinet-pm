@@ -2,7 +2,7 @@
 
 What the product must do **today**, by topic. Each line says whether the owner approved it and whether it is built, and points to its evidence: a `BUILD_SPEC.md` section, an owner amendment (OA-n), or a dated entry in `DECISIONS.md`, where the owner's words and the reasons are kept. **Start here, not in the history.** Open `DECISIONS.md` only to read the evidence for one line, or to record something new.
 
-Last checked against `DECISIONS.md` and the code: 2026-11-11.
+Last checked against `DECISIONS.md` and the code: 2026-11-12.
 
 ## How to read this
 
@@ -29,7 +29,7 @@ Last checked against `DECISIONS.md` and the code: 2026-11-11.
 | §3: selections (stage 3) after room capture (stage 2) | The design choices (intake) come before the room drawing | DECISIONS 2026-11-08 "Visual intake", "The design studio" |
 | §7: design rules "warn by default; each shop can promote rules to block" | Each confirmed rule says what the design tool does: won't let it be drawn, error to fix, or suggestion. Whether they stop the push is open (see "What blocks at each stage") | DECISIONS 2026-11-08 "Design rules reviewed" (S-6) |
 
-**Departures that are only PROPOSED** (the spec still governs until the owner says yes): `rotation` is not stored on placed items; `offset` is measured on the wall's centre line (both DECISIONS 2026-11-08 "Placed cabinets in the master copy").
+**Departures that are only PROPOSED** (the spec still governs until the owner says yes): `rotation` is not stored on placed items; `offset` is measured on the wall's centre line (both DECISIONS 2026-11-08 "Placed cabinets in the master copy"); optional `sections` and `set_by_hand` on placed items and `selections` on appliance placements (DECISIONS 2026-11-12 "Owner requests after the Fake Design kitchen").
 
 ## Requirements by topic
 
@@ -62,6 +62,7 @@ Last checked against `DECISIONS.md` and the code: 2026-11-11.
 - New-run defaults (base + upper, 24" deep; island 72" × 36"). **PROPOSED** (Open questions, "rough layout").
 - The hood matches the width of the range under it. **Assumed, still to confirm** (2026-11-06).
 - Corner cabinet legs on the drawing. **Open** (AD-4).
+- A sink or dishwasher dropped on a bare wall gets a base + upper run, so uppers reach a window over it (it was base only). **PROPOSED** (DECISIONS 2026-11-12 "Owner requests after the Fake Design kitchen"). Built.
 
 ### Design choices (intake)
 - The intake comes first, one question at a time with pictures; the room drawing opens only when every room's choices are finished. **Approved** (2026-11-08). Built.
@@ -74,7 +75,9 @@ Last checked against `DECISIONS.md` and the code: 2026-11-11.
 ### Catalog
 - 50 cabinet types from the shop's library; templates that stretch; 1/16" width step; standard sizes; smallest widths 8" / 12"; door, drawer, shelf, end, filler and sink-base rules; three door styles. **Approved** (2026-11-07 "The cabinet catalog"). Built (`catalog/data/catalog-v1.json`).
 - Size limits other than the standard size. **Open** (CAT-1): only the standard size passes.
-- Hinge side. **Open** (CAT-2).
+- Catalog version 2 adds Double doors to the door opening (was Hinge side), the Back option (unfinished, finished panel, finished door) and the garbage pull-out's new handle note; version 1 is kept as published. **Approved** (DECISIONS 2026-11-12 "Owner requests after the Fake Design kitchen"). Built (`catalog/data/catalog-v2.json`).
+- Whether the door opening must be chosen on every cabinet. **Open** (CAT-2).
+- "Integrated FE" is the catalog's Finished end. **PROPOSED** (FD-1).
 - One item for door-count variants; stable option codes; unknown values stored as unknown. **PROPOSED**.
 
 ### Design rules (shop-settings)
@@ -90,7 +93,7 @@ The app's design step runs the designer's **placeholder** builder (no AI): **App
 - **Hood:** 2" clear each side of an appliance or millwork hood, also when the range stands in a run of its own; the uppers either side are one width (PREF-019, HARD-007); the base beside the range lines up with the upper above. **Approved** (2026-11-10, both rounds). Built (`clearances.hood_side`).
 - **Hood:** when one side is a little longer, up to 1 1/2" becomes a filler at that side's far end. **PROPOSED** (PR-57b). Built (`fill.flank_filler_max`).
 - The cabinet over a fridge comes down to 2" above it. **Approved** (2026-11-10). Built. The fridge's 70" height is a rough placeholder until its spec is confirmed: **PROPOSED** (OA-4).
-- A 3/4" panel, 26" deep, full height, each side of every fridge, never skipped. **Approved** (2026-11-10). Built. Which shop part: **Open** (AD-6; PROPOSED the Tall filler).
+- A 3/4" panel, 26" deep, full height, each side of every fridge, never skipped. **Approved** (2026-11-10). Built. A fridge drawn against a wall or corner is moved along its wall just far enough for its panel, said in the notes and saved with the room: **Approved** (DECISIONS 2026-11-12 "Owner requests after the Fake Design kitchen"). Built. Which shop part: **Open** (AD-6; PROPOSED the Tall filler).
 - Widths are made to fit: equal cabinets on the 1/16" step, a filler only where a space is too narrow. **Approved** (2026-11-10 round 2). Built. The 36" largest width is the prototype's placeholder value.
 - Nothing is skipped: an appliance that runs into a corner or past its run is drawn and reported. **Approved** (2026-11-10). Built.
 - Applied finished ends to the floor; toe kicks in the door colour; one counter per stretch; island panels as chosen. **Approved** (2026-11-10 round 2). Built.
@@ -98,18 +101,26 @@ The app's design step runs the designer's **placeholder** builder (no AI): **App
 - Where uppers start (54" above the floor). **Open** (AD-5). Placeholder value: `visual.upper_bottom`. **Despite the "visual" label, it sets saved cabinet positions** (see "Known discrepancies").
 - Bathroom vanity choices. **PROPOSED** (PR-57c). Built.
 - Drawer levels per intake choice. Prototype recipe, not a reviewed rule.
+- Four-drawer banks beside the range or cooktop and near the sink (PREF-006, PREF-007) at every drawer level. **Approved** (DECISIONS 2026-11-12 "Owner requests after the Fake Design kitchen"). Built. Which cabinets count as beside and near: **PROPOSED** (`placeholder-draft.json` "four_banks").
 - The builder and the 3D view read the design choices through one interpretation (intake `roomDesignInputs`, checked by the designer); the intake's answers stay the only copy. An unknown drawer level stops the design step and "Re-draft this run" with the reason and replaces nothing; an unknown island panel is drawn plain only as a stand-in, with a notice. **Approved** (2026-11-11 "Design choices read in one place"). Built. Other unknown choice values: **Open** (DC-1). A "choices changed since drafting" notice: deferred.
 
 ### Cabinet ends
 - Unfinished beside a wall or cabinet (filler at every wall); applied finished at an open end by default; finished by request. **Approved** (2026-11-07, CB-FACT-10). Built (`designer/model/ends.ts`).
 - One saved end decision per cabinet; the 3D view draws only what is saved. **Approved** (2026-11-11). Built. How ends are worked out again after a layout change is a session's mechanism with a recorded limitation (END-4).
-- Which side is left. **PROPOSED** (END-1). Corner cabinets' ends: **Open** (END-2). Island waterfall or detailed sides: **Open** (END-3). Manual end editing: requirements recorded in END-4, partly PROPOSED; not built.
+- Which side is left. **PROPOSED** (END-1). Corner cabinets' ends: **Open** (END-2). Island waterfall or detailed sides: **Open** (END-3).
+- Manual end editing in Customize: unfinished, applied FE or integrated FE per end, recorded as set by hand and never changed by working ends out again; one the layout contradicts is listed; "From the layout" resets it. **Approved** (DECISIONS 2026-11-12 "Owner requests after the Fake Design kitchen"; END-4). Built. The reset action: PROPOSED in END-4, built as proposed. Ends of unknown origin (saved before 2026-11-12): **Open** (END-4).
 
 ### 3D view and Customize
 - Draws only from the master copy (P6); a visual approximation is acceptable (§5.5). **Approved**. Built.
-- Camera moves, zooms toward the pointer and turns around a double-clicked point; brighter light; a selected cabinet gets a gold tint and tight outline. **Approved** (2026-11-10). Built.
+- Camera moves, zooms toward the pointer and turns around a double-clicked point; a tight outline on a selected cabinet. **Approved** (2026-11-10). Built.
+- A selected cabinet is blue in the 3D view and the panel (was gold); a brighter room with visible lines and shadows between and on fronts. **Approved** (DECISIONS 2026-11-12 "Owner requests after the Fake Design kitchen"). Built.
+- Doors follow the shop's door rule CB-FACT-16 (pair over 20" wide, stacked over 48" tall), so a pantry never has one full-height door; the top drawer front is the standard 6 13/16". **Approved** (2026-11-07; DECISIONS 2026-11-12 "Owner requests after the Fake Design kitchen"). Built (`designer/model/fronts.ts`). Stacked rows of equal height: **PROPOSED**.
+- Sinks have bowls with depth and a faucet; dishwashers and fridges have handles; clicking one opens its look choices (sink colour, bowls, faucet; dishwasher or fridge front), saved on the appliance. **Approved** (DECISIONS 2026-11-12 "Owner requests after the Fake Design kitchen"). Built (`designer/data/appliance-looks.json`). Drawn stainless until chosen: **PROPOSED** (FD-2).
+- A corner cabinet has one handle; the garbage pull-out is a working drawer over a full front with its handle at a four-drawer bank's second drawer. **Approved** (DECISIONS 2026-11-12 "Owner requests after the Fake Design kitchen"). Built.
+- Drag handles on a selected cabinet: width (the neighbour on that side adjusts), height, depth, along the wall (both neighbours adjust), up and down, out from the wall; a change that breaks a placed-item check is refused. **Approved** (DECISIONS 2026-11-12 "Owner requests after the Fake Design kitchen"). Built. Height, depth, height off the floor and setback change only that cabinet: **PROPOSED**.
 - Open doors stays open while the autosave runs. **Approved** (2026-11-10 round 2). Built. **Owner-confirmed on the live app, 2026-11-11** (the owner's own use; there is no automated test with the real autosave; PR-57a).
 - Customize: change a cabinet's type within its kind or its width (the neighbour gives or takes); approve one or all after a confirmation. **Approved** (2026-11-08). Built. What this approval counts for: see "What blocks at each stage".
+- The Cabinet tab opens whenever a cabinet is picked, with the library cabinet, size and position, door opening (hinged left, hinged right, double doors), front and interior (split vertical or horizontal, shelves spaced equally, drawers, roll-outs, open), ends and back. **Approved** (DECISIONS 2026-11-12 "Owner requests after the Fake Design kitchen"). Built (`designer/ui/CabinetEditor.tsx`, `model/sections.ts`). How sections are saved, and parts sharing space equally: **PROPOSED**. How the CAD file carries them: **Open** (CV-13).
 - The Checks tab runs the catalog's checks only. **PROPOSED** (2026-11-08).
 
 ### AI design
@@ -151,11 +162,11 @@ Only what approved decisions say. "Not decided" items must be flagged, not inven
 
 | Stage | Blocks (approved) | Shown, doesn't block (approved) | Not decided |
 |---|---|---|---|
-| **Editing a draft** (room drawing, Customize) | An inexact length (other than mm); walls on top of each other or shrunk to nothing; a change that cuts through a door or window (2026-11-05). The placed-item checks: on a wall, fits along it, under the ceiling, clear of openings, no overlaps (2026-11-08 "Placed cabinets"). The 9 "won't let it be drawn" design rules (2026-11-08). A new client with no name, no reachable contact, or an invalid email or phone (2026-11-09). | Unmeasured sizes (pastel red). "Error to fix" rules (2) and suggestions (36, the running list of preferences that could be improved) (2026-11-08). The sink-off-centre notice (2026-11-07). A save that fails or clashes is shown in red; a clash stops saving until the person chooses (2026-11-09). | What an "error to fix" stops besides being shown (the code gives these rules severity *block*). |
+| **Editing a draft** (room drawing, Customize) | An inexact length (other than mm); walls on top of each other or shrunk to nothing; a change that cuts through a door or window (2026-11-05). The placed-item checks: on a wall, fits along it, under the ceiling, clear of openings, no overlaps (2026-11-08 "Placed cabinets"). The 9 "won't let it be drawn" design rules (2026-11-08). A new client with no name, no reachable contact, or an invalid email or phone (2026-11-09). In Customize, a cabinet change (typed, stepped or dragged) that breaks a placed-item check is refused with the reason (2026-11-12). | Unmeasured sizes (pastel red). "Error to fix" rules (2) and suggestions (36, the running list of preferences that could be improved) (2026-11-08). The sink-off-centre notice (2026-11-07). A save that fails or clashes is shown in red; a clash stops saving until the person chooses (2026-11-09). | What an "error to fix" stops besides being shown (the code gives these rules severity *block*). |
 | **Previewing** (the design step and the 3D view) | A drawer level that isn't one of its options stops the design step and re-drafting a run, with the reason (2026-11-11). | A missing design choice is said in the design's notes, never filled in (2026-11-08). Nothing is skipped: problems are drawn and reported (2026-11-10). Unmapped choices (door style…) show as missing (2026-11-09). A draft that fails checks is returned with its issues listed, not hidden (§5.7). An island panel the 3D view can't show is drawn plain as a stand-in, and Customize says so (2026-11-11). | Which problems stop a preview from being made at all, rather than drawn with a note. Today's builder refuses some rooms (for example a cabinet height below where uppers start); that is code, not policy. |
 | **Approving** | The designer's approval of an AI draft is required before the gate (§5.7, §7). The client signs off an exact version (OA-5). | — | Whether a designer may approve (one cabinet, or "approve all") while blocking findings are open; whether Customize's approve is the gate's designer approval; sign-off per room or per job (E-1); re-signing after the site measure changes sizes (SM-1). |
 | **Pricing** | Prices come only from the catalog and the master copy; a missing or unmapped price fails closed with a reason, never a default (P4, rule 7). | — | Whether live pricing shows a partial total with the missing items listed, or no total; the pricing structure (E-3, C-3); the drawer level's cost (IK-14). |
-| **Exporting** (the push) | Every §7 layer: layout, buildability (size out of range, missing required selection, invalid option), translation preflight (no or stale mapping, an empty required field), designer approval. The four push conditions (OA-5). Every value the design depends on confirmed (OA-4; DATA_MODEL "core"). The writer refuses any missing or unmapped value (§5.8). Items outside tested coverage go to manual review (§9). | — | Whether design-rule findings ("error to fix", suggestions) stop the push (S-6 was answered for the design tool only); the measuring tolerance (SM-1); what "paid" means (PAY-1); the CAD questions CV-1 to CV-12. |
+| **Exporting** (the push) | Every §7 layer: layout, buildability (size out of range, missing required selection, invalid option), translation preflight (no or stale mapping, an empty required field), designer approval. The four push conditions (OA-5). Every value the design depends on confirmed (OA-4; DATA_MODEL "core"). The writer refuses any missing or unmapped value (§5.8). Items outside tested coverage go to manual review (§9). | — | Whether design-rule findings ("error to fix", suggestions) stop the push (S-6 was answered for the design tool only); the measuring tolerance (SM-1); what "paid" means (PAY-1); the CAD questions CV-1 to CV-13 (CV-13: divided cabinets and finished backs). |
 
 ## Known discrepancies (docs or data vs. code)
 - **`placeholder-draft.json` "visual" is not drawing-only.** Its note says "never sent to the shop", but `upper_bottom` and `appliances.fridge_height` set the saved elevation and height of uppers, hoods and the cabinet over the fridge (`designer/model/placeholder-draft.ts`, `upperTopOf` in `model/cabinets.ts`). Both values are placeholders with open questions (AD-5, OA-4). The data note is unchanged (documentation-only pull request); correct it with the next designer code change.

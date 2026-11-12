@@ -28,6 +28,8 @@ export type CabinetView = PlaceholderCabinet & {
   readonly selections?: Readonly<Record<string, string>>;
   /** Its front and interior as a person divided it; absent while it is as its catalog type shows it. */
   readonly sections?: FrontSection;
+  /** The catalog options a person set by hand (END-4); absent when none. */
+  readonly setByHand?: readonly string[];
   /** From the wall face to its back (a cabinet pulled out from the wall); absent when against it. */
   readonly setback?: Length;
   /**
@@ -97,6 +99,7 @@ export function cabinetViews(room: Room): CabinetView[] {
       ...(hasEnds ? { ends: { low: saved('low'), high: saved('high') } } : {}),
       selections: item.item_selections,
       ...(item.sections ? { sections: item.sections } : {}),
+      ...(item.set_by_hand ? { setByHand: item.set_by_hand } : {}),
       ...(item.position.setback ? { setback: item.position.setback } : {}),
       ...(() => {
         // The sink or dishwasher standing in this cabinet (it holds the appliance's middle).
@@ -263,7 +266,14 @@ export function editItems(room: Room, edit: ItemEdit): Result<Room> {
     const selections = { ...cab.item_selections };
     if (edit.value === null) delete selections[edit.option];
     else selections[edit.option] = edit.value;
-    return replace(new Map([[cab, byDesigner({ ...cab, item_selections: selections })]]));
+    // Recorded as set by hand, so working ends out again never changes it (END-4); clearing it
+    // hands it back to the layout (Customize then works the end out at once).
+    const hand = new Set(cab.set_by_hand ?? []);
+    if (edit.value === null) hand.delete(edit.option);
+    else hand.add(edit.option);
+    const { set_by_hand: _old, ...rest } = cab;
+    void _old;
+    return replace(new Map([[cab, byDesigner({ ...rest, item_selections: selections, ...(hand.size ? { set_by_hand: [...hand].sort() } : {}) })]]));
   }
   if (edit.kind === 'sections') {
     if (edit.sections === null) {

@@ -271,6 +271,12 @@ export const PlacedItemSchema = z
      * is as its catalog type shows it. Not set on items saved before then.
      */
     sections: FrontSectionSchema.optional(),
+    /**
+     * The catalog options a person set by hand on this cabinet (owner, 2026-11-12; DECISIONS
+     * END-4: "record each end's origin"). Working ends out again from the layout never changes
+     * one of these. Absent: every option was set by the design step, or the item predates this.
+     */
+    set_by_hand: z.array(z.string().min(1)).optional(),
   })
   .refine((i) => i.width > 0 && i.height > 0 && i.depth > 0, { message: 'A placed item needs a width, a height and a depth.' });
 

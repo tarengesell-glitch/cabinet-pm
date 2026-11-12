@@ -129,7 +129,14 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
     // A width or type change can change what is beside a cabinet: ends that follow the layout are
     // worked out again; an end that differs from the rule is kept (model/ends.ts, limitation END-4).
     // An end set by hand is kept as chosen; other layout changes work ends out again.
-    const r = edited.ok && e.kind !== 'approve' && e.kind !== 'option' && e.kind !== 'sections' && e.kind !== 'appliance' ? refreshEnds(room, edited.value) : edited;
+    // A cleared end goes back to the layout's end at once (END-4's "use the layout's end").
+    const r = !edited.ok
+      ? edited
+      : e.kind === 'option' && e.value === null && (e.option === 'end_left' || e.option === 'end_right')
+        ? fillEnds(edited.value, [e.id])
+        : e.kind !== 'approve' && e.kind !== 'option' && e.kind !== 'sections' && e.kind !== 'appliance'
+          ? refreshEnds(room, edited.value)
+          : edited;
     if (!r.ok) {
       setMessage({ kind: 'error', text: r.reason });
       return false;
@@ -286,6 +293,12 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
                 Update them to match the layout
               </button>
             </div>
+          )}
+          {endReview?.ok && endReview.value.overridden.length > 0 && (
+            <p className={s.notice} role="status" data-testid="ends-overridden">
+              {endReview.value.overridden.length} cabinet{endReview.value.overridden.length === 1 ? ' has an end' : 's have ends'} chosen by hand that the layout would now set differently. They are kept as chosen; pick
+              “From the layout” on a cabinet’s end to change that.
+            </p>
           )}
           {panels.problems.length > 0 && (
             <div className={s.notice} role="status" data-testid="panel-problems">

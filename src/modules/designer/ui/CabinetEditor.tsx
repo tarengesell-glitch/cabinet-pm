@@ -21,6 +21,7 @@ import { SELECT_BLUE } from './theme';
 import s from './Customize.module.css';
 
 const IN = 64;
+const ENDS: Record<string, string> = { unfinished: 'unfinished', applied_finished: 'applied FE', finished: 'integrated FE' };
 
 export function CabinetEditor(props: {
   room: Room;
@@ -166,8 +167,9 @@ export function CabinetEditor(props: {
                   <Segmented
                     label={code === 'end_left' ? 'Left end' : 'Right end'}
                     canEdit={canEdit}
-                    value={cab.selections?.[code] ?? null}
+                    value={(cab.setByHand ?? []).includes(code) ? (cab.selections?.[code] ?? null) : null}
                     choices={[
+                      { value: null, name: 'From the layout' },
                       { value: 'unfinished', name: 'Unfinished' },
                       { value: 'applied_finished', name: 'Applied FE' },
                       { value: 'finished', name: 'Integrated FE' },
@@ -176,7 +178,10 @@ export function CabinetEditor(props: {
                   />
                 </div>
               ))}
-              <p className={s.sub}>Left and right as seen standing in front of the cabinet. FE: finished end; applied is the usual choice for an open end.</p>
+              <p className={s.sub}>
+                Left and right as seen standing in front of the cabinet. FE: finished end. “From the layout” follows the shop’s rule (unfinished against a wall or cabinet, applied FE at an open end
+                {cab.ends ? `; now ${[cab.selections?.['end_left'], cab.selections?.['end_right']].map((v) => ENDS[v ?? ''] ?? 'not set').join(' and ')}` : ''}); a choice made here is kept when the layout changes.
+              </p>
             </section>
           )}
 

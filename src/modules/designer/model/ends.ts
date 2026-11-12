@@ -8,12 +8,14 @@
  * against a wall, a cabinet, a panel or a corner cabinet's leg is unfinished; an end with nothing
  * beside it (an appliance or a window doesn't count) gets an applied finished end.
  *
- * After a layout change, an end whose saved value equals what the rule gave before the change is
- * worked out again (`refreshEnds`); a value that differs from the rule (a finished end by request)
- * is kept. Limitation: the saved design doesn't record who set an end, so a person's choice that
- * equals the rule's old value would be worked out again too. No screen sets ends yet; manual end
- * editing must first record each end's origin (DECISIONS END-4). Cabinets saved before ends were
- * stored are listed by `reviewEnds` and filled only when a person asks (`fillEnds`).
+ * An end a person set in Customize is recorded as set by hand (`PlacedItem.set_by_hand`, DECISIONS
+ * END-4) and is never changed by working ends out again: after a layout change (`refreshEnds`),
+ * or when a person updates ends to match the layout (`fillEnds`). One the layout now contradicts
+ * is listed by `reviewEnds` for a person to look at. Other ends are worked out again after a
+ * layout change while their saved value equals what the rule gave before; a different value is
+ * kept. Limitation, for ends saved before 2026-11-12 (no record of who set them): a person's
+ * choice equal to the rule's old value would be worked out again too. Cabinets saved before ends
+ * were stored are listed by `reviewEnds` and filled only when a person asks.
  */
 import type { PlacedItem, Result, Room, Wall } from '@/core/index';
 import { cabinetViews, endOption, itemOf, type CabinetView, type EndOption } from './cabinets';
@@ -91,7 +93,15 @@ export function ruleEnds(room: Room): Result<Map<string, EndValues>> {
   return { ok: true, value: out };
 }
 
-const withValues = (item: PlacedItem, values: EndValues): PlacedItem => ({ ...item, item_selections: { ...item.item_selections, ...values } });
+/** The item with these end values, except any end a person set by hand (END-4), which is kept. */
+const withValues = (item: PlacedItem, values: EndValues): PlacedItem => {
+  const hand = new Set(item.set_by_hand ?? []);
+  const kept = Object.fromEntries(Object.entries(values).filter(([o]) => !hand.has(o)));
+  return { ...item, item_selections: { ...item.item_selections, ...kept } };
+};
+
+/** An end a person set by hand. */
+const byHand = (item: PlacedItem, option: string): boolean => (item.set_by_hand ?? []).includes(option);
 
 /** A freshly laid-out room with every cabinet's ends set by the rule. */
 export function withRuleEnds(room: Room): Result<Room> {
@@ -132,6 +142,8 @@ export interface EndReview {
   readonly missing: readonly string[];
   /** Cabinets with a saved end that differs from the rule: chosen on purpose, or out of date after the room drawing changed. */
   readonly differ: readonly string[];
+  /** Cabinets with an end set by hand that the layout now contradicts: listed for a person to look at, never changed (END-4). */
+  readonly overridden: readonly string[];
 }
 
 export function reviewEnds(room: Room): Result<EndReview> {
@@ -139,14 +151,17 @@ export function reviewEnds(room: Room): Result<EndReview> {
   if (!rule.ok) return rule;
   const missing: string[] = [];
   const differ: string[] = [];
+  const overridden: string[] = [];
   for (const item of room.items) {
     const target = rule.value.get(item.item_instance_id);
     if (!target) continue;
     const entries = Object.entries(target) as [EndOption, string][];
-    if (entries.some(([o]) => item.item_selections[o] === undefined)) missing.push(item.item_instance_id);
-    else if (entries.some(([o, v]) => item.item_selections[o] !== v)) differ.push(item.item_instance_id);
+    const auto = entries.filter(([o]) => !byHand(item, o));
+    if (auto.some(([o]) => item.item_selections[o] === undefined)) missing.push(item.item_instance_id);
+    else if (auto.some(([o, v]) => item.item_selections[o] !== v)) differ.push(item.item_instance_id);
+    if (entries.some(([o, v]) => byHand(item, o) && item.item_selections[o] !== v)) overridden.push(item.item_instance_id);
   }
-  return { ok: true, value: { missing, differ } };
+  return { ok: true, value: { missing, differ, overridden } };
 }
 
 /** Sets the listed cabinets' ends from the rule, when a person asks. Nothing else on them changes. */

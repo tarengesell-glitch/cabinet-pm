@@ -5,7 +5,7 @@ Master brief for establishing the visual UX/UI specification. If anything here c
 > **Updated 2026-10-27 for the Cabinet Vision build spec.**
 > - Parts 1, 5 and 6 now describe the v1 screens.
 > - The screens from the earlier Mozaik-based plan are kept under "Later screens", and are reused by the v1 screens where the owner's 2026-10-27 workflow confirmed them.
-> - The colour tokens in Part 4 are not settled: closet-builder has an owner-approved design system that may apply instead (DECISIONS C-2).
+> - The colour tokens in Part 4 are replaced: C-2 was answered on 2026-11-08 with closet-builder's design system, in `src/platform/design-system/tokens.css` (see Part 4).
 > - UX work starts before Phase 5 (`docs/BUILD_PLAN.md`).
 
 > **Owner rule (2026-11-05): familiar, not custom.** For anything about drawing, navigating or editing a plan, first research how the most-used apps do it: Cabinet Vision, 2020 Design, Mozaik, Chief Architect, AutoCAD, Revit, SketchUp and Figma. Follow the common convention, and record the source in `docs/ux/INDUSTRY_REVIEW.md` or `docs/DECISIONS.md`. Cabinet designers should feel at home, not have to learn our way.
@@ -286,7 +286,7 @@ Quality: DiscrepancyCard, EvidenceComparison, ToleranceBadge, ProductionReadines
 Approval: ApprovalCard, VersionBadge, VersionHistory, VersionComparison, RoomApprovalPanel.
 Utility: ContextualDrawer, StickyActionBar, EmptyState, ErrorState, AlertBanner, GlobalAlertIndicator, AutosaveIndicator, UserEditingIndicator, ReadOnlyBanner.
 
-Each documented with data/props, behaviour, variants, states. Shared components live in `src/core/design-system/`; modules use them and don't create look-alikes.
+Each documented with data/props, behaviour, variants, states. Shared components live in `src/platform/design-system/` (`docs/ARCHITECTURE.md`); modules use them and don't create look-alikes.
 
 ---
 
@@ -353,7 +353,7 @@ Report what was actually tested.
 
 ## Part 14 — Files to create
 
-In `docs/ux/`: UX_UI_MASTER_SPEC.md, UX_SCREEN_SPECS.md (with ASCII layout diagrams), UX_COMPONENT_LIBRARY.md, UX_REFERENCE_GUIDE.md, UX_PROTOTYPE_PLAN.md, UX_DESIGN_TOKENS.md. Tokens implemented once in `src/core/design-system/`. Add to CLAUDE.md (linking, not pasting): "All frontend work follows docs/ux/. Prefer visual direct manipulation over text-heavy forms, use meaningful representative images during development, and validate key screens with interactive previews."
+In `docs/ux/`: UX_UI_MASTER_SPEC.md, UX_SCREEN_SPECS.md (with ASCII layout diagrams), UX_COMPONENT_LIBRARY.md, UX_REFERENCE_GUIDE.md, UX_PROTOTYPE_PLAN.md, UX_DESIGN_TOKENS.md. Tokens implemented once in `src/platform/design-system/` (DECISIONS C-2). Add to CLAUDE.md (linking, not pasting): "All frontend work follows docs/ux/. Prefer visual direct manipulation over text-heavy forms, use meaningful representative images during development, and validate key screens with interactive previews."
 
 ---
 

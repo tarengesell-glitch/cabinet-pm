@@ -10,7 +10,9 @@
  */
 import { formatInches, parseImperial, type Length, type Result, type Room, type Run, type Wall } from '@/core/index';
 import { CURRENT_CATALOG, type Catalog, type CatalogItem } from '@/modules/catalog/contract';
+import { DESIGN_RULES } from '@/modules/shop-settings/contract';
 import data from '../data/placeholder-draft.json';
+import type { FrontRules } from './fronts';
 import { applianceType, LAYOUT_RULES, overOf, type LayoutRules } from './layout-rules';
 import { applianceEnd, cornerCabinets, hasBase, hasUpper, insideSpan, runEnd, sortedRuns, subtract, upperPieces, windowSpans, type Span } from './layout';
 
@@ -103,6 +105,8 @@ export interface DraftSettings {
     readonly fridgeDepth: Length;
     readonly rangeDepth: Length;
   };
+  /** How the 3D view lays out doors and drawers (model/fronts.ts), in inches. */
+  readonly fronts: FrontRules;
 }
 
 function readSettings(): Result<DraftSettings> {
@@ -115,6 +119,7 @@ function readSettings(): Result<DraftSettings> {
     counter_thickness: data.visual.counter_thickness,
     counter_overhang: data.visual.counter_overhang,
     upper_bottom: data.visual.upper_bottom,
+    top_drawer_front: data.visual.top_drawer_front,
     fridge_height: data.visual.appliances.fridge_height,
     fridge_depth: data.visual.appliances.fridge_depth,
     range_depth: data.visual.appliances.range_depth,
@@ -128,6 +133,15 @@ function readSettings(): Result<DraftSettings> {
     if (!r.ok) return { ok: false, reason: `placeholder-draft.json: ${k}: ${r.reason}` };
     out[k] = r.value;
   }
+  // The door sizes the shop confirmed for drawing (CB-FACT-16); missing ones stop the view with the reason.
+  const doorRule = DESIGN_RULES.rules.find((r) => r.id === 'CB-FACT-16');
+  const doorLength = (name: string): Length | null => {
+    const v = doorRule?.lengths[name];
+    return typeof v === 'number' ? v : null;
+  };
+  const maxSingleDoor = doorLength('max_single_door_width');
+  const maxDoorHeight = doorLength('max_door_height');
+  if (maxSingleDoor === null || maxDoorHeight === null) return { ok: false, reason: 'Design rule CB-FACT-16 (door sizes) is missing its widest or tallest single door.' };
   const codes = data.cabinets;
   const all = [
     codes.base,
@@ -192,6 +206,7 @@ function readSettings(): Result<DraftSettings> {
         fridgeDepth: out['fridge_depth']!,
         rangeDepth: out['range_depth']!,
       },
+      fronts: { maxSingleDoor: maxSingleDoor / 64, maxDoorHeight: maxDoorHeight / 64, topDrawer: out['top_drawer_front']! / 64, upperBottom: out['upper_bottom']! / 64 },
     },
   };
 }

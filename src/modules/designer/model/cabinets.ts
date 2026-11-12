@@ -34,7 +34,7 @@ export type CabinetView = PlaceholderCabinet & {
    * The appliance this view is, or the one standing in this cabinet (a sink in its sink base, a
    * dishwasher in its opening), with how it looks: clicking it opens its look choices (owner, 2026-11-12).
    */
-  readonly housed?: { readonly placementId: string; readonly kind: string; readonly selections: Readonly<Record<string, string>> };
+  readonly housed?: { readonly placementId: string; readonly kind: string; readonly selections: Readonly<Record<string, string>>; readonly offset: Length; readonly width: Length };
 };
 
 export type EndOption = 'end_left' | 'end_right';
@@ -105,7 +105,7 @@ export function cabinetViews(room: Room): CabinetView[] {
           const middle = x.offset + x.width.value / 2;
           return lookOptions(x.kind).length > 0 && item.position.offset < middle && middle < item.position.offset + item.width;
         });
-        return a ? { housed: { placementId: a.placement_id, kind: a.kind, selections: a.selections ?? {} } } : {};
+        return a ? { housed: { placementId: a.placement_id, kind: a.kind, selections: a.selections ?? {}, offset: a.offset, width: a.width.value } } : {};
       })(),
     });
   }
@@ -136,7 +136,7 @@ export function cabinetViews(room: Room): CabinetView[] {
           elevation: 0,
           height: 0,
           reviewed: true,
-          ...(lookOptions(a.kind).length ? { housed: { placementId: a.placement_id, kind: a.kind, selections: a.selections ?? {} } } : {}),
+          ...(lookOptions(a.kind).length ? { housed: { placementId: a.placement_id, kind: a.kind, selections: a.selections ?? {}, offset: a.offset, width: a.width.value } } : {}),
         });
       // An appliance or millwork hood over a range or cooktop; a cabinet there is a placed item.
       const over = overOf(a);

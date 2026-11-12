@@ -76,6 +76,8 @@
     "counter_thickness": "1 1/2",
     "counter_overhang": "1",
     "upper_bottom": "54",
+    "top_drawer_front": "6 13/16",
+    "top_drawer_front_note": "The standard top drawer front, lined up across cabinets (DECISIONS 2026-11-07 \"The cabinet catalog\", Drawers). The door sizes the 3D view draws come from shop design rule CB-FACT-16 (one door up to 20\" wide, then a pair; up to 48\" tall, then stacked).",
     "appliances": {
       "note": "Rough appliance shapes for the 3D view only, from the prototype; real sizes come from confirmed appliance specs (OA-4).",
       "fridge_height": "70",

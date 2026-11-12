@@ -102,10 +102,11 @@ test('the placeholder AI design lays out the drawn room, then the customize scre
   const toReview = page.getByText(/^\d+ placements to review$/);
   await expect(toReview).toBeVisible();
 
-  // Pick a base cabinet from its run; it is marked as placed by the placeholder until approved.
+  // Pick a base cabinet from its run: the Cabinet tab opens by itself (owner, 2026-11-12), and it is
+  // marked as placed by the placeholder until approved.
   await page.getByRole('tab', { name: 'Run' }).click();
   await page.locator('button[aria-label^="Base"]').first().click();
-  await page.getByRole('tab', { name: 'Cabinet' }).click();
+  await expect(page.getByRole('tab', { name: 'Cabinet' })).toHaveAttribute('aria-selected', 'true');
   await expect(page.getByText('Placed by the placeholder')).toBeVisible();
   await page.getByRole('button', { name: 'Approve', exact: true }).click();
   await expect(page.getByText('Reviewed', { exact: true })).toBeVisible();
@@ -116,8 +117,38 @@ test('the placeholder AI design lays out the drawn room, then the customize scre
 
   // A width the cabinet beside it can't give is refused with the reason.
   await page.getByRole('textbox', { name: 'Width' }).fill('400');
-  await page.getByRole('button', { name: 'Apply' }).click();
+  await page.getByRole('textbox', { name: 'Width' }).press('Enter');
   await expect(page.getByText(/can grow by that much at most/)).toBeVisible();
+
+  // The cabinet's own controls (owner, 2026-11-12): door opening, front and interior, ends, back.
+  await page.getByRole('radiogroup', { name: 'Cabinet type' }).getByRole('radio', { name: 'Base, doors', exact: true }).click();
+  await page.getByRole('radiogroup', { name: 'Door opening' }).getByRole('radio', { name: 'Hinged right' }).click();
+  await expect(page.getByText('Hinged on the right (handle on the left)')).toBeVisible();
+  await page.getByRole('button', { name: 'Split vertical' }).click();
+  await expect(page.getByRole('button', { name: /^Section 1:/ })).toBeVisible();
+  await page.getByRole('button', { name: 'Drawers', exact: true }).click();
+  await page.getByRole('button', { name: 'More drawers' }).click();
+  await expect(page.getByLabel('Drawers', { exact: true })).toHaveText('4');
+  await page.getByRole('button', { name: /^Section 2:/ }).click();
+  await page.getByRole('button', { name: 'More shelves' }).click();
+  await page.getByRole('button', { name: 'More roll-outs' }).click();
+  await expect(page.getByLabel('Roll-outs', { exact: true })).toHaveText('1');
+  await page.getByRole('radiogroup', { name: 'Left end' }).getByRole('radio', { name: 'Integrated FE' }).click();
+  await expect(page.getByRole('radiogroup', { name: 'Left end' }).getByRole('radio', { name: 'Integrated FE' })).toHaveAttribute('aria-checked', 'true');
+  await page.getByRole('radiogroup', { name: 'Back' }).getByRole('radio', { name: 'Finished door' }).click();
+  await expect(page.getByRole('radiogroup', { name: 'Back' }).getByRole('radio', { name: 'Finished door' })).toHaveAttribute('aria-checked', 'true');
+
+  // The sink's look, from its sink base (or by clicking the sink in the 3D view).
+  await page.getByRole('tab', { name: 'Run' }).click();
+  await page.locator('button[aria-label^="Sink base"]').first().click();
+  await page.getByRole('button', { name: 'Sink options' }).click();
+  const sinkLooks = page.getByRole('dialog', { name: 'Sink options' });
+  await sinkLooks.getByRole('radiogroup', { name: 'Sink colour' }).getByRole('radio', { name: 'Taupe' }).click();
+  await sinkLooks.getByRole('radiogroup', { name: 'Bowls' }).getByRole('radio', { name: 'Double, 60/40 bowls' }).click();
+  await sinkLooks.getByRole('radiogroup', { name: 'Faucet finish' }).getByRole('radio', { name: 'Brushed bronze' }).click();
+  await expect(sinkLooks.getByRole('radio', { name: 'Double, 60/40 bowls' })).toHaveAttribute('aria-checked', 'true');
+  await sinkLooks.getByRole('button', { name: 'Close' }).click();
+  await expect(sinkLooks).toHaveCount(0);
 
   // Approve all asks first.
   await page.getByRole('button', { name: 'Approve all' }).click();

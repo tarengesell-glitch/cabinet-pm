@@ -18,9 +18,10 @@ import { room as roomOf, wallLabel, type Draft } from '../model/editor';
 import { RUN_KIND_LABEL } from '../model/layout';
 import { applianceType, LAYOUT_RULES } from '../model/layout-rules';
 import { islandPanelsOf, layoutPreferences, type DesignChoices } from '../model/choices';
-import { DRAFT_SETTINGS, draftPlaceholder, itemByCode, runOf, standard } from '../model/placeholder-draft';
-import { parseSize } from './parseSize';
+import { draftPlaceholder, itemByCode, standard } from '../model/placeholder-draft';
+import { lookOptions } from '../model/appliance-looks';
 import { placeholderNotes, saveRoom, storedDraft } from './placeholder-store';
+import { CabinetEditor } from './CabinetEditor';
 import { FrontIcon } from './FrontIcon';
 import { Stage3D } from './Stage3D';
 import s from './Customize.module.css';
@@ -49,6 +50,29 @@ const TABS: readonly { id: Tab; name: string }[] = [
 /** The checks on the room's cabinets: Core's layout checks and the catalog's buildability checks. */
 const CABINET_CHECKS = [...ITEM_CHECKS, catalogItemCheck(CURRENT_CATALOG)];
 
+/** The history line for each kind of change. */
+function summaryOf(e: ItemEdit): string {
+  switch (e.kind) {
+    case 'approve':
+      return `Approved ${e.ids.length} cabinet${e.ids.length === 1 ? '' : 's'}`;
+    case 'type':
+      return 'Changed a cabinet’s type';
+    case 'width':
+    case 'resize':
+      return 'Changed a cabinet’s width';
+    case 'move':
+      return 'Moved a cabinet along its wall';
+    case 'box':
+      return 'Changed a cabinet’s size or position';
+    case 'option':
+      return `Changed a cabinet’s ${e.option.replace(/_/g, ' ')}`;
+    case 'sections':
+      return 'Changed a cabinet’s front and interior';
+    case 'appliance':
+      return `Changed an appliance’s ${e.option}`;
+  }
+}
+
 const nameOf = (c: CabinetView): string =>
   c.code ? (itemByCode(c.code)?.name ?? c.code) : c.appliance === 'hood' ? 'Hood' : c.appliance === 'millwork_hood' ? 'Millwork hood' : (applianceType(LAYOUT_RULES, c.appliance ?? '')?.name ?? c.appliance ?? 'Appliance');
 
@@ -63,6 +87,8 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
   const [fitToken, setFitToken] = useState(0);
   const [message, setMessage] = useState<{ kind: 'error' | 'notice'; text: string } | null>(null);
   const [approveArmed, setApproveArmed] = useState(false);
+  /** The sink, dishwasher or fridge whose look choices are open (owner, 2026-11-12), by placement ID. */
+  const [lookFor, setLookFor] = useState<string | null>(null);
   /** The choices, checked: a layout is made only from usable ones; a panel the 3D view can't show is reported. */
   const layoutPrefs = layoutPreferences(cr.designChoices);
   const panels = islandPanelsOf(cr.designChoices);
@@ -102,13 +128,22 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
     const edited = editItems(room, e);
     // A width or type change can change what is beside a cabinet: ends that follow the layout are
     // worked out again; an end that differs from the rule is kept (model/ends.ts, limitation END-4).
-    const r = edited.ok && e.kind !== 'approve' ? refreshEnds(room, edited.value) : edited;
+    // An end set by hand is kept as chosen; other layout changes work ends out again.
+    const r = edited.ok && e.kind !== 'approve' && e.kind !== 'option' && e.kind !== 'sections' && e.kind !== 'appliance' ? refreshEnds(room, edited.value) : edited;
     if (!r.ok) {
       setMessage({ kind: 'error', text: r.reason });
       return false;
     }
+    // A change that breaks a placed-item check (on its wall, along it, under the ceiling, clear of
+    // openings, no overlaps) is refused while editing a draft (REQUIREMENTS "What blocks").
+    const before = new Set(runChecks(ITEM_CHECKS, draft!.job, {}).issues.map((i) => i.message));
+    const fresh = runChecks(ITEM_CHECKS, { ...draft!.job, rooms: [r.value] }, {}).issues.filter((i) => !before.has(i.message));
+    if (fresh.length) {
+      setMessage({ kind: 'error', text: `Not changed: ${fresh[0]!.message}` });
+      return false;
+    }
     setMessage(null);
-    const summary = e.kind === 'approve' ? `Approved ${e.ids.length} cabinet${e.ids.length === 1 ? '' : 's'}` : e.kind === 'type' ? 'Changed a cabinet’s type' : 'Changed a cabinet’s width';
+    const summary = summaryOf(e);
     return keep(r.value, summary, 'designer');
   };
 
@@ -125,7 +160,8 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
   /** Selects a cabinet (from the 3D view, a run strip or a check) and shows its settings. */
   const pick = useCallback((id: string) => {
     setSelected(id);
-    setTab((t) => (t === 'room' || t === 'checks' ? 'cabinet' : t));
+    // The Cabinet tab opens whenever a cabinet is picked (owner, 2026-11-12).
+    setTab('cabinet');
     const c = designRef.current?.cabinets.find((x) => x.id === id);
     if (c) setRunId(c.runId);
   }, []);
@@ -171,7 +207,6 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
   const pending = design.cabinets.filter((c) => !c.reviewed && c.code !== null);
   const runs = room.walls.flatMap((w) => w.runs.map((r) => ({ wall: w, run: r })));
   const run = runs.find((r) => r.run.run_id === runId) ?? runs[0] ?? null;
-  const selItem = sel?.code ? itemByCode(sel.code) : null;
 
   const stepCab = (d: 1 | -1) => {
     const list = design.cabinets;
@@ -405,18 +440,19 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
             (!sel ? (
               <p className={s.empty}>Click a cabinet in the 3D view.</p>
             ) : (
-              <CabinetTab
+              <CabinetEditor
                 key={sel.id}
                 room={room}
                 cab={sel}
+                name={nameOf(sel)}
                 canEdit={canEdit}
                 onStep={stepCab}
                 onEdit={edit}
-                onTypeChange={(code) => edit({ kind: 'type', id: sel.id, code })}
                 row={design.cabinets.filter((c) => c.runId === sel.runId && c.layer === sel.layer).sort((a, b) => a.offset - b.offset)}
+                rowName={nameOf}
                 finish={cr.designChoices.look.door}
                 onPick={pick}
-                itemType={selItem?.type ?? null}
+                onLooks={setLookFor}
               />
             ))}
           {tab === 'checks' && (
@@ -441,7 +477,20 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
         </div>
       </section>
       <section className={s.stageCol} aria-label="3D view">
-        <Stage3D room={room} cabinets={design.cabinets} look={cr.designChoices.look} panels={panels} selected={selected} doorsOpen={doorsOpen} fitToken={fitToken} onPick={pick} onError={show3dError} />
+        <Stage3D
+          room={room}
+          cabinets={design.cabinets}
+          look={cr.designChoices.look}
+          panels={panels}
+          selected={selected}
+          doorsOpen={doorsOpen}
+          fitToken={fitToken}
+          onPick={pick}
+          onPickAppliance={setLookFor}
+          {...(canEdit ? { onEdit: edit } : {})}
+          onError={show3dError}
+        />
+        {lookFor && <ApplianceLooks room={room} placementId={lookFor} canEdit={canEdit} onEdit={edit} onClose={() => setLookFor(null)} />}
         <div className={s.hudTop}>
           <div className={s.hudCard}>
             <div className={s.label}>Live preview</div>
@@ -487,148 +536,43 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
   );
 }
 
-function CabinetTab(props: {
-  room: Room;
-  cab: CabinetView;
-  canEdit: boolean;
-  itemType: string | null;
-  /** The cabinets in the same row (run and layer), left to right. */
-  row: readonly CabinetView[];
-  finish: string;
-  onStep: (d: 1 | -1) => void;
-  onEdit: (e: ItemEdit) => boolean;
-  onTypeChange: (code: string) => void;
-  onPick: (id: string) => void;
-}) {
-  const { room, cab, canEdit } = props;
-  const [text, setText] = useState(formatInches(cab.width));
-  const [error, setError] = useState<string | null>(null);
-  const where = runOf(room, cab.runId);
-  const item = cab.code ? itemByCode(cab.code) : null;
-  const types = props.itemType && props.itemType !== 'filler' ? CURRENT_CATALOG.items.filter((i) => i.type === props.itemType && i.availability === 'available') : [];
-  const step = DRAFT_SETTINGS.ok ? DRAFT_SETTINGS.value.widthStep : null;
-  const setWidth = (width: number) => {
-    setError(null);
-    if (props.onEdit({ kind: 'width', id: cab.id, width })) setText(formatInches(width));
-    else setText(formatInches(cab.width));
-  };
-  const apply = () => {
-    const r = parseSize(text);
-    if (!r.ok) return setError(r.reason);
-    setWidth(r.value.value);
-  };
+/** The pop-up of an appliance's look choices: a sink's colour, bowls and faucet; a dishwasher's or fridge's front (owner, 2026-11-12). */
+function ApplianceLooks(props: { room: Room; placementId: string; canEdit: boolean; onEdit: (e: ItemEdit) => boolean; onClose: () => void }) {
+  const a = props.room.walls.flatMap((w) => w.appliances).find((x) => x.placement_id === props.placementId);
+  const onClose = props.onClose;
+  useEffect(() => {
+    const key = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    window.addEventListener('keydown', key);
+    return () => window.removeEventListener('keydown', key);
+  }, [onClose]);
+  if (!a) return null;
+  const options = lookOptions(a.kind);
+  if (!options.length) return null;
+  const name = applianceType(LAYOUT_RULES, a.kind)?.name ?? a.kind;
   return (
-    <>
-      <div className={s.cabHero}>
-        <span className={s.cabPic}>
-          <FrontIcon item={item} appliance={cab.appliance} width={cab.width} height={cab.height || 34 * 64} size={88} selected finish={props.finish} />
-        </span>
-        <div className={s.cabInfo}>
-          <h2 className={s.h2}>{nameOf(cab)}</h2>
-          <p className={s.sub}>
-            {where?.wall.kind === 'floating' ? 'Island' : wallLabel(room, cab.wallId).replace(/^w/, 'W')} · {formatInches(cab.offset - (where?.run.offset ?? 0))} from the run’s start
-          </p>
-          <div className={s.dimsRow}>
-            <span>
-              <b>W</b> {formatInches(cab.width)}
-            </span>
-            {cab.height > 0 && (
-              <span>
-                <b>H</b> {formatInches(cab.height)}
-              </span>
-            )}
-            {cab.code && (
-              <span>
-                <b>D</b> {formatInches(cab.depth ?? standard(cab.code, 'depth') ?? 0)}
-              </span>
-            )}
-          </div>
-          <div className={s.row}>
-            {cab.code === null ? null : !cab.reviewed ? (
-              <>
-                <span className={s.tag}>Placed by the placeholder</span>
-                <button className={s.btnSm} disabled={!canEdit} onClick={() => props.onEdit({ kind: 'approve', ids: [cab.id] })}>
-                  Approve
+    <div className={s.modalBack} onClick={onClose}>
+      <div className={s.modal} role="dialog" aria-modal="true" aria-label={`${name} options`} onClick={(e) => e.stopPropagation()}>
+        <div className={s.modalHead}>
+          <h2 className={s.h2}>{name}</h2>
+          <button className={s.btnGhost} onClick={onClose} aria-label="Close">
+            ×
+          </button>
+        </div>
+        {options.map((o) => (
+          <section key={o.code} className={s.sec}>
+            <h3 className={s.h3}>{o.name}</h3>
+            <div className={s.seg} role="radiogroup" aria-label={o.name}>
+              {o.values.map((v) => (
+                <button key={v.code} role="radio" aria-checked={a.selections?.[o.code] === v.code} className={s.segBtn} disabled={!props.canEdit} onClick={() => props.onEdit({ kind: 'appliance', placementId: a.placement_id, option: o.code, value: v.code })}>
+                  {v.hex && <i className={s.dot} style={{ background: v.hex }} />}
+                  {v.name}
                 </button>
-              </>
-            ) : (
-              <span className={s.ok}>Reviewed</span>
-            )}
-          </div>
-        </div>
-        <div className={s.stepBtns}>
-          <button className={s.btnSm} onClick={() => props.onStep(-1)} aria-label="Previous cabinet">
-            ←
-          </button>
-          <button className={s.btnSm} onClick={() => props.onStep(1)} aria-label="Next cabinet">
-            →
-          </button>
-        </div>
+              ))}
+            </div>
+            {!a.selections?.[o.code] && <p className={s.sub}>Not chosen yet: drawn in stainless{o.code === 'bowls' ? ' with one bowl' : ''}.</p>}
+          </section>
+        ))}
       </div>
-      {cab.code === null && <p className={s.notice}>An appliance. Move or resize it on the Room drawing step.</p>}
-      {cab.code !== null && (
-        <section className={s.sec}>
-          <h3 className={s.h3}>Width</h3>
-          <div className={s.rowStrip} aria-label="This cabinet in its row">
-            {props.row.map((c) => (
-              <button
-                key={c.id}
-                className={c.id === cab.id ? s.rowCellOn : s.rowCell}
-                style={{ flex: `${Math.max(c.width / 64, 4)} 1 0` }}
-                title={`${nameOf(c)} ${formatInches(c.width)}`}
-                aria-label={`${nameOf(c)} ${formatInches(c.width)}`}
-                onClick={() => props.onPick(c.id)}
-              >
-                {c.code ? formatInches(c.width).replace('"', '') : ''}
-              </button>
-            ))}
-          </div>
-          <p className={s.sub}>The cabinet or filler beside it gives or takes the difference, so the run stays the same length.</p>
-          <div className={s.row}>
-            {step !== null && (
-              <button className={s.btnSq} disabled={!canEdit} aria-label={`Narrower by ${formatInches(step)}`} onClick={() => setWidth(cab.width - step)}>
-                −
-              </button>
-            )}
-            <input
-              className={error ? s.inputBad : s.input}
-              aria-label="Width"
-              value={text}
-              disabled={!canEdit}
-              onChange={(e) => setText(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && apply()}
-            />
-            {step !== null && (
-              <button className={s.btnSq} disabled={!canEdit} aria-label={`Wider by ${formatInches(step)}`} onClick={() => setWidth(cab.width + step)}>
-                +
-              </button>
-            )}
-            <button className={s.btn} disabled={!canEdit} onClick={apply}>
-              Apply
-            </button>
-          </div>
-          {error && (
-            <p className={s.error} role="alert">
-              {error}
-            </p>
-          )}
-        </section>
-      )}
-      {types.length > 1 && (
-        <section className={s.sec}>
-          <h3 className={s.h3}>Type</h3>
-          <div className={s.typeGrid} role="radiogroup" aria-label="Cabinet type">
-            {types.map((t) => (
-              <button key={t.code} role="radio" className={s.typeCard} aria-checked={t.code === cab.code} disabled={!canEdit} onClick={() => props.onTypeChange(t.code)}>
-                <span className={s.typePic}>
-                  <FrontIcon item={t} width={cab.width} height={cab.height || (t.size.height.default.value ?? 34 * 64)} size={44} selected={t.code === cab.code} finish={props.finish} />
-                </span>
-                <span className={s.typeName}>{t.name}</span>
-              </button>
-            ))}
-          </div>
-        </section>
-      )}
-    </>
+    </div>
   );
 }

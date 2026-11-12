@@ -134,6 +134,12 @@ export const AppliancePlacementSchema = z.strictObject({
    * ranges and cooktops come with a hood); the screens read it so.
    */
   above: OverCookingSchema.optional(),
+  /**
+   * How the appliance looks, chosen in Customize (owner, 2026-11-12): option code → value code
+   * from the designer's appliance-look list (a sink's colour, bowls and faucet; a dishwasher's or
+   * fridge's front). Not set on rooms saved before then, or until someone chooses.
+   */
+  selections: z.record(z.string().min(1), z.string().min(1)).optional(),
 });
 
 /**
@@ -221,6 +227,30 @@ export const ItemOriginSchema = z.strictObject({
 /** A catalog-defined modification (scribe, end panel…). Free-form modifications are not allowed. */
 export const ModificationSchema = z.strictObject({ code: z.string().min(1) });
 
+/**
+ * A cabinet's front and interior as a person divided it in Customize (owner, 2026-11-12: split
+ * vertical or horizontal, shelves, drawers, roll-outs, as the common cabinet design programs do).
+ * A split divides its space into parts side by side ("vertical": a vertical divider) or stacked
+ * ("horizontal", top first); every other kind fills its space. `size` is the part's share along
+ * its parent's split (width or height), or null for an equal share of what is left. PROPOSED
+ * shape (2026-11-12): the shop's library decides how it is built; the CAD file can't carry it yet.
+ */
+export type FrontSection =
+  | { readonly kind: 'split'; readonly direction: 'vertical' | 'horizontal'; readonly parts: readonly FrontSection[]; readonly size: number | null }
+  | { readonly kind: 'doors'; readonly shelves: number; readonly rollouts: number; readonly size: number | null }
+  | { readonly kind: 'drawers'; readonly count: number; readonly size: number | null }
+  | { readonly kind: 'open'; readonly shelves: number; readonly size: number | null };
+
+const Count = z.number().int().min(0).max(40);
+export const FrontSectionSchema: z.ZodType<FrontSection> = z.lazy(() =>
+  z.discriminatedUnion('kind', [
+    z.strictObject({ kind: z.literal('split'), direction: z.enum(['vertical', 'horizontal']), parts: z.array(FrontSectionSchema).min(2).max(12), size: SizeSchema.nullable() }),
+    z.strictObject({ kind: z.literal('doors'), shelves: Count, rollouts: Count, size: SizeSchema.nullable() }),
+    z.strictObject({ kind: z.literal('drawers'), count: Count.min(1), size: SizeSchema.nullable() }),
+    z.strictObject({ kind: z.literal('open'), shelves: Count, size: SizeSchema.nullable() }),
+  ]),
+);
+
 /** BUILD_SPEC section 6, PlacedItem: one catalog item placed in a room. */
 export const PlacedItemSchema = z
   .strictObject({
@@ -236,6 +266,11 @@ export const PlacedItemSchema = z
     origin: ItemOriginSchema,
     /** Free text for the shop; never used for translation. */
     notes: z.string(),
+    /**
+     * The front and interior as a person divided it (owner, 2026-11-12); absent while the cabinet
+     * is as its catalog type shows it. Not set on items saved before then.
+     */
+    sections: FrontSectionSchema.optional(),
   })
   .refine((i) => i.width > 0 && i.height > 0 && i.depth > 0, { message: 'A placed item needs a width, a height and a depth.' });
 

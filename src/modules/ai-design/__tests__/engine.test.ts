@@ -113,7 +113,7 @@ describe('the layout builder', () => {
         // The only catalog findings are the choices left as blockers until the intake is mapped (owner, 2026-11-09) and CAT-2,
         // and the sizes of the panels and the cabinet over the fridge whose limits aren't known yet (owner, 2026-11-10; CAT-1, AD-6).
         for (const i of o.issues.filter((x) => x.check_id.startsWith('catalog.'))) {
-          if (/needs a choice for “(Door style|Hinge side \(single door\))”\.$/.test(i.message)) continue;
+          if (/needs a choice for “(Door style|Door opening)”\.$/.test(i.message)) continue;
           const item = o.room.items.find((x) => x.item_instance_id === i.ref.id)!;
           expect(SIZED_BY_OWNER.has(code.get(item.catalog_item_id)!)).toBe(true);
           expect(i.message).toMatch(/^The (smallest (width|height|depth) for|largest (width|height|depth) for|size step for) .+ isn’t known yet/);

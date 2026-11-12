@@ -7,6 +7,7 @@ import { describe, expect, it } from 'vitest';
 
 const PUBLISHED: Readonly<Record<string, string>> = {
   'catalog-v1.json': '1710241f888d7c14d30b9934a1cfdba1f2fa3afed354c6e5ef502c98c2023b52',
+  'catalog-v2.json': '597c4369fc148d6078a0ec24ba626556987a0c7353a39a7525c97ec74813df0d',
 };
 
 describe('published catalog versions', () => {

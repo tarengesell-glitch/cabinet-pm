@@ -529,7 +529,7 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
               </span>
             )}
           </div>
-          <div className={s.hint3d}>Click a cabinet · drag to turn · right-drag or Shift-drag to move · scroll to zoom · double-click to look there</div>
+          <div className={s.hint3d}>Click a cabinet, then drag its blue handles to size or move it · drag to turn · right-drag or Shift-drag to move · scroll to zoom · double-click to look there</div>
         </div>
       </section>
     </div>

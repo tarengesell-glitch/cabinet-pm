@@ -803,7 +803,7 @@ function addHandles(s: Pick<Scene3D, 'mats'>, g: THREE.Group, c: CabinetView, ct
   const own = (key: string, color: string): THREE.Material => {
     const have = s.mats.get(key);
     if (have) return have;
-    const made = new THREE.MeshBasicMaterial({ color, depthTest: false, transparent: true, opacity: 0.95 });
+    const made = new THREE.MeshBasicMaterial({ color, depthTest: false, toneMapped: false });
     s.mats.set(key, made);
     return made;
   };

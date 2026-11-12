@@ -58,6 +58,8 @@ Navigation: what actually runs, where each rule's data and code live, and which 
 | Parked AI layout builder | `ai-design/__tests__/engine.test.ts`, `split.test.ts` | |
 | The live site's pages | | `e2e-static/deployed-site.spec.ts` (`npm run test:static`) |
 
+**Seen once, not reproduced:** `e2e/studio.spec.ts` "every room is in the room bar…" failed once in a full `npm run check` (a Claude cloud session, 2026-11-11): after a room-bar click the intake still showed the main bath's question, not the kitchen's review. It then passed 6 times on its own and in every later full run. Cause unknown; if it fails again, look at the room switch, not the test's timing.
+
 Commands and timings: `docs/DEVELOPMENT.md`. Which to run when: root `CLAUDE.md` "Checks".
 
 ## Unresolved

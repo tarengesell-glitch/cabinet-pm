@@ -1,5 +1,10 @@
 /* The customize screens: closet-builder's 40/60 settings pane and studio-lit 3D stage (DECISIONS C-2). */
 .ws {
+  /* A selected cabinet is shown in blue, the usual selection colour (owner, 2026-11-12); gold stays elsewhere in the app. */
+  --gold: #2f7de1;
+  --gold-soft: #d6e6fb;
+  --gold-glow: rgba(47, 125, 225, 0.35);
+  --selected-ring: inset 0 0 0 1.5px #2f7de1, inset 0 0 22px rgba(47, 125, 225, 0.22), 0 0 0 4px rgba(47, 125, 225, 0.16);
   display: grid;
   grid-template-columns: minmax(370px, 40%) minmax(0, 1fr);
   height: 100%;
@@ -307,7 +312,7 @@
 .choice[aria-checked='true'] {
   border-color: var(--gold);
   color: var(--navy);
-  box-shadow: inset 0 0 0 1px var(--gold), 0 0 0 3px rgba(212, 181, 127, 0.18);
+  box-shadow: inset 0 0 0 1px var(--gold), 0 0 0 3px rgba(47, 125, 225, 0.18);
 }
 
 .input,
@@ -757,4 +762,148 @@
 
 .typeName {
   font: 500 11.5px/1.25 var(--body);
+}
+
+/* The Cabinet tab's controls (CabinetEditor.tsx, owner 2026-11-12). */
+.sizeGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 10px 14px;
+}
+
+.sizeField {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sizeField .input,
+.sizeField .inputBad {
+  width: 110px;
+  height: 32px;
+}
+
+.optRow {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.optLabel {
+  font: 600 11px var(--body);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.seg {
+  display: inline-flex;
+  flex-wrap: wrap;
+  border: 1px solid var(--rule);
+  border-radius: 9px;
+  overflow: hidden;
+  background: var(--paper);
+  box-shadow: var(--ambient);
+  width: fit-content;
+  max-width: 100%;
+}
+
+.segBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border: 0;
+  border-right: 1px solid var(--rule);
+  background: transparent;
+  font: 500 12.5px var(--body);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.segBtn:last-child {
+  border-right: 0;
+}
+
+.segBtn:hover:not(:disabled):not([aria-checked='true']) {
+  background: var(--surface);
+}
+
+.segBtn[aria-checked='true'] {
+  background: var(--gold);
+  color: #fff;
+}
+
+.segBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+}
+
+.facePreview {
+  display: block;
+  margin: 4px 0 8px;
+  background: var(--surface);
+  border-radius: 8px;
+}
+
+.toolGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.counters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+
+.counter {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.counter b {
+  min-width: 18px;
+  text-align: center;
+  font: 600 13px var(--mono);
+}
+
+/* The appliance look pop-up, over the 3D view. */
+.modalBack {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  background: rgba(20, 20, 24, 0.18);
+}
+
+.modal {
+  width: min(440px, calc(100% - 32px));
+  max-height: calc(100% - 32px);
+  overflow: auto;
+  background: var(--paper);
+  border-radius: 14px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.22);
+  padding: 16px 18px;
+}
+
+.modalHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }

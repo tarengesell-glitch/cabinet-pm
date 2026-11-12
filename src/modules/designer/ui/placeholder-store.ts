@@ -5,7 +5,7 @@
  * Every failure is returned with its reason (rule 7).
  */
 import { type Job, type Result, type Room } from '@/core/index';
-import { placeholderItems } from '../model/cabinets';
+import { applyMoves, placeholderItems } from '../model/cabinets';
 import { loadJob, room as roomOf, upgradeStoredDraft, type Draft } from '../model/editor';
 import { withRuleEnds } from '../model/ends';
 import { layoutPreferences, type DesignChoices } from '../model/choices';
@@ -71,9 +71,10 @@ export function draftRoom(roomKey: string, choices: DesignChoices, userId: strin
   if (!prefs.ok) return prefs;
   const d = storedDraft(roomKey);
   if (!d.ok) return d;
-  const room = roomOf(d.value);
-  const design = draftPlaceholder(room, prefs.value, () => crypto.randomUUID());
+  const drawn = roomOf(d.value);
+  const design = draftPlaceholder(drawn, prefs.value, () => crypto.randomUUID());
   if (!design.ok) return design;
+  const room = applyMoves(drawn, design.value);
   const items = placeholderItems(room, design.value);
   if (!items.ok) return items;
   // Every cabinet's ends, worked out once and saved with it (the 3D view draws what is saved).

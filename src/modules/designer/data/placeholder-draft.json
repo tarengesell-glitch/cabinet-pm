@@ -27,6 +27,12 @@
       },
       "maximum": {
         "all": "base_3_drawers"
+      },
+      "four_banks": {
+        "source": "Shop design rules PREF-006 (\"A bank of four drawers should be close to the sink cabinet and dishwasher\") and PREF-007 (\"At least one, ideally two, four-drawer banks for pots and pans right beside the cooking appliance\"), both confirmed 2026-11-08. Owner, 2026-11-12: \"This kitchen didn't include any banks of four drawers. The design rules say some of these should exist.\" With a drawer level chosen, the base cabinets right beside a range or cooktop (up to two) and the nearest one to the sink base or dishwasher become four-drawer banks; Minimum makes only one, beside the cooking first. Which cabinet counts as near is this session's reading (PROPOSED): touching the cooking appliance, or the next one along from a bank that does; the nearest base on the sink's wall.",
+        "code": "base_4_drawers",
+        "beside_cooking": 2,
+        "near_sink": 1
       }
     },
     "base_filler": "base_filler",
@@ -70,6 +76,8 @@
     "counter_thickness": "1 1/2",
     "counter_overhang": "1",
     "upper_bottom": "54",
+    "top_drawer_front": "6 13/16",
+    "top_drawer_front_note": "The standard top drawer front, lined up across cabinets (DECISIONS 2026-11-07 \"The cabinet catalog\", Drawers). The door sizes the 3D view draws come from shop design rule CB-FACT-16 (one door up to 20\" wide, then a pair; up to 48\" tall, then stacked).",
     "appliances": {
       "note": "Rough appliance shapes for the 3D view only, from the prototype; real sizes come from confirmed appliance specs (OA-4).",
       "fridge_height": "70",

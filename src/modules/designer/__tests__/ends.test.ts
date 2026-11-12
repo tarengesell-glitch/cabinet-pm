@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { JobSchema, runChecks, type PlacedItem, type Room } from '@/core/index';
 import { catalogItemCheck, CURRENT_CATALOG } from '@/modules/catalog/contract';
-import { endOption, placeholderItems } from '../model/cabinets';
+import { editItems, endOption, placeholderItems } from '../model/cabinets';
 import { endContext, fillEnds, refreshEnds, reviewEnds, withRuleEnds } from '../model/ends';
 import type { DesignChoices } from '../model/choices';
 import { draftPlaceholder, itemByCode, type DraftPreferences } from '../model/placeholder-draft';
@@ -182,7 +182,7 @@ describe('older designs, saved before ends were stored', () => {
     expect(endContext(withStyle).all.flatMap((c) => finishedEnds(c))).toEqual([]);
     const filled = ok(fillEnds(withStyle, review.missing));
     for (const i of filled.items) expect(i.item_selections['door_style']).toBe('slab');
-    expect(ok(reviewEnds(filled))).toEqual({ missing: [], differ: [] });
+    expect(ok(reviewEnds(filled))).toEqual({ missing: [], differ: [], overridden: [] });
     expect(filled.items.map((i) => i.item_selections)).toEqual(ended(withStyle).items.map((i) => i.item_selections));
   });
 
@@ -191,7 +191,7 @@ describe('older designs, saved before ends were stored', () => {
     const target = room.items.find((i) => where(room, i) === '2 base 2.25')!;
     const changed = { ...room, items: room.items.map((i) => (i === target ? { ...i, item_selections: { ...i.item_selections, end_left: 'finished' } } : i)) };
     const review = ok(reviewEnds(changed));
-    expect(review).toEqual({ missing: [], differ: [target.item_instance_id] });
+    expect(review).toEqual({ missing: [], differ: [target.item_instance_id], overridden: [] });
     const back = ok(fillEnds(changed, review.differ));
     expect(back.items.find((i) => i.item_instance_id === target.item_instance_id)!.item_selections['end_left']).toBe('unfinished');
   });
@@ -220,6 +220,48 @@ describe('saving and opening again', () => {
     const sel = (r: Room) => r.items.map((i) => [i.item_instance_id, i.item_selections] as const);
     expect(sel(reopened)).toEqual(sel(drafted));
     expect(reopened.items.filter((i) => i.item_selections['end_left'] === 'applied_finished' || i.item_selections['end_right'] === 'applied_finished')).toHaveLength(9);
-    expect(ok(reviewEnds(reopened))).toEqual({ missing: [], differ: [] });
+    expect(ok(reviewEnds(reopened))).toEqual({ missing: [], differ: [], overridden: [] });
+  });
+});
+
+describe('ends set by hand in Customize (owner, 2026-11-12; DECISIONS END-4)', () => {
+  /** A cabinet whose low end the rule leaves unfinished (something beside it), and the option for that end. */
+  const closedEnd = (room: Room): { item: PlacedItem; option: 'end_left' | 'end_right' } => {
+    for (const item of room.items) {
+      const option = endOption(item.position.side, 'low');
+      if (item.item_selections[option] === 'unfinished' && itemByCode(CURRENT_CATALOG.items.find((c) => c.id === item.catalog_item_id)!.code)?.type === 'base') return { item, option };
+    }
+    throw new Error('no closed end');
+  };
+
+  it('is recorded as set by hand, kept through a layout change and "update to match", and listed when the layout disagrees', () => {
+    const room = ended(laidOut(MAX));
+    const { item, option } = closedEnd(room);
+    const set = editItems(room, { kind: 'option', id: item.item_instance_id, option, value: 'finished' });
+    if (!set.ok) throw new Error(set.reason);
+    const mine = set.value.items.find((i) => i.item_instance_id === item.item_instance_id)!;
+    expect(mine.set_by_hand).toEqual([option]);
+    // The layout says unfinished, so it is listed for review, never as "differs, update it".
+    const review = reviewEnds(set.value);
+    expect(review.ok && review.value.overridden).toContain(item.item_instance_id);
+    expect(review.ok && review.value.differ).not.toContain(item.item_instance_id);
+    const filled = fillEnds(set.value, [item.item_instance_id]);
+    expect(filled.ok && filled.value.items.find((i) => i.item_instance_id === item.item_instance_id)!.item_selections[option]).toBe('finished');
+    const refreshed = refreshEnds(room, set.value);
+    expect(refreshed.ok && refreshed.value.items.find((i) => i.item_instance_id === item.item_instance_id)!.item_selections[option]).toBe('finished');
+  });
+
+  it('cleared, it goes back to the layout', () => {
+    const room = ended(laidOut(MAX));
+    const { item, option } = closedEnd(room);
+    const set = editItems(room, { kind: 'option', id: item.item_instance_id, option, value: 'finished' });
+    if (!set.ok) throw new Error(set.reason);
+    const cleared = editItems(set.value, { kind: 'option', id: item.item_instance_id, option, value: null });
+    if (!cleared.ok) throw new Error(cleared.reason);
+    const back = fillEnds(cleared.value, [item.item_instance_id]);
+    if (!back.ok) throw new Error(back.reason);
+    const it2 = back.value.items.find((i) => i.item_instance_id === item.item_instance_id)!;
+    expect(it2.item_selections[option]).toBe('unfinished');
+    expect(it2.set_by_hand).toBeUndefined();
   });
 });

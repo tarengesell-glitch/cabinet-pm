@@ -4,7 +4,7 @@ import { CURRENT_CATALOG } from '@/modules/catalog/contract';
 import { ITEM_CHECKS, JobSchema, runChecks } from '@/core/index';
 import { DRAFT_SETTINGS, draftPlaceholder, equalFlank, fillWidths, type DraftPreferences, type PlaceholderDesign } from '../model/placeholder-draft';
 import { realKitchenRoom } from './real-kitchen';
-import { cabinetViews, editItems, placeholderItems, replaceRunItems } from '../model/cabinets';
+import { applyMoves, cabinetViews, editItems, placeholderItems, replaceRunItems } from '../model/cabinets';
 import { LAYOUT_RULES } from '../model/layout-rules';
 
 const IN = 64;
@@ -372,3 +372,53 @@ describe('owner fixes, 2026-11-10 round 2 (a real kitchen)', () => {
 });
 
 const applianceEndOf = (a: { offset: number; width: { value: number } }) => a.offset + a.width.value;
+
+describe('owner fixes, 2026-11-12', () => {
+  /** The real kitchen with its fridge pushed against the end of its wall (no room for a panel there). */
+  const fridgeAtWall = (): Room => {
+    const r = realKitchenRoom();
+    return { ...r, walls: r.walls.map((w) => ({ ...w, runs: w.runs.map((x, i) => (i === 0 && w.appliances.some((a) => a.kind === 'fridge') ? { ...x, offset: 9, length: x.length + 45 } : x)), appliances: w.appliances.map((a) => (a.kind === 'fridge' ? { ...a, offset: 9 } : a)) })) };
+  };
+
+  it('moves a fridge drawn against the wall over by its panel, so it has a full panel on both sides', () => {
+    const room = fridgeAtWall();
+    const d = draftPlaceholder(room, prefs(), ids);
+    if (!d.ok) throw new Error(d.reason);
+    const fridge = room.walls.flatMap((w) => w.appliances).find((a) => a.kind === 'fridge')!;
+    const panelW = CURRENT_CATALOG.items.find((i) => i.code === 'tall_filler')!.size.width.default.value!;
+    // Moved toward the wall's end by just what the panel needed, never more than the panel's width.
+    expect(d.value.moves).toHaveLength(1);
+    const at = d.value.moves[0]!.offset;
+    expect(d.value.moves[0]!.placementId).toBe(fridge.placement_id);
+    expect(at - fridge.offset).toBeGreaterThan(0);
+    expect(at - fridge.offset).toBeLessThanOrEqual(panelW);
+    const panels = d.value.cabinets.filter((c) => c.code === 'tall_filler').map((c) => [c.offset, c.width]);
+    expect(panels).toEqual([
+      [at - panelW, panelW],
+      [at + fridge.width.value, panelW],
+    ]);
+    // Saved with the room: the fridge the 3D view draws stands between its panels.
+    const moved = applyMoves(room, d.value);
+    expect(moved.walls.flatMap((w) => w.appliances).find((a) => a.kind === 'fridge')!.offset).toBe(at);
+    expect(d.value.notes.some((n) => n.includes('to make room for its panel'))).toBe(true);
+    expect(d.value.notes.some((n) => n.includes('no room for the fridge panel'))).toBe(false);
+  });
+
+  it('makes four-drawer banks beside the range and near the sink at every drawer level (PREF-006, PREF-007)', () => {
+    for (const drawers of ['minimum', 'moderate', 'maximum'] as const) {
+      const d = draftPlaceholder(realKitchenRoom(), prefs({ drawers }), ids);
+      if (!d.ok) throw new Error(d.reason);
+      const fours = d.value.cabinets.filter((c) => c.code === 'base_4_drawers');
+      const range = d.value.cabinets.find((c) => c.appliance === 'range')!;
+      const besideRange = fours.filter((c) => c.wallId === range.wallId && (c.offset === range.offset + range.width || c.offset + c.width === range.offset));
+      if (drawers === 'minimum') expect(fours).toHaveLength(1);
+      else {
+        expect(besideRange).toHaveLength(2);
+        expect(fours).toHaveLength(3);
+        const sink = d.value.cabinets.find((c) => c.code === 'sink_base')!;
+        expect(fours.some((c) => c.wallId === sink.wallId)).toBe(true);
+      }
+      expect(besideRange.length).toBeGreaterThan(0);
+    }
+  });
+});

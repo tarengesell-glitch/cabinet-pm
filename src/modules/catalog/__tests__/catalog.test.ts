@@ -30,11 +30,23 @@ const ids = (issues: readonly { check_id: string }[]) => issues.map((i) => i.che
 const copy = () => JSON.parse(JSON.stringify(raw)) as typeof raw;
 
 describe('the catalog file', () => {
-  it('loads, as version 1, with the 50 cabinet types from the owner’s review', () => {
-    expect(CURRENT_CATALOG.version).toBe(1);
+  it('loads, as version 2, with the 50 cabinet types from the owner’s review; version 1 is kept as it was', () => {
+    expect(CURRENT_CATALOG.version).toBe(2);
     expect(CURRENT_CATALOG.items).toHaveLength(50);
-    expect(catalogVersion(1)).toBe(CURRENT_CATALOG);
-    expect(catalogVersion(2)).toBeNull();
+    expect(catalogVersion(2)).toBe(CURRENT_CATALOG);
+    expect(catalogVersion(1)?.version).toBe(1);
+    expect(catalogVersion(3)).toBeNull();
+    // The same items in both, by ID: a design checked against version 1 still finds every cabinet.
+    expect(catalogVersion(1)!.items.map((i) => i.id)).toEqual(CURRENT_CATALOG.items.map((i) => i.id));
+  });
+
+  it('version 2 adds the owner’s cabinet choices of 2026-11-12: double doors, the back, integrated finished ends', () => {
+    const option = (code: string) => CURRENT_CATALOG.options.find((o) => o.code === code)!;
+    expect(option('hinge_side').values.map((v) => v.code)).toEqual(['left', 'right', 'pair']);
+    expect(option('back').values.map((v) => v.code)).toEqual(['unfinished', 'finished_panel', 'finished_door']);
+    expect(option('end_left').values.find((v) => v.code === 'finished')!.name).toMatch(/^Integrated finished end/);
+    expect(item('base_doors').options).toContain('back');
+    expect(item('base_doors').required).not.toContain('back');
   });
 
   it('records the owner’s answers', () => {

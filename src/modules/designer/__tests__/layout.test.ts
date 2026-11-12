@@ -381,6 +381,15 @@ describe('appliances', () => {
     expect(passes(d)).toEqual([]);
   });
 
+  it('a sink dropped on a bare wall gets a base + upper run, so uppers reach a window over it (owner, 2026-11-12)', () => {
+    const k = bareKitchen();
+    const env = testEnv();
+    const d = unwrap(placeAppliance(k, env, 'sink', wallOf(k, 'C').wall_id, 100 * IN, SNAP));
+    const runs = wallOf(d, 'C').runs;
+    expect(runs.length).toBeGreaterThan(0);
+    expect(runs.every((r) => r.kind === 'base_upper')).toBe(true);
+  });
+
   it('nothing goes in a doorway or past a wall end', () => {
     const k = bareKitchen();
     const env = testEnv();

@@ -1,0 +1,59 @@
+{
+  "source": "Owner (Taren), chat, 2026-11-12: \"I should be able to click on a sink, have a modal option window pop up, then change the sink to black, white, or taupe, single bowl, double equal bowl, 60/40 double bowl, and change the faucet finishes from brushed aluminum, to brushed bronze, to black\"; \"change the dishwasher to brushed aluminum, black, white, or panelled door that matches the rest of the doors\"; fridges the same as dishwashers.",
+  "visual_note": "The colours (hex) and the bowl proportions are for drawing the 3D view only (a visual approximation, BUILD_SPEC 5.5). The real products come from confirmed appliance specs (OA-4). Until someone chooses, an appliance is drawn as before (stainless) and Customize says it isn't chosen.",
+  "kinds": {
+    "sink": [
+      {
+        "code": "colour",
+        "name": "Sink colour",
+        "values": [
+          { "code": "black", "name": "Black", "hex": "#232325" },
+          { "code": "white", "name": "White", "hex": "#f2f1ee" },
+          { "code": "taupe", "name": "Taupe", "hex": "#8b8073" }
+        ]
+      },
+      {
+        "code": "bowls",
+        "name": "Bowls",
+        "values": [
+          { "code": "single", "name": "Single bowl", "split": [1] },
+          { "code": "double_equal", "name": "Double, equal bowls", "split": [1, 1] },
+          { "code": "double_60_40", "name": "Double, 60/40 bowls", "split": [3, 2] }
+        ]
+      },
+      {
+        "code": "faucet",
+        "name": "Faucet finish",
+        "values": [
+          { "code": "brushed_aluminum", "name": "Brushed aluminum", "hex": "#c3c6ca" },
+          { "code": "brushed_bronze", "name": "Brushed bronze", "hex": "#8a6a48" },
+          { "code": "black", "name": "Black", "hex": "#1c1c1e" }
+        ]
+      }
+    ],
+    "dishwasher": [
+      {
+        "code": "front",
+        "name": "Front",
+        "values": [
+          { "code": "brushed_aluminum", "name": "Brushed aluminum", "hex": "#c3c6ca" },
+          { "code": "black", "name": "Black", "hex": "#1f1f21" },
+          { "code": "white", "name": "White", "hex": "#f1f0ec" },
+          { "code": "panelled", "name": "Panelled to match the doors" }
+        ]
+      }
+    ],
+    "fridge": [
+      {
+        "code": "front",
+        "name": "Front",
+        "values": [
+          { "code": "brushed_aluminum", "name": "Brushed aluminum", "hex": "#c3c6ca" },
+          { "code": "black", "name": "Black", "hex": "#1f1f21" },
+          { "code": "white", "name": "White", "hex": "#f1f0ec" },
+          { "code": "panelled", "name": "Panelled to match the doors" }
+        ]
+      }
+    ]
+  }
+}

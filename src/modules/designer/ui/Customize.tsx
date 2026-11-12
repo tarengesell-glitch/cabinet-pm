@@ -12,7 +12,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { formatInches, ITEM_CHECKS, runChecks, type Room } from '@/core/index';
 import { can, type User } from '@/platform/index';
 import { catalogItemCheck, CURRENT_CATALOG } from '@/modules/catalog/contract';
-import { cabinetViews, editItems, placeholderItems, replaceRunItems, upperTopOf, type CabinetView, type ItemEdit } from '../model/cabinets';
+import { applyMoves, cabinetViews, editItems, placeholderItems, replaceRunItems, upperTopOf, type CabinetView, type ItemEdit } from '../model/cabinets';
 import { fillEnds, refreshEnds, reviewEnds } from '../model/ends';
 import { room as roomOf, wallLabel, type Draft } from '../model/editor';
 import { RUN_KIND_LABEL } from '../model/layout';
@@ -382,9 +382,10 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
                       if (!layoutPrefs.ok) return setMessage({ kind: 'error', text: layoutPrefs.reason });
                       const fresh = draftPlaceholder(room, layoutPrefs.value, () => crypto.randomUUID());
                       if (!fresh.ok) return setMessage({ kind: 'error', text: fresh.reason });
-                      const items = placeholderItems(room, fresh.value);
+                      const moved = applyMoves(room, fresh.value);
+                      const items = placeholderItems(moved, fresh.value);
                       if (!items.ok) return setMessage({ kind: 'error', text: items.reason });
-                      const next = refreshEnds(room, replaceRunItems(room, items.value, run.run.run_id));
+                      const next = refreshEnds(room, replaceRunItems(moved, items.value, run.run.run_id));
                       if (!next.ok) return setMessage({ kind: 'error', text: next.reason });
                       if (keep(next.value, 'Placeholder layout (no AI was used) of one run', 'ai'))
                         setMessage({ kind: 'notice', text: 'Run re-drafted with the placeholder recipe.' });

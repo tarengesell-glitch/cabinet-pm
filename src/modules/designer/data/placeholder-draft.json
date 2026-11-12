@@ -27,6 +27,12 @@
       },
       "maximum": {
         "all": "base_3_drawers"
+      },
+      "four_banks": {
+        "source": "Shop design rules PREF-006 (\"A bank of four drawers should be close to the sink cabinet and dishwasher\") and PREF-007 (\"At least one, ideally two, four-drawer banks for pots and pans right beside the cooking appliance\"), both confirmed 2026-11-08. Owner, 2026-11-12: \"This kitchen didn't include any banks of four drawers. The design rules say some of these should exist.\" With a drawer level chosen, the base cabinets right beside a range or cooktop (up to two) and the nearest one to the sink base or dishwasher become four-drawer banks; Minimum makes only one, beside the cooking first. Which cabinet counts as near is this session's reading (PROPOSED): touching the cooking appliance, or the next one along from a bank that does; the nearest base on the sink's wall.",
+        "code": "base_4_drawers",
+        "beside_cooking": 2,
+        "near_sink": 1
       }
     },
     "base_filler": "base_filler",

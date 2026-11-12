@@ -60,6 +60,12 @@ export interface PlaceholderDesign {
   /** The top line every upper and tall cabinet reaches. */
   readonly upperTop: Length;
   readonly cabinets: readonly PlaceholderCabinet[];
+  /**
+   * Appliances the builder moved along their own wall, each explained in the notes: a fridge drawn
+   * against a wall or corner moves over just enough for its panel (owner, 2026-11-12: "the fridge
+   * should have fridge panels on both sides"). `applyMoves` (cabinets.ts) saves them in the room.
+   */
+  readonly moves: readonly { readonly placementId: string; readonly offset: Length }[];
   /** Why it looks the way it does, in plain words. */
   readonly notes: readonly string[];
 }
@@ -152,6 +158,7 @@ function readSettings(): Result<DraftSettings> {
     ...codes.base_by_drawer_level.moderate.banks,
     codes.base_by_drawer_level.moderate.every_third,
     codes.base_by_drawer_level.maximum.all,
+    codes.base_by_drawer_level.four_banks.code,
   ];
   const missing = all.filter((c) => !CURRENT_CATALOG.items.some((i) => i.code === c));
   if (missing.length) return { ok: false, reason: `placeholder-draft.json names cabinet types the catalog doesn't have: ${missing.join(', ')}` };
@@ -283,16 +290,23 @@ export function draftPlaceholder(room: Room, prefs: DraftPreferences, newId: () 
     const leftOver = { total: 0 };
     const panelW = size(c.fridge_panel, 'width');
 
-    for (const w of room.walls) {
-      const span = insideSpan(room, w);
-      const startCorner = corners.find((k) => k.startingWallId === w.wall_id) ?? null;
-      const endCorner = corners.find((k) => k.endingWallId === w.wall_id) ?? null;
+    const moves: { placementId: string; offset: Length }[] = [];
+    for (const w0 of room.walls) {
+      const span = insideSpan(room, w0);
+      const startCorner = corners.find((k) => k.startingWallId === w0.wall_id) ?? null;
+      const endCorner = corners.find((k) => k.endingWallId === w0.wall_id) ?? null;
       // A fridge always has a full-height, full-depth panel on each side (owner, 2026-11-10), in
       // the stretch the cabinets can use (not behind a corner cabinet).
       const usable: Span = {
         start: span.start + (startCorner?.base ? size(cornerCode, 'width') : 0),
         end: span.end - (endCorner?.base ? size(cornerCode, 'depth') : 0),
       };
+      // A fridge drawn against a wall or corner moves over just enough for its panel, never
+      // skipping one (owner, 2026-11-12); said in the notes, and saved with the room (applyMoves).
+      const w = shiftFridges(w0, usable, panelW, (placementId, offset, by) => {
+        moves.push({ placementId, offset });
+        notes.push(`The fridge on wall ${room.walls.indexOf(w0) + 1} is drawn ${formatInches(Math.abs(by))} ${by > 0 ? 'toward the wall’s end' : 'toward the wall’s start'} to make room for its panel against the wall or corner.`);
+      });
       const fridgePanels: Span[] = [];
       for (const a of w.appliances.filter((x) => x.kind === 'fridge')) {
         for (const [side, p] of [
@@ -300,7 +314,7 @@ export function draftPlaceholder(room: Room, prefs: DraftPreferences, newId: () 
           ['end', { start: applianceEnd(a), end: applianceEnd(a) + panelW }],
         ] as const) {
           if (p.start >= usable.start && p.end <= usable.end) fridgePanels.push(p);
-          else notes.push(`There is no room for the fridge panel on the fridge's ${side === 'start' ? 'left' : 'right'} side of wall ${room.walls.indexOf(w) + 1}: move the fridge ${formatInches(panelW)} away from the corner or wall.`);
+          else notes.push(`There is no room for the fridge panel on the fridge's ${side === 'start' ? 'left' : 'right'} side of wall ${room.walls.indexOf(w0) + 1}: the stretch is too short for the fridge and both panels.`);
         }
       }
       const runs = sortedRuns(w);
@@ -351,7 +365,7 @@ export function draftPlaceholder(room: Room, prefs: DraftPreferences, newId: () 
         if (!lo || !hi) continue;
         const flank = equalFlank(lo.end - lo.start, hi.end - hi.start, s, rules.minRunLength);
         if (flank === null) {
-          notes.push(`The uppers either side of the hood on wall ${room.walls.indexOf(w) + 1} can't be made the same width.`);
+          notes.push(`The uppers either side of the hood on wall ${room.walls.indexOf(w0) + 1} can't be made the same width.`);
           continue;
         }
         flankHigh.set(lo, flank);
@@ -393,7 +407,7 @@ export function draftPlaceholder(room: Room, prefs: DraftPreferences, newId: () 
           for (const a of aps) {
             const aw = a.width.value;
             if (!isSink(a.kind) && !placedWithSink.has(a.placement_id) && (a.offset < from || applianceEnd(a) > to))
-              notes.push(`The ${a.kind.replace(/_/g, ' ')} on wall ${room.walls.indexOf(w) + 1} runs ${formatInches(Math.max(from - a.offset, applianceEnd(a) - to))} into the corner cabinet or past the end of its run: move it on the room drawing.`);
+              notes.push(`The ${a.kind.replace(/_/g, ' ')} on wall ${room.walls.indexOf(w0) + 1} runs ${formatInches(Math.max(from - a.offset, applianceEnd(a) - to))} into the corner cabinet or past the end of its run: move it on the room drawing.`);
             if (isSink(a.kind)) {
               const sinkCode = codes.sink;
               const sw = Math.max(aw, size(sinkCode, 'width'));
@@ -408,7 +422,7 @@ export function draftPlaceholder(room: Room, prefs: DraftPreferences, newId: () 
               const move = ge > to ? Math.max(to - ge, from - gs) : Math.max(0, from - gs);
               if (move !== 0) {
                 o += move;
-                notes.push(`The sink base${dw ? ' and dishwasher' : ''} on wall ${room.walls.indexOf(w) + 1} ${dw ? 'are' : 'is'} drawn ${formatInches(Math.abs(move))} ${move < 0 ? 'toward the wall’s start' : 'toward the wall’s end'} to clear the corner or the end of the run: move the sink on the room drawing to match.`);
+                notes.push(`The sink base${dw ? ' and dishwasher' : ''} on wall ${room.walls.indexOf(w0) + 1} ${dw ? 'are' : 'is'} drawn ${formatInches(Math.abs(move))} ${move < 0 ? 'toward the wall’s start' : 'toward the wall’s end'} to clear the corner or the end of the run: move the sink on the room drawing to match.`);
               }
               add({ code: sinkCode, appliance: null, layer: 'base', offset: o, width: sw, depth: null });
               taken.push({ start: o, end: o + sw });
@@ -516,7 +530,7 @@ export function draftPlaceholder(room: Room, prefs: DraftPreferences, newId: () 
     if (prefs.roomSet === 'bath') {
       // A vanity's drawers (PROPOSED reading of the drawer level for vanities, placeholder-draft.json "bath").
       if (prefs.drawers === 'maximum') for (const b of out) if (b.code === codes.base && fits(c.bath.maximum, b.width)) b.code = c.bath.maximum;
-    } else if (prefs.drawers) applyDrawerLevel(out, prefs.drawers, s);
+    } else if (prefs.drawers) applyDrawerLevel(out, prefs.drawers, s, [codes.sink, c.dishwasher]);
     if (prefs.roomSet === 'bath') notes.push('Vanity cabinets, as this is a bathroom.');
     if (out.some((x) => x.code === codes.sink)) notes.push('Sink base under the sink, with the dishwasher beside it where one was placed.');
     notes.push(
@@ -528,6 +542,8 @@ export function draftPlaceholder(room: Room, prefs: DraftPreferences, newId: () 
             maximum: 'Maximum drawers: every base cabinet is a drawer bank.',
           }[prefs.drawers],
     );
+    const fourCount = prefs.roomSet === 'bath' ? 0 : out.filter((x) => x.code === c.base_by_drawer_level.four_banks.code).length;
+    if (fourCount) notes.push(`${fourCount} four-drawer bank${fourCount === 1 ? '' : 's'} beside the cooking and near the sink, as the shop's rules ask (PREF-006, PREF-007).`);
     if (out.some((x) => x.code === cornerCode))
       notes.push(
         prefs.cornerInsert === 'lazy_susan'
@@ -550,6 +566,7 @@ export function draftPlaceholder(room: Room, prefs: DraftPreferences, newId: () 
         version: 2,
         roomId: room.room_id,
         upperTop,
+        moves,
         cabinets: out
           .sort((a, b) => wallIndex(a.wallId) - wallIndex(b.wallId) || (a.layer === b.layer ? 0 : a.layer === 'base' ? -1 : 1) || a.offset - b.offset)
           .map((x) => ({ ...x, ...vertical(x), reviewed: false })),
@@ -563,6 +580,24 @@ export function draftPlaceholder(room: Room, prefs: DraftPreferences, newId: () 
 }
 
 class MissingSize extends Error {}
+
+/**
+ * A wall with each fridge moved along it, when a panel beside it would stand outside `usable`
+ * (against the wall or a corner cabinet), by just the shortfall, if the other side then still has
+ * room. `moved` is told each move. A fridge with no room either way stays, and the notes say so.
+ */
+function shiftFridges(w: Wall, usable: Span, panelW: Length, moved: (placementId: string, offset: Length, by: Length) => void): Wall {
+  const appliances = w.appliances.map((a) => {
+    if (a.kind !== 'fridge') return a;
+    const short = usable.start - (a.offset - panelW);
+    const over = applianceEnd(a) + panelW - usable.end;
+    const by = short > 0 && over + short <= 0 ? short : over > 0 && short + over <= 0 ? -over : 0;
+    if (by === 0) return a;
+    moved(a.placement_id, a.offset + by, by);
+    return { ...a, offset: a.offset + by };
+  });
+  return { ...w, appliances };
+}
 
 function fillGap(gap: Span, code: string, fillerCode: string, layer: 'base' | 'upper', add: (d: Omit<Draft, 'id'>) => void, s: DraftSettings, rules: LayoutRules, leftOver: { total: Length }): void {
   const { widths, filler } = fillWidths(gap.end - gap.start, s, rules.minRunLength);
@@ -582,40 +617,81 @@ const fits = (code: string, width: Length): boolean => {
   return min === null || width >= min;
 };
 
-/** Turns plain base cabinets into drawer banks by the client's drawer level (intake). */
-function applyDrawerLevel(cabs: (Draft & { wallId: string })[], level: DrawerLevel, s: DraftSettings): void {
+/** The gap between two stretches along a wall (0 when they touch or overlap). */
+const gapBetween = (a: { offset: Length; width: Length }, b: { offset: Length; width: Length }): Length => Math.max(0, a.offset - (b.offset + b.width), b.offset - (a.offset + a.width));
+
+/**
+ * The plain base cabinets that become four-drawer banks (PREF-006, PREF-007; placeholder-draft.json
+ * "four_banks"): right beside a range or cooktop, up to `beside_cooking`, touching it or the next one
+ * along from a bank that does; then the nearest to the sink base or dishwasher, up to `near_sink`.
+ * Minimum drawers makes only one. Each must be wide enough for the four-drawer bank.
+ */
+function fourBanks(cabs: readonly (Draft & { wallId: string })[], bases: readonly (Draft & { wallId: string })[], level: DrawerLevel, s: DraftSettings, sinkCodes: readonly string[]): Set<string> {
+  const rule = s.codes.base_by_drawer_level.four_banks;
+  const max = level === 'minimum' ? 1 : rule.beside_cooking + rule.near_sink;
+  const chosen: (Draft & { wallId: string })[] = [];
+  const ok = (b: Draft & { wallId: string }) => !chosen.includes(b) && fits(rule.code, b.width) && b.width >= s.narrowBelow;
+  const touching = (a: { offset: Length; width: Length }, b: { offset: Length; width: Length }) => a.offset === b.offset + b.width || a.offset + a.width === b.offset;
+  for (const cook of cabs.filter((a) => a.appliance === 'range' || a.appliance === 'cooktop')) {
+    const beside: (Draft & { wallId: string })[] = [];
+    for (const b of bases) if (b.wallId === cook.wallId && touching(b, cook) && ok(b)) beside.push(b);
+    // Only one touching (a corner or the run's end on the other side): the next one along from it.
+    if (beside.length === 1) {
+      const next = bases.find((b) => b.wallId === cook.wallId && b !== beside[0] && touching(b, beside[0]!) && gapBetween(b, cook) > 0 && ok(b));
+      if (next) beside.push(next);
+    }
+    for (const b of beside.slice(0, rule.beside_cooking)) if (chosen.length < Math.min(max, rule.beside_cooking)) chosen.push(b);
+  }
+  const sinks = cabs.filter((x) => x.code !== null && sinkCodes.includes(x.code));
+  for (let k = 0; k < rule.near_sink && chosen.length < max; k++) {
+    const near = bases
+      .filter((b) => ok(b) && sinks.some((x) => x.wallId === b.wallId))
+      .map((b) => ({ b, d: Math.min(...sinks.filter((x) => x.wallId === b.wallId).map((x) => gapBetween(b, x))) }))
+      .sort((p, q) => p.d - q.d || p.b.offset - q.b.offset)[0];
+    if (near) chosen.push(near.b);
+  }
+  return new Set(chosen.map((b) => b.id));
+}
+
+/** Turns plain base cabinets into drawer banks by the client's drawer level (intake), with the four-drawer banks the shop's rules ask for. */
+function applyDrawerLevel(cabs: (Draft & { wallId: string })[], level: DrawerLevel, s: DraftSettings, sinkCodes: readonly string[]): void {
   const levels = s.codes.base_by_drawer_level;
   const bases = cabs.filter((x) => x.code !== null && isBase(x.code, s));
+  const fours = fourBanks(cabs, bases, level, s, sinkCodes);
+  for (const b of bases) if (fours.has(b.id)) b.code = levels.four_banks.code;
+  const rest = bases.filter((b) => !fours.has(b.id));
   // Base cabinets right beside a range or cooktop get the pots-and-pans drawers first.
   const byCooking = new Set(
-    bases
+    rest
       .filter((b) => cabs.some((a) => (a.appliance === 'range' || a.appliance === 'cooktop') && a.wallId === b.wallId && (a.offset === b.offset + b.width || a.offset + a.width === b.offset)))
       .map((b) => b.id),
   );
   if (level === 'maximum') {
-    for (const b of bases) if (fits(levels.maximum.all, b.width)) b.code = levels.maximum.all;
+    for (const b of rest) if (fits(levels.maximum.all, b.width)) b.code = levels.maximum.all;
     return;
   }
   if (level === 'moderate') {
-    let fours = 0;
-    bases.forEach((b, k) => {
+    let fourCount = fours.size;
+    rest.forEach((b, k) => {
       if (byCooking.has(b.id) || k % 3 !== 2) {
         const [four, three] = levels.moderate.banks as [string, string];
-        const code = fours < 2 && fits(four, b.width) ? four : three;
+        const code = fourCount < 2 && fits(four, b.width) ? four : three;
         if (fits(code, b.width)) {
           b.code = code;
-          if (code === four) fours++;
+          if (code === four) fourCount++;
         }
       } else if (fits(levels.moderate.every_third, b.width)) b.code = levels.moderate.every_third;
     });
     return;
   }
   const m = levels.minimum;
-  for (const b of bases) b.code = b.width < s.narrowBelow ? m.narrow : m.most;
-  const three = bases.find((b) => byCooking.has(b.id) && fits(m.one_bank_of_3, b.width)) ?? bases.find((b) => fits(m.one_bank_of_3, b.width));
+  for (const b of rest) b.code = b.width < s.narrowBelow ? m.narrow : m.most;
+  const three = rest.find((b) => byCooking.has(b.id) && fits(m.one_bank_of_3, b.width)) ?? rest.find((b) => fits(m.one_bank_of_3, b.width));
   if (three) three.code = m.one_bank_of_3;
-  const four = bases.find((b) => b !== three && fits(m.one_bank_of_4, b.width) && b.width >= s.narrowBelow);
-  if (four) four.code = m.one_bank_of_4;
+  if (fours.size === 0) {
+    const four = rest.find((b) => b !== three && fits(m.one_bank_of_4, b.width) && b.width >= s.narrowBelow);
+    if (four) four.code = m.one_bank_of_4;
+  }
 }
 
 /** The run a cabinet stands on, for the screens. */

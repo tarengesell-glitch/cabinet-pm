@@ -75,8 +75,9 @@ describe('the layout choices (the builder’s input)', () => {
     };
     expect(bases(plain)).toEqual({ base_doors: 7 });
     expect(bases(byLevel[0]!)).toEqual({ base_3_drawers: 1, base_4_drawers: 1, base_drawer_doors: 5 });
-    expect(bases(byLevel[1]!)).toEqual({ base_3_drawers: 3, base_4_drawers: 2, base_drawer_doors: 2 });
-    expect(bases(byLevel[2]!)).toEqual({ base_3_drawers: 7 });
+    // Two four-drawer banks beside the range and one near the sink (PREF-006, PREF-007; owner 2026-11-12).
+    expect(bases(byLevel[1]!)).toEqual({ base_3_drawers: 3, base_4_drawers: 3, base_drawer_doors: 1 });
+    expect(bases(byLevel[2]!)).toEqual({ base_3_drawers: 4, base_4_drawers: 3 });
     // The island panels are appearance only: the layout is the same whatever they are.
     expect(codes(laidOut(choices({ islandBackPanel: chosen('shiplap'), islandSidePanel: chosen('waterfall_stone') })))).toEqual(byLevel[2]);
   });

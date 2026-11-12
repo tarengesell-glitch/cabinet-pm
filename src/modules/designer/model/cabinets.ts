@@ -107,6 +107,13 @@ export function cabinetViews(room: Room): CabinetView[] {
   return out;
 }
 
+/** The room with the appliances the builder moved (a fridge moved over for its panel) at their new places. */
+export function applyMoves(room: Room, design: Pick<PlaceholderDesign, 'moves'>): Room {
+  if (design.moves.length === 0) return room;
+  const at = new Map(design.moves.map((m) => [m.placementId, m.offset]));
+  return { ...room, walls: room.walls.map((w) => ({ ...w, appliances: w.appliances.map((a) => (at.has(a.placement_id) ? { ...a, offset: at.get(a.placement_id)! } : a)) })) };
+}
+
 /** Turns the placeholder recipe's cabinets into placed items in the master copy. */
 export function placeholderItems(room: Room, design: PlaceholderDesign): Result<PlacedItem[]> {
   const inside = roomInsideSide(room.walls);

@@ -14,10 +14,11 @@ A cabinet design and CAD handoff platform for our own residential cabinetry sale
 **The app runs the designer's placeholder builder** (`src/modules/designer/model/placeholder-draft.ts`), so layout fixes go there. The AI layout builder (`src/modules/ai-design/model/engine/`) is parked: don't change it or copy fixes into it unless the owner asks.
 
 ## A typical change
-1. Find the current requirement (`docs/REQUIREMENTS.md`) and the code that owns the behaviour (`docs/PROJECT_MAP.md`).
-2. Change every module the requested behaviour needs (see "Working across modules"), with a test, running the "while working" checks.
-3. Update docs only if the change is meaningful (see "Docs").
-4. Run `npm run check` on the final code, then open the pull request.
+1. **Start in the right place** ("Branches"): a new independent task from up-to-date `main`; continuing work on its own branch, keeping its uncommitted changes.
+2. **Plan before editing.** From "Read first", name the owning module, the interfaces (`contract.ts`) involved, the likely files and the focused checks; follow dependencies from there as needed.
+3. **Check for overlap.** Look at the open pull requests for changes to the same files or shared interfaces. If another known task is changing the same shared interface, settle which goes first (ask the owner if unclear) before building the overlapping part. Other conversations' uncommitted work isn't visible: don't assume there is none.
+4. **Keep it focused.** Change what the requested behaviour needs, in every module it needs ("Working across modules"); reuse existing interfaces; keep each business rule in its authoritative place (`docs/PROJECT_MAP.md` "Where the rules live"). Explain any meaningful growth in scope in the report and the pull request.
+5. Add a test, run the "while working" checks, update docs only as "Docs" says, verify as "Checks" says, then open the pull request.
 
 ## Working across modules
 - **Do what the requested behaviour needs, wherever it lives.** Crossing a module folder needs no approval. Keep each piece in the module that owns it.
@@ -52,18 +53,22 @@ A cabinet design and CAD handoff platform for our own residential cabinetry sale
 ## Checks
 - **While working:** `npm run lint`, `npm run typecheck`, `npm run boundaries`, `npm run vendor-names`, `npm run test`, plus the one browser test file for a screen you changed (`npx playwright test e2e/<file>.spec.ts`).
 - **Before merging:** `npm run check` on the final code (it is the only gate; there is no CI). If you change code afterwards, re-run the focused checks for that change, then `npm run check` again.
-- **Docs-only change:** no `npm run check`; check each changed doc, link and path by hand.
+- **Match the checks to what changed.** A docs-only or comment-only change needs no `npm run check`: check each changed doc, link and path by hand. Run the checks when a change touches anything executable, even in a doc or comment: config, scripts, `package.json`, lint or type directives (`eslint-disable`, `@ts-…`), the vendor-name allowlist. When the 3D view, the layout or another visible result changes, look at it: `npm run views` for the 3D view (`docs/DEVELOPMENT.md`).
 - **Breaking a check on purpose** (show it fails, then restore it) is for new guardrails: boundary or lint rules, the vendor-name check, golden tests. Not for ordinary new tests.
 - Report what you ran. Commands, timings and setup: `docs/DEVELOPMENT.md`.
 
 ## Docs
-Each doc has one job (the list: `docs/PROJECT_MAP.md` "Which doc answers what"). Update docs only when something meaningful changes: behaviour the owner can see, a rule or number, a module's `contract.ts`, or the workflow. A new or changed decision goes in `docs/DECISIONS.md` **and** its line in `docs/REQUIREMENTS.md`; module behaviour in its README; what runs and where code, data and tests live in `docs/PROJECT_MAP.md`. Link to the authoritative place instead of repeating it. Refactors, test-only changes and small fixes within existing behaviour need none.
+Each doc has one job (the list: `docs/PROJECT_MAP.md` "Which doc answers what"). Update the existing doc only when something meaningful changes: behaviour the owner can see, which module is responsible for what, an interface (a module's `contract.ts`), a rule or number, or a command or the workflow. Don't start a parallel wiki or notes set, and don't restructure docs beyond what the change needs. A new or changed decision goes in `docs/DECISIONS.md` **and** its line in `docs/REQUIREMENTS.md`; module behaviour in its README; what runs and where code, data and tests live in `docs/PROJECT_MAP.md`. Link to the authoritative place instead of repeating it. Refactors, test-only changes and small fixes within existing behaviour need none.
 - **When an approved requirement changes,** edit its existing entry in `docs/REQUIREMENTS.md` and record the approval evidence in `docs/DECISIONS.md`, in the same pull request. Never leave two current versions of a requirement.
 - **Implementation progress goes in the pull request.** When a requirement's build status changes, update its status in `docs/REQUIREMENTS.md`; don't add a session narrative to `docs/DECISIONS.md`, which records decisions and their evidence.
 - **Environment limits are observations, not project facts.** When a doc records that something couldn't be reached (the live database, a website, a service), say where and when it was observed (for example "from a Claude cloud session, 2026-11-09"), never "sessions can't…" as a lasting rule.
 
 ## Branches
-Merging into `main` deploys the live site. Work on a branch from the latest `main` (restart it from `main` if it was already merged), open a pull request, and merge it yourself only after the checks above pass. Never push straight to `main`. Delete the branch after merging. Report the checks run and the pull request link.
+Merging into `main` deploys the live site. Never push straight to `main`.
+- **A new independent task** starts on a branch from up-to-date `main` (fetch first). A branch whose pull request is already merged is restarted from `main`, keeping any commits on it that weren't merged.
+- **Continuing existing work:** stay on its branch and keep its uncommitted changes. Never reset or discard work.
+- **Concurrent local tasks** each use their own git worktree (`docs/DEVELOPMENT.md` "Working on several tasks at once"). A worktree keeps files apart; it doesn't remove the need to settle the order of changes to a shared interface (step 3 of "A typical change").
+- Open a pull request and merge it yourself only after the checks above pass. Delete the branch after merging. Report the checks run and the pull request link.
 
 ## Reports
 The owner, Taren, is not a programmer: plain English, short, only the questions that matter.

@@ -41,7 +41,17 @@ Measured 2026-11-10 in a cloud session, one run each:
 | `test:static` | 7.9 s | with `build` | yes |
 | `test:e2e` (63 browser tests) | 185.5 s | only the file for the screen you changed: `npx playwright test e2e/studio.spec.ts` (studio, about 1 min alone); `room-drawing`, `rough-layout`, `intake`, `office` likewise | yes |
 
-`npm run check` runs all of them in order (about 3 min 40 s). When to run what, and when to break a check on purpose: root `CLAUDE.md` "Checks".
+`npm run check` runs all of them in order (about 3 min 40 s). A docs-only or comment-only change runs none of them, unless it touches something executable (root `CLAUDE.md` "Checks"). When to run what, and when to break a check on purpose: root `CLAUDE.md` "Checks".
+
+## Working on several tasks at once
+Each task that runs at the same time on one machine gets its own git worktree, so their files and uncommitted changes never mix:
+
+```bash
+git fetch origin main
+git worktree add ../cabinet-pm-<task> -b <branch> origin/main
+```
+
+Run `npm install` in the new folder. Use a different port for each dev server or test run (`npm run dev -- --port 3001`, `E2E_PORT`, `VIEWS_PORT`). Remove the worktree when its pull request is merged: `git worktree remove ../cabinet-pm-<task>`. Two tasks changing the same shared interface still need their order settled first (root `CLAUDE.md` "A typical change").
 
 ## Pictures of the 3D view (`npm run views`)
 Takes pictures of the anonymised real kitchen (`src/modules/designer/__tests__/real-kitchen.ts`) at fixed camera views: `overall` (the 3D view's starting view), each room wall straight on (`wall-A` to `wall-E`) and `island` (from behind one end). They land in `views-output/<view>.png`. About 2½ minutes; starts its own dev server on port 3200 (`VIEWS_PORT` changes it).

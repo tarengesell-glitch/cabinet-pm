@@ -30,6 +30,8 @@ export interface CameraPose {
 /** The camera's vertical field of view, in degrees (the 3D view's camera). */
 export const FOV = 32;
 const FAR_NEAR = 1;
+/** How close the camera may come to what it turns around, in inches: close enough to look at a handle (owner, 2026-11-12: "Zooming in close isn't working"; it stopped at a quarter of the starting distance). */
+export const CLOSEST = 12;
 
 /** The room's centre, size and main wall's facing, as the starting view frames it. */
 export function roomFrame(room: Room, cabinets: readonly CabinetView[]): { centre: V3; span: number; facing: V3 } {
@@ -75,7 +77,7 @@ export function cameraPose(room: Room, cabinets: readonly CabinetView[], view: C
     const el = 0.6;
     const dir = rotateY(frame.facing, 0.45);
     const flat = Math.cos(el) * dist;
-    return { position: [frame.centre[0] + dir[0] * flat, frame.centre[1] + Math.sin(el) * dist, frame.centre[2] + dir[2] * flat], target: frame.centre, near: FAR_NEAR, minDistance: dist * 0.25, maxDistance: dist * 2.2 };
+    return { position: [frame.centre[0] + dir[0] * flat, frame.centre[1] + Math.sin(el) * dist, frame.centre[2] + dir[2] * flat], target: frame.centre, near: FAR_NEAR, minDistance: CLOSEST, maxDistance: dist * 2.2 };
   }
   if (view.kind === 'wall') {
     const wall = wallByLetter(room, view.letter);
@@ -96,7 +98,7 @@ export function cameraPose(room: Room, cabinets: readonly CabinetView[], view: C
     // Straight on, from a little higher, so the toe kicks, the counter's top and the hood's clear space all show.
     const out: V3 = [n.x, 0, -n.y];
     const position: V3 = [at[0] + out[0] * dist, at[1] + 16, at[2] + out[2] * dist];
-    return { position, target: at, near: Math.max(FAR_NEAR, len(position, at) - 40), minDistance: dist * 0.25, maxDistance: dist * 2.2 };
+    return { position, target: at, near: Math.max(FAR_NEAR, len(position, at) - 40), minDistance: CLOSEST, maxDistance: dist * 2.2 };
   }
   const island = room.walls.find((w) => w.kind === 'floating' && cabinets.some((c) => c.wallId === w.wall_id));
   if (!island) return { problem: 'The room has no island with cabinets.' };
@@ -113,7 +115,7 @@ export function cameraPose(room: Room, cabinets: readonly CabinetView[], view: C
   const el = (28 * Math.PI) / 180;
   const flat = add([back[0] * Math.cos(yaw), 0, back[2] * Math.cos(yaw)], along, Math.sin(yaw));
   const position: V3 = [at[0] + flat[0] * Math.cos(el) * dist, at[1] + Math.sin(el) * dist, at[2] + flat[2] * Math.cos(el) * dist];
-  return { position, target: at, near: FAR_NEAR, minDistance: dist * 0.25, maxDistance: dist * 2.2 };
+  return { position, target: at, near: FAR_NEAR, minDistance: CLOSEST, maxDistance: dist * 2.2 };
 }
 
 /** A view as a short name: "overall", "wall-A", "island" (the screenshot files and the page's ?view=). */

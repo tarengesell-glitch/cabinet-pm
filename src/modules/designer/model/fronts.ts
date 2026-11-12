@@ -8,7 +8,8 @@
  *   as saved. Without them, the catalog type's fronts (top to bottom) give the sections.
  * - **Doors** follow the shop's door rule (design rule CB-FACT-16, "keep these measurements for
  *   drawing in the visual tool"): one door up to 20" wide, then a pair; one door up to 48" tall,
- *   then stacked doors. The cabinet's door opening (`hinge_side`: left, right or a pair, owner
+ *   then stacked doors. A tall pantry's lower door lines up with the tops of the base cabinets'
+ *   doors and drawers (owner, 2026-11-12); the part above follows the 48" rule. The cabinet's door opening (`hinge_side`: left, right or a pair, owner
  *   2026-11-12) overrides the width rule.
  * - **Drawers:** the top drawer front is the standard 6 13/16" and lines up across cabinets
  *   (DECISIONS 2026-11-07); the rest share what is left equally.
@@ -39,6 +40,8 @@ export interface FrontRules {
   readonly topDrawer: number;
   /** Where uppers start, inches: a door whose middle is above it gets its handle at the bottom. */
   readonly upperBottom: number;
+  /** The top of the base cabinets' fronts, inches: a tall pantry's lower door lines up with it (owner, 2026-11-12). */
+  readonly baseTop: number;
 }
 
 export interface FrontInput {
@@ -108,9 +111,7 @@ function fromCatalog(input: FrontInput, rules: FrontRules): Draw {
   const first = fronts[0];
   if (fronts.length > 0 && fronts.every((f) => f.kind === 'doors')) {
     if (fronts.length === 1) return { kind: 'doors', shelves, rollouts: 0, size: null };
-    // Stacked doors (a tall pantry): as many equal rows as the door height rule needs, at least the catalog's.
-    const rows = Math.max(fronts.length, Math.ceil((y1 - y0) / rules.maxDoorHeight - 1e-9));
-    return { kind: 'split', direction: 'horizontal', size: null, parts: Array.from({ length: rows }, () => ({ kind: 'doors', shelves: 0, rollouts: 0, size: null })) };
+    return stackedDoors(fronts.length, y0, y1, rules);
   }
   if (first?.kind === 'drawers' && fronts.length === 1) return { kind: 'drawers', count: first.count ?? 3, size: null };
   if (first?.kind === 'drawers' && fronts[1]?.kind === 'doors' && base) {
@@ -127,6 +128,17 @@ function fromCatalog(input: FrontInput, rules: FrontRules): Draw {
   }
   if (first?.kind === 'pullout' && fronts.length === 1) return { kind: 'pullout', handleY: null, size: null };
   return { kind: 'doors', shelves, rollouts: 0, size: null };
+}
+
+/**
+ * A tall cabinet's stacked doors (a pantry): the lower door's top lines up with the base cabinets'
+ * fronts (owner, 2026-11-12), the rest above, stacked again by the 48" rule. When the face doesn't
+ * reach past the base top, as many equal rows as the catalog lists.
+ */
+function stackedDoors(count: number, y0: number, y1: number, rules: FrontRules): FrontSection {
+  const doors = (size: number | null): FrontSection => ({ kind: 'doors', shelves: 0, rollouts: 0, size });
+  if (rules.baseTop > y0 + 1 && rules.baseTop < y1 - 1) return { kind: 'split', direction: 'horizontal', size: null, parts: [doors(null), doors(Math.round((rules.baseTop - y0) * IN))] };
+  return { kind: 'split', direction: 'horizontal', size: null, parts: Array.from({ length: count }, () => doors(null)) };
 }
 
 /** The parts' lengths along a split of `total` inches: a part's own size, or an equal share of the rest. */
@@ -213,7 +225,8 @@ export function frontPieces(input: FrontInput, rules: FrontRules): FrontPiece[] 
  * The sections a cabinet starts from when a person first divides it in Customize: its catalog
  * type's fronts as saved sections (drawers, then doors), so a split keeps what was there.
  */
-export function startingSections(item: Pick<CatalogItem, 'code' | 'type' | 'front' | 'inside'>, topDrawer: number): FrontSection {
+export function startingSections(item: Pick<CatalogItem, 'code' | 'type' | 'front' | 'inside'>, rules: FrontRules, y0: number, y1: number): FrontSection {
+  const topDrawer = rules.topDrawer;
   const fronts = item.front;
   const shelves = (item.inside?.['adjustable_shelves'] ?? 0) + (item.inside?.['fixed_shelves'] ?? 0);
   const first = fronts[0];
@@ -228,7 +241,6 @@ export function startingSections(item: Pick<CatalogItem, 'code' | 'type' | 'fron
         { kind: 'doors', shelves: 0, rollouts: /rollouts/.test(item.code) ? 2 : 0, size: null },
       ],
     };
-  if (fronts.length > 1 && fronts.every((f) => f.kind === 'doors'))
-    return { kind: 'split', direction: 'horizontal', size: null, parts: fronts.map(() => ({ kind: 'doors', shelves, rollouts: 0, size: null })) };
+  if (fronts.length > 1 && fronts.every((f) => f.kind === 'doors')) return stackedDoors(fronts.length, y0, y1, rules);
   return { kind: 'doors', shelves, rollouts: 0, size: null };
 }

@@ -28,6 +28,8 @@ export type CabinetView = PlaceholderCabinet & {
   readonly selections?: Readonly<Record<string, string>>;
   /** Its front and interior as a person divided it; absent while it is as its catalog type shows it. */
   readonly sections?: FrontSection;
+  /** Which end of the wall (its start, low, or its end, high) is this cabinet's left, seen from the front (END-1). */
+  readonly leftAt?: 'low' | 'high';
   /** The catalog options a person set by hand (END-4); absent when none. */
   readonly setByHand?: readonly string[];
   /** From the wall face to its back (a cabinet pulled out from the wall); absent when against it. */
@@ -100,6 +102,7 @@ export function cabinetViews(room: Room): CabinetView[] {
       selections: item.item_selections,
       ...(item.sections ? { sections: item.sections } : {}),
       ...(item.set_by_hand ? { setByHand: item.set_by_hand } : {}),
+      leftAt: endOption(item.position.side, 'high') === 'end_left' ? 'high' : 'low',
       ...(item.position.setback ? { setback: item.position.setback } : {}),
       ...(() => {
         // The sink or dishwasher standing in this cabinet (it holds the appliance's middle).
@@ -188,8 +191,12 @@ export function placeholderItems(room: Room, design: PlaceholderDesign): Result<
 
 export type ItemEdit =
   | { readonly kind: 'width'; readonly id: string; readonly width: Length }
-  /** A new width from one side (a 3D handle): the cabinet beside that side gives or takes the difference. */
-  | { readonly kind: 'resize'; readonly id: string; readonly side: 'low' | 'high'; readonly width: Length }
+  /**
+   * A new width from one side (a 3D handle, or typed with "change on the left or right"): the
+   * cabinet beside that side gives or takes the difference; "both": half each side (owner,
+   * 2026-11-12: "add it to the right, add it to the left, add equally to both").
+   */
+  | { readonly kind: 'resize'; readonly id: string; readonly side: 'low' | 'high' | 'both'; readonly width: Length }
   /** Along the wall by `by` (a 3D handle): the cabinets touching it on either side give and take. */
   | { readonly kind: 'move'; readonly id: string; readonly by: Length }
   /** Its height, depth, height off the floor or distance from the wall (3D handles); only what is given changes. */
@@ -199,6 +206,12 @@ export type ItemEdit =
   | { readonly kind: 'option'; readonly id: string; readonly option: string; readonly value: string | null }
   /** The front and interior as divided in Customize; null puts it back to its catalog type's. */
   | { readonly kind: 'sections'; readonly id: string; readonly sections: FrontSection | null }
+  /**
+   * Splits a cabinet into two separate cabinets of its type (owner, 2026-11-12: "splitting results
+   * in two new individual cabinets"): side by side, each half the width on the catalog's width
+   * step, or stacked, each half the height. `newId` is the second cabinet's ID.
+   */
+  | { readonly kind: 'split'; readonly id: string; readonly direction: 'side_by_side' | 'stacked'; readonly newId: string }
   /** How an appliance looks (owner, 2026-11-12): a choice from the appliance-look list. */
   | { readonly kind: 'appliance'; readonly placementId: string; readonly option: string; readonly value: string }
   | { readonly kind: 'approve'; readonly ids: readonly string[] };
@@ -275,6 +288,28 @@ export function editItems(room: Room, edit: ItemEdit): Result<Room> {
     void _old;
     return replace(new Map([[cab, byDesigner({ ...rest, item_selections: selections, ...(hand.size ? { set_by_hand: [...hand].sort() } : {}) })]]));
   }
+  if (edit.kind === 'split') {
+    if (room.items.some((i) => i.item_instance_id === edit.newId)) return { ok: false, reason: 'The new cabinet’s ID is already in use.' };
+    const step = DRAFT_SETTINGS.ok ? DRAFT_SETTINGS.value.widthStep : 1;
+    const along = edit.direction === 'side_by_side' ? cab.width : cab.height;
+    const first = Math.floor(along / 2 / step) * step;
+    if (first <= 0 || along - first <= 0) return { ok: false, reason: 'This cabinet is too small to split.' };
+    // Each half keeps the cabinet's choices, except ends, which the layout works out again, and its divided front.
+    const keep = Object.fromEntries(Object.entries(cab.item_selections).filter(([o]) => o !== 'end_left' && o !== 'end_right'));
+    const hand = (cab.set_by_hand ?? []).filter((o) => o !== 'end_left' && o !== 'end_right');
+    const { sections: _s, set_by_hand: _h, ...plain } = cab;
+    void _s;
+    void _h;
+    const base = { ...plain, item_selections: keep, ...(hand.length ? { set_by_hand: hand } : {}) };
+    const a: PlacedItem = byDesigner(edit.direction === 'side_by_side' ? { ...base, width: first } : { ...base, height: first });
+    const b: PlacedItem = byDesigner(
+      edit.direction === 'side_by_side'
+        ? { ...base, item_instance_id: edit.newId, width: along - first, position: { ...cab.position, offset: cab.position.offset + first } }
+        : { ...base, item_instance_id: edit.newId, height: along - first, position: { ...cab.position, elevation: cab.position.elevation + first } },
+    );
+    const items = room.items.flatMap((x) => (x === cab ? [a, b] : [x]));
+    return { ok: true, value: { ...room, items } };
+  }
   if (edit.kind === 'sections') {
     if (edit.sections === null) {
       const { sections: _drop, ...rest } = cab;
@@ -316,10 +351,18 @@ export function editItems(room: Room, edit: ItemEdit): Result<Room> {
   }
   const width = edit.width;
   if (!Number.isSafeInteger(width) || width <= 0) return { ok: false, reason: 'The width must be more than zero.' };
+  if (edit.kind === 'resize' && edit.side === 'both') {
+    // Half the change on each side, the low side taking any odd 1/64".
+    const diff = width - cab.width;
+    const low = Math.round(diff / 2);
+    const first = editItems(room, { kind: 'resize', id: edit.id, side: 'low', width: cab.width + low });
+    if (!first.ok) return first;
+    return editItems(first.value, { kind: 'resize', id: edit.id, side: 'high', width });
+  }
   const diff = width - cab.width;
   if (diff === 0) return { ok: true, value: room };
   const { low, high } = touching(room, cab);
-  const side: 'low' | 'high' = edit.kind === 'resize' ? edit.side : high ? 'high' : 'low';
+  const side: 'low' | 'high' = edit.kind === 'resize' && edit.side !== 'both' ? edit.side : high ? 'high' : 'low';
   const nb = side === 'high' ? high : low;
   const offset = side === 'low' ? cab.position.offset - diff : cab.position.offset;
   if (!nb) {

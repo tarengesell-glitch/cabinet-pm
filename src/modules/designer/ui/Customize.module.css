@@ -907,3 +907,8 @@
   align-items: center;
   justify-content: space-between;
 }
+
+.hudBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

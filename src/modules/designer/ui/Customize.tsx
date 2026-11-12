@@ -62,6 +62,8 @@ function summaryOf(e: ItemEdit): string {
       return 'Changed a cabinet’s width';
     case 'move':
       return 'Moved a cabinet along its wall';
+    case 'split':
+      return e.direction === 'side_by_side' ? 'Split a cabinet into two, side by side' : 'Split a cabinet into two, stacked';
     case 'box':
       return 'Changed a cabinet’s size or position';
     case 'option':
@@ -109,20 +111,60 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
   const endReview = useMemo(() => (room ? reviewEnds(room) : null), [room]);
   const onChange = cr.onChange;
   /** Saves a changed room into the master copy, with a history entry. */
+  /**
+   * Undo and redo (owner, 2026-11-12: "Ctrl+z doesn't seem to undo"): the rooms before each change
+   * made here. Undoing saves the earlier room as a new version, so no saved version is changed (rule 12).
+   */
+  const [undo, setUndo] = useState<{ room: Room; summary: string }[]>([]);
+  const [redo, setRedo] = useState<{ room: Room; summary: string }[]>([]);
   const keep = useCallback(
-    (next: Room, summary: string, origin: 'ai' | 'designer'): boolean => {
+    (next: Room, summary: string, origin: 'ai' | 'designer', how: 'edit' | 'undo' | 'redo' = 'edit'): boolean => {
       if (!draft) return false;
+      const before = roomOf(draft);
       const saved = saveRoom(cr.key, draft, next, summary, origin, user.id);
       if (!saved.ok) {
         setMessage({ kind: 'error', text: saved.reason });
         return false;
       }
+      if (how === 'edit') {
+        setUndo((u) => [...u.slice(-49), { room: before, summary }]);
+        setRedo([]);
+      }
       setDraft(saved.value);
       onChange?.();
       return true;
     },
-    [cr.key, draft, onChange],
+    [cr.key, draft, onChange, user.id],
   );
+  const step = useCallback(
+    (way: 'undo' | 'redo') => {
+      if (!draft || !canEdit) return;
+      const from = way === 'undo' ? undo : redo;
+      const last = from[from.length - 1];
+      if (!last) return;
+      const now = roomOf(draft);
+      if (!keep(last.room, `${way === 'undo' ? 'Undid' : 'Redid'}: ${last.summary}`, 'designer', way)) return;
+      (way === 'undo' ? setUndo : setRedo)(from.slice(0, -1));
+      (way === 'undo' ? setRedo : setUndo)((o) => [...o, { room: now, summary: last.summary }]);
+      setMessage({ kind: 'notice', text: `${way === 'undo' ? 'Undid' : 'Redid'}: ${last.summary}.` });
+    },
+    [draft, canEdit, undo, redo, keep],
+  );
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      // Typing in a box keeps the box's own undo.
+      const t = e.target as HTMLElement | null;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+      if (!(e.metaKey || e.ctrlKey)) return;
+      const k = e.key.toLowerCase();
+      if (k === 'z' || k === 'y') {
+        e.preventDefault();
+        step(k === 'y' || e.shiftKey ? 'redo' : 'undo');
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [step]);
   const edit = (e: ItemEdit): boolean => {
     if (!room || !canEdit) return false;
     const edited = editItems(room, e);
@@ -461,10 +503,7 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
                 canEdit={canEdit}
                 onStep={stepCab}
                 onEdit={edit}
-                row={design.cabinets.filter((c) => c.runId === sel.runId && c.layer === sel.layer).sort((a, b) => a.offset - b.offset)}
-                rowName={nameOf}
                 finish={cr.designChoices.look.door}
-                onPick={pick}
                 onLooks={setLookFor}
               />
             ))}
@@ -513,6 +552,12 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
             <button className={s.hudBtn} aria-pressed={doorsOpen} onClick={() => setDoorsOpen((o) => !o)}>
               {doorsOpen ? 'Close doors' : 'Open doors'}
             </button>
+            <button className={s.hudBtn} disabled={!canEdit || undo.length === 0} onClick={() => step('undo')} aria-label="Undo" title="Undo (Ctrl+Z)">
+              ↶
+            </button>
+            <button className={s.hudBtn} disabled={!canEdit || redo.length === 0} onClick={() => step('redo')} aria-label="Redo" title="Redo (Ctrl+Shift+Z)">
+              ↷
+            </button>
             <button className={s.hudBtn} onClick={() => setFitToken((t) => t + 1)} aria-label="Reset view" title="Reset view">
               ↺
             </button>
@@ -542,7 +587,6 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
               </span>
             )}
           </div>
-          <div className={s.hint3d}>Click a cabinet, then drag its blue handles to size or move it · drag to turn · right-drag or Shift-drag to move · scroll to zoom · double-click to look there</div>
         </div>
       </section>
     </div>

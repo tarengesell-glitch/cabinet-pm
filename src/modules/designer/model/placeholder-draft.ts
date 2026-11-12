@@ -84,6 +84,8 @@ export interface DraftSettings {
     readonly hoodSide: Length;
     readonly overFridge: Length;
     readonly fridgePanelDepth: Length;
+    /** The case over a fridge is the panel's depth less this, so its doors are flush with the panel (owner, 2026-11-12). */
+    readonly overFridgeCaseShort: Length;
   };
   /** The finished-end rule (decided 2026-11-07, CB-FACT-10): catalog values for end_left / end_right. */
   readonly ends: {
@@ -126,6 +128,7 @@ function readSettings(): Result<DraftSettings> {
     hood_side: data.clearances.hood_side,
     over_fridge: data.clearances.over_fridge,
     fridge_panel_depth: data.clearances.fridge_panel_depth,
+    over_fridge_case_short: data.clearances.over_fridge_case_short,
   };
   const out: Record<string, Length> = {};
   for (const [k, text] of Object.entries(lengths)) {
@@ -142,6 +145,9 @@ function readSettings(): Result<DraftSettings> {
   const maxSingleDoor = doorLength('max_single_door_width');
   const maxDoorHeight = doorLength('max_door_height');
   if (maxSingleDoor === null || maxDoorHeight === null) return { ok: false, reason: 'Design rule CB-FACT-16 (door sizes) is missing its widest or tallest single door.' };
+  // The base cabinets' fronts reach the top of the box (the 3D view draws them so).
+  const baseTop = CURRENT_CATALOG.items.find((i) => i.code === data.cabinets.base)?.size.height.default.value ?? null;
+  if (baseTop === null) return { ok: false, reason: `The catalog has no standard height for "${data.cabinets.base}", so a pantry's doors can't be lined up with the base cabinets.` };
   const codes = data.cabinets;
   const all = [
     codes.base,
@@ -195,7 +201,7 @@ function readSettings(): Result<DraftSettings> {
       flankFillerMax: out['flank_filler_max']!,
       narrowBelow: out['narrow_below']!,
       codes,
-      clearances: { hoodSide: out['hood_side']!, overFridge: out['over_fridge']!, fridgePanelDepth: out['fridge_panel_depth']! },
+      clearances: { hoodSide: out['hood_side']!, overFridge: out['over_fridge']!, fridgePanelDepth: out['fridge_panel_depth']!, overFridgeCaseShort: out['over_fridge_case_short']! },
       ends: { open: data.ends.open, closed: data.ends.closed, finished: new Set(data.ends.finished), types: new Set(data.ends.types) },
       visual: {
         toeKick: out['toe_kick_height']!,
@@ -206,7 +212,7 @@ function readSettings(): Result<DraftSettings> {
         fridgeDepth: out['fridge_depth']!,
         rangeDepth: out['range_depth']!,
       },
-      fronts: { maxSingleDoor: maxSingleDoor / 64, maxDoorHeight: maxDoorHeight / 64, topDrawer: out['top_drawer_front']! / 64, upperBottom: out['upper_bottom']! / 64 },
+      fronts: { maxSingleDoor: maxSingleDoor / 64, maxDoorHeight: maxDoorHeight / 64, topDrawer: out['top_drawer_front']! / 64, upperBottom: out['upper_bottom']! / 64, baseTop: baseTop / 64 },
     },
   };
 }
@@ -476,11 +482,12 @@ export function draftPlaceholder(room: Room, prefs: DraftPreferences, newId: () 
         const up = plan.get(run.run_id);
         if (up) {
           if (up.corner !== null) add({ code: c.upper_corner, appliance: null, layer: 'upper', offset: up.corner, width: size(c.upper_corner, 'width'), depth: null });
-          // A deeper upper over a fridge (upperPieces leaves its stretch out).
+          // A deeper upper over a fridge (upperPieces leaves its stretch out): its doors flush with
+          // the fridge panels' fronts (owner, 2026-11-12).
           for (const a of w.appliances) {
             const t = applianceType(rules, a.kind);
             if (!t || t.upperAboveDepth === null || run.kind === 'upper' || a.offset < run.offset || applianceEnd(a) > runEnd(run)) continue;
-            add({ code: c.upper_over_fridge, appliance: null, layer: 'upper', offset: a.offset, width: a.width.value, depth: t.upperAboveDepth });
+            add({ code: c.upper_over_fridge, appliance: null, layer: 'upper', offset: a.offset, width: a.width.value, depth: cl.fridgePanelDepth - cl.overFridgeCaseShort });
           }
           for (const p of up.pieces) {
             const fl = flankLow.get(p) ?? 0;
@@ -657,12 +664,25 @@ function fourBanks(cabs: readonly (Draft & { wallId: string })[], bases: readonl
     }
     for (const b of beside.slice(0, rule.beside_cooking)) if (chosen.length < Math.min(max, rule.beside_cooking)) chosen.push(b);
   }
+  // Near the sink: within the first `near_sink_within` cabinets from the sink base or the dishwasher,
+  // counted along the wall, the nearer the better (owner, 2026-11-12).
   const sinks = cabs.filter((x) => x.code !== null && sinkCodes.includes(x.code));
+  const placesAway = (b: Draft & { wallId: string }): number =>
+    Math.min(
+      ...sinks
+        .filter((x) => x.wallId === b.wallId)
+        .map((x) => {
+          const [lo, hi] = b.offset >= x.offset + x.width ? [x.offset + x.width, b.offset] : [b.offset + b.width, x.offset];
+          // The cabinets between them, plus this one.
+          return 1 + cabs.filter((y) => y !== b && y !== x && y.wallId === b.wallId && y.layer === 'base' && y.code !== null && !sinkCodes.includes(y.code) && !['filler', 'panel'].includes(itemByCode(y.code)?.type ?? '') && y.offset >= lo && y.offset + y.width <= hi).length;
+        }),
+    );
   for (let k = 0; k < rule.near_sink && chosen.length < max; k++) {
     const near = bases
       .filter((b) => ok(b) && sinks.some((x) => x.wallId === b.wallId))
-      .map((b) => ({ b, d: Math.min(...sinks.filter((x) => x.wallId === b.wallId).map((x) => gapBetween(b, x))) }))
-      .sort((p, q) => p.d - q.d || p.b.offset - q.b.offset)[0];
+      .map((b) => ({ b, places: placesAway(b), d: Math.min(...sinks.filter((x) => x.wallId === b.wallId).map((x) => gapBetween(b, x))) }))
+      .filter((x) => x.places <= rule.near_sink_within)
+      .sort((p, q) => p.places - q.places || p.d - q.d || p.b.offset - q.b.offset)[0];
     if (near) chosen.push(near.b);
   }
   return new Set(chosen.map((b) => b.id));

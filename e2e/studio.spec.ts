@@ -118,13 +118,19 @@ test('the placeholder AI design lays out the drawn room, then the customize scre
   // A width the cabinet beside it can't give is refused with the reason.
   await page.getByRole('textbox', { name: 'Width' }).fill('400');
   await page.getByRole('textbox', { name: 'Width' }).press('Enter');
-  await expect(page.getByText(/can grow by that much at most/)).toBeVisible();
+  await expect(page.getByText(/can grow by that much at most|would run past|would run into/)).toBeVisible();
 
   // The cabinet's own controls (owner, 2026-11-12): door opening, front and interior, ends, back.
   await page.getByRole('radiogroup', { name: 'Cabinet type' }).getByRole('radio', { name: 'Base, doors', exact: true }).click();
   await page.getByRole('radiogroup', { name: 'Door opening' }).getByRole('radio', { name: 'Hinged right' }).click();
-  await expect(page.getByText('Hinged on the right (handle on the left)')).toBeVisible();
-  await page.getByRole('button', { name: 'Split vertical' }).click();
+  await expect(page.getByRole('radiogroup', { name: 'Door opening' }).getByRole('radio', { name: 'Hinged right' })).toHaveAttribute('aria-checked', 'true');
+  // Undo and redo (Ctrl+Z, Ctrl+Shift+Z), outside a text box.
+  await page.getByRole('heading', { name: 'Base, doors' }).click();
+  await page.keyboard.press('Control+z');
+  await expect(page.getByRole('radiogroup', { name: 'Door opening' }).getByRole('radio', { name: 'By width' })).toHaveAttribute('aria-checked', 'true');
+  await page.keyboard.press('Control+Shift+z');
+  await expect(page.getByRole('radiogroup', { name: 'Door opening' }).getByRole('radio', { name: 'Hinged right' })).toHaveAttribute('aria-checked', 'true');
+  await page.getByRole('button', { name: 'Vertical divider' }).click();
   await expect(page.getByRole('button', { name: /^Section 1:/ })).toBeVisible();
   await page.getByRole('button', { name: 'Drawers', exact: true }).click();
   await page.getByRole('button', { name: 'More drawers' }).click();

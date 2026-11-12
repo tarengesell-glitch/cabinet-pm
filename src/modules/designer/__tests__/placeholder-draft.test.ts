@@ -267,6 +267,8 @@ describe('owner fixes, 2026-11-10 (after trying a real job)', () => {
     ]);
     const over = d.cabinets.find((c) => c.code === 'upper_no_shelf' && c.depth !== null)!;
     expect([over.offset, over.width]).toEqual([60 * IN, 36 * IN]);
+    // Its doors are flush with the 26" panels' fronts: a 25 1/8" case (owner, 2026-11-12).
+    expect(over.depth).toBe(25 * IN + 8);
     expect(over.elevation).toBe(s!.visual.fridgeHeight + 2 * IN);
     expect(over.elevation + over.height).toBe(d.upperTop);
     // Nothing else stands where the panels are.
@@ -416,7 +418,12 @@ describe('owner fixes, 2026-11-12', () => {
         expect(besideRange).toHaveLength(2);
         expect(fours).toHaveLength(3);
         const sink = d.value.cabinets.find((c) => c.code === 'sink_base')!;
-        expect(fours.some((c) => c.wallId === sink.wallId)).toBe(true);
+        const dw = d.value.cabinets.find((c) => c.code === 'dishwasher_opening')!;
+        // Within the first three cabinets from the sink or dishwasher (owner, 2026-11-12).
+        const byWall = d.value.cabinets.filter((c) => c.wallId === sink.wallId && c.layer === 'base' && c.code !== null && c.code !== 'base_filler').sort((a, b) => a.offset - b.offset);
+        const near = fours.filter((c) => c.wallId === sink.wallId);
+        expect(near.length).toBeGreaterThan(0);
+        for (const f of near) expect(Math.min(...[sink, dw].map((x) => Math.abs(byWall.indexOf(f) - byWall.indexOf(x))))).toBeLessThanOrEqual(3);
       }
       expect(besideRange.length).toBeGreaterThan(0);
     }

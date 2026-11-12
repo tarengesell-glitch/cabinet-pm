@@ -216,8 +216,32 @@ export function Stage3D(props: {
       drag = { handle: h, start, plane, ghost, result: null };
       renderer.domElement.setPointerCapture(e.pointerId);
     };
+    // Pointing at a handle: its pointer, a little larger, and what it does.
+    let hovered: THREE.Object3D | null = null;
+    const hover = (e: PointerEvent) => {
+      ray.setFromCamera(toNdc(e), camera);
+      let h: THREE.Object3D | null = s.handles.length ? (ray.intersectObjects(s.handles, true)[0]?.object ?? null) : null;
+      while (h && !h.userData['handle']) h = h.parent;
+      if (h === hovered) {
+        if (h && label.current) Object.assign(label.current.style, { left: `${e.clientX - el.getBoundingClientRect().left + 14}px`, top: `${e.clientY - el.getBoundingClientRect().top + 14}px` });
+        return;
+      }
+      hovered?.scale.setScalar((hovered.userData['size'] as number | undefined) ?? 1);
+      hovered = h;
+      if (h) h.scale.setScalar(((h.userData['size'] as number | undefined) ?? 1) * 1.3);
+      const kind = h ? (h.userData as HandleData).handle : null;
+      el.style.cursor = kind === null ? 'grab' : kind === 'left' || kind === 'right' ? 'ew-resize' : kind === 'top' ? 'ns-resize' : kind === 'move' ? 'move' : 'nwse-resize';
+      if (label.current) {
+        if (kind) {
+          const r = el.getBoundingClientRect();
+          Object.assign(label.current.style, { display: 'block', left: `${e.clientX - r.left + 14}px`, top: `${e.clientY - r.top + 14}px` });
+          label.current.textContent = HANDLE_NAMES[kind];
+        } else label.current.style.display = 'none';
+      }
+      s.dirty = true;
+    };
     const onHandleMove = (e: PointerEvent) => {
-      if (!drag) return;
+      if (!drag) return hover(e);
       const p = hitPlane(e, drag.plane);
       if (!p) return;
       const g = drag.handle.parent as THREE.Group;
@@ -289,6 +313,14 @@ export function Stage3D(props: {
     // Drawn only when something changed (the camera, a door moving, a rebuild, a resize, a drag):
     // a still view costs nothing, so the page stays quick with every detail drawn.
     controls.addEventListener('change', () => (s.dirty = true));
+    // Once the person moves the camera, nothing is clipped away in front of it any more (a fixed
+    // wall view clips what stands between it and the wall), so they can come in close.
+    controls.addEventListener('start', () => {
+      if (camera.near !== 1) {
+        camera.near = 1;
+        camera.updateProjectionMatrix();
+      }
+    });
     const loop = () => {
       for (const d of s.doors) {
         const target = doorsOpen.current ? (d.userData['dir'] as number) * 1.75 : 0;
@@ -727,6 +759,16 @@ function sinkBowls(s: Pick<Scene3D, 'mats'>, k: { c: CabinetView; x0: number; x1
   return g;
 }
 
+/** What each handle does, said when the pointer is on it. */
+const HANDLE_NAMES: Record<HandleData['handle'], string> = {
+  left: 'Width (from the left)',
+  right: 'Width (from the right)',
+  top: 'Height',
+  front: 'Depth',
+  move: 'Move along the wall, or up and down',
+  out: 'Out from the wall',
+};
+
 /** What a handle does, in the cabinet's own frame (inches), as stored on it for a drag. */
 interface HandleData {
   handle: 'left' | 'right' | 'top' | 'front' | 'move' | 'out';
@@ -810,38 +852,49 @@ function addHandles(s: Pick<Scene3D, 'mats'>, g: THREE.Group, c: CabinetView, ct
   const m = own('handle:blue', SELECT_BLUE);
   const ring = own('handle:white', '#ffffff');
   const out: THREE.Object3D[] = [];
-  const add = (handle: HandleData['handle'], pos: [number, number, number], axis: THREE.Vector3 | undefined, shape: 'ball' | 'move' | 'arrow') => {
+  /** An arrow head pointing along `dir` (local), its tip `len` out from the handle's centre. */
+  const arrowHead = (o: THREE.Group, dir: THREE.Vector3, at = 1.6) => {
+    const cone = new THREE.Mesh(new THREE.ConeGeometry(1.25, 2.6, 18), m);
+    cone.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.clone().normalize());
+    cone.position.copy(dir.clone().normalize().multiplyScalar(at + 1.3));
+    o.add(cone);
+  };
+  const shaft = (o: THREE.Group, dir: THREE.Vector3, len: number) => {
+    const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, len, 12), m);
+    bar.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.clone().normalize());
+    o.add(bar);
+  };
+  // Each handle is an arrow pointing the ways it drags (owner, 2026-11-12: the controls "aren't very
+  // intuitive"): a double arrow for a size, a four-way cross for moving; a white dot is where to grab.
+  const add = (handle: HandleData['handle'], pos: [number, number, number], axis: THREE.Vector3 | undefined, ways: readonly THREE.Vector3[]) => {
     const o = new THREE.Group();
     o.position.set(...pos);
     o.userData = { ...data, handle, ...(axis ? { axis } : {}) } satisfies HandleData;
-    if (shape === 'ball') {
-      const b = new THREE.Mesh(new THREE.SphereGeometry(1.5, 20, 14), m);
-      const r = new THREE.Mesh(new THREE.TorusGeometry(1.5, 0.25, 8, 24), ring);
-      o.add(b, r);
-    } else if (shape === 'move') {
-      for (const rot of [0, Math.PI / 2]) {
-        const bar = new THREE.Mesh(new THREE.BoxGeometry(6, 0.9, 0.9), m);
-        bar.rotation.z = rot;
-        o.add(bar);
-      }
-      o.add(new THREE.Mesh(new THREE.SphereGeometry(1.3, 16, 12), ring));
-    } else {
-      const cone = new THREE.Mesh(new THREE.ConeGeometry(1.4, 3, 16), m);
-      cone.rotation.x = Math.PI / 2;
-      o.add(cone);
+    for (const d of ways) {
+      shaft(o, d, 3.2);
+      arrowHead(o, d);
     }
-    o.renderOrder = 10;
+    o.add(new THREE.Mesh(new THREE.SphereGeometry(1.05, 16, 12), ring));
+    const grab = new THREE.Mesh(new THREE.SphereGeometry(0.75, 14, 10), m);
+    o.add(grab);
     o.traverse((x) => (x.renderOrder = 10));
+    // A little larger on a big cabinet, so they are easy to grab.
+    o.scale.setScalar(SIZE);
+    o.userData['size'] = SIZE;
     g.add(o);
     out.push(o);
   };
+  const SIZE = Math.min(1.5, Math.max(1, Math.min(w, hh) / 16));
+  const X = new THREE.Vector3(1, 0, 0);
+  const Y = new THREE.Vector3(0, 1, 0);
+  const Z = new THREE.Vector3(0, 0, 1);
   const ym = y0 + hh / 2;
-  add('left', [-w / 2 - 1, ym, zf], new THREE.Vector3(1, 0, 0), 'ball');
-  add('right', [w / 2 + 1, ym, zf], new THREE.Vector3(1, 0, 0), 'ball');
-  add('top', [0, y0 + hh + 1.5, zf], new THREE.Vector3(0, 1, 0), 'ball');
-  add('front', [0, y0 + hh * 0.25, zf + 2.5], new THREE.Vector3(0, 0, 1), 'arrow');
-  add('move', [0, ym, zf], undefined, 'move');
-  add('out', [w / 2 - 3, y0 + 2.5, zf + 1], new THREE.Vector3(0, 0, 1), 'arrow');
+  add('left', [-w / 2 - 2, ym, zf], X, [X.clone().negate(), X]);
+  add('right', [w / 2 + 2, ym, zf], X, [X.clone().negate(), X]);
+  add('top', [0, y0 + hh + 2.5, zf], Y, [Y, Y.clone().negate()]);
+  add('front', [-w / 4, y0 + 3, zf + 1], Z, [Z, Z.clone().negate()]);
+  add('move', [0, ym, zf], undefined, [X, X.clone().negate(), Y, Y.clone().negate()]);
+  add('out', [w / 4, y0 + 3, zf + 1], Z, [Z, Z.clone().negate()]);
   return out;
 }
 
@@ -922,7 +975,7 @@ export function cabinet(s: Pick<Scene3D, 'mats' | 'doors'>, c: CabinetView, ctx:
     if (!item) return;
     const pieces = frontPieces(
       { item, x0, x1, y0, y1, hinge: c.selections?.['hinge_side'] ?? null, sections: c.sections ?? null, drawerHandleTop: look.drawerTop },
-      DRAFT_SETTINGS.ok ? DRAFT_SETTINGS.value.fronts : { maxSingleDoor: 20, maxDoorHeight: 48, topDrawer: 6.8125, upperBottom: 54 },
+      DRAFT_SETTINGS.ok ? DRAFT_SETTINGS.value.fronts : { maxSingleDoor: 20, maxDoorHeight: 48, topDrawer: 6.8125, upperBottom: 54, baseTop: 34.75 },
     );
     const inner = `paint:${SURROUNDINGS.interior}`;
     for (const p of pieces) {
@@ -1057,11 +1110,12 @@ export function cabinet(s: Pick<Scene3D, 'mats' | 'doors'>, c: CabinetView, ctx:
         const rx = xr(0, legD + oh);
         counterBox(h, rx[0], rx[1], zFace + oh, d / 2);
       }
-      // One door on this wall's face, beside the other leg, hinged at its far end with the only
-      // handle by the inside corner where the two doors meet (owner, 2026-11-12: "Corner cabinets
-      // shouldn't have handles on both doors").
+      // One door on this wall's face, beside the other leg, with the only handle (owner,
+      // 2026-11-12: "Corner cabinets shouldn't have handles on both doors"): hinged by the inside
+      // corner, the handle on the far edge ("not in the corner … on the far opposite edge from
+      // where the hinge is").
       const [fx0, fx1] = xr(legD, w);
-      if (fx1 - fx0 > 1) hangDoor(fx0, fx1, y0, top, 2 * zFace, inward > 0 ? 'right' : 'left', upper ? y0 + 5 : top - 5, true);
+      if (fx1 - fx0 > 1) hangDoor(fx0, fx1, y0, top, 2 * zFace, inward > 0 ? 'left' : 'right', upper ? y0 + 5 : top - 5, true);
       // The door on the other leg's face, turned to face along this wall.
       const fw = d - legD;
       if (fw > 1) {

@@ -29,10 +29,12 @@
         "all": "base_3_drawers"
       },
       "four_banks": {
-        "source": "Shop design rules PREF-006 (\"A bank of four drawers should be close to the sink cabinet and dishwasher\") and PREF-007 (\"At least one, ideally two, four-drawer banks for pots and pans right beside the cooking appliance\"), both confirmed 2026-11-08. Owner, 2026-11-12: \"This kitchen didn't include any banks of four drawers. The design rules say some of these should exist.\" With a drawer level chosen, the base cabinets right beside a range or cooktop (up to two) and the nearest one to the sink base or dishwasher become four-drawer banks; Minimum makes only one, beside the cooking first. Which cabinet counts as near is this session's reading (PROPOSED): touching the cooking appliance, or the next one along from a bank that does; the nearest base on the sink's wall.",
+        "source": "Shop design rules PREF-006 (\"A bank of four drawers should be close to the sink cabinet and dishwasher\") and PREF-007 (\"At least one, ideally two, four-drawer banks for pots and pans right beside the cooking appliance\"), both confirmed 2026-11-08. Owner, 2026-11-12: \"This kitchen didn't include any banks of four drawers. The design rules say some of these should exist.\" With a drawer level chosen, the base cabinets right beside a range or cooktop (up to two) and the nearest one to the sink base or dishwasher become four-drawer banks; Minimum makes only one, beside the cooking first. Which cabinet counts as beside the cooking is this session's reading (PROPOSED): touching the cooking appliance, or the next one along from a bank that does. Near the sink: see near_sink_note (owner).",
         "code": "base_4_drawers",
         "beside_cooking": 2,
-        "near_sink": 1
+        "near_sink": 1,
+        "near_sink_within": 3,
+        "near_sink_note": "Owner, 2026-11-12 (round 2): \"the bank of four drawers should ideally be within the first 1-3 cabinets away from the sink, the nearer the better. It can be immediately adjacent to either the sink or the dishwasher, either is ok.\" Counted along the wall from the sink base or the dishwasher, base cabinets only."
       }
     },
     "base_filler": "base_filler",
@@ -92,6 +94,8 @@
     "over_fridge": "2",
     "over_fridge_note": "The cabinet over a fridge comes down to 2\" above the fridge: \"should only have 2 inches of clearance over a fridge\". The fridge's height is the rough one below until its spec is confirmed (OA-4).",
     "fridge_panel_depth": "26",
-    "fridge_panel_depth_note": "\"26 inches to go past the depth of adjacent counters\". Full height: from the floor to the cabinets' top line."
+    "fridge_panel_depth_note": "\"26 inches to go past the depth of adjacent counters\". Full height: from the floor to the cabinets' top line.",
+    "over_fridge_case_short": "7/8",
+    "over_fridge_case_short_note": "Owner, 2026-11-12 (chat): \"Make cabinets over top of a fridge deep enough that the front of the door is flush with the front of the fridge panel. So if the fridge panel is 26\"d, then the front of the doors of the cabinet over top of the fridge should be 26\" from the back wall, and the case should be 25 1/8\"d.\" The case over a fridge is the fridge panel's depth less this much. Replaces the room drawing's 24\" for the drafted cabinet."
   }
 }

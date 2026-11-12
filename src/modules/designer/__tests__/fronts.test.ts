@@ -20,19 +20,23 @@ describe('cabinet fronts (3D view)', () => {
     expect(doors(face('base_doors', 21, 4, 34.75))).toHaveLength(2);
   });
 
-  it('a tall pantry has stacked doors, never one full-height door (owner, 2026-11-12)', () => {
-    const ds = doors(face('tall_pantry', 30, 4, 96));
-    // Two door sections, each a pair (30" wide), each under 48" tall.
-    expect(ds).toHaveLength(4);
+  it('a tall pantry has stacked doors, the lower one lined up with the base cabinets’ fronts (owner, 2026-11-12)', () => {
+    expect(rules.baseTop).toBe(34.75);
+    // To 84": a lower pair to 34 3/4", then the 49 1/4" above stacked again by the 48" rule.
+    const ds = doors(face('tall_pantry', 30, 4, 84));
+    const rows = [...new Set(ds.map((d) => `${d.y0.toFixed(3)}-${d.y1.toFixed(3)}`))];
+    expect(ds).toHaveLength(6);
+    expect(rows).toHaveLength(3);
+    const lower = ds.filter((d) => d.y0 === 4);
+    expect(lower).toHaveLength(2);
+    for (const d of lower) expect(d.y1).toBeCloseTo(34.75);
     for (const d of ds) expect(d.y1 - d.y0).toBeLessThanOrEqual(48);
-    // The upper doors open from their bottom, the lower ones from their top.
-    const [upperDoor, , lowerDoor] = ds;
-    expect(upperDoor!.handleY).toBeLessThan((upperDoor!.y0 + upperDoor!.y1) / 2);
-    expect(lowerDoor!.handleY).toBeGreaterThan((lowerDoor!.y0 + lowerDoor!.y1) / 2);
-    // To a 120" top: three equal rows, each under 48".
-    const tall = doors(face('tall_pantry', 30, 4, 120));
-    expect(tall).toHaveLength(6);
-    for (const d of tall) expect(d.y1 - d.y0).toBeCloseTo((120 - 4) / 3);
+    // The lower doors open from their top, the highest from their bottom.
+    expect(lower[0]!.handleY).toBeGreaterThan(19);
+    const top = ds.reduce((a, b) => (b.y1 > a.y1 ? b : a));
+    expect(top.handleY).toBeLessThan((top.y0 + top.y1) / 2);
+    // Its starting sections, when divided in Customize, keep the same line.
+    expect(startingSections(item('tall_pantry'), rules, 4, 84)).toMatchObject({ kind: 'split', parts: [{ kind: 'doors', size: null }, { kind: 'doors', size: Math.round(30.75 * 64) }] });
   });
 
   it('follows the door opening chosen: hinged left, hinged right, or a pair (owner, 2026-11-12)', () => {
@@ -83,8 +87,8 @@ describe('cabinet fronts (3D view)', () => {
   });
 
   it('starts a divided cabinet from its catalog fronts', () => {
-    expect(startingSections(item('base_drawer_doors'), rules.topDrawer)).toMatchObject({ kind: 'split', direction: 'horizontal', parts: [{ kind: 'drawers', count: 1 }, { kind: 'doors' }] });
-    expect(startingSections(item('base_3_drawers'), rules.topDrawer)).toMatchObject({ kind: 'drawers', count: 3 });
-    expect(startingSections(item('tall_pantry'), rules.topDrawer)).toMatchObject({ kind: 'split', parts: [{ kind: 'doors' }, { kind: 'doors' }] });
+    expect(startingSections(item('base_drawer_doors'), rules, 4, 34.75)).toMatchObject({ kind: 'split', direction: 'horizontal', parts: [{ kind: 'drawers', count: 1 }, { kind: 'doors' }] });
+    expect(startingSections(item('base_3_drawers'), rules, 4, 34.75)).toMatchObject({ kind: 'drawers', count: 3 });
+    expect(startingSections(item('tall_pantry'), rules, 4, 96)).toMatchObject({ kind: 'split', parts: [{ kind: 'doors' }, { kind: 'doors' }] });
   });
 });

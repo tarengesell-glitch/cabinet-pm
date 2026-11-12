@@ -113,6 +113,40 @@ describe('changing a cabinet from Customize and the 3D handles', () => {
   });
 });
 
+describe('splitting and typed widths (owner, 2026-11-12)', () => {
+  it('splitting makes two separate cabinets: side by side on the width step, or one over the other', () => {
+    const room = placed();
+    const [, b] = threeUppers(room);
+    const side = unwrap(editItems(room, { kind: 'split', id: b.item_instance_id, direction: 'side_by_side', newId: '00000000-0000-4000-a000-000000000001' }));
+    const one = byId(side, b.item_instance_id);
+    const two = byId(side, '00000000-0000-4000-a000-000000000001');
+    expect(one.width + two.width).toBe(b.width);
+    expect(one.width % 4).toBe(0);
+    expect(two.position.offset).toBe(b.position.offset + one.width);
+    expect(two.catalog_item_id).toBe(b.catalog_item_id);
+    expect(side.items).toHaveLength(room.items.length + 1);
+    expect(RoomSchema.safeParse(side).success).toBe(true);
+    const stacked = unwrap(editItems(room, { kind: 'split', id: b.item_instance_id, direction: 'stacked', newId: '00000000-0000-4000-a000-000000000002' }));
+    const low = byId(stacked, b.item_instance_id);
+    const high = byId(stacked, '00000000-0000-4000-a000-000000000002');
+    expect(low.height + high.height).toBe(b.height);
+    expect(high.position.elevation).toBe(b.position.elevation + low.height);
+    expect(high.width).toBe(b.width);
+    // A used ID is refused.
+    expect(editItems(room, { kind: 'split', id: b.item_instance_id, direction: 'stacked', newId: b.item_instance_id }).ok).toBe(false);
+  });
+
+  it('a typed width on both sides takes half from each neighbour', () => {
+    const room = placed();
+    const [a, b, c] = threeUppers(room);
+    const r = unwrap(editItems(room, { kind: 'resize', id: b.item_instance_id, side: 'both', width: b.width + 4 * IN }));
+    expect(byId(r, a.item_instance_id).width).toBe(a.width - 2 * IN);
+    expect(byId(r, c.item_instance_id).width).toBe(c.width - 2 * IN);
+    expect(byId(r, b.item_instance_id).position.offset).toBe(b.position.offset - 2 * IN);
+    expect(byId(r, b.item_instance_id).width).toBe(b.width + 4 * IN);
+  });
+});
+
 describe('editing sections', () => {
   const doors = { kind: 'doors', shelves: 0, rollouts: 0, size: null } as const;
   it('splits, adds parts beside in the same direction, and removes them', () => {

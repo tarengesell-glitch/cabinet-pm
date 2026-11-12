@@ -1,9 +1,9 @@
 'use client';
 /**
  * Customize's Cabinet tab (owner, 2026-11-12: "controls similar to the other major cabinet design
- * softwares"): the cabinet's library type; its size and place; how its doors open; its front and
- * interior, divided the way the common programs do it (split vertical or horizontal, shelves,
- * drawers, roll-outs); its ends; and its back. Every change goes through `editItems` (model/cabinets.ts)
+ * softwares"): the cabinet's library type; its size and place (a typed width changes on the left,
+ * the right or both sides); splitting it into two cabinets; how its doors open; its front and
+ * interior (vertical or horizontal dividers, shelves, drawers, roll-outs); its ends; and its back. Every change goes through `editItems` (model/cabinets.ts)
  * and is saved as a new version of the master copy.
  */
 import { useState } from 'react';
@@ -21,20 +21,15 @@ import { SELECT_BLUE } from './theme';
 import s from './Customize.module.css';
 
 const IN = 64;
-const ENDS: Record<string, string> = { unfinished: 'unfinished', applied_finished: 'applied FE', finished: 'integrated FE' };
 
 export function CabinetEditor(props: {
   room: Room;
   cab: CabinetView;
   name: string;
   canEdit: boolean;
-  /** The cabinets in the same row (run and layer), left to right. */
-  row: readonly CabinetView[];
-  rowName: (c: CabinetView) => string;
   finish: string;
   onStep: (d: 1 | -1) => void;
   onEdit: (e: ItemEdit) => boolean;
-  onPick: (id: string) => void;
   /** Opens the look choices of the sink, dishwasher or fridge this is (or holds). */
   onLooks: (placementId: string) => void;
 }) {
@@ -43,7 +38,9 @@ export function CabinetEditor(props: {
   const item = cab.code ? itemByCode(cab.code) : null;
   const types = item && item.type !== 'filler' ? CURRENT_CATALOG.items.filter((i) => i.type === item.type && i.availability === 'available') : [];
   const offers = (code: string) => item?.options.includes(code) ?? false;
-  const option = (code: string) => CURRENT_CATALOG.options.find((o) => o.code === code) ?? null;
+  const [widthFrom, setWidthFrom] = useState<'left' | 'both' | 'right'>('right');
+  /** The wall end ("low" or "high") the chosen side is, for this cabinet. */
+  const sideOf = (w: 'left' | 'both' | 'right'): 'low' | 'high' | 'both' => (w === 'both' ? 'both' : (w === 'left') === (cab.leftAt === 'low') ? 'low' : 'high');
   const depth = cab.depth ?? (cab.code ? standard(cab.code, 'depth') : null) ?? 0;
   const set = (code: string, value: string | null) => props.onEdit({ kind: 'option', id: cab.id, option: code, value });
 
@@ -109,29 +106,41 @@ export function CabinetEditor(props: {
 
           <section className={s.sec}>
             <h3 className={s.h3}>Size and position</h3>
-            <div className={s.rowStrip} aria-label="This cabinet in its row">
-              {props.row.map((c) => (
-                <button
-                  key={c.id}
-                  className={c.id === cab.id ? s.rowCellOn : s.rowCell}
-                  style={{ flex: `${Math.max(c.width / IN, 4)} 1 0` }}
-                  title={`${props.rowName(c)} ${formatInches(c.width)}`}
-                  aria-label={`${props.rowName(c)} ${formatInches(c.width)}`}
-                  onClick={() => props.onPick(c.id)}
-                >
-                  {c.code ? formatInches(c.width).replace('"', '') : ''}
-                </button>
-              ))}
-            </div>
-            <p className={s.sub}>The cabinet beside it gives or takes a change in width, so the run stays the same length. You can also drag the blue handles in the 3D view.</p>
             <div className={s.sizeGrid}>
-              <SizeInput key={`w${cab.width}`} label="Width" value={cab.width} canEdit={canEdit} step={DRAFT_SETTINGS.ok ? DRAFT_SETTINGS.value.widthStep : null} onSet={(v) => props.onEdit({ kind: 'width', id: cab.id, width: v })} />
-              <SizeInput key={`h${cab.height}`} label="Height" value={cab.height} canEdit={canEdit} step={IN / 4} onSet={(v) => props.onEdit({ kind: 'box', id: cab.id, height: v })} />
-              <SizeInput key={`d${depth}`} label="Depth" value={depth} canEdit={canEdit} step={IN / 4} onSet={(v) => props.onEdit({ kind: 'box', id: cab.id, depth: v })} />
-              <SizeInput key={`e${cab.elevation}`} label="Off the floor" value={cab.elevation} canEdit={canEdit} step={IN / 4} allowZero onSet={(v) => props.onEdit({ kind: 'box', id: cab.id, elevation: v })} />
-              <SizeInput key={`b${cab.setback ?? 0}`} label="Out from the wall" value={cab.setback ?? 0} canEdit={canEdit} step={IN / 4} allowZero onSet={(v) => props.onEdit({ kind: 'box', id: cab.id, setback: v })} />
+              <div className={s.sizeField}>
+                <SizeInput key={`w${cab.width}`} label="Width" value={cab.width} canEdit={canEdit} onSet={(v) => props.onEdit({ kind: 'resize', id: cab.id, side: sideOf(widthFrom), width: v })} />
+                <Segmented
+                  label="Change the width on"
+                  canEdit={canEdit}
+                  value={widthFrom}
+                  choices={[
+                    { value: 'left', name: 'Left' },
+                    { value: 'both', name: 'Both sides' },
+                    { value: 'right', name: 'Right' },
+                  ]}
+                  onSet={(v) => setWidthFrom((v ?? 'right') as 'left' | 'both' | 'right')}
+                />
+              </div>
+              <SizeInput key={`h${cab.height}`} label="Height" value={cab.height} canEdit={canEdit} onSet={(v) => props.onEdit({ kind: 'box', id: cab.id, height: v })} />
+              <SizeInput key={`d${depth}`} label="Depth" value={depth} canEdit={canEdit} onSet={(v) => props.onEdit({ kind: 'box', id: cab.id, depth: v })} />
+              <SizeInput key={`e${cab.elevation}`} label="Off the floor" value={cab.elevation} canEdit={canEdit} allowZero onSet={(v) => props.onEdit({ kind: 'box', id: cab.id, elevation: v })} />
+              <SizeInput key={`b${cab.setback ?? 0}`} label="Out from the wall" value={cab.setback ?? 0} canEdit={canEdit} allowZero onSet={(v) => props.onEdit({ kind: 'box', id: cab.id, setback: v })} />
             </div>
           </section>
+
+          {item.type !== 'filler' && item.type !== 'panel' && !item.type.startsWith('corner') && item.type !== 'appliance_opening' && (
+            <section className={s.sec}>
+              <h3 className={s.h3}>Split into two cabinets</h3>
+              <div className={s.row}>
+                <button className={s.btnSm} disabled={!canEdit} onClick={() => props.onEdit({ kind: 'split', id: cab.id, direction: 'side_by_side', newId: crypto.randomUUID() })}>
+                  Side by side
+                </button>
+                <button className={s.btnSm} disabled={!canEdit} onClick={() => props.onEdit({ kind: 'split', id: cab.id, direction: 'stacked', newId: crypto.randomUUID() })}>
+                  One over the other
+                </button>
+              </div>
+            </section>
+          )}
 
           {offers('hinge_side') && (
             <section className={s.sec}>
@@ -148,11 +157,6 @@ export function CabinetEditor(props: {
                 ]}
                 onSet={(v) => set('hinge_side', v)}
               />
-              <p className={s.sub}>
-                {cab.selections?.['hinge_side']
-                  ? option('hinge_side')?.values.find((v) => v.code === cab.selections?.['hinge_side'])?.name
-                  : 'Not chosen: one door up to 20" wide, then a pair (the shop’s door rule).'}
-              </p>
             </section>
           )}
 
@@ -178,10 +182,6 @@ export function CabinetEditor(props: {
                   />
                 </div>
               ))}
-              <p className={s.sub}>
-                Left and right as seen standing in front of the cabinet. FE: finished end. “From the layout” follows the shop’s rule (unfinished against a wall or cabinet, applied FE at an open end
-                {cab.ends ? `; now ${[cab.selections?.['end_left'], cab.selections?.['end_right']].map((v) => ENDS[v ?? ''] ?? 'not set').join(' and ')}` : ''}); a choice made here is kept when the layout changes.
-              </p>
             </section>
           )}
 
@@ -219,36 +219,23 @@ function Segmented(props: { label: string; canEdit: boolean; value: string | nul
   );
 }
 
-/** One size: type it (feet and inches, or mm) and press Enter, or step it with − and +. */
-function SizeInput(props: { label: string; value: number; canEdit: boolean; step: number | null; allowZero?: boolean; onSet: (v: number) => boolean }) {
+/** One size: type it (feet and inches, or mm) and press Enter, or leave the box. */
+function SizeInput(props: { label: string; value: number; canEdit: boolean; allowZero?: boolean; onSet: (v: number) => boolean }) {
   const [text, setText] = useState(formatInches(props.value));
   const [error, setError] = useState<string | null>(null);
-  const apply = (v: number) => {
-    setError(null);
-    if (v < 0 || (!props.allowZero && v === 0)) return setError('Too small.');
-    if (!props.onSet(v)) setText(formatInches(props.value));
-  };
   const typed = () => {
     const r = parseSize(text);
     if (!r.ok) return setError(r.reason);
-    if (r.value.value !== props.value) apply(r.value.value);
+    setError(null);
+    const v = r.value.value;
+    if (v === props.value) return;
+    if (v < 0 || (!props.allowZero && v === 0)) return setError('Too small.');
+    if (!props.onSet(v)) setText(formatInches(props.value));
   };
   return (
     <label className={s.sizeField}>
       <span className={s.optLabel}>{props.label}</span>
-      <span className={s.row}>
-        {props.step !== null && (
-          <button type="button" className={s.btnSq} disabled={!props.canEdit} aria-label={`${props.label} down by ${formatInches(props.step)}`} onClick={() => apply(props.value - props.step!)}>
-            −
-          </button>
-        )}
-        <input className={error ? s.inputBad : s.input} aria-label={props.label} value={text} disabled={!props.canEdit} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && typed()} onBlur={typed} />
-        {props.step !== null && (
-          <button type="button" className={s.btnSq} disabled={!props.canEdit} aria-label={`${props.label} up by ${formatInches(props.step)}`} onClick={() => apply(props.value + props.step!)}>
-            +
-          </button>
-        )}
-      </span>
+      <input className={error ? s.inputBad : s.input} aria-label={props.label} value={text} disabled={!props.canEdit} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && typed()} onBlur={typed} />
       {error && (
         <span className={s.error} role="alert">
           {error}
@@ -260,7 +247,8 @@ function SizeInput(props: { label: string; value: number; canEdit: boolean; step
 
 /**
  * The cabinet's face, drawn from the same layout the 3D view uses; click a part to pick it, then
- * split it or change what is in it (owner, 2026-11-12, as the common cabinet programs do).
+ * add a divider in it or change what is in it (owner, 2026-11-12, as the common cabinet programs
+ * do). A divider keeps one cabinet; "Split into two cabinets" above makes two.
  */
 function FrontEditor(props: { cab: CabinetView; item: NonNullable<ReturnType<typeof itemByCode>>; canEdit: boolean; onSet: (sections: FrontSection | null) => boolean }) {
   const { cab, item } = props;
@@ -272,7 +260,7 @@ function FrontEditor(props: { cab: CabinetView; item: NonNullable<ReturnType<typ
   const w = cab.width / IN;
   const y0 = cab.elevation / IN + toe;
   const y1 = (cab.elevation + cab.height) / IN;
-  const tree: FrontSection = cab.sections ?? startingSections(item, rules.topDrawer);
+  const tree: FrontSection = cab.sections ?? startingSections(item, rules, y0, y1);
   const picked = sectionAt(tree, path) ?? tree;
   const pieces = frontPieces({ item, x0: 0, x1: w, y0, y1, hinge: cab.selections?.['hinge_side'] ?? null, sections: cab.sections ?? null, drawerHandleTop: false }, rules);
   const boxes = sectionBoxes(tree, 0, w, y0, y1);
@@ -298,7 +286,6 @@ function FrontEditor(props: { cab: CabinetView; item: NonNullable<ReturnType<typ
   return (
     <section className={s.sec}>
       <h3 className={s.h3}>Front and interior</h3>
-      <p className={s.sub}>Click a part of the cabinet, then change it. New parts share the space equally.</p>
       <svg className={s.facePreview} width={w * k + 12} height={(y1 - y0) * k + 12} role="group" aria-label="Cabinet face">
         <rect x={X(0)} y={Y(y1)} width={w * k} height={(y1 - y0) * k} fill="#f3f1ec" stroke="#57524b" />
         {pieces.map((p, i) =>
@@ -354,10 +341,10 @@ function FrontEditor(props: { cab: CabinetView; item: NonNullable<ReturnType<typ
       </p>
       <div className={s.toolGrid}>
         <button className={s.btnSm} disabled={!can} onClick={() => act('split_vertical')}>
-          Split vertical
+          Vertical divider
         </button>
         <button className={s.btnSm} disabled={!can} onClick={() => act('split_horizontal')}>
-          Split horizontal
+          Horizontal divider
         </button>
         <button className={s.btnSm} disabled={!can || path.length === 0} onClick={() => act('remove')}>
           Remove part

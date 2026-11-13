@@ -80,6 +80,19 @@
     "upper_bottom": "54",
     "top_drawer_front": "6 13/16",
     "top_drawer_front_note": "The standard top drawer front, lined up across cabinets (DECISIONS 2026-11-07 \"The cabinet catalog\", Drawers). The door sizes the 3D view draws come from shop design rule CB-FACT-16 (one door up to 20\" wide, then a pair; up to 48\" tall, then stacked).",
+    "trim": {
+      "note": "PROPOSED stand-ins for drawing the top trim and light valance in the 3D view (2026-11-13), until the shop gives real profiles. Top trim sits on the tops of upper and tall cabinets, projecting past the doors in steps (a crown flares in three small steps, a stepped crown in two big ones), and never above the ceiling. A valance hangs under upper cabinets, flush with the doors. Hidden valances and None draw nothing.",
+      "top": {
+        "flat_band": { "height": "3", "projection": "3/4", "steps": 1 },
+        "crown": { "height": "4", "projection": "2 1/2", "steps": 3 },
+        "stepped_crown": { "height": "5", "projection": "2 1/2", "steps": 2 }
+      },
+      "valance": {
+        "flat": { "height": "2", "thickness": "3/4", "rise": "0" },
+        "shaped": { "height": "3", "thickness": "3/4", "rise": "1 1/2" }
+      },
+      "draws_nothing": { "top": ["none"], "valance": ["hidden", "none"] }
+    },
     "appliances": {
       "note": "Rough appliance shapes for the 3D view only, from the prototype; real sizes come from confirmed appliance specs (OA-4).",
       "fridge_height": "70",

@@ -97,6 +97,7 @@ The app's design step runs the designer's **placeholder** builder (no AI): **App
 - Widths are made to fit: equal cabinets on the 1/16" step, a filler only where a space is too narrow. **Approved** (2026-11-10 round 2). Built. The 36" largest width is the prototype's placeholder value.
 - Nothing is skipped: an appliance that runs into a corner or past its run is drawn and reported. **Approved** (2026-11-10). Built.
 - Applied finished ends to the floor; toe kicks in the door colour; one counter per stretch; island panels as chosen. **Approved** (2026-11-10 round 2). Built.
+- Top trim on upper and tall cabinets and a light valance under the uppers, as chosen in the design choices; None and Hidden draw nothing; a choice with no profile draws nothing and is listed under To review. **Approved** (DECISIONS 2026-11-13 "Top trim and light valance in the 3D view"). Built. The profiles, and no valance over a fridge: **PROPOSED**; the shop's profiles and the crown's ceiling gap: **Open** (TRIM-1).
 - Uppers and talls reach the client's cabinet height, never above the ceiling. **Approved** (2026-11-08 "Placeholder office screens…", Customize feedback, "Heights"). Built.
 - Where uppers start (54" above the floor). **Open** (AD-5). Placeholder value: `visual.upper_bottom`. **Despite the "visual" label, it sets saved cabinet positions** (see "Known discrepancies").
 - Bathroom vanity choices. **PROPOSED** (PR-57c). Built.

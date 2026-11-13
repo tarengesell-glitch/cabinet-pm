@@ -14,7 +14,7 @@ let n = 0;
 const ids = () => `cccccccc-0000-4000-8000-${String(++n).padStart(12, '0')}`;
 const chosen = (option_id: string): DesignChoice => ({ status: 'chosen', option_id });
 const NONE: DesignChoice = { status: 'not_applicable' };
-const LOOK: FinishLook = { door: '#eeeeee', baseDoor: '#eeeeee', island: '#666666', counter: '#cccccc', style: 'transitional', doorHw: 'handle', drawerHw: 'handle', pullFinish: '#111111', knobFinish: '#111111', doorOrient: 'vertical', drawerTop: false };
+const LOOK: FinishLook = { door: '#eeeeee', baseDoor: '#eeeeee', island: '#666666', counter: '#cccccc', style: 'transitional', doorHw: 'handle', drawerHw: 'handle', pullFinish: '#111111', knobFinish: '#111111', doorOrient: 'vertical', drawerTop: false, topTrim: null, trimHex: '#ffffff', valance: null, valanceHex: '#ffffff' };
 const choices = (c: Partial<DesignChoices> = {}): DesignChoices => ({
   roomKind: 'kitchen',
   cabinetTop: 'ceiling',

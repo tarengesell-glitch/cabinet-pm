@@ -106,9 +106,58 @@ export interface DraftSettings {
     readonly fridgeHeight: Length;
     readonly fridgeDepth: Length;
     readonly rangeDepth: Length;
+    /** Top trim and light valance profiles by option ID (PROPOSED stand-ins), and the options drawn as nothing. */
+    readonly trim: TrimSettings;
   };
   /** How the 3D view lays out doors and drawers (model/fronts.ts), in inches. */
   readonly fronts: FrontRules;
+}
+
+/** A top trim's profile: its height, how far it stands out past the doors, and in how many steps. */
+export interface TopTrimSize {
+  readonly height: Length;
+  readonly projection: Length;
+  readonly steps: number;
+}
+/** A light valance's profile: its height at the ends, thickness, and how far its middle rises (0 for straight). */
+export interface ValanceSize {
+  readonly height: Length;
+  readonly thickness: Length;
+  readonly rise: Length;
+}
+export interface TrimSettings {
+  readonly top: ReadonlyMap<string, TopTrimSize>;
+  readonly valance: ReadonlyMap<string, ValanceSize>;
+  readonly drawsNothing: { readonly top: ReadonlySet<string>; readonly valance: ReadonlySet<string> };
+}
+
+/** The trim profiles from the data; a size that isn't an exact length stops the view with the reason. */
+function readTrim(raw: typeof data.visual.trim): Result<TrimSettings> {
+  const len = (where: string, text: string): Result<Length> => {
+    const r = parseImperial(text);
+    return r.ok ? r : { ok: false, reason: `placeholder-draft.json "visual.trim.${where}": ${r.reason}` };
+  };
+  const top = new Map<string, TopTrimSize>();
+  for (const [id, v] of Object.entries(raw.top)) {
+    const height = len(`top.${id}.height`, v.height);
+    const projection = len(`top.${id}.projection`, v.projection);
+    if (!height.ok) return height;
+    if (!projection.ok) return projection;
+    if (!Number.isInteger(v.steps) || v.steps < 1) return { ok: false, reason: `placeholder-draft.json "visual.trim.top.${id}.steps" must be a whole number of 1 or more.` };
+    top.set(id, { height: height.value, projection: projection.value, steps: v.steps });
+  }
+  const valance = new Map<string, ValanceSize>();
+  for (const [id, v] of Object.entries(raw.valance)) {
+    const height = len(`valance.${id}.height`, v.height);
+    const thickness = len(`valance.${id}.thickness`, v.thickness);
+    const rise = len(`valance.${id}.rise`, v.rise);
+    if (!height.ok) return height;
+    if (!thickness.ok) return thickness;
+    if (!rise.ok) return rise;
+    if (rise.value >= height.value) return { ok: false, reason: `placeholder-draft.json "visual.trim.valance.${id}": its rise must be less than its height.` };
+    valance.set(id, { height: height.value, thickness: thickness.value, rise: rise.value });
+  }
+  return { ok: true, value: { top, valance, drawsNothing: { top: new Set(raw.draws_nothing.top), valance: new Set(raw.draws_nothing.valance) } } };
 }
 
 function readSettings(): Result<DraftSettings> {
@@ -148,6 +197,8 @@ function readSettings(): Result<DraftSettings> {
   // The base cabinets' fronts reach the top of the box (the 3D view draws them so).
   const baseTop = CURRENT_CATALOG.items.find((i) => i.code === data.cabinets.base)?.size.height.default.value ?? null;
   if (baseTop === null) return { ok: false, reason: `The catalog has no standard height for "${data.cabinets.base}", so a pantry's doors can't be lined up with the base cabinets.` };
+  const trim = readTrim(data.visual.trim);
+  if (!trim.ok) return trim;
   const codes = data.cabinets;
   const all = [
     codes.base,
@@ -211,6 +262,7 @@ function readSettings(): Result<DraftSettings> {
         fridgeHeight: out['fridge_height']!,
         fridgeDepth: out['fridge_depth']!,
         rangeDepth: out['range_depth']!,
+        trim: trim.value,
       },
       fronts: { maxSingleDoor: maxSingleDoor / 64, maxDoorHeight: maxDoorHeight / 64, topDrawer: out['top_drawer_front']! / 64, upperBottom: out['upper_bottom']! / 64, baseTop: baseTop / 64 },
     },

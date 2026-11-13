@@ -42,6 +42,10 @@ const CHOICES: DesignChoices = {
     knobFinish: '#262626',
     doorOrient: 'vertical',
     drawerTop: false,
+    topTrim: 'crown',
+    trimHex: '#eeebe4',
+    valance: 'flat',
+    valanceHex: '#eeebe4',
   },
 };
 

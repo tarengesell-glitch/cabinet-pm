@@ -9,7 +9,7 @@
  * builder.
  */
 import { refuse, type Length, type Result } from '@/core/index';
-import type { DraftPreferences, DrawerLevel } from './placeholder-draft';
+import { DRAFT_SETTINGS, type DraftPreferences, type DrawerLevel, type TopTrimSize, type ValanceSize } from './placeholder-draft';
 
 /** One choice: chosen, unanswered, not applicable to the room, or saved but not one of its options. */
 export type DesignChoice =
@@ -31,6 +31,12 @@ export interface FinishLook {
   readonly knobFinish: string;
   readonly doorOrient: 'vertical' | 'horizontal';
   readonly drawerTop: boolean;
+  /** The top trim's option ID ("none" for none), or null when not chosen; drawn on uppers and tall cabinets. */
+  readonly topTrim: string | null;
+  readonly trimHex: string;
+  /** The light valance's option ID ("hidden" or "none" draw nothing), or null when not chosen. */
+  readonly valance: string | null;
+  readonly valanceHex: string;
 }
 
 export interface DesignChoices {
@@ -119,4 +125,29 @@ export function islandPanelsOf(c: DesignChoices): IslandPanels {
     }
   };
   return { back: panel(c.islandBackPanel, 'back'), side: panel(c.islandSidePanel, 'side'), problems };
+}
+
+/** What the 3D view draws along the tops of the cabinets and under the uppers, and any choice it can't show. */
+export interface TrimLook {
+  readonly top: TopTrimSize | null;
+  readonly valance: ValanceSize | null;
+  readonly problems: readonly string[];
+}
+
+/**
+ * The top trim and light valance the 3D view draws (owner, 2026-11-13: "Top trim and light valance
+ * doesn't seem to be rendering"), with PROPOSED stand-in profiles. Not chosen, None or Hidden draws
+ * nothing; a choice with no profile is drawn as nothing and reported, never drawn as another one.
+ */
+export function trimsOf(look: Pick<FinishLook, 'topTrim' | 'valance'>): TrimLook {
+  if (!DRAFT_SETTINGS.ok) return { top: null, valance: null, problems: [] };
+  const t = DRAFT_SETTINGS.value.visual.trim;
+  const problems: string[] = [];
+  const pick = <T>(id: string | null, sizes: ReadonlyMap<string, T>, nothing: ReadonlySet<string>, name: string): T | null => {
+    if (id === null || nothing.has(id)) return null;
+    const size = sizes.get(id);
+    if (!size) problems.push(`The 3D view can’t show the ${name} "${id}" yet, so it draws none.`);
+    return size ?? null;
+  };
+  return { top: pick(look.topTrim, t.top, t.drawsNothing.top, 'top trim'), valance: pick(look.valance, t.valance, t.drawsNothing.valance, 'light valance'), problems };
 }

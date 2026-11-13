@@ -75,8 +75,6 @@ export function Stage3D(props: {
   panels: IslandPanels;
   selected: string | null;
   doorsOpen: boolean;
-  /** Bump to put the camera back to the starting view. */
-  fitToken: number;
   /**
    * A fixed view to show instead of the starting one (the screenshot command's page; the studio
    * doesn't pass it). Once a frame with it is drawn, the view's name is set as `data-view` on the
@@ -496,11 +494,6 @@ export function Stage3D(props: {
       s.fitted = true;
     }
   }, [room, cabinets, look, selected, editable, onError]);
-
-  const fitToken = props.fitToken;
-  useEffect(() => {
-    if (s3.current && fitToken > 0) show(s3.current, OVERALL, onError);
-  }, [fitToken, onError]);
 
   // A fixed view, when one is asked for (by its name, so an equal view isn't shown again).
   const viewKey = props.view ? viewName(props.view) : null;

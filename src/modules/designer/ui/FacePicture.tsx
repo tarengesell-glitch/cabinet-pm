@@ -3,7 +3,7 @@
  * A cabinet's face drawn flat, from the same layout the 3D view uses (`model/fronts.ts`), showing
  * what is inside too (owner, 2026-11-13): a shelf is a dotted line, a roll-out a dotted U, a fixed
  * divider a solid line; doors and drawers are outlined with their handles, and a drawer's insert
- * shows as its letter. Used for the library choices' icons and the Cabinet tab's front editor.
+ * shows as its letter. Used for the library choices' icons and the cabinet editor's front editor.
  */
 import type { ReactNode } from 'react';
 import type { FrontPiece } from '../model/fronts';

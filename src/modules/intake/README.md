@@ -53,7 +53,7 @@ The app's design studio (`/studio`) shows this screen as its first step (DECISIO
 - `model/definition.ts`: reads and checks the data. Anything malformed refuses the whole intake with the reasons.
 - `model/engine.ts`: the rules (pure; tested in `__tests__/engine.test.ts`).
 - `model/handover.ts`: what other modules read (below).
-- `ui/`: the screen, the placeholder pictures and browser storage.
+- `ui/`: the screen, the placeholder pictures and browser storage; `RoomDefaults.tsx`, one room's design choices as editable rows for the studio's customize screen (same rules as the screen, linked rooms included; the room's type and basis stay on the screen).
 
 ## Public API (`contract.ts`)
 - `INTAKE_DEFINITION`: the checked questions (or the reason they can't load).

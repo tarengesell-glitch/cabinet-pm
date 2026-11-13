@@ -120,6 +120,24 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 - **Room drawing, round 9 (owner, 2026-11-05): edge scrolling.** While drawing walls or dragging a handle, a cursor within 40 px of the plan's edge scrolls the plan that way, faster nearer the edge, as AutoCAD, SketchUp and Figma do. The wall or drag being made follows the cursor. It stops when the cursor moves back in.
 - Room capture is pulled ahead of Phase 5 (BUILD_PLAN). Order: scaffold (1a), then Core walls and openings, then the Designer drawing screen.
 
+### 2026-11-13: Kitchen image library: Blender first, and the pilot's results (owner, chat, 2026-11-13)
+The owner asked whether AI can reliably make perfect masks, and shared outside advice to build the images in Blender. Decided: **Blender first, AI only for touch-ups.** This replaces "AI edits of one locked base photo" in the 2026-11-10 entry. The images are full 3D renders of one scene per room shape, from a fixed camera, with every option built to size in code. Masks come straight from the render, so they are exact.
+
+A pilot rendered the L-shape-with-island kitchen 14 ways: 5 paints, 4 door styles, 3 handle lengths, 2 waterfall ends and 2 stains. The code is in `tools/kitchen-images/` and the review page is at https://claude.ai/artifact/1rRYLr691X9Z7BfW6w3KuY. What it measured:
+- **The layout stays locked:** outside the area each test changes, no object moved by a single pixel in any of the 13 variants (object-index pass).
+- **Sizes are exact:** 50 fully visible handles measured within 2 px of their exact length in the picture.
+- **Paint colours can be re-coloured instead of rendered:** a render re-coloured to another colour from its light passes takes about a second.
+  - From a nearby colour, the result matches a full render (mean ΔE2000 0.8).
+  - From white straight to a dark colour, it doesn't (mean ΔE 2.6), because dark cabinets darken the whole room.
+  - So about 8 rendered paint colours spread across light to dark can produce all 1,728 Sherwin-Williams colours.
+- **Time:** about 2.1 min a render on this Mac, so about 14 hours unattended for the roughly 400 renders the library needs.
+- **PROPOSED, set by eye for the pilot:**
+  - the scene's sizes;
+  - the counter colours;
+  - the stain tints;
+  - "handle length" read as the overall length (IK-26).
+- **The open question for the owner:** are the renders good enough to show clients? Go, tune, or add an AI realism pass.
+
 ### 2026-11-10: Kitchen image library, the variables (owner, chat, 2026-11-10)
 The image selector needs a photorealistic image for every option, all from the same camera angle and the same kitchen layout, made by an automated generate, check and retry loop. The owner gave the full variable list and answered the follow-up questions. The list is data in `src/modules/visual-library/data/kitchen-image-variables.json` (colour lists in `data/colours/`), checked by `model/variables.ts`. A shared doc, "Kitchen Image Library: Variables", is made from it.
 - **Each step varies one thing.** Every combination is not pre-rendered. (The fixed default kitchen was dropped on 2026-11-13, see below and IK-25.)
@@ -587,6 +605,7 @@ Five confirmed rules are now checked in the design tool (HARD-014, PREF-011, PRE
 - ~~**IK-23 Default kitchen.**~~ Answered 2026-11-13 (owner): "You don't need a single default kitchen because the flow always has multiple options." Removed from the catalog.
 - ~~**IK-24 Knobs on drawers.**~~ Answered 2026-11-13 (owner): yes, they apply to knobs too.
 - **IK-25 Earlier picks in later images.** With no default kitchen, what do a later step's images show for the picks already made? The client's own picks, which needs a layered or 3D build, or something fixed? This depends on the image engine (see the masks and Blender question raised 2026-11-13).
+- **IK-26 Handle length.** Are 5 1/2", 8" and 12" the handle's overall length, or the distance between its screw holes (centre to centre)? The pilot draws them as overall length.
 
 ### From the AI designer plan (2026-11-09)
 - ~~**AD-1 The upper over a fridge.**~~ Answered 2026-11-09 (owner: "sounds good"): it stays a blocker on drafts until the shop names the cabinet and depth. The room drawing gives it 24" deep, but the catalog has no upper at that depth: `upper_no_shelf` is 12" deep, and its depth limits are not known (CAT-1). Until the shop says which cabinet and depth to use, a draft shows it as a blocker.

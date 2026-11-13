@@ -1,0 +1,329 @@
+{
+ "source": "PROPOSED, presentation only (2026-11-13): a typical L-shape kitchen with an island, sized from common cabinet sizes, for the image library pilot. Not a design and not shop data; nothing here feeds the master copy.",
+ "room": {
+  "width": 204,
+  "depth": 180,
+  "height": 96,
+  "wall": 4.5
+ },
+ "window": {
+  "wall": "back",
+  "x0": 45,
+  "x1": 81,
+  "z0": 42,
+  "z1": 84
+ },
+ "heights": {
+  "toe": 4,
+  "toe_recess": 3,
+  "base_top": 34.5,
+  "counter": 1.25,
+  "upper_bottom": 54,
+  "upper_top": 90,
+  "base_depth": 24,
+  "upper_depth": 12
+ },
+ "runs": [
+  {
+   "id": "back_base",
+   "frame": "+y",
+   "origin": [
+    0,
+    0
+   ],
+   "level": "base",
+   "start": 0,
+   "items": [
+    {
+     "w": 24,
+     "type": "blank"
+    },
+    {
+     "w": 3,
+     "type": "filler"
+    },
+    {
+     "w": 18,
+     "type": "base",
+     "fronts": "drawers3"
+    },
+    {
+     "w": 36,
+     "type": "base",
+     "fronts": "sink"
+    },
+    {
+     "w": 24,
+     "type": "dishwasher"
+    },
+    {
+     "w": 30,
+     "type": "range"
+    },
+    {
+     "w": 30,
+     "type": "base",
+     "fronts": "drawer_doors2"
+    },
+    {
+     "w": 36,
+     "type": "base",
+     "fronts": "drawer_doors2"
+    },
+    {
+     "w": 3,
+     "type": "filler"
+    }
+   ]
+  },
+  {
+   "id": "back_upper",
+   "frame": "+y",
+   "origin": [
+    0,
+    0
+   ],
+   "level": "upper",
+   "start": 0,
+   "items": [
+    {
+     "w": 12,
+     "type": "blank",
+     "trim": false
+    },
+    {
+     "w": 3,
+     "type": "filler"
+    },
+    {
+     "w": 30,
+     "type": "upper",
+     "fronts": "doors2"
+    },
+    {
+     "w": 36,
+     "type": "gap"
+    },
+    {
+     "w": 24,
+     "type": "upper",
+     "fronts": "door1",
+     "opening": "lo"
+    },
+    {
+     "w": 30,
+     "type": "hood"
+    },
+    {
+     "w": 30,
+     "type": "upper",
+     "fronts": "doors2"
+    },
+    {
+     "w": 36,
+     "type": "upper",
+     "fronts": "doors2"
+    },
+    {
+     "w": 3,
+     "type": "filler"
+    }
+   ]
+  },
+  {
+   "id": "side_base",
+   "frame": "+x",
+   "origin": [
+    0,
+    0
+   ],
+   "level": "base",
+   "start": 24,
+   "items": [
+    {
+     "w": 24,
+     "type": "base",
+     "fronts": "drawers3"
+    },
+    {
+     "w": 36,
+     "type": "base",
+     "fronts": "drawer_doors2"
+    },
+    {
+     "w": 0.75,
+     "type": "panel",
+     "depth": 26
+    },
+    {
+     "w": 36,
+     "type": "fridge"
+    },
+    {
+     "w": 0.75,
+     "type": "panel",
+     "depth": 26
+    }
+   ]
+  },
+  {
+   "id": "side_upper",
+   "frame": "+x",
+   "origin": [
+    0,
+    0
+   ],
+   "level": "upper",
+   "start": 0,
+   "items": [
+    {
+     "w": 12,
+     "type": "blank",
+     "trim": false
+    },
+    {
+     "w": 36,
+     "type": "upper",
+     "fronts": "doors2"
+    },
+    {
+     "w": 36,
+     "type": "upper",
+     "fronts": "doors2"
+    },
+    {
+     "w": 0.75,
+     "type": "gap"
+    },
+    {
+     "w": 36,
+     "type": "upper",
+     "fronts": "doors2",
+     "depth": 24,
+     "bottom": 72
+    },
+    {
+     "w": 0.75,
+     "type": "gap"
+    }
+   ]
+  }
+ ],
+ "counters": [
+  {
+   "x0": 0,
+   "y0": 0,
+   "x1": 105,
+   "y1": 25.5,
+   "sink": {
+    "x0": 48,
+    "y0": 4,
+    "x1": 78,
+    "y1": 20
+   }
+  },
+  {
+   "x0": 135,
+   "y0": 0,
+   "x1": 204,
+   "y1": 25.5
+  },
+  {
+   "x0": 0,
+   "y0": 25.5,
+   "x1": 25.5,
+   "y1": 84
+  }
+ ],
+ "splash_left_to": 84,
+ "island": {
+  "x0": 48,
+  "x1": 144,
+  "y_front": 66,
+  "counter_back": 107.5,
+  "items": [
+   {
+    "w": 24,
+    "type": "base",
+    "fronts": "drawers3"
+   },
+   {
+    "w": 48,
+    "type": "base",
+    "fronts": "doors2"
+   },
+   {
+    "w": 24,
+    "type": "base",
+    "fronts": "drawers3"
+   }
+  ]
+ },
+ "ceiling_lights": [
+  [
+   40,
+   34
+  ],
+  [
+   96,
+   34
+  ],
+  [
+   150,
+   34
+  ],
+  [
+   186,
+   34
+  ],
+  [
+   36,
+   72
+  ],
+  [
+   72,
+   86
+  ],
+  [
+   120,
+   86
+  ],
+  [
+   110,
+   140
+  ]
+ ],
+ "light": {
+  "can_watts": 65,
+  "fill_watts": 40,
+  "fill_at": [
+   180,
+   160,
+   88
+  ],
+  "fill_rot_deg": [
+   62,
+   0,
+   134
+  ],
+  "sun_strength": 6.0,
+  "sun_rot_deg": [
+   50,
+   0,
+   -18
+  ],
+  "sky_strength": 0.5,
+  "sky_sun_elevation_deg": 38,
+  "sky_sun_rotation_deg": 160
+ },
+ "camera": {
+  "at": [
+   196,
+   160,
+   50
+  ],
+  "yaw_deg": 134,
+  "lens_mm": 20,
+  "shift_y": -0.03
+ }
+}

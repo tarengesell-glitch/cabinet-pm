@@ -16,8 +16,8 @@ import { useCallback, useMemo, useState, type ReactNode } from 'react';
 import type { User } from '@/platform/index';
 import { layoutPreferences, roomDrawingStatus, type DesignChoices, type RoomDrawingStatus } from '@/modules/designer/contract';
 import { Customize, RoomCapture } from '@/modules/designer/ui/index';
-import { INTAKE_DEFINITION, intakeHandover, loadIntakeState, roomDesignInputs, roomSummary, roughCeiling, type IntakeState, type RoomDesignInputs, type RoomHandover } from '@/modules/intake/contract';
-import { IntakeScreen } from '@/modules/intake/ui/index';
+import { INTAKE_DEFINITION, intakeHandover, loadIntakeState, roomDesignInputs, roughCeiling, type IntakeState, type RoomDesignInputs, type RoomHandover } from '@/modules/intake/contract';
+import { IntakeScreen, RoomDefaults } from '@/modules/intake/ui/index';
 import { clientHref, type ClientInfo } from '../clients';
 import { jobName } from '../demo-data';
 import { WhoIsIn } from '../sync/session';
@@ -145,7 +145,6 @@ export function Studio({ user, saveStatus, client }: { user: User; saveStatus: R
   const aiRooms = stage === 'ai' ? rooms.map((r) => ({ room: r, inputs: inputsOf(r.room_id) })) : [];
   /** Rooms a later step needs whose design choices can't be read: said plainly, never skipped. */
   const unreadable = (stage === 'ai' ? aiRooms.filter((a) => !a.inputs).map((a) => a.room) : current && stage !== 'choices' && !currentInputs ? [current] : []).map((r) => r.name.toLowerCase());
-  const choices = current && intake && INTAKE_DEFINITION.ok ? roomSummary(INTAKE_DEFINITION.value, intake, current.room_id) : [];
 
   return (
     <div className={s.flow}>
@@ -224,9 +223,8 @@ export function Studio({ user, saveStatus, client }: { user: User; saveStatus: R
             room={{
               key: current.room_id,
               name: current.name,
-              choices,
+              defaults: intake && <RoomDefaults user={user} job={job} roomId={current.room_id} state={intake} onChange={onIntakeChange} onOpenChoices={() => setStage('choices')} />,
               designChoices: designChoices(currentInputs),
-              onEditChoices: () => setStage('choices'),
               onChange: bump,
             }}
           />

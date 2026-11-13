@@ -1,6 +1,6 @@
 'use client';
 /**
- * Customize's Cabinet tab (owner, 2026-11-12: "controls similar to the other major cabinet design
+ * Customize's cabinet editor (owner, 2026-11-12: "controls similar to the other major cabinet design
  * softwares"): the cabinet's library type; its size and place (a typed width changes on the left,
  * the right or both sides); splitting it into two cabinets; how its doors open; its front and
  * interior (vertical or horizontal dividers, shelves, drawers, roll-outs); its ends; and its back. Every change goes through `editItems` (model/cabinets.ts)

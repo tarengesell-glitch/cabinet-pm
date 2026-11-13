@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { answerKitchen, next, question, tile } from './intake-steps';
+import { answerKitchen, next, question, selectCabinet, tile } from './intake-steps';
 
 const step = (page: Page, name: string) => page.getByRole('navigation', { name: 'Progress' }).getByRole('button', { name });
 const roomBar = (page: Page) => page.getByRole('navigation', { name: 'Rooms' });
@@ -102,12 +102,26 @@ test('the placeholder AI design lays out the drawn room, then the customize scre
   const toReview = page.getByText(/^\d+ placements to review$/);
   await expect(toReview).toBeVisible();
 
-  // Pick a base cabinet from its run: the Cabinet tab opens by itself (owner, 2026-11-12), and it is
-  // marked as placed by the placeholder until approved.
-  await page.getByRole('tab', { name: 'Run' }).click();
-  await page.locator('button[aria-label^="Base"]').first().click();
-  await expect(page.getByRole('tab', { name: 'Cabinet' })).toHaveAttribute('aria-selected', 'true');
-  await expect(page.getByText('Placed by the placeholder')).toBeVisible();
+  // The pane (owner, 2026-11-13): room defaults and everything to review on top, the cabinet editor
+  // below; no tabs, no reset-view button.
+  await expect(page.getByRole('tab')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Reset view' })).toHaveCount(0);
+  await expect(page.getByRole('region', { name: 'Checks' })).toBeVisible();
+  await expect(page.getByText('Click a cabinet in the 3D view.')).toBeVisible();
+
+  // The room defaults are the design choices, editable here: a colour shows in the 3D view's look,
+  // and the design choices screen has the same answer.
+  await page.getByText('Room defaults', { exact: true }).click();
+  const doorStyle = page.getByTestId('room-defaults').getByRole('combobox', { name: 'Door style' });
+  await expect(doorStyle).toBeVisible();
+  const otherStyle = await doorStyle.locator('option:not(:checked)').first().getAttribute('value');
+  await doorStyle.selectOption(otherStyle!);
+  await expect(doorStyle).toHaveValue(otherStyle!);
+  await page.getByText('Room defaults', { exact: true }).click();
+
+  // Pick a base cabinet: it is marked as placed by the placeholder until approved.
+  await selectCabinet(page, /^Base/);
+  await expect(page.getByText('Placed by the placeholder', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Approve', exact: true }).click();
   await expect(page.getByText('Reviewed', { exact: true })).toBeVisible();
 
@@ -128,29 +142,29 @@ test('the placeholder AI design lays out the drawn room, then the customize scre
   await page.getByRole('radiogroup', { name: 'Cabinet type' }).getByRole('radio', { name: 'Full door', exact: true }).click();
   await page.getByRole('radiogroup', { name: 'Door opening' }).getByRole('radio', { name: 'Hinged right' }).click();
   await expect(page.getByRole('radiogroup', { name: 'Door opening' }).getByRole('radio', { name: 'Hinged right' })).toHaveAttribute('aria-checked', 'true');
-  // Undo and redo (Ctrl+Z, Ctrl+Shift+Z), outside a text box.
+  // Undo and redo (Ctrl+Z, Ctrl+Shift+Z), outside a text box, with no running narrative of what was undone.
   await page.getByRole('heading', { name: 'Base, doors' }).click();
   await page.keyboard.press('Control+z');
   await expect(page.getByRole('radiogroup', { name: 'Door opening' }).getByRole('radio', { name: 'By width' })).toHaveAttribute('aria-checked', 'true');
+  await expect(page.getByText(/^Undid:/)).toHaveCount(0);
   await page.keyboard.press('Control+Shift+z');
   await expect(page.getByRole('radiogroup', { name: 'Door opening' }).getByRole('radio', { name: 'Hinged right' })).toHaveAttribute('aria-checked', 'true');
   await page.getByRole('button', { name: 'Vertical divider' }).click();
   await expect(page.getByRole('button', { name: /^Section 1:/ })).toBeVisible();
   await page.getByRole('button', { name: 'Drawers', exact: true }).click();
   await page.getByRole('button', { name: 'More drawers' }).click();
-  await expect(page.getByLabel('Drawers', { exact: true })).toHaveText('4');
+  await expect(page.getByRole('region', { name: 'Cabinet' }).getByLabel('Drawers', { exact: true })).toHaveText('4');
   await page.getByRole('button', { name: /^Section 2:/ }).click();
   await page.getByRole('button', { name: 'More shelves' }).click();
   await page.getByRole('button', { name: 'More roll-outs' }).click();
-  await expect(page.getByLabel('Roll-outs', { exact: true })).toHaveText('1');
+  await expect(page.getByRole('region', { name: 'Cabinet' }).getByLabel('Roll-outs', { exact: true })).toHaveText('1');
   await page.getByRole('radiogroup', { name: 'Left end' }).getByRole('radio', { name: 'Integrated FE' }).click();
   await expect(page.getByRole('radiogroup', { name: 'Left end' }).getByRole('radio', { name: 'Integrated FE' })).toHaveAttribute('aria-checked', 'true');
   await page.getByRole('radiogroup', { name: 'Back' }).getByRole('radio', { name: 'Finished door' }).click();
   await expect(page.getByRole('radiogroup', { name: 'Back' }).getByRole('radio', { name: 'Finished door' })).toHaveAttribute('aria-checked', 'true');
 
   // The sink's look, from its sink base (or by clicking the sink in the 3D view).
-  await page.getByRole('tab', { name: 'Run' }).click();
-  await page.locator('button[aria-label^="Sink base"]').first().click();
+  await selectCabinet(page, /^Sink base/);
   await page.getByRole('button', { name: 'Sink options' }).click();
   const sinkLooks = page.getByRole('dialog', { name: 'Sink options' });
   await sinkLooks.getByRole('radiogroup', { name: 'Sink colour' }).getByRole('radio', { name: 'Taupe' }).click();
@@ -211,9 +225,6 @@ test('the placeholder AI design lays out the drawn room, then the customize scre
   await expect(page.getByText('Every placement reviewed')).toBeVisible();
   await expect(page.getByTestId('panel-problems')).toContainText('"beadboard"');
   await expect(page.getByTestId('panel-problems')).toContainText('stand-in');
-  await page.getByRole('tab', { name: 'Run' }).click();
-  await expect(page.getByRole('button', { name: 'Re-draft this run' })).toBeDisabled();
-  await expect(page.getByTestId('redraft-blocked')).toContainText('"lots"');
 });
 
 test('Test data: save a job as the test start and load it into another job', async ({ page }) => {

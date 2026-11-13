@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { answerKitchen } from './intake-steps';
+import { answerKitchen, selectCabinet } from './intake-steps';
 const step = (page: Page, name: string) => page.getByRole('navigation', { name: 'Progress' }).getByRole('button', { name: new RegExp(name) });
 
 // The 3D view's drag handles (owner, 2026-11-12): a selected cabinet shows blue handles; dragging
@@ -19,8 +19,7 @@ test('dragging a selected cabinet’s handle in the 3D view changes its width', 
   await page.getByRole('button', { name: 'Load example kitchen' }).click();
   await step(page, 'AI design').click();
   await expect(step(page, 'Customize')).toHaveAttribute('aria-current', 'step', { timeout: 20_000 });
-  await page.getByRole('tab', { name: 'Run' }).click();
-  await page.locator('button[aria-label^="Upper"]').nth(1).click();
+  await selectCabinet(page, /^Upper/, 1);
   const width = page.getByRole('textbox', { name: 'Width' });
   const before = await width.inputValue();
   // Wait until the handles are drawn (the 3D view draws only when something changes).

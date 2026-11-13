@@ -22,7 +22,7 @@ export function RoomViews({ room, choices, view }: { room: Room; choices: Design
           {problem}
         </p>
       )}
-      <Stage3D room={room} cabinets={cabinets} look={choices.look} panels={panels} selected={null} doorsOpen={false} fitToken={0} view={view} onPick={onPick} onError={setProblem} />
+      <Stage3D room={room} cabinets={cabinets} look={choices.look} panels={panels} selected={null} doorsOpen={false} view={view} onPick={onPick} onError={setProblem} />
     </>
   );
 }

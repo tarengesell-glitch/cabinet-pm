@@ -639,7 +639,7 @@ function Review(props: {
   );
 }
 
-function LinkedRooms({ x, onChoose }: { x: Intake; onChoose: (c: 'all' | 'one' | 'cancel') => void }) {
+export function LinkedRooms({ x, onChoose }: { x: Intake; onChoose: (c: 'all' | 'one' | 'cancel') => void }) {
   const t = x.pendingText();
   const first = useRef<HTMLButtonElement | null>(null);
   useEffect(() => first.current?.focus(), []);

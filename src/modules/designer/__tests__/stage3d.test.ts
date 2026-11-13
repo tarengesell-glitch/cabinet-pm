@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { Box3, Vector3 } from 'three';
+import { Box3, BoxGeometry, Group, Mesh, Raycaster, Vector3 } from 'three';
 import { cabinetViews, placeholderItems, type CabinetView } from '../model/cabinets';
 import { endOpen, withRuleEnds, type Context } from '../model/ends';
 import { cornerCabinets } from '../model/layout';
 import { draftPlaceholder } from '../model/placeholder-draft';
-import { counters, finishedEnds, type FinishLook } from '../ui/Stage3D';
+import { counters, finishedEnds, seenHits, type FinishLook } from '../ui/Stage3D';
 import { realKitchenRoom } from './real-kitchen';
 
 const IN = 64;
@@ -71,5 +71,26 @@ describe('the 3D view (owner, 2026-11-10)', () => {
     expect(width(top(ctx.all)) - width(top(all))).toBeCloseTo(1, 5);
     // Saved as a finished end by request: drawn like the applied one.
     expect(finishedEnds({ ...first, ends: { low: 'finished', high: null } })).toEqual(['low']);
+  });
+});
+
+describe('what the pointer is over (owner, 2026-11-13)', () => {
+  it('passes through a wall cut away for the camera, so zoom and clicks reach the wall seen behind it', () => {
+    const root = new Group();
+    const near = new Group();
+    near.add(new Mesh(new BoxGeometry(100, 100, 1)));
+    near.position.set(0, 0, -10);
+    near.userData['name'] = 'cut-away wall';
+    const far = new Mesh(new BoxGeometry(100, 100, 1));
+    far.position.set(0, 0, -200);
+    far.userData['name'] = 'far wall';
+    root.add(near, far);
+    root.updateMatrixWorld(true);
+    const ray = new Raycaster(new Vector3(0, 0, 0), new Vector3(0, 0, -1));
+    expect(seenHits(ray, root)[0]?.object.parent?.userData['name']).toBe('cut-away wall');
+    near.visible = false;
+    expect(seenHits(ray, root)[0]?.object.userData['name']).toBe('far wall');
+    // Three.js's own ray test still hits the hidden wall: that is what made zoom stop at it.
+    expect(ray.intersectObjects(root.children, true)[0]?.object.parent?.userData['name']).toBe('cut-away wall');
   });
 });

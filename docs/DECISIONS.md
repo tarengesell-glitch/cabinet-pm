@@ -8,6 +8,12 @@ The history of decisions and the evidence of the owner's approval. Only the owne
 
 ## Decided
 
+### 2026-11-13: Customize clean-up, round 2 (owner, chat, 2026-11-13)
+After trying the one-pane layout ("This is not quite correct"). Each quoted request is the approval for the behaviour it specifies. Built in the designer (`ui/Customize.tsx`, `ui/Stage3D.tsx`).
+- **"Room defaults and To Review should be tabs that are side by side … When these are selected they should take up the entire editing window."** To review is open to start.
+- **"When a cabinet is selected for editing it should take up the entire editing window."** No tab shows as selected then; picking a tab, or clicking empty space in the 3D view, lets go of the cabinet.
+- **Zoom** ("I can zoom in close on the sink wall, but I can't zoom in close on the attached image wall"): a wall cut away because the camera stands behind it was still being hit by the pointer, so zooming aimed at that hidden wall and stopped there. The pointer now passes through anything hidden, for zooming, clicking, double-clicking and dragging alike.
+
 ### 2026-11-13: Customize clean-up: one pane, no tabs (owner, chat, 2026-11-13)
 Each quoted request is the approval for the behaviour it specifies; the owner also answered two questions in the same chat. Built in the designer (`ui/Customize.tsx`, `ui/Stage3D.tsx`), the intake (`ui/RoomDefaults.tsx`) and the studio (`app/studio/Studio.tsx`).
 - **"Remove the Reset View button."**

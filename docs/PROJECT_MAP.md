@@ -29,6 +29,7 @@ Navigation: what actually runs, where each rule's data and code live, and which 
 | Cabinet types, sizes, steps, options | `src/modules/catalog/data/catalog-v2.json` (current; `catalog-v1.json` kept as published) | The one source of cabinet sizes. A change is a new version file. |
 | Shop design rules (PREF-, HARD-, CB-) | `src/modules/shop-settings/data/design-rules.json`, `design-rule-checks.json` | |
 | Wall thickness, standard openings, door swing | `src/modules/designer/data/standard-sizes.json` | |
+| The library choices Customize offers for bases, and the drawer inserts | `src/modules/designer/data/library-presets.json`, `drawer-inserts.json`, read by `designer/model/library.ts` | Each choice is a catalog cabinet with its front and interior. |
 | How a sink, dishwasher or fridge can look (colours, bowls, faucet, fronts) | `src/modules/designer/data/appliance-looks.json`, read by `designer/model/appliance-looks.ts` | Saved on each appliance placement. Colours are for drawing. |
 | Door sizes drawn in 3D (pair over 20", stacked over 48") | design rule CB-FACT-16 in `shop-settings/data/design-rules.json`; the standard top drawer in `placeholder-draft.json` "visual" | Laid out by `designer/model/fronts.ts`. |
 | Run depths, appliance widths, island sizes, what goes over a range, bathroom fixture sets | `src/modules/designer/data/layout-rules.json` | The 24" base depth appears twice here (`run_depths.base` and `room_sets.kitchen.base_depth`). |

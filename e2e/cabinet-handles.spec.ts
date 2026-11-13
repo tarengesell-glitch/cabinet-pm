@@ -42,14 +42,26 @@ test('dragging a selected cabinet’s handle in the 3D view changes its width', 
     return out;
   }, { shot, w: box.width, h: box.height });
   expect(pts.length).toBeGreaterThan(20);
-  // The right-most blue pixel is on the right handle.
-  const right = pts.reduce((a, b) => (b[0] > a[0] ? b : a));
-  const sx = box.x + right[0] - 2, sy = box.y + right[1];
-  await page.mouse.move(sx, sy);
+  // The grips are blue rings; the right width grip is the one that names itself so when pointed at.
+  const candidates = [...pts].sort((p, q) => q[0] - p[0]).filter((p, i, all) => i === 0 || Math.hypot(p[0] - all[i - 1]![0], p[1] - all[i - 1]![1]) > 3);
+  let sx = 0;
+  let sy = 0;
+  for (const c of candidates.slice(0, 60)) {
+    await page.mouse.move(box.x + c[0] - 3, box.y + c[1]);
+    if ((await page.getByTestId('drag-size').textContent()) === 'Width (from the right)' && (await page.getByTestId('drag-size').isVisible())) {
+      sx = box.x + c[0] - 3;
+      sy = box.y + c[1];
+      break;
+    }
+  }
+  expect(sx).toBeGreaterThan(0);
   await page.mouse.down();
   await page.mouse.move(sx - 30, sy, { steps: 8 });
   await expect(page.getByTestId('drag-size')).toBeVisible();
   await expect(page.getByTestId('drag-size')).toHaveText(/^Width \d/);
   await page.mouse.up();
   await expect(width).not.toHaveValue(before);
+  // A click on empty space lets go of the cabinet (owner, 2026-11-13).
+  await page.mouse.click(box.x + box.width - 20, box.y + box.height - 20);
+  await expect(page.getByText('Click a cabinet in the 3D view.')).toBeVisible();
 });

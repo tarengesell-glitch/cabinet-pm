@@ -11,6 +11,7 @@
  */
 import { FrontSectionSchema, formatInches, roomInsideSide, type FrontSection, type Length, type PlacedItem, type Result, type Room, type Wall } from '@/core/index';
 import { lookOptions, lookProblem } from './appliance-looks';
+import { DRAWER_INSERTS } from './library';
 import { catalogItem, CURRENT_CATALOG, type CatalogItem } from '@/modules/catalog/contract';
 import { overOf } from './layout-rules';
 import { applianceEnd } from './layout';
@@ -30,6 +31,8 @@ export type CabinetView = PlaceholderCabinet & {
   readonly sections?: FrontSection;
   /** Which end of the wall (its start, low, or its end, high) is this cabinet's left, seen from the front (END-1). */
   readonly leftAt?: 'low' | 'high';
+  /** Drawer inserts by drawer number from the top (owner, 2026-11-13); absent when none. */
+  readonly drawerInserts?: Readonly<Record<string, string>>;
   /** The catalog options a person set by hand (END-4); absent when none. */
   readonly setByHand?: readonly string[];
   /** From the wall face to its back (a cabinet pulled out from the wall); absent when against it. */
@@ -102,6 +105,7 @@ export function cabinetViews(room: Room): CabinetView[] {
       selections: item.item_selections,
       ...(item.sections ? { sections: item.sections } : {}),
       ...(item.set_by_hand ? { setByHand: item.set_by_hand } : {}),
+      ...(item.drawer_inserts ? { drawerInserts: item.drawer_inserts } : {}),
       leftAt: endOption(item.position.side, 'high') === 'end_left' ? 'high' : 'low',
       ...(item.position.setback ? { setback: item.position.setback } : {}),
       ...(() => {
@@ -212,6 +216,10 @@ export type ItemEdit =
    * step, or stacked, each half the height. `newId` is the second cabinet's ID.
    */
   | { readonly kind: 'split'; readonly id: string; readonly direction: 'side_by_side' | 'stacked'; readonly newId: string }
+  /** A library choice (owner, 2026-11-13): a catalog cabinet of the same kind with its front and interior. */
+  | { readonly kind: 'preset'; readonly id: string; readonly code: string; readonly sections: FrontSection | null }
+  /** A drawer's insert (owner, 2026-11-13), by drawer number from the top; null takes it out. */
+  | { readonly kind: 'insert'; readonly id: string; readonly drawer: number; readonly insert: string | null }
   /** How an appliance looks (owner, 2026-11-12): a choice from the appliance-look list. */
   | { readonly kind: 'appliance'; readonly placementId: string; readonly option: string; readonly value: string }
   | { readonly kind: 'approve'; readonly ids: readonly string[] };
@@ -268,7 +276,34 @@ export function editItems(room: Room, edit: ItemEdit): Result<Room> {
     const next = itemByCode(edit.code);
     if (!now || !next) return { ok: false, reason: `"${edit.code}" isn't in the catalog.` };
     if (now.type !== next.type) return { ok: false, reason: `A ${now.name.toLowerCase()} can only change to another cabinet of the same kind.` };
-    return replace(new Map([[cab, byDesigner({ ...cab, catalog_item_id: next.id })]]));
+    // The new cabinet shows its own front: a front divided for the old one is dropped, with its inserts.
+    const { sections: _s, drawer_inserts: _d, ...rest } = cab;
+    void _s;
+    void _d;
+    return replace(new Map([[cab, byDesigner({ ...rest, catalog_item_id: next.id })]]));
+  }
+  if (edit.kind === 'preset') {
+    const now = itemOf(cab);
+    const next = itemByCode(edit.code);
+    if (!now || !next) return { ok: false, reason: `"${edit.code}" isn't in the catalog.` };
+    if (now.type !== next.type) return { ok: false, reason: `A ${now.name.toLowerCase()} can only change to another cabinet of the same kind.` };
+    const { sections: _s, drawer_inserts: _d, ...rest } = cab;
+    void _s;
+    void _d;
+    if (edit.sections === null) return replace(new Map([[cab, byDesigner({ ...rest, catalog_item_id: next.id })]]));
+    const checked = FrontSectionSchema.safeParse(edit.sections);
+    if (!checked.success) return { ok: false, reason: `That cabinet's front can't be saved: ${checked.error.issues[0]?.message ?? 'not valid'}.` };
+    return replace(new Map([[cab, byDesigner({ ...rest, catalog_item_id: next.id, sections: checked.data })]]));
+  }
+  if (edit.kind === 'insert') {
+    if (!Number.isSafeInteger(edit.drawer) || edit.drawer < 1) return { ok: false, reason: 'Pick a drawer.' };
+    if (edit.insert !== null && !DRAWER_INSERTS.some((i) => i.code === edit.insert)) return { ok: false, reason: `"${edit.insert}" isn't one of the drawer inserts.` };
+    const inserts: Record<string, string> = { ...(cab.drawer_inserts ?? {}) };
+    if (edit.insert === null) delete inserts[String(edit.drawer)];
+    else inserts[String(edit.drawer)] = edit.insert;
+    const { drawer_inserts: _d, ...rest } = cab;
+    void _d;
+    return replace(new Map([[cab, byDesigner({ ...rest, ...(Object.keys(inserts).length ? { drawer_inserts: inserts } : {}) })]]));
   }
   if (edit.kind === 'option') {
     const item = itemOf(cab);

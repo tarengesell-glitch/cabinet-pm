@@ -111,9 +111,13 @@ test('the placeholder AI design lays out the drawn room, then the customize scre
   await page.getByRole('button', { name: 'Approve', exact: true }).click();
   await expect(page.getByText('Reviewed', { exact: true })).toBeVisible();
 
-  // Its type comes from the catalog, and stays within its kind.
-  await page.getByRole('radiogroup', { name: 'Cabinet type' }).getByRole('radio', { name: 'Base, 4 drawers' }).click();
+  // The base library choices (owner, 2026-11-13), each a catalog cabinet with its interior.
+  await page.getByRole('radiogroup', { name: 'Cabinet type' }).getByRole('radio', { name: 'Four drawer bank' }).click();
   await expect(page.getByRole('heading', { name: 'Base, 4 drawers' })).toBeVisible();
+  await expect(page.getByRole('radiogroup', { name: 'Cabinet type' }).getByRole('radio', { name: 'Four drawer bank' })).toHaveAttribute('aria-checked', 'true');
+  // A drawer's insert, by drawer.
+  await page.getByRole('radiogroup', { name: 'Drawer 1 insert' }).getByRole('radio', { name: 'Cutlery' }).click();
+  await expect(page.getByRole('radiogroup', { name: 'Drawer 1 insert' }).getByRole('radio', { name: 'Cutlery' })).toHaveAttribute('aria-checked', 'true');
 
   // A width the cabinet beside it can't give is refused with the reason.
   await page.getByRole('textbox', { name: 'Width' }).fill('400');
@@ -121,7 +125,7 @@ test('the placeholder AI design lays out the drawn room, then the customize scre
   await expect(page.getByText(/can grow by that much at most|would run past|would run into/)).toBeVisible();
 
   // The cabinet's own controls (owner, 2026-11-12): door opening, front and interior, ends, back.
-  await page.getByRole('radiogroup', { name: 'Cabinet type' }).getByRole('radio', { name: 'Base, doors', exact: true }).click();
+  await page.getByRole('radiogroup', { name: 'Cabinet type' }).getByRole('radio', { name: 'Full door', exact: true }).click();
   await page.getByRole('radiogroup', { name: 'Door opening' }).getByRole('radio', { name: 'Hinged right' }).click();
   await expect(page.getByRole('radiogroup', { name: 'Door opening' }).getByRole('radio', { name: 'Hinged right' })).toHaveAttribute('aria-checked', 'true');
   // Undo and redo (Ctrl+Z, Ctrl+Shift+Z), outside a text box.

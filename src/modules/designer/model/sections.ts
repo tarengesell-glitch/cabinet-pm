@@ -24,7 +24,8 @@ export type SectionAction =
   | 'add_rollout'
   | 'remove_rollout'
   | 'doors'
-  | 'open';
+  | 'open'
+  | 'pullout';
 
 /** The section at a path, or null when there is none. */
 export function sectionAt(root: FrontSection, path: SectionPath): FrontSection | null {
@@ -87,7 +88,7 @@ export function editSection(root: FrontSection, path: SectionPath, action: Secti
     case 'add_shelf':
     case 'remove_shelf':
       return leaf((s) => {
-        if (s.kind === 'drawers') return { ok: false, reason: 'Drawers have no shelves. Make this part doors or open first.' };
+        if (s.kind === 'drawers' || s.kind === 'pullout') return { ok: false, reason: 'Drawers and pull-outs have no shelves. Make this part doors or open first.' };
         const shelves = s.shelves + (action === 'add_shelf' ? 1 : -1);
         if (shelves < 0) return { ok: false, reason: 'There are no shelves to take out.' };
         if (shelves > MAX_COUNT) return { ok: false, reason: 'That is as many shelves as a section can have.' };
@@ -107,16 +108,18 @@ export function editSection(root: FrontSection, path: SectionPath, action: Secti
     case 'add_rollout':
     case 'remove_rollout':
       return leaf((s) => {
-        if (s.kind !== 'doors') return { ok: false, reason: 'Roll-outs go behind doors. Make this part doors first.' };
+        if (s.kind !== 'doors' && s.kind !== 'pullout') return { ok: false, reason: 'Roll-outs go behind doors or in a pull-out. Make this part doors first.' };
         const rollouts = s.rollouts + (action === 'add_rollout' ? 1 : -1);
         if (rollouts < 0) return { ok: false, reason: 'There are no roll-outs to take out.' };
         if (rollouts > MAX_COUNT) return { ok: false, reason: 'That is as many roll-outs as a section can have.' };
         return done({ ...s, rollouts });
       });
     case 'doors':
-      return leaf((s) => (s.kind === 'doors' ? { ok: true, value: root } : done({ kind: 'doors', shelves: s.kind === 'open' ? s.shelves : 0, rollouts: 0, size: s.size })));
+      return leaf((s) => (s.kind === 'doors' ? { ok: true, value: root } : done({ kind: 'doors', shelves: s.kind === 'open' ? s.shelves : 0, rollouts: s.kind === 'pullout' ? s.rollouts : 0, size: s.size })));
     case 'open':
       return leaf((s) => (s.kind === 'open' ? { ok: true, value: root } : done({ kind: 'open', shelves: s.kind === 'doors' ? s.shelves : 0, size: s.size })));
+    case 'pullout':
+      return leaf((s) => (s.kind === 'pullout' ? { ok: true, value: root } : done({ kind: 'pullout', rollouts: s.kind === 'doors' ? s.rollouts : 0, size: s.size })));
   }
 }
 

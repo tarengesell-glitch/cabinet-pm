@@ -58,8 +58,10 @@ interface Scene3D {
   /** The view to tell the page about once a frame with it has been drawn (`data-view`). */
   drawnView: string | null;
   fitted: boolean;
-  /** The selected cabinet's handles (when it can be edited), for dragging. */
+  /** The selected cabinet's grips (when it can be edited), for dragging. */
   handles: THREE.Object3D[];
+  /** The selected cabinet, and what dragging it moves (when it can be edited). */
+  body: { id: string; data: HandleData } | null;
   /** Something changed since the last frame was drawn. */
   dirty: boolean;
 }
@@ -84,6 +86,8 @@ export function Stage3D(props: {
   onPick: (id: string) => void;
   /** A sink, dishwasher or fridge was clicked (its placement ID): the screen offers how it looks (owner, 2026-11-12). */
   onPickAppliance?: (placementId: string) => void;
+  /** A click on no cabinet: let go of the selected one. */
+  onDeselect?: () => void;
   /**
    * Given when the person may edit: the selected cabinet gets handles to drag it wider or
    * narrower, taller or shorter, deeper or shallower, along the wall, up and down, and out from
@@ -97,12 +101,14 @@ export function Stage3D(props: {
   const doorsOpen = useRef(props.doorsOpen);
   const onPick = useRef(props.onPick);
   const onPickAppliance = useRef(props.onPickAppliance);
+  const onDeselect = useRef(props.onDeselect);
   const onEdit = useRef(props.onEdit);
   const label = useRef<HTMLDivElement | null>(null);
   const viewRef = useRef(props.view);
   useEffect(() => {
     onPick.current = props.onPick;
     onPickAppliance.current = props.onPickAppliance;
+    onDeselect.current = props.onDeselect;
     onEdit.current = props.onEdit;
     doorsOpen.current = props.doorsOpen;
     viewRef.current = props.view;
@@ -159,7 +165,7 @@ export function Stage3D(props: {
     sun.shadow.bias = -0.0002;
     sun.shadow.normalBias = 0.6;
     scene.add(sun, sun.target, new THREE.HemisphereLight(0xffffff, 0xd9d3c9, 0.8), new THREE.AmbientLight(0xffffff, 0.12));
-    const s: Scene3D = { renderer, scene, camera, controls, sun, root: null, doors: [], walls: [], mats: new Map(), room: null, cabinets: [], drawnView: null, fitted: false, handles: [], dirty: true };
+    const s: Scene3D = { renderer, scene, camera, controls, sun, root: null, doors: [], walls: [], mats: new Map(), room: null, cabinets: [], drawnView: null, fitted: false, handles: [], body: null, dirty: true };
     s3.current = s;
 
     const size = () => {
@@ -188,14 +194,34 @@ export function Stage3D(props: {
       ray.setFromCamera(toNdc(e), camera);
       return ray.ray.intersectPlane(plane, new THREE.Vector3());
     };
+    /** The selected cabinet's group under the pointer, and the point hit on it, or null. */
+    const bodyHit = (e: PointerEvent): { g: THREE.Group; point: THREE.Vector3 } | null => {
+      if (!s.body || !s.root) return null;
+      ray.setFromCamera(toNdc(e), camera);
+      for (const hit of ray.intersectObjects(s.root.children, true)) {
+        let o: THREE.Object3D | null = hit.object;
+        while (o && !o.userData['cabId']) o = o.parent;
+        if (!o) continue;
+        return o.userData['cabId'] === s.body.id ? { g: o as THREE.Group, point: hit.point } : null;
+      }
+      return null;
+    };
     const onHandleDown = (e: PointerEvent) => {
-      if (!s.handles.length || e.button !== 0) return;
+      if (!s.handles.length || e.button !== 0 || e.shiftKey) return;
       ray.setFromCamera(toNdc(e), camera);
       const hit = ray.intersectObjects(s.handles, true)[0];
-      if (!hit) return;
-      let h: THREE.Object3D | null = hit.object;
+      let h: THREE.Object3D | null = hit?.object ?? null;
       while (h && !h.userData['handle']) h = h.parent;
-      if (!h) return;
+      if (!h) {
+        // Dragging the selected cabinet itself moves it (along the wall, or up and down).
+        const b = bodyHit(e);
+        if (!b || !s.body) return;
+        h = new THREE.Object3D();
+        h.userData = { ...s.body.data };
+        b.g.add(h);
+        h.position.copy(b.g.worldToLocal(b.point.clone()));
+        h.userData['temporary'] = true;
+      }
       const g = h.parent as THREE.Group;
       // The plane the pointer slides on: through the handle, facing the camera as much as the handle's direction allows.
       const local = h.userData['axis'] as THREE.Vector3 | undefined;
@@ -222,15 +248,23 @@ export function Stage3D(props: {
       ray.setFromCamera(toNdc(e), camera);
       let h: THREE.Object3D | null = s.handles.length ? (ray.intersectObjects(s.handles, true)[0]?.object ?? null) : null;
       while (h && !h.userData['handle']) h = h.parent;
+      if (!h) {
+        hovered?.scale.setScalar(1);
+        if (hovered) s.dirty = true;
+        hovered = null;
+        if (label.current) label.current.style.display = 'none';
+        el.style.cursor = bodyHit(e) ? 'move' : 'grab';
+        return;
+      }
       if (h === hovered) {
         if (h && label.current) Object.assign(label.current.style, { left: `${e.clientX - el.getBoundingClientRect().left + 14}px`, top: `${e.clientY - el.getBoundingClientRect().top + 14}px` });
         return;
       }
-      hovered?.scale.setScalar((hovered.userData['size'] as number | undefined) ?? 1);
+      hovered?.scale.setScalar(1);
       hovered = h;
-      if (h) h.scale.setScalar(((h.userData['size'] as number | undefined) ?? 1) * 1.3);
+      h.scale.setScalar(1.35);
       const kind = h ? (h.userData as HandleData).handle : null;
-      el.style.cursor = kind === null ? 'grab' : kind === 'left' || kind === 'right' ? 'ew-resize' : kind === 'top' ? 'ns-resize' : kind === 'move' ? 'move' : 'nwse-resize';
+      el.style.cursor = kind === null ? 'grab' : kind === 'left' || kind === 'right' ? 'ew-resize' : kind === 'top' ? 'ns-resize' : kind === 'move' ? 'move' : 'nesw-resize';
       if (label.current) {
         if (kind) {
           const r = el.getBoundingClientRect();
@@ -261,7 +295,8 @@ export function Stage3D(props: {
     };
     const onHandleUp = (e: PointerEvent) => {
       if (!drag) return;
-      const { result, ghost } = drag;
+      const { result, ghost, handle } = drag;
+      if (handle.userData['temporary']) handle.parent?.remove(handle);
       ghost.parent?.remove(ghost);
       ghost.geometry.dispose();
       s.dirty = true;
@@ -289,6 +324,8 @@ export function Stage3D(props: {
         if (appliance) onPickAppliance.current?.(appliance);
         return;
       }
+      // A click on anything else (a wall, the floor, empty space) lets go of the cabinet (owner, 2026-11-13).
+      onDeselect.current?.();
     };
     // A double-click turns the view around the point under the pointer.
     const onDouble = (e: MouseEvent) => {
@@ -301,6 +338,20 @@ export function Stage3D(props: {
       controls.target.copy(hit.point);
       s.dirty = true;
     };
+    // Zooming in goes toward what is under the pointer, as close as CLOSEST to it: the camera
+    // turns around a point at that depth (owner, 2026-11-13: it stopped short, because it turned
+    // around a point far behind what was being looked at).
+    const onWheel = (e: WheelEvent) => {
+      if (e.deltaY >= 0 || !s.root) return;
+      ray.setFromCamera(toNdc(e), camera);
+      const hit = ray.intersectObjects(s.root.children, true)[0];
+      if (!hit) return;
+      const view = camera.getWorldDirection(new THREE.Vector3());
+      const depth = hit.point.clone().sub(camera.position).dot(view);
+      if (depth <= 0) return;
+      controls.target.copy(camera.position.clone().add(view.multiplyScalar(depth)));
+    };
+    renderer.domElement.addEventListener('wheel', onWheel, { capture: true, passive: true });
     renderer.domElement.addEventListener('pointerdown', onHandleDown, { capture: true });
     renderer.domElement.addEventListener('pointermove', onHandleMove);
     renderer.domElement.addEventListener('pointerup', onHandleUp, { capture: true });
@@ -331,6 +382,19 @@ export function Stage3D(props: {
         s.dirty = true;
       }
       controls.update();
+      // Grips keep the same size on screen at any zoom.
+      if (s.handles.length) {
+        const per = (2 * Math.tan((camera.fov * Math.PI) / 360)) / Math.max(1, el.clientHeight);
+        for (const h of s.handles) {
+          const dist = h.getWorldPosition(new THREE.Vector3()).distanceTo(camera.position);
+          const r = GRIP_PX * per * dist;
+          if (Math.abs((h.userData['r'] as number | undefined ?? 0) - r) > r * 0.01) {
+            h.userData['r'] = r;
+            for (const m of h.children) m.scale.setScalar(r);
+            s.dirty = true;
+          }
+        }
+      }
       if (!s.dirty) {
         raf = requestAnimationFrame(loop);
         return;
@@ -354,6 +418,7 @@ export function Stage3D(props: {
     return () => {
       cancelAnimationFrame(raf);
       ro.disconnect();
+      renderer.domElement.removeEventListener('wheel', onWheel, { capture: true });
       renderer.domElement.removeEventListener('pointerdown', onHandleDown, { capture: true });
       renderer.domElement.removeEventListener('pointermove', onHandleMove);
       renderer.domElement.removeEventListener('pointerup', onHandleUp, { capture: true });
@@ -388,13 +453,20 @@ export function Stage3D(props: {
     s.doors = [];
     s.walls = [];
     s.handles = [];
+    s.body = null;
     const root = new THREE.Group();
     buildRoom(s, root, room);
     const ctx: Context = { room, all: cabinets, corners: cornerCabinets(room) };
     for (const c of cabinets) {
       const g = cabinet(s, c, ctx, look, c.id === selected);
       if (g) root.add(g);
-      if (g && c.id === selected && editable) s.handles = addHandles(s, g, c, ctx);
+      if (g && c.id === selected && editable) {
+        const h = addHandles(s, g, c, ctx);
+        if (h) {
+          s.handles = h.grips;
+          s.body = { id: c.id, data: h.body };
+        }
+      }
     }
     for (const g of counters(s, ctx, look)) root.add(g);
     for (const d of s.doors) {
@@ -766,12 +838,11 @@ const HANDLE_NAMES: Record<HandleData['handle'], string> = {
   top: 'Height',
   front: 'Depth',
   move: 'Move along the wall, or up and down',
-  out: 'Out from the wall',
 };
 
 /** What a handle does, in the cabinet's own frame (inches), as stored on it for a drag. */
 interface HandleData {
-  handle: 'left' | 'right' | 'top' | 'front' | 'move' | 'out';
+  handle: 'left' | 'right' | 'top' | 'front' | 'move';
   axis?: THREE.Vector3;
   id: string;
   /** +1 when the cabinet's local +x runs toward the wall's end (offsets grow that way). */
@@ -815,10 +886,6 @@ export function dragResult(h: HandleData, moved: { x: number; y: number; z: numb
       const d = Math.max(1, h.d + dz);
       return { edit: d === h.d ? null : { kind: 'box', id: h.id, depth: units(d) }, box: { ...at, d, z: (d - h.d) / 2 }, text: `Depth ${formatInches(units(d))}` };
     }
-    case 'out': {
-      const sb = Math.max(0, h.setback + dz);
-      return { edit: sb === h.setback ? null : { kind: 'box', id: h.id, setback: units(sb) }, box: { ...at, z: sb - h.setback }, text: `Out from the wall ${formatInches(units(sb))}` };
-    }
     case 'move': {
       // Along the wall or up and down, whichever the pointer went further.
       if (Math.abs(dx) >= Math.abs(dy)) {
@@ -830,18 +897,28 @@ export function dragResult(h: HandleData, moved: { x: number; y: number; z: numb
   }
 }
 
-/** The selected cabinet's drag handles, added to its group (its own frame). */
-function addHandles(s: Pick<Scene3D, 'mats'>, g: THREE.Group, c: CabinetView, ctx: Context): THREE.Object3D[] {
-  if (!c.code || c.back || !DRAFT_SETTINGS.ok) return [];
+/** A grip's radius on screen, in CSS pixels: the same however near or far the camera is. */
+const GRIP_PX = 7;
+
+/**
+ * The selected cabinet's grips, added to its group (its own frame). Researched against the common
+ * planners and 3D editors (owner, 2026-11-13: "a complete jumbled mess … research good UI"): small
+ * round grips sitting on the cabinet's own edges, the same size on screen at any zoom, each named
+ * and with its own pointer when pointed at; the cabinet itself is dragged to move it. Width: the
+ * middle of each side; height: the middle of the top front edge; depth: the middle of the top of
+ * its right side. Returns the grips, and what a drag of the cabinet itself moves.
+ */
+function addHandles(s: Pick<Scene3D, 'mats'>, g: THREE.Group, c: CabinetView, ctx: Context): { grips: THREE.Object3D[]; body: HandleData } | null {
+  if (!c.code || c.back || !DRAFT_SETTINGS.ok) return null;
   const wall = ctx.room.walls.find((w) => w.wall_id === c.wallId);
-  if (!wall) return [];
+  if (!wall) return null;
   const w = inch(c.width);
   const hh = inch(c.height);
   const y0 = inch(c.elevation);
   const d = inch(c.depth ?? standard(c.code, 'depth') ?? 24 * IN);
-  const zf = d / 2 + DOOR_T + 1.2;
+  const zf = d / 2 + DOOR_T;
   const data = { id: c.id, sign: alongSign(ctx.room, wall), w, h: hh, d, y0, setback: inch(c.setback ?? 0) };
-  // Drawn over everything, so a handle is never hidden behind a door or counter.
+  // Drawn over everything, so a grip is never hidden behind a door or counter.
   const own = (key: string, color: string): THREE.Material => {
     const have = s.mats.get(key);
     if (have) return have;
@@ -849,53 +926,28 @@ function addHandles(s: Pick<Scene3D, 'mats'>, g: THREE.Group, c: CabinetView, ct
     s.mats.set(key, made);
     return made;
   };
-  const m = own('handle:blue', SELECT_BLUE);
-  const ring = own('handle:white', '#ffffff');
-  const out: THREE.Object3D[] = [];
-  /** An arrow head pointing along `dir` (local), its tip `len` out from the handle's centre. */
-  const arrowHead = (o: THREE.Group, dir: THREE.Vector3, at = 1.6) => {
-    const cone = new THREE.Mesh(new THREE.ConeGeometry(1.25, 2.6, 18), m);
-    cone.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.clone().normalize());
-    cone.position.copy(dir.clone().normalize().multiplyScalar(at + 1.3));
-    o.add(cone);
-  };
-  const shaft = (o: THREE.Group, dir: THREE.Vector3, len: number) => {
-    const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, len, 12), m);
-    bar.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.clone().normalize());
-    o.add(bar);
-  };
-  // Each handle is an arrow pointing the ways it drags (owner, 2026-11-12: the controls "aren't very
-  // intuitive"): a double arrow for a size, a four-way cross for moving; a white dot is where to grab.
-  const add = (handle: HandleData['handle'], pos: [number, number, number], axis: THREE.Vector3 | undefined, ways: readonly THREE.Vector3[]) => {
+  const blue = own('handle:blue', SELECT_BLUE);
+  const white = own('handle:white', '#ffffff');
+  const grips: THREE.Object3D[] = [];
+  const add = (handle: HandleData['handle'], pos: [number, number, number], axis: THREE.Vector3) => {
     const o = new THREE.Group();
     o.position.set(...pos);
-    o.userData = { ...data, handle, ...(axis ? { axis } : {}) } satisfies HandleData;
-    for (const d of ways) {
-      shaft(o, d, 3.2);
-      arrowHead(o, d);
-    }
-    o.add(new THREE.Mesh(new THREE.SphereGeometry(1.05, 16, 12), ring));
-    const grab = new THREE.Mesh(new THREE.SphereGeometry(0.75, 14, 10), m);
-    o.add(grab);
-    o.traverse((x) => (x.renderOrder = 10));
-    // A little larger on a big cabinet, so they are easy to grab.
-    o.scale.setScalar(SIZE);
-    o.userData['size'] = SIZE;
+    o.userData = { ...data, handle, axis, grip: true } satisfies HandleData & { grip: true };
+    // A white dot in a blue ring (unit size; the frame loop sizes it to GRIP_PX on screen).
+    const ring = new THREE.Mesh(new THREE.SphereGeometry(1, 20, 14), blue);
+    const dot = new THREE.Mesh(new THREE.SphereGeometry(0.62, 18, 12), white);
+    ring.renderOrder = 10;
+    dot.renderOrder = 11;
+    o.add(ring, dot);
     g.add(o);
-    out.push(o);
+    grips.push(o);
   };
-  const SIZE = Math.min(1.5, Math.max(1, Math.min(w, hh) / 16));
-  const X = new THREE.Vector3(1, 0, 0);
-  const Y = new THREE.Vector3(0, 1, 0);
-  const Z = new THREE.Vector3(0, 0, 1);
   const ym = y0 + hh / 2;
-  add('left', [-w / 2 - 2, ym, zf], X, [X.clone().negate(), X]);
-  add('right', [w / 2 + 2, ym, zf], X, [X.clone().negate(), X]);
-  add('top', [0, y0 + hh + 2.5, zf], Y, [Y, Y.clone().negate()]);
-  add('front', [-w / 4, y0 + 3, zf + 1], Z, [Z, Z.clone().negate()]);
-  add('move', [0, ym, zf], undefined, [X, X.clone().negate(), Y, Y.clone().negate()]);
-  add('out', [w / 4, y0 + 3, zf + 1], Z, [Z, Z.clone().negate()]);
-  return out;
+  add('left', [-w / 2, ym, zf], new THREE.Vector3(1, 0, 0));
+  add('right', [w / 2, ym, zf], new THREE.Vector3(1, 0, 0));
+  add('top', [0, y0 + hh, zf], new THREE.Vector3(0, 1, 0));
+  add('front', [w / 2, y0 + hh, 0], new THREE.Vector3(0, 0, 1));
+  return { grips, body: { ...data, handle: 'move' } };
 }
 
 export function cabinet(s: Pick<Scene3D, 'mats' | 'doors'>, c: CabinetView, ctx: Context, look: DrawLook, isSelected: boolean): THREE.Group | null {
@@ -974,7 +1026,7 @@ export function cabinet(s: Pick<Scene3D, 'mats' | 'doors'>, c: CabinetView, ctx:
   const drawFace = (x0: number, x1: number, y0: number, y1: number, depth: number) => {
     if (!item) return;
     const pieces = frontPieces(
-      { item, x0, x1, y0, y1, hinge: c.selections?.['hinge_side'] ?? null, sections: c.sections ?? null, drawerHandleTop: look.drawerTop },
+      { item, x0, x1, y0, y1, hinge: c.selections?.['hinge_side'] ?? null, sections: c.sections ?? null, drawerHandleTop: look.drawerTop, sinkFront: c.selections?.['sink_front'] ?? null },
       DRAFT_SETTINGS.ok ? DRAFT_SETTINGS.value.fronts : { maxSingleDoor: 20, maxDoorHeight: 48, topDrawer: 6.8125, upperBottom: 54, baseTop: 34.75 },
     );
     const inner = `paint:${SURROUNDINGS.interior}`;

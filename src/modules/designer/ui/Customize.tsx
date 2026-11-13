@@ -62,6 +62,10 @@ function summaryOf(e: ItemEdit): string {
       return 'Changed a cabinet’s width';
     case 'move':
       return 'Moved a cabinet along its wall';
+    case 'preset':
+      return 'Changed a cabinet to another library cabinet';
+    case 'insert':
+      return e.insert ? `Put a drawer insert in drawer ${e.drawer}` : `Took the insert out of drawer ${e.drawer}`;
     case 'split':
       return e.direction === 'side_by_side' ? 'Split a cabinet into two, side by side' : 'Split a cabinet into two, stacked';
     case 'box':
@@ -176,7 +180,7 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
       ? edited
       : e.kind === 'option' && e.value === null && (e.option === 'end_left' || e.option === 'end_right')
         ? fillEnds(edited.value, [e.id])
-        : e.kind !== 'approve' && e.kind !== 'option' && e.kind !== 'sections' && e.kind !== 'appliance'
+        : e.kind !== 'approve' && e.kind !== 'option' && e.kind !== 'sections' && e.kind !== 'appliance' && e.kind !== 'insert'
           ? refreshEnds(room, edited.value)
           : edited;
     if (!r.ok) {
@@ -214,6 +218,7 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
     const c = designRef.current?.cabinets.find((x) => x.id === id);
     if (c) setRunId(c.runId);
   }, []);
+  const deselect = useCallback(() => setSelected(null), []);
   const show3dError = useCallback((reason: string) => setMessage({ kind: 'error', text: reason }), []);
 
   const issues = useMemo(() => {
@@ -539,6 +544,7 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
           fitToken={fitToken}
           onPick={pick}
           onPickAppliance={setLookFor}
+          onDeselect={deselect}
           {...(canEdit ? { onEdit: edit } : {})}
           onError={show3dError}
         />

@@ -239,7 +239,9 @@ export type FrontSection =
   | { readonly kind: 'split'; readonly direction: 'vertical' | 'horizontal'; readonly parts: readonly FrontSection[]; readonly size: number | null }
   | { readonly kind: 'doors'; readonly shelves: number; readonly rollouts: number; readonly size: number | null }
   | { readonly kind: 'drawers'; readonly count: number; readonly size: number | null }
-  | { readonly kind: 'open'; readonly shelves: number; readonly size: number | null };
+  | { readonly kind: 'open'; readonly shelves: number; readonly size: number | null }
+  /** A front that opens like a drawer (a garbage pull-out), with roll-outs inside at its top (owner, 2026-11-13). */
+  | { readonly kind: 'pullout'; readonly rollouts: number; readonly size: number | null };
 
 const Count = z.number().int().min(0).max(40);
 export const FrontSectionSchema: z.ZodType<FrontSection> = z.lazy(() =>
@@ -248,6 +250,7 @@ export const FrontSectionSchema: z.ZodType<FrontSection> = z.lazy(() =>
     z.strictObject({ kind: z.literal('doors'), shelves: Count, rollouts: Count, size: SizeSchema.nullable() }),
     z.strictObject({ kind: z.literal('drawers'), count: Count.min(1), size: SizeSchema.nullable() }),
     z.strictObject({ kind: z.literal('open'), shelves: Count, size: SizeSchema.nullable() }),
+    z.strictObject({ kind: z.literal('pullout'), rollouts: Count, size: SizeSchema.nullable() }),
   ]),
 );
 
@@ -277,6 +280,11 @@ export const PlacedItemSchema = z
      * one of these. Absent: every option was set by the design step, or the item predates this.
      */
     set_by_hand: z.array(z.string().min(1)).optional(),
+    /**
+     * Drawer inserts (owner, 2026-11-13: cutlery, utility, spice), by drawer number counted from the
+     * top of the cabinet's face (1 = the top drawer) → an insert code from the designer's list.
+     */
+    drawer_inserts: z.record(z.string().regex(/^[1-9]\d*$/), z.string().min(1)).optional(),
   })
   .refine((i) => i.width > 0 && i.height > 0 && i.depth > 0, { message: 'A placed item needs a width, a height and a depth.' });
 

@@ -39,7 +39,7 @@ def jpg(src: pathlib.Path, dst: pathlib.Path, width=None):
     if width:
         h = int(img.shape[0] * width / img.shape[1])
         img = cv2.resize(img, (width, h), interpolation=cv2.INTER_AREA)
-    cv2.imwrite(str(dst), img, [cv2.IMWRITE_JPEG_QUALITY, 88])
+    cv2.imwrite(str(dst), img, [cv2.IMWRITE_JPEG_QUALITY, 92])
 
 
 def chip(ok, text):
@@ -48,7 +48,7 @@ def chip(ok, text):
 
 def figure(name, label, chips=""):
     return (f'<figure><a href="img/{name}.jpg"><img src="img/{name}_s.jpg" alt="{html.escape(label)}" '
-            f'loading="lazy" width="800" height="533"></a><figcaption><span>{html.escape(label)}</span>'
+            f'loading="lazy" width="1200" height="800"></a><figcaption><span>{html.escape(label)}</span>'
             f'{chips}</figcaption></figure>')
 
 
@@ -63,11 +63,11 @@ def main():
     for v in job["variants"]:
         src = out / v["id"] / "image.png"
         jpg(src, sheet / "img" / f"{v['id']}.jpg")
-        jpg(src, sheet / "img" / f"{v['id']}_s.jpg", 800)
+        jpg(src, sheet / "img" / f"{v['id']}_s.jpg", 1200)
         files += [f"img/{v['id']}.jpg", f"img/{v['id']}_s.jpg"]
         if (out / v["id"] / "recolour.png").exists():
             jpg(out / v["id"] / "recolour.png", sheet / "img" / f"{v['id']}_rc.jpg")
-            jpg(out / v["id"] / "recolour.png", sheet / "img" / f"{v['id']}_rc_s.jpg", 800)
+            jpg(out / v["id"] / "recolour.png", sheet / "img" / f"{v['id']}_rc_s.jpg", 1200)
             files += [f"img/{v['id']}_rc.jpg", f"img/{v['id']}_rc_s.jpg"]
 
     # headline numbers
@@ -159,7 +159,7 @@ TEMPLATE = """<title>Kitchen Render Pilot</title>
 body {{ background: var(--bg); color: var(--fg); font: 16px/1.55 var(--body);
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
   padding-block: 32px 64px; }}
-main {{ max-width: 1240px; margin: 0 auto; display: grid; gap: 48px; }}
+main {{ max-width: 1480px; margin: 0 auto; display: grid; gap: 48px; }}
 h1, h2, h3 {{ font-family: var(--display); text-wrap: balance; margin: 0; }}
 h1 {{ font-size: clamp(28px, 4vw, 40px); font-weight: 700; letter-spacing: -0.01em; }}
 h2 {{ font-size: 24px; font-weight: 700; }}
@@ -174,7 +174,7 @@ header p {{ max-width: 68ch; margin: 0; color: var(--muted); }}
 .tile .d {{ font-size: 14px; color: var(--muted); }}
 section {{ display: grid; gap: 16px; }}
 .lede {{ margin: 0; max-width: 72ch; color: var(--muted); }}
-.grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr)); gap: 16px; }}
+.grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 560px), 1fr)); gap: 16px; }}
 figure {{ margin: 0; display: grid; gap: 8px; min-width: 0; }}
 figure img {{ width: 100%; height: auto; display: block; border-radius: 4px; border: 1px solid var(--line); background: var(--panel); }}
 figure a:focus-visible {{ outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }}

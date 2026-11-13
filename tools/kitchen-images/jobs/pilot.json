@@ -2,10 +2,10 @@
  "source": "Pilot job (2026-11-13), from the approved pilot plan. Option IDs are the catalog's (visual-library/data/kitchen-image-variables.json). Everything under \"looks\" is PROPOSED by eye for the pilot: counter colours have no hex in the catalog, and the stain tints are not yet anchored to approved reference photos.",
  "scene": "l_shape_island",
  "resolution": [
-  1600,
-  1067
+  2400,
+  1600
  ],
- "samples": 192,
+ "samples": 160,
  "base": {
   "material": "painted",
   "colour": "sw_7005",
@@ -194,5 +194,5 @@
   "veneer_tile_in": 30,
   "led_strength": 6.0
  },
- "exposure": -0.4
+ "exposure": 0.15
 }

@@ -166,5 +166,221 @@
     "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/laminate_floor_02/laminate_floor_02_rough_2k.jpg",
     "sha256": "f547988692d1b53274b3023e9ed89d8280087a5ff1018cd64f83e77440ab54c4",
     "licence": "CC0 (https://polyhaven.com/license)"
+  },
+  {
+    "file": "painted_plaster_wall_diff.jpg",
+    "asset": "painted_plaster_wall",
+    "purpose": "Wall surface (normal map only, so painted walls aren't perfectly flat)",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/painted_plaster_wall/painted_plaster_wall_diff_2k.jpg",
+    "sha256": "6fd812ed8dd5be1873c29aeef38ce9bf1fb30a22c6d4b3a12db725e98c26a1be",
+    "licence": "CC0 (https://polyhaven.com/license)"
+  },
+  {
+    "file": "painted_plaster_wall_nor.jpg",
+    "asset": "painted_plaster_wall",
+    "purpose": "Wall surface (normal map only, so painted walls aren't perfectly flat)",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/painted_plaster_wall/painted_plaster_wall_nor_gl_2k.jpg",
+    "sha256": "2d601a46ed5ce2af866741c53cafa3cba472620c272e633b6484d4de16a80eb1",
+    "licence": "CC0 (https://polyhaven.com/license)"
+  },
+  {
+    "file": "painted_plaster_wall_rough.jpg",
+    "asset": "painted_plaster_wall",
+    "purpose": "Wall surface (normal map only, so painted walls aren't perfectly flat)",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/painted_plaster_wall/painted_plaster_wall_rough_2k.jpg",
+    "sha256": "35aad595469533cc3b7cc209cc6c7e065d660211f02c867f4492d3b371b1fee1",
+    "licence": "CC0 (https://polyhaven.com/license)"
+  },
+  {
+    "file": "models/bar_chair_round_01/bar_chair_round_01.gltf",
+    "asset": "bar_chair_round_01",
+    "purpose": "Counter stools at the island",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/2k/bar_chair_round_01/bar_chair_round_01_2k.gltf",
+    "sha256": "0c7d5dbea18d83a766b4b5ae1ccd303898e117af1f829282bc6aad37b8be55cc",
+    "licence": "CC0 (https://polyhaven.com/license)"
+  },
+  {
+    "file": "models/bar_chair_round_01/textures/bar_chair_round_01_nor_gl_2k.jpg",
+    "asset": "bar_chair_round_01",
+    "purpose": "Counter stools at the island",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/bar_chair_round_01/bar_chair_round_01_nor_gl_2k.jpg",
+    "sha256": "e75ca5d2b6561f475e313b40656c9f9274a139c82a1cac2c2b47b774c590fbe2",
+    "licence": "CC0 (https://polyhaven.com/license)"
+  },
+  {
+    "file": "models/bar_chair_round_01/textures/bar_chair_round_01_arm_2k.jpg",
+    "asset": "bar_chair_round_01",
+    "purpose": "Counter stools at the island",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/bar_chair_round_01/bar_chair_round_01_arm_2k.jpg",
+    "sha256": "115e39a21a98d7c07a334b3df65539f763795d6dbba9c70d1506c965de50d1fd",
+    "licence": "CC0 (https://polyhaven.com/license)"
+  },
+  {
+    "file": "models/bar_chair_round_01/textures/bar_chair_round_01_diff_2k.jpg",
+    "asset": "bar_chair_round_01",
+    "purpose": "Counter stools at the island",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/bar_chair_round_01/bar_chair_round_01_diff_2k.jpg",
+    "sha256": "76eb3521bd8d07ee35711bc3acba9590af400a6d9e4088f6d965ba9417c6b8ad",
+    "licence": "CC0 (https://polyhaven.com/license)"
+  },
+  {
+    "file": "models/bar_chair_round_01/bar_chair_round_01.bin",
+    "asset": "bar_chair_round_01",
+    "purpose": "Counter stools at the island",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/bar_chair_round_01/bar_chair_round_01.bin",
+    "sha256": "2bda85d89beb91097998b25293f10e72686b972aecffd2c14d1b5412cc1da276",
+    "licence": "CC0 (https://polyhaven.com/license)"
+  },
+  {
+    "file": "models/potted_plant_02/potted_plant_02.gltf",
+    "asset": "potted_plant_02",
+    "purpose": "Plant on the floor by the open wall",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/2k/potted_plant_02/potted_plant_02_2k.gltf",
+    "sha256": "80ab49cb61737244f50b805ddde3dd64e461b2a244817f8882e95a97c916d158",
+    "licence": "CC0 (https://polyhaven.com/license)"
+  },
+  {
+    "file": "models/potted_plant_02/textures/potted_plant_02_leaves_diff_2k.jpg",
+    "asset": "potted_plant_02",
+    "purpose": "Plant on the floor by the open wall",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/potted_plant_02/potted_plant_02_leaves_diff_2k.jpg",
+    "sha256": "f70de9a4b735b740e79d4e7720a47eae5e2bb4a289880cdae5905d156223bd7d",
+    "licence": "CC0 (https://polyhaven.com/license)"
+  },
+  {
+    "file": "models/potted_plant_02/textures/potted_plant_02_leaves_nor_gl_2k.jpg",
+    "asset": "potted_plant_02",
+    "purpose": "Plant on the floor by the open wall",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/potted_plant_02/potted_plant_02_leaves_nor_gl_2k.jpg",
+    "sha256": "2ae648b12ea457fb720f9adc6f8dc9feb8d5409e43f3b9f2ce7f089b3eef12f6",
+    "licence": "CC0 (https://polyhaven.com/license)"
+  },
+  {
+    "file": "models/potted_plant_02/textures/potted_plant_02_pot_diff_2k.jpg",
+    "asset": "potted_plant_02",
+    "purpose": "Plant on the floor by the open wall",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/potted_plant_02/potted_plant_02_pot_diff_2k.jpg",
+    "sha256": "21672040b5de49e7dae07452431b4fe5cf401494f5ab5157b5f54a146cc68383",
+    "licence": "CC0 (https://polyhaven.com/license)"
+  },
+  {
+    "file": "models/potted_plant_02/potted_plant_02.bin",
+    "asset": "potted_plant_02",
+    "purpose": "Plant on the floor by the open wall",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/potted_plant_02/potted_plant_02.bin",
+    "sha256": "9c9812482c78a59789ed32fa842b4cbd9365e09c900c31ebb998e5efe627fe97",
+    "licence": "CC0 (https://polyhaven.com/license)"
+  },
+  {
+    "file": "models/potted_plant_02/textures/potted_plant_02_leaves_rough_2k.jpg",
+    "asset": "potted_plant_02",
+    "purpose": "Plant on the floor by the open wall",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/potted_plant_02/potted_plant_02_leaves_rough_2k.jpg",
+    "sha256": "399e61a82069b3e344cece76c128f84a664dd44719331450877b671906e01e27",
+    "licence": "CC0 (https://polyhaven.com/license)"
+  },
+  {
+    "file": "models/potted_plant_02/textures/potted_plant_02_pot_nor_gl_2k.jpg",
+    "asset": "potted_plant_02",
+    "purpose": "Plant on the floor by the open wall",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/potted_plant_02/potted_plant_02_pot_nor_gl_2k.jpg",
+    "sha256": "8e8c2e96de90e793712a9db8a6cea7a38f7fd5ec489b8134b586a42ebbbfcb11",
+    "licence": "CC0 (https://polyhaven.com/license)"
+  },
+  {
+    "file": "models/potted_plant_02/textures/potted_plant_02_pot_rough_2k.jpg",
+    "asset": "potted_plant_02",
+    "purpose": "Plant on the floor by the open wall",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/potted_plant_02/potted_plant_02_pot_rough_2k.jpg",
+    "sha256": "c1f341bfa5e610dab2fd31aad4068fa20cf957b098912da5949bca996d7649bf",
+    "licence": "CC0 (https://polyhaven.com/license)"
+  },
+  {
+    "file": "models/ceramic_vase_03/ceramic_vase_03.gltf",
+    "asset": "ceramic_vase_03",
+    "purpose": "Vase on the side-run counter",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/2k/ceramic_vase_03/ceramic_vase_03_2k.gltf",
+    "sha256": "f01b35d72b3edf565961dcd1b2d81da90e8c6b51ccddbc62d7c54d9b8ca988b9",
+    "licence": "CC0 (https://polyhaven.com/license)"
+  },
+  {
+    "file": "models/ceramic_vase_03/textures/ceramic_vase_03_diff_2k.jpg",
+    "asset": "ceramic_vase_03",
+    "purpose": "Vase on the side-run counter",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/ceramic_vase_03/ceramic_vase_03_diff_2k.jpg",
+    "sha256": "3e9a7a350540769a4b78dafb975ce732c19dfdb011e9987141a8c00ba57ec3b2",
+    "licence": "CC0 (https://polyhaven.com/license)"
+  },
+  {
+    "file": "models/ceramic_vase_03/textures/ceramic_vase_03_nor_gl_2k.jpg",
+    "asset": "ceramic_vase_03",
+    "purpose": "Vase on the side-run counter",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/ceramic_vase_03/ceramic_vase_03_nor_gl_2k.jpg",
+    "sha256": "20defcdd0b4c3cc9d30f31b8a17af88b2b307afc725126154cb3da3c1e4970ee",
+    "licence": "CC0 (https://polyhaven.com/license)"
+  },
+  {
+    "file": "models/ceramic_vase_03/textures/ceramic_vase_03_rough_2k.jpg",
+    "asset": "ceramic_vase_03",
+    "purpose": "Vase on the side-run counter",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/ceramic_vase_03/ceramic_vase_03_rough_2k.jpg",
+    "sha256": "6066733d04bb9d38cfb7286cfb8644e8993311c232c7713f4fe25be03eeed835",
+    "licence": "CC0 (https://polyhaven.com/license)"
+  },
+  {
+    "file": "models/ceramic_vase_03/ceramic_vase_03.bin",
+    "asset": "ceramic_vase_03",
+    "purpose": "Vase on the side-run counter",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/ceramic_vase_03/ceramic_vase_03.bin",
+    "sha256": "19ced3c9a4231e0e0f0d2693661e40db15590ad99b3c84feecaa19067311fa6b",
+    "licence": "CC0 (https://polyhaven.com/license)"
+  },
+  {
+    "file": "models/wooden_bowl_02/wooden_bowl_02.gltf",
+    "asset": "wooden_bowl_02",
+    "purpose": "Bowl on the island",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/2k/wooden_bowl_02/wooden_bowl_02_2k.gltf",
+    "sha256": "144404195bb47eccab110e50aeea4b38a164aca4a6c06d9748c3552390af4737",
+    "licence": "CC0 (https://polyhaven.com/license)"
+  },
+  {
+    "file": "models/wooden_bowl_02/textures/wooden_bowl_02_nor_gl_2k.jpg",
+    "asset": "wooden_bowl_02",
+    "purpose": "Bowl on the island",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/wooden_bowl_02/wooden_bowl_02_nor_gl_2k.jpg",
+    "sha256": "e3ab02649c3d8178c5d2c5c7e6a1a61746a72c0fcfc7bf3cfc33d07366346f9b",
+    "licence": "CC0 (https://polyhaven.com/license)"
+  },
+  {
+    "file": "models/wooden_bowl_02/textures/wooden_bowl_02_arm_2k.jpg",
+    "asset": "wooden_bowl_02",
+    "purpose": "Bowl on the island",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/wooden_bowl_02/wooden_bowl_02_arm_2k.jpg",
+    "sha256": "be8b112b7fb6230a400d3114cd40472a049feed79501fcd66328c189d793f7ca",
+    "licence": "CC0 (https://polyhaven.com/license)"
+  },
+  {
+    "file": "models/wooden_bowl_02/wooden_bowl_02.bin",
+    "asset": "wooden_bowl_02",
+    "purpose": "Bowl on the island",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/wooden_bowl_02/wooden_bowl_02.bin",
+    "sha256": "6e3e1fb30969e9a52db3519b01ace016628a361c2cd9e2817c5e50c1ffb8a1dd",
+    "licence": "CC0 (https://polyhaven.com/license)"
+  },
+  {
+    "file": "models/wooden_bowl_02/textures/wooden_bowl_02_diff_2k.jpg",
+    "asset": "wooden_bowl_02",
+    "purpose": "Bowl on the island",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/wooden_bowl_02/wooden_bowl_02_diff_2k.jpg",
+    "sha256": "9f85b1f26c447d2aa0d6cdf355a24025bef2bee4db19aaf04e87b1ae5d06aa66",
+    "licence": "CC0 (https://polyhaven.com/license)"
+  },
+  {
+    "file": "residential_garden.exr",
+    "asset": "residential_garden",
+    "purpose": "Daylight and the view through the window",
+    "url": "https://dl.polyhaven.org/file/ph-assets/HDRIs/exr/2k/residential_garden_2k.exr",
+    "sha256": "ede0c40ce93bdaa3f8f341f781239253c7495dd3856082b33cbf362e514c0f39",
+    "licence": "CC0 (https://polyhaven.com/license)"
   }
 ]

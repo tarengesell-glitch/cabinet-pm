@@ -237,10 +237,10 @@
  ],
  "splash_left_to": 84,
  "island": {
-  "x0": 48,
-  "x1": 144,
-  "y_front": 66,
-  "counter_back": 107.5,
+  "x0": 76,
+  "x1": 160,
+  "y_front": 67.5,
+  "counter_back": 109,
   "items": [
    {
     "w": 24,
@@ -248,7 +248,7 @@
     "fronts": "drawers3"
    },
    {
-    "w": 48,
+    "w": 36,
     "type": "base",
     "fronts": "doors2"
    },
@@ -257,7 +257,8 @@
     "type": "base",
     "fronts": "drawers3"
    }
-  ]
+  ],
+  "clearance_note": "42 in walkway from the fridge handles (x = 32) to the island end, and from the sink-run counter (y = 25.5) to the island cabinets (NKBA recommends 42 in for one cook)."
  },
  "ceiling_lights": [
   [
@@ -281,21 +282,29 @@
    72
   ],
   [
-   72,
-   86
-  ],
-  [
-   120,
-   86
-  ],
-  [
-   110,
+   36,
    140
+  ],
+  [
+   96,
+   88
+  ],
+  [
+   140,
+   88
+  ],
+  [
+   118,
+   150
+  ],
+  [
+   186,
+   120
   ]
  ],
  "light": {
-  "can_watts": 65,
-  "fill_watts": 40,
+  "can_watts": 80,
+  "fill_watts": 140,
   "fill_at": [
    180,
    160,
@@ -312,18 +321,18 @@
    0,
    -18
   ],
-  "sky_strength": 0.5,
-  "sky_sun_elevation_deg": 38,
-  "sky_sun_rotation_deg": 160
+  "hdri": "residential_garden",
+  "hdri_strength": 4.0,
+  "hdri_rotation_deg": 0
  },
  "camera": {
   "at": [
-   196,
-   160,
-   50
+   200,
+   176,
+   46
   ],
-  "yaw_deg": 134,
+  "yaw_deg": 142,
   "lens_mm": 20,
-  "shift_y": -0.03
+  "shift_y": -0.02
  }
 }

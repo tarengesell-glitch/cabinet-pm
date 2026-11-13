@@ -24,7 +24,17 @@ TEXTURES = {
     "walnut_veneer": "Walnut cabinet fronts",
     "plank_flooring_02": "Kitchen floor (first try; too knotty)",
     "laminate_floor_02": "Kitchen floor",
+    "painted_plaster_wall": "Wall surface (normal map only, so painted walls aren't perfectly flat)",
 }
+# Scanned 3D models (glTF with their textures): real objects make the room read as a photo.
+MODELS = {
+    "bar_chair_round_01": "Counter stools at the island",
+    "potted_plant_02": "Plant on the floor by the open wall",
+    "ceramic_vase_03": "Vase on the side-run counter",
+    "wooden_bowl_02": "Bowl on the island",
+}
+# Outdoor light probe: what the window looks out on, and the daylight coming in.
+HDRIS = {"residential_garden": "Daylight and the view through the window"}
 MAPS = {"Diffuse": "diff", "nor_gl": "nor", "Rough": "rough"}
 
 
@@ -64,6 +74,34 @@ def main() -> int:
             record.append({"file": dest.name, "asset": asset, "purpose": purpose, "url": entry["url"],
                            "sha256": sha, "licence": "CC0 (https://polyhaven.com/license)"})
             print(f"ok {dest.name}")
+    for asset, purpose in MODELS.items():
+        entry = get_json(f"https://api.polyhaven.com/files/{asset}")["gltf"][RES]["gltf"]
+        folder = ASSETS / "models" / asset
+        (folder / "textures").mkdir(parents=True, exist_ok=True)
+        parts = [(entry["url"], folder / f"{asset}.gltf", entry.get("md5"))]
+        parts += [(v["url"], folder / k, v.get("md5")) for k, v in entry["include"].items()]
+        for url, dest, md5 in parts:
+            if not (dest.exists() and md5 and hashlib.md5(dest.read_bytes()).hexdigest() == md5):
+                fetch(url, dest)
+            if md5 and hashlib.md5(dest.read_bytes()).hexdigest() != md5:
+                print(f"{dest.name}: checksum doesn't match Poly Haven's; stopping.", file=sys.stderr)
+                return 1
+            record.append({"file": str(dest.relative_to(ASSETS)), "asset": asset, "purpose": purpose, "url": url,
+                           "sha256": hashlib.sha256(dest.read_bytes()).hexdigest(),
+                           "licence": "CC0 (https://polyhaven.com/license)"})
+        print(f"ok model {asset}")
+    for asset, purpose in HDRIS.items():
+        entry = get_json(f"https://api.polyhaven.com/files/{asset}")["hdri"][RES]["exr"]
+        dest = ASSETS / f"{asset}.exr"
+        if not (dest.exists() and hashlib.md5(dest.read_bytes()).hexdigest() == entry["md5"]):
+            fetch(entry["url"], dest)
+        if hashlib.md5(dest.read_bytes()).hexdigest() != entry["md5"]:
+            print(f"{dest.name}: checksum doesn't match Poly Haven's; stopping.", file=sys.stderr)
+            return 1
+        record.append({"file": dest.name, "asset": asset, "purpose": purpose, "url": entry["url"],
+                       "sha256": hashlib.sha256(dest.read_bytes()).hexdigest(),
+                       "licence": "CC0 (https://polyhaven.com/license)"})
+        print(f"ok hdri {asset}")
     (HERE / "licenses.json").write_text(json.dumps(record, indent=2) + "\n")
     print(f"{len(record)} files, recorded in licenses.json")
     return 0

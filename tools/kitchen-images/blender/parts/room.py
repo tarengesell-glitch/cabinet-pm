@@ -21,15 +21,17 @@ def build_room(S, M):
     box("wall_front", -t, D, 0, W + t, D + t, Hc, M["wall"], "room", bevel=0)
     # window frame, mullion and sill
     f = 2.0
-    box("win_l", x0, -t, z0, x0 + f, -t + 2.5, z1, M["trim_white"], "room")
-    box("win_r", x1 - f, -t, z0, x1, -t + 2.5, z1, M["trim_white"], "room")
-    box("win_t", x0, -t, z1 - f, x1, -t + 2.5, z1, M["trim_white"], "room")
-    box("win_b", x0, -t, z0, x1, -t + 2.5, z0 + f, M["trim_white"], "room")
-    box("win_m", (x0 + x1) / 2 - 0.75, -t, z0, (x0 + x1) / 2 + 0.75, -t + 2.5, z1, M["trim_white"], "room")
+    # jamb liners the full wall depth (no dark gaps at the corners), then the frame and mullion
+    for nm, a, b, c, d in (("jl", x0, x0 + 0.75, z0, z1), ("jr", x1 - 0.75, x1, z0, z1),
+                           ("jt", x0, x1, z1 - 0.75, z1), ("jb", x0, x1, z0, z0 + 0.75)):
+        box(f"win_{nm}", a, -t, c, b, 0.05, d, M["trim_white"], "room", bevel=0)
+    box("win_l", x0, -t, z0, x0 + f, -t + 2.5, z1, M["trim_white"], "room", bevel=0)
+    box("win_r", x1 - f, -t, z0, x1, -t + 2.5, z1, M["trim_white"], "room", bevel=0)
+    box("win_t", x0, -t, z1 - f, x1, -t + 2.5, z1, M["trim_white"], "room", bevel=0)
+    box("win_b", x0, -t, z0, x1, -t + 2.5, z0 + f, M["trim_white"], "room", bevel=0)
+    box("win_m", (x0 + x1) / 2 - 0.75, -t, z0, (x0 + x1) / 2 + 0.75, -t + 2.5, z1, M["trim_white"], "room", bevel=0)
     box("win_glass", x0, -t + 1.2, z0, x1, -t + 1.3, z1, M["glass"], "room", bevel=0)
-    # outside: lawn and a hedge so the window doesn't look into nothing
-    box("outside_ground", -400, -800, -2, 600, -t - 1, -1, M["lawn"], "room", bevel=0)
-    box("outside_hedge", -400, -260, -2, 600, -240, 70, M["hedge"], "room", bevel=0)
+    # outside is the HDRI photo (build_scene._world), seen through the glass
     # backsplash tile between the counter and the uppers
     top = S["heights"]["base_top"] + S["heights"]["counter"]
     ub = S["heights"]["upper_bottom"]

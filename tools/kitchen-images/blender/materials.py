@@ -39,6 +39,25 @@ def matte(name: str, hex_value: str, roughness: float = 0.85):
     return mat
 
 
+def wall_paint(name: str, hex_value: str, roughness: float = 0.88, scale_in: float = 40, bump: float = 0.12):
+    """Flat wall paint over real plaster: a scanned normal map, faint, so the wall isn't a perfect CG plane."""
+    mat, b, nt = _principled(name)
+    b.inputs["Base Color"].default_value = hex_rgba(hex_value)
+    b.inputs["Roughness"].default_value = roughness
+    coord = nt.nodes.new("ShaderNodeTexCoord")
+    mapping = nt.nodes.new("ShaderNodeMapping")
+    s = 1 / (scale_in * 0.0254)
+    mapping.inputs["Scale"].default_value = (s, s, s)
+    nt.links.new(coord.outputs["Object"], mapping.inputs["Vector"])
+    nor = _image(nt, "painted_plaster_wall_nor.jpg", True)
+    nt.links.new(mapping.outputs["Vector"], nor.inputs["Vector"])
+    nm = nt.nodes.new("ShaderNodeNormalMap")
+    nm.inputs["Strength"].default_value = bump
+    nt.links.new(nor.outputs["Color"], nm.inputs["Color"])
+    nt.links.new(nm.outputs["Normal"], b.inputs["Normal"])
+    return mat
+
+
 def metal(name: str, hex_value: str, roughness: float = 0.28, anisotropic: float = 0.0):
     mat, b, _ = _principled(name)
     b.inputs["Base Color"].default_value = hex_rgba(hex_value)

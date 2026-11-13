@@ -64,14 +64,12 @@ def build(scene_spec: dict, picks: dict, looks: dict) -> dict:
         "sink": mt.metal("sink", "#9A9C9C", 0.3),
         "counter": mt.quartz("counter", cc["base"], cc["vein"], picks["counter_pattern"]),
         "led": mt.emission("led", "#FFE2B8", looks["led_strength"]),
-        "floor": mt.textured("floor", "laminate_floor_02", 60, coat=0.1, rotate_grain=False, saturation=0.7),
-        "wall": mt.matte("wall", "#E3DED6", 0.9),
+        "floor": mt.textured("floor", "laminate_floor_02", 60, coat=0.1, rotate_grain=False, saturation=0.85),
+        "wall": mt.wall_paint("wall", "#E6E2DA"),
         "ceiling": mt.matte("ceiling_paint", "#F2F0EC", 0.95),
         "trim_white": mt.paint("trim_white", "#F1EFEA", 0.4),
         "glass": _glass(),
         "tile": mt.subway_tile("tile"),
-        "lawn": mt.matte("lawn", "#5D7A3A", 0.9),
-        "hedge": mt.matte("hedge", "#3E5A2C", 0.9),
         "ceramic": mt.paint("ceramic", "#F4F1EA", 0.15),
         "board": mt.textured("board", "walnut_veneer", 30, coat=0.2),
         "lemon": mt.paint("lemon", "#E8C33A", 0.45),
@@ -97,23 +95,31 @@ def _glass():
     b = mat.node_tree.nodes["Principled BSDF"]
     b.inputs["Transmission Weight"].default_value = 1.0
     b.inputs["Roughness"].default_value = 0.0
-    b.inputs["IOR"].default_value = 1.45
+    b.inputs["IOR"].default_value = 1.15  # low, so the window shows outside, not the room
     b.inputs["Thin Wall"].default_value = True
     return mat
 
 
 def _world(S):
-    world = bpy.data.worlds.new("sky")
+    """A real outdoor photo (CC0 HDRI) all round the house: the view through the window and its daylight."""
+    L = S["light"]
+    path = mt.ASSETS / f"{L['hdri']}.exr"
+    if not path.exists():
+        raise FileNotFoundError(f"{path} is missing: run fetch_assets.py first")
+    world = bpy.data.worlds.new("outside")
     bpy.context.scene.world = world
     world.use_nodes = True
     nt = world.node_tree
-    sky = nt.nodes.new("ShaderNodeTexSky")
-    sky.sky_type = "MULTIPLE_SCATTERING"
-    sky.sun_elevation = math.radians(S["light"]["sky_sun_elevation_deg"])
-    sky.sun_rotation = math.radians(S["light"]["sky_sun_rotation_deg"])
+    env = nt.nodes.new("ShaderNodeTexEnvironment")
+    env.image = bpy.data.images.load(str(path))
+    coord = nt.nodes.new("ShaderNodeTexCoord")
+    mapping = nt.nodes.new("ShaderNodeMapping")
+    mapping.inputs["Rotation"].default_value = (0, 0, math.radians(L["hdri_rotation_deg"]))
+    nt.links.new(coord.outputs["Generated"], mapping.inputs["Vector"])
+    nt.links.new(mapping.outputs["Vector"], env.inputs["Vector"])
     bg = nt.nodes["Background"]
-    bg.inputs["Strength"].default_value = S["light"]["sky_strength"]
-    nt.links.new(sky.outputs["Color"], bg.inputs["Color"])
+    bg.inputs["Strength"].default_value = L["hdri_strength"]
+    nt.links.new(env.outputs["Color"], bg.inputs["Color"])
 
 
 def _camera(S):

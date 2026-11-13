@@ -59,7 +59,7 @@ def build_run(run, H, picks, M):
             depth = H["base_depth"]
             box_w = depth - doors.T
             if t in ("base", "filler"):
-                fr.box(f"{name}_toe", u0, 0, 0, u1, H["toe"], box_w - H["toe_recess"], M["toe"], "carcass", bevel=0)
+                fr.box(f"{name}_toe", u0, 0, 0, u1, H["toe"], box_w - H["toe_recess"], M["front"], "cabinet_fronts", bevel=0)
                 fr.box(f"{name}_box", u0, H["toe"], 0, u1, H["base_top"], box_w, M["front"], "cabinet_fronts",
                        bevel=0)
                 if t == "filler":

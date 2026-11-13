@@ -130,7 +130,15 @@ A pilot rendered the L-shape-with-island kitchen 14 ways: 5 paints, 4 door style
   - From a nearby colour, the result matches a full render (mean ΔE2000 0.8).
   - From white straight to a dark colour, it doesn't (mean ΔE 2.6), because dark cabinets darken the whole room.
   - So about 8 rendered paint colours spread across light to dark can produce all 1,728 Sherwin-Williams colours.
-- **Time:** about 2.1 min a render on this Mac, so about 14 hours unattended for the roughly 400 renders the library needs.
+- **Time:** about 3.8 min a render on this Mac at 2400 × 1600, so about 26 hours unattended for the roughly 400 renders the library needs.
+- **Round 2, after the owner's review (2026-11-13):**
+  - the island moved to 42" clear of the fridge and the sink run;
+  - the camera was re-aimed so the kitchen sits in the middle of the frame;
+  - the picture was brightened;
+  - the resolution went up from 1600 × 1067 to 2400 × 1600;
+  - the oversized cutting board that read as a wood panel was removed;
+  - added real scanned CC0 objects (counter stools, a vase, a bowl), a real outdoor photo outside the window, plaster texture on the walls, and toe kicks painted to match.
+  - All checks still pass. Re-colour from a nearby colour: mean ΔE 0.8–1.1. From white straight to Iron Ore: 4.0, so the anchor-colour plan stands.
 - **PROPOSED, set by eye for the pilot:**
   - the scene's sizes;
   - the counter colours;

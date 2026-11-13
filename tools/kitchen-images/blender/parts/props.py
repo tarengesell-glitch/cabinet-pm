@@ -1,8 +1,47 @@
 """Things that make a kitchen look lived-in: baseboards, can-light trims, island pendants and a few
 counter props. They stay the same in every image and sit away from the regions the tests change."""
-import bmesh
+import math
+import pathlib
 
-from kit import IN, box, cylinder, mesh_object
+import bmesh
+import bpy
+
+from kit import IN, REGIONS, box, cylinder, mesh_object
+
+MODELS = pathlib.Path(__file__).resolve().parents[2] / "assets" / "models"
+
+
+def model(asset: str, at, height_in: float, turn_deg: float = 0.0):
+    """Places a scanned CC0 model (see fetch_assets.py) standing on `at` (inches), scaled to a real height."""
+    path = MODELS / asset / f"{asset}.gltf"
+    if not path.exists():
+        raise FileNotFoundError(f"{path} is missing: run fetch_assets.py first")
+    before = set(bpy.data.objects)
+    bpy.ops.import_scene.gltf(filepath=str(path))
+    new = [o for o in bpy.data.objects if o not in before]
+    meshes = [o for o in new if o.type == "MESH"]
+    if not meshes:
+        raise RuntimeError(f"{asset} imported no meshes")
+    bpy.context.view_layer.update()
+    zs = [(o.matrix_world @ v.co).z for o in meshes for v in o.data.vertices]
+    k = height_in * IN / (max(zs) - min(zs))
+    roots = [o for o in new if o.parent is None]
+    pivot = bpy.data.objects.new(f"{asset}_pivot", None)
+    bpy.context.scene.collection.objects.link(pivot)
+    for r in roots:
+        r.parent = pivot
+    pivot.location = (0, 0, -min(zs))
+    bpy.context.view_layer.update()
+    holder = bpy.data.objects.new(f"{asset}_at", None)
+    bpy.context.scene.collection.objects.link(holder)
+    pivot.parent = holder
+    holder.scale = (k, k, k)
+    holder.rotation_euler = (0, 0, math.radians(turn_deg))
+    holder.location = tuple(c * IN for c in at)
+    for o in meshes:
+        o.pass_index = REGIONS["room"]
+        o["region"] = "room"
+    return holder
 
 
 def _sphere(name, centre, r, mat):
@@ -46,7 +85,6 @@ def build(S, M):
         mod.thickness = 0.06 * IN
         _sphere(f"pendant_bulb_{i}", (px, py, 60.8), 1.1, M["bulb"])
     # counter props on the back run, clear of the sink and range
-    box("cutting_board", 150, 0.8, ctop, 166, 1.6, ctop + 20, M["board"], "room", bevel=0.25)
     cylinder("crock", (190, 9, ctop), (190, 9, ctop + 7), 2.6, M["ceramic"], "room")
     for i, (dx, dy, h) in enumerate([(-0.8, 0.3, 14), (0.6, -0.5, 13), (0.2, 0.9, 15)]):
         cylinder(f"utensil_{i}", (190 + dx, 9 + dy, ctop + 2), (190 + dx * 2.2, 9 + dy * 2.2, ctop + h), 0.25,
@@ -63,3 +101,9 @@ def build(S, M):
         p.use_smooth = True
     for i, (dx, dy, dz) in enumerate([(-1.5, 0.5, 3.6), (1.4, -0.6, 3.6), (0.2, 1.5, 3.8), (0.1, -0.2, 5.4)]):
         _sphere(f"lemon_{i}", (cx + dx, cy + dy, ctop + dz), 1.4, M["lemon"])
+    # scanned CC0 models: stools tucked under the island overhang, a vase and a bowl
+    sy = I["counter_back"] - 6
+    for i, sx in enumerate((I["x0"] + 24, I["x0"] + 52)):
+        model("bar_chair_round_01", (sx, sy, 0), 25.5, turn_deg=15 * i)
+    model("ceramic_vase_03", (7, 38, ctop), 11)
+    model("wooden_bowl_02", (I["x0"] + 20, I["y_front"] + 14, ctop + 0.0), 2.9)

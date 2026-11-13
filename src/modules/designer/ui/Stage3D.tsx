@@ -893,13 +893,15 @@ export function trims(s: Pick<Scene3D, 'mats'>, ctx: Context, look: Pick<FinishL
   const panel = (c: CabinetView) => (typeOf(c) === 'filler' || typeOf(c) === 'panel') && !c.back && (c.layer === 'upper' || c.elevation + c.height > baseTop);
   const trimmed = ctx.all.filter((c) => ['wall', 'corner_wall', 'tall'].includes(typeOf(c) ?? '') || panel(c));
   const depthOf = (c: CabinetView) => c.depth ?? (c.code ? standard(c.code, 'depth') : null);
+  /** A panel's or filler's face is its own; a cabinet's is its doors', a door's thickness further out. */
+  const faceOut = (c: CabinetView) => (panel(c) ? 0 : DOOR_T);
   /** How far a cabinet's face stands out from its wall (an L-shaped corner cabinet's face on this wall is its leg's). */
   const reachOf = (c: CabinetView): number | null => {
     const d = depthOf(c);
     const wall = ctx.room.walls.find((w) => w.wall_id === c.wallId);
     if (d === null || !wall) return null;
     const inches = typeOf(c) === 'corner_wall' ? cornerFrame(ctx.room, wall, c, inch(c.width), inch(d)).legD : inch(d);
-    return inch(c.setback ?? 0) + inches;
+    return inch(c.setback ?? 0) + inches + faceOut(c);
   };
   /** Whether a fridge stands under a cabinet (on its wall, overlapping it along the wall). */
   const overFridge = (c: CabinetView) => ctx.all.some((f) => f.appliance === 'fridge' && f.wallId === c.wallId && f.offset < c.offset + c.width - TOUCH && f.offset + f.width > c.offset + TOUCH);
@@ -918,7 +920,9 @@ export function trims(s: Pick<Scene3D, 'mats'>, ctx: Context, look: Pick<FinishL
     g.rotation.y = p.angle;
     const w = inch(c.width);
     const d = inch(depth);
-    const zf = d / 2 + DOOR_T;
+    // The moulding runs along the face: a cabinet's doors, or a panel's own face (owner, 2026-11-13:
+    // the returns on the fridge panels stood out past the face of the cabinet over the fridge).
+    const zf = d / 2 + faceOut(c);
     let path: Pt[];
     if (typeOf(c) === 'corner_wall') {
       // Along this wall's face from the far end to the inside corner, then along the other leg's face.

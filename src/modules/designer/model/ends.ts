@@ -19,7 +19,7 @@
  */
 import type { PlacedItem, Result, Room, Wall } from '@/core/index';
 import { cabinetViews, endOption, itemOf, type CabinetView, type EndOption } from './cabinets';
-import { cornerCabinets, insideSpan, type CornerCabinet } from './layout';
+import { cornerCabinets, insideSpan, neighbours, type CornerCabinet } from './layout';
 import { DRAFT_SETTINGS, itemByCode, standard } from './placeholder-draft';
 
 /** What a cabinet needs to know about the rest of the room: its neighbours and the corners. */
@@ -56,7 +56,10 @@ export function endOpen(ctx: Context, c: CabinetView, wall: Wall, edge: number, 
   if (touching) return false;
   if (wall.kind !== 'room') return true;
   const sp = insideSpan(ctx.room, wall);
-  if (side === 'low' ? edge <= sp.start + TOUCH : edge >= sp.end - TOUCH) return false;
+  // Against the wall it meets at that end; a wall end with no wall joined to it (a room drawn open
+  // there) leaves the end open (owner, 2026-11-13: a fridge panel at such an end had no trim return).
+  const { before, after } = neighbours(ctx.room, wall);
+  if (side === 'low' ? before !== null && edge <= sp.start + TOUCH : after !== null && edge >= sp.end - TOUCH) return false;
   const corner = ctx.corners.find((k) => (side === 'high' ? k.endingWallId : k.startingWallId) === wall.wall_id && (c.layer === 'upper' ? k.upper : k.base));
   if (!corner) return true;
   const legs = ctx.all.filter((o) => o.wallId !== wall.wall_id && o.layer === c.layer && o.code !== null && (itemByCode(o.code)?.type ?? '').startsWith('corner')).map((o) => o.depth ?? (o.code ? standard(o.code, 'depth') : null) ?? 0);

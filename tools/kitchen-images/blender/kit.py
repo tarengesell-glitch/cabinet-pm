@@ -68,8 +68,8 @@ def add_bevel(obj, width_in: float, segments: int = 2):
     m.segments = segments
     m.limit_method = "ANGLE"
     m.harden_normals = False
-    for p in obj.data.polygons:
-        p.use_smooth = True
+    for p in obj.data.polygons:  # flat: smooth shading blends across the face and reads as a round-over
+        p.use_smooth = False
     return m
 
 

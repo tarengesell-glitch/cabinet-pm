@@ -104,7 +104,18 @@ def textured(name: str, asset: str, scale_in: float, tint_hex: str | None = None
     mapping.inputs["Scale"].default_value = (s, s, s)
     if rotate_grain:  # for a scan whose grain runs sideways (the Poly Haven veneers already run up)
         mapping.inputs["Rotation"].default_value = (radians(90), 0, 0)
-    nt.links.new(coord.outputs["Object"], mapping.inputs["Vector"])
+    # Per-part grain: a part may carry "grain_rot" (radians) and "grain_offset" (metres). A rail turns its
+    # grain to run across; every stile, rail and panel gets its own patch of the scan, as real parts are
+    # cut from different boards. Parts without them read 0 and keep the shared mapping.
+    part = nt.nodes.new("ShaderNodeMapping")
+    part.vector_type = "POINT"
+    for attr, sock in (("grain_rot", "Rotation"), ("grain_offset", "Location")):
+        a = nt.nodes.new("ShaderNodeAttribute")
+        a.attribute_type = "OBJECT"
+        a.attribute_name = attr
+        nt.links.new(a.outputs["Vector"], part.inputs[sock])
+    nt.links.new(coord.outputs["Object"], part.inputs["Vector"])
+    nt.links.new(part.outputs["Vector"], mapping.inputs["Vector"])
     diff = _image(nt, f"{asset}_diff.jpg", False)
     rough = _image(nt, f"{asset}_rough.jpg", True)
     nor = _image(nt, f"{asset}_nor.jpg", True)

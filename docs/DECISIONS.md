@@ -139,6 +139,11 @@ A pilot rendered the L-shape-with-island kitchen 14 ways: 5 paints, 4 door style
   - the oversized cutting board that read as a wood panel was removed;
   - added real scanned CC0 objects (counter stools, a vase, a bowl), a real outdoor photo outside the window, plaster texture on the walls, and toe kicks painted to match.
   - All checks still pass. Re-colour from a nearby colour: mean ΔE 0.8–1.1. From white straight to Iron Ore: 4.0, so the anchor-colour plan stands.
+- **Round 3, after the owner's review (2026-11-13):**
+  - shaker frames had looked rounded over; the door parts now have square edges with only a tiny edge break;
+  - wood grain is now set per part, as in a real five-piece door: stiles and panels run vertically, rails run horizontally, and each part starts at a different place in the veneer;
+  - white kitchens had looked washed out: the fill light and the exposure were lowered so the shadow lines on white doors show.
+  - All checks still pass (layout locked, handles within 1.7 px). Re-colour from a nearby colour: mean ΔE 0.8–1.3.
 - **PROPOSED, set by eye for the pilot:**
   - the scene's sizes;
   - the counter colours;

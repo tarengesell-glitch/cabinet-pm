@@ -886,7 +886,12 @@ export function trims(s: Pick<Scene3D, 'mats'>, ctx: Context, look: Pick<FinishL
   if (!top && !valance) return [];
   const ceiling = inch(ctx.room.ceiling_height.value);
   const typeOf = (c: CabinetView) => (c.code && !c.appliance ? (itemByCode(c.code)?.type ?? null) : null);
-  const trimmed = ctx.all.filter((c) => ['wall', 'corner_wall', 'tall'].includes(typeOf(c) ?? ''));
+  // Upper and tall cabinets, and the fillers and panels that reach their top line (a fridge's
+  // full-height panels, the fillers between uppers; owner, 2026-11-13: "Returns on the fridge panels
+  // aren't showing top trim"), so the trim runs along the whole top line.
+  const baseTop = (standard('base_doors', 'height') ?? 34 * IN) + IN;
+  const panel = (c: CabinetView) => (typeOf(c) === 'filler' || typeOf(c) === 'panel') && !c.back && (c.layer === 'upper' || c.elevation + c.height > baseTop);
+  const trimmed = ctx.all.filter((c) => ['wall', 'corner_wall', 'tall'].includes(typeOf(c) ?? '') || panel(c));
   const depthOf = (c: CabinetView) => c.depth ?? (c.code ? standard(c.code, 'depth') : null);
   /** How far a cabinet's face stands out from its wall (an L-shaped corner cabinet's face on this wall is its leg's). */
   const reachOf = (c: CabinetView): number | null => {
@@ -932,6 +937,8 @@ export function trims(s: Pick<Scene3D, 'mats'>, ctx: Context, look: Pick<FinishL
           const r = reachOf(next);
           return r !== null && r < reach - 1 / 16 ? zf - (reach - r) : null;
         }
+        // A panel is finished on both faces: it returns wherever its side is open.
+        if (panel(c)) return endOpen(ctx, c, wall, at === 'low' ? c.offset : c.offset + c.width, at) ? -d / 2 : null;
         return finishedEnds(c).includes(at) ? -d / 2 : null;
       };
       const [left, right] = sign > 0 ? [back('low'), back('high')] : [back('high'), back('low')];
@@ -952,7 +959,7 @@ export function trims(s: Pick<Scene3D, 'mats'>, ctx: Context, look: Pick<FinishL
       add(sweep(path, stepProfile(h, inch(top.projection), top.steps, DOOR_T), y1 - h), look.trimHex);
     }
     // A light valance hangs over a counter: under the uppers, not under the cabinet over a fridge.
-    if (valance && typeOf(c) !== 'tall' && !overFridge(c)) {
+    if (valance && c.layer === 'upper' && typeOf(c) !== 'tall' && !overFridge(c)) {
       const h = inch(valance.height);
       const th = inch(valance.thickness);
       add(sweep(path, valance.profile === 'light_rail' ? lightRailProfile(h, th) : flatValanceProfile(h, th), inch(c.elevation)), look.valanceHex);

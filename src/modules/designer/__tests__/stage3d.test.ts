@@ -97,6 +97,13 @@ describe('what the pointer is over (owner, 2026-11-13)', () => {
   });
 });
 
+/** How far a trim group's first moulding reaches out from the wall, in its cabinet's own frame (inches). */
+const depthOfMoulding = (g: Group): number => {
+  const geo = (g.children.find((m) => (m as Mesh).isMesh) as Mesh).geometry;
+  geo.computeBoundingBox();
+  return geo.boundingBox!.getSize(new Vector3()).z;
+};
+
 describe('top trim and light valance (owner, 2026-11-13)', () => {
   it('draws only what is chosen and has a profile; anything else is reported, never drawn as another one', () => {
     expect(trimsOf({ topTrim: null, valance: null })).toEqual({ top: null, valance: null, problems: [] });
@@ -118,7 +125,17 @@ describe('top trim and light valance (owner, 2026-11-13)', () => {
     const typeOf = (id: string) => itemByCode(ctx.all.find((c) => c.id === id)!.code!)?.type;
     const tops = ctx.all.filter((c) => c.code && !c.appliance && ['wall', 'corner_wall', 'tall'].includes(itemByCode(c.code)?.type ?? ''));
     expect(tops.length).toBeGreaterThan(0);
-    expect(groups.map((g) => g.userData['trimOf']).sort()).toEqual(tops.map((c) => c.id).sort());
+    // Fridge panels and fillers reaching the top line get the trim too (owner, 2026-11-13).
+    const panels = ctx.all.filter((c) => c.code && ['filler', 'panel'].includes(itemByCode(c.code)?.type ?? '') && !c.back && (c.layer === 'upper' || c.elevation + c.height > 36 * IN));
+    const fridgePanels = ctx.all.filter((c) => c.code === 'tall_filler');
+    expect(fridgePanels.length).toBe(2);
+    expect(panels).toEqual(expect.arrayContaining(fridgePanels));
+    expect(groups.map((g) => g.userData['trimOf']).sort()).toEqual([...tops, ...panels].map((c) => c.id).sort());
+    // A fridge panel open on one side returns its trim along that side to the wall.
+    const returned = fridgePanels.filter((c) => {
+      return depthOfMoulding(groups.find((x) => x.userData['trimOf'] === c.id)!) > (c.depth ?? 0) / IN;
+    });
+    expect(returned.length).toBeGreaterThan(0);
     // This kitchen's cabinets go to the ceiling: the crown stops at it.
     const ceiling = ctx.room.ceiling_height.value / IN;
     for (const g of groups) {
@@ -128,7 +145,7 @@ describe('top trim and light valance (owner, 2026-11-13)', () => {
       const valances = g.children.filter((m) => (m as { isMesh?: boolean }).isMesh).length - 1;
       const c = ctx.all.find((x) => x.id === g.userData['trimOf'])!;
       const overFridge = ctx.all.some((f) => f.appliance === 'fridge' && f.wallId === c.wallId && f.offset < c.offset + c.width && f.offset + f.width > c.offset);
-      expect(valances).toBe(typeOf(c.id) === 'tall' || overFridge ? 0 : 1);
+      expect(valances).toBe(c.layer !== 'upper' || typeOf(c.id) === 'tall' || overFridge ? 0 : 1);
     }
     // The cabinet over the fridge has no valance (there is no counter under it).
     expect(ctx.all.some((c) => c.appliance === 'fridge')).toBe(true);
@@ -136,9 +153,8 @@ describe('top trim and light valance (owner, 2026-11-13)', () => {
     const ended = tops.find((c) => typeOf(c.id) === 'wall' && finishedEnds(c).length > 0)!;
     expect(ended).toBeDefined();
     const g = groups.find((x) => x.userData['trimOf'] === ended.id)!;
-    const crownBox = new Box3().setFromObject(g.children.find((m) => (m as Mesh).isMesh)!);
     const depth = (ended.depth ?? standard(ended.code!, 'depth')!) / IN;
-    expect(crownBox.getSize(new Vector3()).z).toBeGreaterThan(depth);
+    expect(depthOfMoulding(g)).toBeGreaterThan(depth);
     // None of either draws nothing.
     expect(trims({ mats: new Map() }, ctx, { ...look, topTrim: 'none', valance: 'none' })).toEqual([]);
   });

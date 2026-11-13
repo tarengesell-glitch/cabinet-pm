@@ -2,11 +2,11 @@ import { describe, expect, it } from 'vitest';
 import { Box3, BoxGeometry, CylinderGeometry, Group, Mesh, Raycaster, Vector3, type Object3D } from 'three';
 import { cabinetViews, placeholderItems, type CabinetView } from '../model/cabinets';
 import { endOpen, withRuleEnds, type Context } from '../model/ends';
-import { cornerCabinets } from '../model/layout';
+import { cornerCabinets, insideSpan, neighbours } from '../model/layout';
 import { draftPlaceholder } from '../model/placeholder-draft';
 import { cabinet, cornerFrame, counters, drawLook, finishedEnds, seenHits, trims, type FinishLook } from '../ui/Stage3D';
 import { trimsOf } from '../model/choices';
-import { itemByCode, standard } from '../model/placeholder-draft';
+import { DRAFT_SETTINGS, itemByCode, standard } from '../model/placeholder-draft';
 import { realKitchenRoom } from './real-kitchen';
 
 const IN = 64;
@@ -155,6 +155,16 @@ describe('top trim and light valance (owner, 2026-11-13)', () => {
     const g = groups.find((x) => x.userData['trimOf'] === ended.id)!;
     const depth = (ended.depth ?? standard(ended.code!, 'depth')!) / IN;
     expect(depthOfMoulding(g)).toBeGreaterThan(depth);
+    // A panel's moulding runs along its own face, a cabinet's along its doors (owner, 2026-11-13:
+    // the panel returns stood out past the face of the cabinet over the fridge).
+    const proj = DRAFT_SETTINGS.ok ? DRAFT_SETTINGS.value.visual.trim.top.get('crown')!.projection / IN : 0;
+    const front = (id: string) => {
+      const geo = (groups.find((x) => x.userData['trimOf'] === id)!.children.find((m) => (m as Mesh).isMesh) as Mesh).geometry;
+      geo.computeBoundingBox();
+      return geo.boundingBox!.max.z;
+    };
+    for (const p of fridgePanels) expect(front(p.id)).toBeCloseTo((p.depth ?? 0) / IN / 2 + proj, 3);
+    expect(front(tops[0]!.id)).toBeCloseTo(((tops[0]!.depth ?? standard(tops[0]!.code!, 'depth')!) / IN) / 2 + 0.75 + proj, 3);
     // None of either draws nothing.
     expect(trims({ mats: new Map() }, ctx, { ...look, topTrim: 'none', valance: 'none' })).toEqual([]);
   });
@@ -232,5 +242,22 @@ describe('opening cabinets (owner, 2026-11-13)', () => {
     expect(count(over, 1) - count(over, 0)).toBe(3);
     const other = ctx.all.find((x) => x.code === 'upper_doors' && x !== over)!;
     expect(count(other, 1) - count(other, 0)).toBe(0);
+  });
+});
+
+describe('open wall ends (owner, 2026-11-13)', () => {
+  it('a cabinet at a wall end with no wall joined to it is open there; with a wall, it is not', () => {
+    const ctx = scene();
+    const wall = ctx.room.walls.find((w) => w.kind === 'room' && neighbours(ctx.room, w).before !== null)!;
+    const sp = insideSpan(ctx.room, wall);
+    // One cabinet alone at the start of the wall.
+    const c = { ...ctx.all.find((x) => x.code === 'upper_doors')!, wallId: wall.wall_id, offset: sp.start };
+    const alone = { ...ctx, all: [c], corners: [] };
+    expect(endOpen(alone, c, wall, c.offset, 'low')).toBe(false);
+    // The same room drawn open there: the wall before it removed.
+    const before = neighbours(ctx.room, wall).before!;
+    const room = { ...ctx.room, walls: ctx.room.walls.filter((w) => w !== before) };
+    const atEnd = { ...c, offset: insideSpan(room, wall).start };
+    expect(endOpen({ ...alone, room, all: [atEnd] }, atEnd, wall, atEnd.offset, 'low')).toBe(true);
   });
 });

@@ -8,6 +8,11 @@ The history of decisions and the evidence of the owner's approval. Only the owne
 
 ## Decided
 
+### 2026-11-13: Fridge panel trim in the Fake Design kitchen (owner, chat, 2026-11-13)
+"The left return doesn't have crown. And the returns protrude past the face of the cabinet over the fridge." Asked what is beside the left fridge panel, the owner answered **"Open: nothing there"**. Built in the designer (`model/ends.ts`, `ui/Stage3D.tsx`).
+- A cabinet or panel at a wall end with no wall joined to it (the test job's room is drawn open at that end) counts as open there, not as against a wall. This is the same check that sets finished ends and counter overhangs, so those now follow it too at such an end.
+- A panel's or filler's trim runs along its own face; a cabinet's along its doors (it was set a door's thickness too far out on panels).
+
 ### 2026-11-13: Stand-ins approved; trim on fridge panels (owner, chat, 2026-11-13)
 - **"Approve the proposed sizes and shapes as they are"**, answering the list of stand-ins in "Opening cabinets, interiors, and trim fixes" (below): the drawer boxes, inserts, bins, Lazy Susan and tray dividers as drawn; how far drawers open; the light rail's proportions; the interior colour before Interiors is chosen; the Interiors colours. The other trim profiles (flat band, crown, stepped crown, flat valance) and the crown's ceiling gap were not in that list and stay open (TRIM-1).
 - **"Returns on the fridge panels aren't showing top trim"**: the top trim now runs over every filler and panel that reaches the top line (a fridge's full-height panels, the fillers between uppers), and a panel returns it wherever its side is open (a panel is finished on both faces) or the cabinet beside it is shallower. Built in the designer (`trims` in `ui/Stage3D.tsx`).

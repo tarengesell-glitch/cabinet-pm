@@ -1,4 +1,4 @@
-"""Things that make a kitchen look lived-in: baseboards, can-light trims, island pendants and a few
+"""Things that make a kitchen look lived-in: baseboards, can-light trims and a few
 counter props. They stay the same in every image and sit away from the regions the tests change."""
 import math
 import pathlib
@@ -69,21 +69,7 @@ def build(S, M):
     for i, (x, y) in enumerate(S["ceiling_lights"]):
         cylinder(f"can_trim_{i}", (x, y, Hc - 0.15), (x, y, Hc), 2.6, M["trim_white"], "room")
         cylinder(f"can_glow_{i}", (x, y, Hc - 0.2), (x, y, Hc - 0.1), 1.8, M["bulb"], "room")
-    # two pendants over the island
     I = S["island"]
-    py = (I["y_front"] + I["counter_back"]) / 2
-    for i, px in enumerate((I["x0"] + (I["x1"] - I["x0"]) * 0.3, I["x0"] + (I["x1"] - I["x0"]) * 0.7)):
-        cylinder(f"pendant_rod_{i}", (px, py, 66), (px, py, Hc), 0.12, M["brass"], "room")
-        bm = bmesh.new()
-        bmesh.ops.create_cone(bm, cap_ends=False, segments=32, radius1=5.5 * IN, radius2=1.2 * IN, depth=6 * IN)
-        for v in bm.verts:
-            v.co.x += px * IN
-            v.co.y += py * IN
-            v.co.z += 63 * IN
-        shade = mesh_object(f"pendant_shade_{i}", bm, M["shade"], "room")
-        mod = shade.modifiers.new("thick", "SOLIDIFY")
-        mod.thickness = 0.06 * IN
-        _sphere(f"pendant_bulb_{i}", (px, py, 60.8), 1.1, M["bulb"])
     # counter props on the back run, clear of the sink and range
     cylinder("crock", (190, 9, ctop), (190, 9, ctop + 7), 2.6, M["ceramic"], "room")
     for i, (dx, dy, h) in enumerate([(-0.8, 0.3, 14), (0.6, -0.5, 13), (0.2, 0.9, 15)]):
@@ -101,9 +87,6 @@ def build(S, M):
         p.use_smooth = True
     for i, (dx, dy, dz) in enumerate([(-1.5, 0.5, 3.6), (1.4, -0.6, 3.6), (0.2, 1.5, 3.8), (0.1, -0.2, 5.4)]):
         _sphere(f"lemon_{i}", (cx + dx, cy + dy, ctop + dz), 1.4, M["lemon"])
-    # scanned CC0 models: stools tucked under the island overhang, a vase and a bowl
-    sy = I["counter_back"] - 6
-    for i, sx in enumerate((I["x0"] + 24, I["x0"] + 52)):
-        model("bar_chair_round_01", (sx, sy, 0), 25.5, turn_deg=15 * i)
+    # scanned CC0 models: a vase and a bowl (no pendants or stools: owner, round 4)
     model("ceramic_vase_03", (7, 38, ctop), 11)
     model("wooden_bowl_02", (I["x0"] + 20, I["y_front"] + 14, ctop + 0.0), 2.9)

@@ -39,6 +39,18 @@ def build_room(S, M):
     box("splash_back_b", x0, -0.01, top, x1, 0.3, z0, M["tile"], "room", bevel=0)
     box("splash_back_c", x1, -0.01, top, W, 0.3, ub, M["tile"], "room", bevel=0)
     box("splash_left", -0.01, 0.3, top, 0.3, S["splash_left_to"], ub, M["tile"], "room", bevel=0)
+    # behind a hood the tile runs up to whatever is above it: the chimney goes to the ceiling, so the
+    # tile does too (a hood with a cabinet above would stop at that cabinet's underside)
+    for run in S["runs"]:
+        if run["frame"] != "+y" or run["level"] != "upper":
+            continue
+        u = run["start"]
+        for n, it in enumerate(run["items"]):
+            if it["type"] == "hood":
+                hx0, hx1 = run["origin"][0] + u, run["origin"][0] + u + it["w"]
+                above = it.get("cabinet_above_bottom", Hc)
+                box(f"splash_hood_{n}", hx0, -0.01, ub, hx1, 0.3, above, M["tile"], "room", bevel=0)
+            u += it["w"]
 
 
 def build_counters(S, M):

@@ -35,7 +35,7 @@ def colour_hex(list_id: str, colour_id: str) -> str:
 def front_material(picks, looks):
     m = picks["material"]
     if m == "painted":
-        return mt.paint("cabinet", colour_hex("sherwin_williams", picks["colour"]))
+        return mt.paint("cabinet", colour_hex("sherwin_williams", picks["colour"]), uneven=True)
     if m in SPECIES_ASSET:
         st = looks["stains"][picks["colour"]]
         return mt.textured("cabinet", SPECIES_ASSET[m], looks["veneer_tile_in"], st.get("tint"), st.get("strength", 0.0),
@@ -57,7 +57,7 @@ def build(scene_spec: dict, picks: dict, looks: dict) -> dict:
         "front": front_material(picks, looks),
         "toe": mt.matte("toe", "#2A2826", 0.7),
         "hw": mt.metal("hardware", fin["hex"], fin["roughness"], fin.get("anisotropic", 0.0)),
-        "steel": mt.metal("steel", "#C7C9C9", 0.22, 0.4),
+        "steel": mt.metal("steel", "#C7C9C9", 0.22, 0.4, smudge=0.025),
         "chrome": mt.metal("chrome", "#E4E6E8", 0.06),
         "black_glass": mt.paint("black_glass", "#0C0C0E", 0.05),
         "black_metal": mt.metal("black_metal", "#1C1C1C", 0.4),

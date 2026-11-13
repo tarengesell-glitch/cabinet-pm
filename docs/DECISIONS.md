@@ -144,6 +144,13 @@ A pilot rendered the L-shape-with-island kitchen 14 ways: 5 paints, 4 door style
   - wood grain is now set per part, as in a real five-piece door: stiles and panels run vertically, rails run horizontally, and each part starts at a different place in the veneer;
   - white kitchens had looked washed out: the fill light and the exposure were lowered so the shadow lines on white doors show.
   - All checks still pass (layout locked, handles within 1.7 px). Re-colour from a nearby colour: mean ΔE 0.8–1.3.
+- **Round 4, after the owner's review (2026-11-13):**
+  - the cabinet over the fridge is now as deep as the fridge panels (26"), so the panels no longer stick out past it;
+  - the tile behind the hood runs up to whatever is above the hood (the ceiling, for a chimney hood);
+  - the hood is now the common wall-mount pyramid chimney style;
+  - the island pendants and stools were removed;
+  - for realism: finishes are slightly uneven (paint sheen, quartz, stainless, tile), and the review images get a fixed camera finish (slight bloom, darker corners, colour fringe at the edges, fine grain). The finish runs after QA, so the checks still measure the raw render.
+  - All checks still pass (layout locked, handles within 1.5 px, re-colour from a nearby colour ΔE 0.8–1.3).
 - **PROPOSED, set by eye for the pilot:**
   - the scene's sizes;
   - the counter colours;

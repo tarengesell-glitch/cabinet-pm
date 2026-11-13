@@ -37,9 +37,35 @@ def build(kind, fr, name, u0, u1, H, M):
             fr.bar(f"{name}_h{cu}", (cu, split + 6, dd + 2), (cu, h - 6, dd + 2), 0.4, st, "appliance")
         fr.bar(f"{name}_hd", (u0 + 6, split - 3, dd + 2), (u1 - 6, split - 3, dd + 2), 0.4, st, "appliance")
     elif kind == "hood":
-        bottom = 66.0
-        fr.box(f"{name}_canopy", u0, bottom, 1, u1, bottom + 5, 21, st, "appliance", bevel=1 / 16)
-        fr.box(f"{name}_tlo", u0 + 3, bottom + 5, 1, u1 - 3, bottom + 9, 15, st, "appliance", bevel=1 / 16)
-        fr.box(f"{name}_duct", u0 + 9, bottom + 9, 1, u1 - 9, H["ceiling"], 11, st, "appliance", bevel=1 / 16)
+        # the common wall-mount pyramid chimney hood: a thin front band, a sloped canopy rising to a
+        # narrow chimney that runs to the ceiling, and a dark baffle filter underneath
+        bottom, band, slope_top, depth = 66.0, 2.5, 76.0, 20.0
+        cu, cw, cd = (u0 + u1) / 2, 6.0, 10.0  # chimney centre, half-width, depth
+        fr.box(f"{name}_band", u0, bottom, 0, u1, bottom + band, depth, st, "appliance", bevel=1 / 16)
+        fr.box(f"{name}_filter", u0 + 1.5, bottom - 0.05, 1.5, u1 - 1.5, bottom, depth - 1.5,
+               M["black_metal"], "appliance", bevel=0)
+        _frustum(fr, f"{name}_canopy", (u0, u1, 0, depth, bottom + band),
+                 (cu - cw, cu + cw, 0, cd, slope_top), st)
+        fr.box(f"{name}_chimney", cu - cw, slope_top, 0, cu + cw, H["ceiling"], cd, st, "appliance",
+               bevel=1 / 32)
+        fr.box(f"{name}_controls", cu - 4, bottom + 0.6, depth, cu + 4, bottom + band - 0.6, depth + 0.05,
+               M["black_glass"], "appliance", bevel=0)
     else:
         raise ValueError(f"unknown appliance {kind!r}")
+
+
+def _frustum(fr, name, lo, hi, mat):
+    """A closed tapered box between two level rectangles, each (u0, u1, w0, w1, v) in the run's frame."""
+    import bmesh
+
+    from kit import IN, mesh_object
+
+    bm = bmesh.new()
+    vs = []
+    for a0, a1, b0, b1, v in (lo, hi):
+        for u, w in ((a0, b0), (a1, b0), (a1, b1), (a0, b1)):
+            vs.append(bm.verts.new(tuple(c * IN for c in fr.world(u, v, w))))
+    for f in ((0, 3, 2, 1), (4, 5, 6, 7), (0, 1, 5, 4), (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7)):
+        bm.faces.new([vs[i] for i in f])
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    return mesh_object(name, bm, mat, "appliance", bevel=1 / 32)

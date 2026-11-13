@@ -22,13 +22,33 @@ def _principled(name: str):
     return mat, bsdf, mat.node_tree
 
 
-def paint(name: str, hex_value: str, roughness: float = 0.38):
+def _uneven_roughness(nt, b, base: float, spread: float, scale: float):
+    """Real finishes are never perfectly even: wipe marks, sheen changes, fingerprints. A soft noise moves
+    the roughness by +/- spread around base. Fixed noise, so every render is the same."""
+    coord = nt.nodes.new("ShaderNodeTexCoord")
+    noise = nt.nodes.new("ShaderNodeTexNoise")
+    noise.inputs["Scale"].default_value = scale
+    noise.inputs["Detail"].default_value = 6.0
+    noise.inputs["Roughness"].default_value = 0.6
+    nt.links.new(coord.outputs["Object"], noise.inputs["Vector"])
+    rng = nt.nodes.new("ShaderNodeMapRange")
+    rng.inputs["From Min"].default_value = 0.3
+    rng.inputs["From Max"].default_value = 0.7
+    rng.inputs["To Min"].default_value = max(0.0, base - spread)
+    rng.inputs["To Max"].default_value = base + spread
+    nt.links.new(noise.outputs["Fac"], rng.inputs["Value"])
+    nt.links.new(rng.outputs["Result"], b.inputs["Roughness"])
+
+
+def paint(name: str, hex_value: str, roughness: float = 0.38, uneven: bool = False):
     """Sprayed cabinet paint with a satin lacquer."""
-    mat, b, _ = _principled(name)
+    mat, b, nt = _principled(name)
     b.inputs["Base Color"].default_value = hex_rgba(hex_value)
     b.inputs["Roughness"].default_value = roughness
     b.inputs["Coat Weight"].default_value = 0.15
     b.inputs["Coat Roughness"].default_value = 0.25
+    if uneven:
+        _uneven_roughness(nt, b, roughness, 0.06, 6.0)
     return mat
 
 
@@ -58,12 +78,14 @@ def wall_paint(name: str, hex_value: str, roughness: float = 0.88, scale_in: flo
     return mat
 
 
-def metal(name: str, hex_value: str, roughness: float = 0.28, anisotropic: float = 0.0):
-    mat, b, _ = _principled(name)
+def metal(name: str, hex_value: str, roughness: float = 0.28, anisotropic: float = 0.0, smudge: float = 0.0):
+    mat, b, nt = _principled(name)
     b.inputs["Base Color"].default_value = hex_rgba(hex_value)
     b.inputs["Metallic"].default_value = 1.0
     b.inputs["Roughness"].default_value = roughness
     b.inputs["Anisotropic"].default_value = anisotropic
+    if smudge:
+        _uneven_roughness(nt, b, roughness, smudge, 9.0)
     return mat
 
 
@@ -218,7 +240,7 @@ def quartz(name: str, base_hex: str, vein_hex: str, pattern: str):
             vein_mix.inputs["B"].default_value = hex_rgba(vein_hex)
             colour = vein_mix.outputs["Result"]
     nt.links.new(colour, b.inputs["Base Color"])
-    b.inputs["Roughness"].default_value = 0.12
+    _uneven_roughness(nt, b, 0.14, 0.07, 3.0)
     b.inputs["Coat Weight"].default_value = 0.0
     return mat
 
@@ -243,5 +265,5 @@ def subway_tile(name: str):
     bump.inputs["Strength"].default_value = 0.3
     nt.links.new(brick.outputs["Fac"], bump.inputs["Height"])
     nt.links.new(bump.outputs["Normal"], b.inputs["Normal"])
-    b.inputs["Roughness"].default_value = 0.08
+    _uneven_roughness(nt, b, 0.1, 0.05, 12.0)
     return mat

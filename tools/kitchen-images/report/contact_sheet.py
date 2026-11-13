@@ -9,6 +9,9 @@ import sys
 
 import cv2
 
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+from finish import finish  # noqa: E402
+
 TESTS = [
     ("paint", "Paint colour", "Five Sherwin-Williams shortlist colours, each a full render. Dark cabinets darken the "
      "whole room, as they do in life."),
@@ -36,6 +39,7 @@ def jpg(src: pathlib.Path, dst: pathlib.Path, width=None):
     img = cv2.imread(str(src))
     if img is None:
         raise FileNotFoundError(src)
+    img = finish(img)  # camera finish on the shown image only; QA measured the raw render
     if width:
         h = int(img.shape[0] * width / img.shape[1])
         img = cv2.resize(img, (width, h), interpolation=cv2.INTER_AREA)

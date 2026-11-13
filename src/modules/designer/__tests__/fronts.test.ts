@@ -64,6 +64,22 @@ describe('cabinet fronts (3D view)', () => {
     expect(pull!.handleY).not.toBeCloseTo((pull!.y0 + pull!.y1) / 2);
   });
 
+  it('a sink base has full-height doors unless a false drawer front is chosen (owner, 2026-11-13)', () => {
+    expect(drawers(face('sink_base', 36, 4, 34.75))).toHaveLength(0);
+    expect(doors(face('sink_base', 36, 4, 34.75))).toHaveLength(2);
+    expect(drawers(face('sink_base', 36, 4, 34.75, { sinkFront: 'false_drawer_front' }))).toHaveLength(1);
+  });
+
+  it('a full-height pull-out is one front that opens like a drawer, with roll-outs at its top', () => {
+    const ps = face('garbage_pullout', 18, 4, 34.75, { sections: { kind: 'pullout', rollouts: 1, size: null } });
+    const fronts = drawers(ps);
+    expect(fronts).toHaveLength(1);
+    expect(fronts[0]).toMatchObject({ y0: 4, y1: 34.75, pullout: true });
+    const ro = ps.filter((p) => p.kind === 'rollout');
+    expect(ro).toHaveLength(1);
+    expect((ro[0] as { y: number }).y).toBeGreaterThan(25);
+  });
+
   it('draws saved sections: a vertical split, shelves, drawers and roll-outs', () => {
     const ps = face('base_doors', 36, 4, 34.75, {
       sections: {

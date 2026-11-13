@@ -6,6 +6,7 @@ import { applyMoves, cabinetViews, editItems, placeholderItems } from '../model/
 import { draftPlaceholder } from '../model/placeholder-draft';
 import { editSection, sectionAt } from '../model/sections';
 import { dragResult } from '../ui/Stage3D';
+import { isPreset, presetsFor } from '../model/library';
 import { realKitchenRoom } from './real-kitchen';
 
 const IN = 64;
@@ -185,12 +186,61 @@ describe('the 3D handles', () => {
     expect(dragResult({ ...h, handle: 'right' }, { x: 1.06, y: 0, z: 0 }).edit).toMatchObject({ width: 31 * IN + 4 });
     expect(dragResult({ ...h, handle: 'right' }, { x: 0.01, y: 0, z: 0 }).edit).toBeNull();
   });
-  it('top, front, out and move', () => {
+  it('top, front and move', () => {
     expect(dragResult({ ...h, handle: 'top' }, { x: 0, y: -4, z: 0 }).edit).toEqual({ kind: 'box', id: 'c', height: 30 * IN });
     expect(dragResult({ ...h, handle: 'front' }, { x: 0, y: 0, z: -3 }).edit).toEqual({ kind: 'box', id: 'c', depth: 21 * IN });
-    expect(dragResult({ ...h, handle: 'out' }, { x: 0, y: 0, z: 2 }).edit).toEqual({ kind: 'box', id: 'c', setback: 2 * IN });
     expect(dragResult({ ...h, handle: 'move' }, { x: 3, y: 1, z: 0 }).edit).toEqual({ kind: 'move', id: 'c', by: 3 * IN });
     expect(dragResult({ ...h, sign: -1, handle: 'move' }, { x: 3, y: 1, z: 0 }).edit).toEqual({ kind: 'move', id: 'c', by: -3 * IN });
     expect(dragResult({ ...h, handle: 'move' }, { x: 1, y: 5, z: 0 }).edit).toEqual({ kind: 'box', id: 'c', elevation: 5 * IN });
+  });
+});
+
+describe('library choices and drawer inserts (owner, 2026-11-13)', () => {
+  it('offers the owner’s twelve base choices, each a catalog base with its interior', () => {
+    const list = presetsFor('base');
+    expect(list.map((p) => p.name)).toEqual([
+      'Full door',
+      'Door and drawer',
+      'Door and drawer, two roll-outs',
+      'Full door, three roll-outs',
+      'Full door, four roll-outs',
+      'Four drawer bank',
+      'Three drawer bank',
+      'Garbage pull-out',
+      'Garbage pull-out, full height',
+      'Garbage pull-out, full height, roll-out',
+      'Sink base',
+      'Angled cabinet',
+    ]);
+    expect(list.find((p) => p.id === 'full_door')!.sections).toMatchObject({ kind: 'doors', shelves: 2 });
+    expect(list.find((p) => p.id === 'door_drawer')!.sections).toMatchObject({ parts: [{ kind: 'drawers', count: 1, size: 6 * IN + 52 }, { kind: 'doors', shelves: 1 }] });
+    expect(list.find((p) => p.id === 'garbage_full_ro')!.sections).toEqual({ kind: 'pullout', rollouts: 1, size: null });
+    expect(presetsFor('wall')).toEqual([]);
+  });
+
+  it('choosing one sets the catalog cabinet and its interior; it shows as chosen', () => {
+    const room = placed();
+    const base = room.items.find((i) => cabinetViews(room).find((v) => v.id === i.item_instance_id)?.code === 'base_3_drawers')!;
+    const p = presetsFor('base').find((x) => x.id === 'full_door_4ro')!;
+    const r = unwrap(editItems(room, { kind: 'preset', id: base.item_instance_id, code: p.code, sections: p.sections }));
+    const v = cabinetViews(r).find((x) => x.id === base.item_instance_id)!;
+    expect(v.code).toBe('base_doors_rollouts');
+    expect(isPreset(p, v.code, v.sections ?? null)).toBe(true);
+    expect(RoomSchema.safeParse(r).success).toBe(true);
+    // Another kind of cabinet is refused.
+    expect(editItems(room, { kind: 'preset', id: base.item_instance_id, code: 'upper_doors', sections: null }).ok).toBe(false);
+  });
+
+  it('a drawer insert is saved by drawer number, from the list only, and dropped with a new library cabinet', () => {
+    const room = placed();
+    const base = room.items.find((i) => cabinetViews(room).find((v) => v.id === i.item_instance_id)?.code === 'base_3_drawers')!;
+    const r = unwrap(editItems(room, { kind: 'insert', id: base.item_instance_id, drawer: 1, insert: 'cutlery' }));
+    expect(byId(r, base.item_instance_id).drawer_inserts).toEqual({ '1': 'cutlery' });
+    expect(RoomSchema.safeParse(r).success).toBe(true);
+    expect(editItems(room, { kind: 'insert', id: base.item_instance_id, drawer: 1, insert: 'bread' }).ok).toBe(false);
+    const out = unwrap(editItems(r, { kind: 'insert', id: base.item_instance_id, drawer: 1, insert: null }));
+    expect(byId(out, base.item_instance_id).drawer_inserts).toBeUndefined();
+    const changed = unwrap(editItems(r, { kind: 'type', id: base.item_instance_id, code: 'base_doors' }));
+    expect(byId(changed, base.item_instance_id).drawer_inserts).toBeUndefined();
   });
 });

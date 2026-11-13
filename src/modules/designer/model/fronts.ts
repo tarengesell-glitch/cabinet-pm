@@ -25,7 +25,8 @@ export type Hinge = 'left' | 'right';
 
 export type FrontPiece =
   | { readonly kind: 'door'; readonly x0: number; readonly x1: number; readonly y0: number; readonly y1: number; readonly hinge: Hinge; readonly handleY: number; readonly handle: boolean }
-  | { readonly kind: 'drawer'; readonly x0: number; readonly x1: number; readonly y0: number; readonly y1: number; readonly handleY: number }
+  /** A drawer front; `pullout`: a front that opens like a drawer (a garbage pull-out), which takes no insert. */
+  | { readonly kind: 'drawer'; readonly x0: number; readonly x1: number; readonly y0: number; readonly y1: number; readonly handleY: number; readonly pullout?: true }
   | { readonly kind: 'shelf'; readonly x0: number; readonly x1: number; readonly y: number }
   | { readonly kind: 'rollout'; readonly x0: number; readonly x1: number; readonly y: number }
   | { readonly kind: 'divider'; readonly x0: number; readonly x1: number; readonly y0: number; readonly y1: number }
@@ -56,6 +57,8 @@ export interface FrontInput {
   readonly sections: FrontSection | null;
   /** True: a drawer's handle near its top edge; false: centred (the client's hardware choice). */
   readonly drawerHandleTop: boolean;
+  /** The sink base's front (catalog `sink_front`): full-height doors unless a false drawer front or tip-out is chosen. */
+  readonly sinkFront?: string | null;
 }
 
 /** A section as drawn: a saved one, or one made from the catalog type with its handle placed by rule. */
@@ -64,7 +67,7 @@ type Draw =
   | { readonly kind: 'doors'; readonly shelves: number; readonly rollouts: number; readonly size: number | null; readonly handleY?: number }
   | { readonly kind: 'drawers'; readonly count: number; readonly size: number | null }
   | { readonly kind: 'open'; readonly shelves: number; readonly size: number | null }
-  | { readonly kind: 'pullout'; readonly handleY: number | null; readonly size: number | null };
+  | { readonly kind: 'pullout'; readonly rollouts: number; readonly size: number | null; readonly handleY?: number };
 
 const IN = 64;
 
@@ -103,11 +106,16 @@ function fromCatalog(input: FrontInput, rules: FrontRules): Draw {
       size: null,
       parts: [
         { kind: 'drawers', count: 1, size: rules.topDrawer * IN },
-        { kind: 'pullout', handleY: bankHandle(4, 1, y0, y1, rules, input.drawerHandleTop), size: null },
+        { kind: 'pullout', rollouts: 0, handleY: bankHandle(4, 1, y0, y1, rules, input.drawerHandleTop), size: null },
       ],
     };
-  if (item.code === 'sink_base')
-    return { kind: 'split', direction: 'horizontal', size: null, parts: [{ kind: 'drawers', count: 1, size: rules.topDrawer * IN }, { kind: 'doors', shelves: 0, rollouts: 0, size: null, handleY: bankMiddle }] };
+  // The sink base: full-height doors (the catalog's default sink front; owner, 2026-11-13: "Sink
+  // base. Full height doors"); a false drawer front or tip-out tray over doors when one is chosen.
+  if (item.code === 'sink_base') {
+    if (input.sinkFront === 'false_drawer_front' || input.sinkFront === 'tip_out_tray')
+      return { kind: 'split', direction: 'horizontal', size: null, parts: [{ kind: 'drawers', count: 1, size: rules.topDrawer * IN }, { kind: 'doors', shelves: 0, rollouts: 0, size: null, handleY: bankMiddle }] };
+    return { kind: 'doors', shelves: 0, rollouts: 0, size: null };
+  }
   const first = fronts[0];
   if (fronts.length > 0 && fronts.every((f) => f.kind === 'doors')) {
     if (fronts.length === 1) return { kind: 'doors', shelves, rollouts: 0, size: null };
@@ -126,7 +134,7 @@ function fromCatalog(input: FrontInput, rules: FrontRules): Draw {
       ],
     };
   }
-  if (first?.kind === 'pullout' && fronts.length === 1) return { kind: 'pullout', handleY: null, size: null };
+  if (first?.kind === 'pullout' && fronts.length === 1) return { kind: 'pullout', rollouts: 0, size: null };
   return { kind: 'doors', shelves, rollouts: 0, size: null };
 }
 
@@ -189,8 +197,13 @@ export function frontPieces(input: FrontInput, rules: FrontRules): FrontPiece[] 
         }
         return;
       }
-      case 'pullout':
-        out.push({ kind: 'drawer', x0, x1, y0, y1, handleY: sec.handleY ?? drawerHandle(y0, y1, input.drawerHandleTop) });
+      case 'pullout': {
+        // Its handle where a top drawer's would be, unless placed by rule (the garbage pull-out's).
+        const top = Math.min(rules.topDrawer, h);
+        out.push({ kind: 'drawer', x0, x1, y0, y1, handleY: sec.handleY ?? drawerHandle(y1 - top, y1, input.drawerHandleTop), pullout: true });
+        for (let k = 0; k < sec.rollouts; k++) out.push({ kind: 'rollout', x0, x1, y: y1 - 4 - k * 5 });
+        return;
+      }
         return;
       case 'open':
         out.push({ kind: 'open', x0, x1, y0, y1 });

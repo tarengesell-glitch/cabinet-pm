@@ -8,7 +8,7 @@
  */
 import { useState } from 'react';
 import { formatInches, type FrontSection, type Room } from '@/core/index';
-import { CURRENT_CATALOG } from '@/modules/catalog/contract';
+import { CURRENT_CATALOG, type CatalogItem } from '@/modules/catalog/contract';
 import type { CabinetView, ItemEdit } from '../model/cabinets';
 import { wallLabel } from '../model/editor';
 import { frontPieces } from '../model/fronts';
@@ -16,11 +16,26 @@ import { startingSections } from '../model/fronts';
 import { DRAFT_SETTINGS, itemByCode, runOf, standard } from '../model/placeholder-draft';
 import { editSection, sectionAt, sectionBoxes, type SectionAction, type SectionPath } from '../model/sections';
 import { parseSize } from './parseSize';
+import { FacePicture } from './FacePicture';
 import { FrontIcon } from './FrontIcon';
+import { DRAWER_INSERTS, isPreset, presetsFor } from '../model/library';
 import { SELECT_BLUE } from './theme';
 import s from './Customize.module.css';
 
 const IN = 64;
+
+/** A cabinet face laid out for a picture: this cabinet's size, with another catalog cabinet and front if given. */
+function faceOf(item: CatalogItem | null, sections: FrontSection | null, cab: CabinetView, hinge: string | null) {
+  if (!item || !DRAFT_SETTINGS.ok) return null;
+  const rules = DRAFT_SETTINGS.value.fronts;
+  const toe = cab.layer === 'base' && item.toeKick ? DRAFT_SETTINGS.value.visual.toeKick / IN : 0;
+  const w = cab.width / IN;
+  const height = cab.height || (item.size.height.default.value ?? 34 * IN);
+  const y0 = cab.elevation / IN + toe;
+  const y1 = (cab.elevation + height) / IN;
+  const pieces = frontPieces({ item, x0: 0, x1: w, y0, y1, hinge, sections, drawerHandleTop: false, sinkFront: cab.selections?.['sink_front'] ?? null }, rules);
+  return { pieces, x0: 0, x1: w, y0, y1 };
+}
 
 export function CabinetEditor(props: {
   room: Room;
@@ -37,12 +52,16 @@ export function CabinetEditor(props: {
   const where = runOf(room, cab.runId);
   const item = cab.code ? itemByCode(cab.code) : null;
   const types = item && item.type !== 'filler' ? CURRENT_CATALOG.items.filter((i) => i.type === item.type && i.availability === 'available') : [];
+  /** The owner's library choices for this kind of cabinet (bases), shown instead of the catalog's list. */
+  const presets = item ? presetsFor(item.type) : [];
   const offers = (code: string) => item?.options.includes(code) ?? false;
   const [widthFrom, setWidthFrom] = useState<'left' | 'both' | 'right'>('right');
   /** The wall end ("low" or "high") the chosen side is, for this cabinet. */
   const sideOf = (w: 'left' | 'both' | 'right'): 'low' | 'high' | 'both' => (w === 'both' ? 'both' : (w === 'left') === (cab.leftAt === 'low') ? 'low' : 'high');
   const depth = cab.depth ?? (cab.code ? standard(cab.code, 'depth') : null) ?? 0;
   const set = (code: string, value: string | null) => props.onEdit({ kind: 'option', id: cab.id, option: code, value });
+  /** The cabinet's working drawers (not a pull-out front), top first: each can take an insert (owner, 2026-11-13). */
+  const drawerCount = (item && item.type !== 'filler' ? (faceOf(item, cab.sections ?? null, cab, cab.selections?.['hinge_side'] ?? null)?.pieces ?? []) : []).filter((p) => p.kind === 'drawer' && !p.pullout).length;
 
   return (
     <>
@@ -88,20 +107,39 @@ export function CabinetEditor(props: {
       )}
       {cab.code !== null && item && (
         <>
-          {types.length > 1 && (
+          {presets.length > 0 ? (
             <section className={s.sec}>
               <h3 className={s.h3}>Library cabinet</h3>
               <div className={s.typeGrid} role="radiogroup" aria-label="Cabinet type">
-                {types.map((t) => (
-                  <button key={t.code} role="radio" className={s.typeCard} aria-checked={t.code === cab.code} disabled={!canEdit} onClick={() => props.onEdit({ kind: 'type', id: cab.id, code: t.code })}>
-                    <span className={s.typePic}>
-                      <FrontIcon item={t} width={cab.width} height={cab.height || (t.size.height.default.value ?? 34 * IN)} size={44} selected={t.code === cab.code} finish={props.finish} />
-                    </span>
-                    <span className={s.typeName}>{t.name}</span>
-                  </button>
-                ))}
+                {presets.map((p) => {
+                  const on = isPreset(p, cab.code, cab.sections ?? null);
+                  const face = faceOf(itemByCode(p.code), p.sections, cab, null);
+                  return (
+                    <button key={p.id} role="radio" className={s.typeCard} aria-checked={on} disabled={!canEdit} title={p.note ?? undefined} onClick={() => !on && props.onEdit({ kind: 'preset', id: cab.id, code: p.code, sections: p.sections })}>
+                      <span className={s.typePic}>{face && <FacePicture {...face} maxW={44} maxH={52} />}</span>
+                      <span className={s.typeName}>{p.name}</span>
+                    </button>
+                  );
+                })}
               </div>
             </section>
+          ) : (
+            types.length > 1 && (
+              <section className={s.sec}>
+                <h3 className={s.h3}>Library cabinet</h3>
+                <div className={s.typeGrid} role="radiogroup" aria-label="Cabinet type">
+                  {types.map((t) => {
+                    const face = faceOf(t, null, cab, null);
+                    return (
+                      <button key={t.code} role="radio" className={s.typeCard} aria-checked={t.code === cab.code && !cab.sections} disabled={!canEdit} onClick={() => props.onEdit({ kind: 'type', id: cab.id, code: t.code })}>
+                        <span className={s.typePic}>{face && <FacePicture {...face} maxW={44} maxH={52} />}</span>
+                        <span className={s.typeName}>{t.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </section>
+            )
           )}
 
           <section className={s.sec}>
@@ -161,6 +199,24 @@ export function CabinetEditor(props: {
           )}
 
           <FrontEditor cab={cab} item={item} canEdit={canEdit} onSet={(sections) => props.onEdit({ kind: 'sections', id: cab.id, sections })} />
+
+          {drawerCount > 0 && (
+            <section className={s.sec}>
+              <h3 className={s.h3}>Drawer inserts</h3>
+              {Array.from({ length: drawerCount }, (_, k) => k + 1).map((n) => (
+                <div key={n} className={s.optRow}>
+                  <span className={s.optLabel}>{drawerCount === 1 ? 'Drawer' : n === 1 ? 'Drawer 1 (top)' : `Drawer ${n}`}</span>
+                  <Segmented
+                    label={`Drawer ${n} insert`}
+                    canEdit={canEdit}
+                    value={cab.drawerInserts?.[String(n)] ?? null}
+                    choices={[{ value: null, name: 'None' }, ...DRAWER_INSERTS.map((i) => ({ value: i.code, name: i.name.replace(/ insert$/, '') }))]}
+                    onSet={(v) => props.onEdit({ kind: 'insert', id: cab.id, drawer: n, insert: v })}
+                  />
+                </div>
+              ))}
+            </section>
+          )}
 
           {(offers('end_left') || offers('end_right')) && (
             <section className={s.sec}>
@@ -262,7 +318,7 @@ function FrontEditor(props: { cab: CabinetView; item: NonNullable<ReturnType<typ
   const y1 = (cab.elevation + cab.height) / IN;
   const tree: FrontSection = cab.sections ?? startingSections(item, rules, y0, y1);
   const picked = sectionAt(tree, path) ?? tree;
-  const pieces = frontPieces({ item, x0: 0, x1: w, y0, y1, hinge: cab.selections?.['hinge_side'] ?? null, sections: cab.sections ?? null, drawerHandleTop: false }, rules);
+  const pieces = frontPieces({ item, x0: 0, x1: w, y0, y1, hinge: cab.selections?.['hinge_side'] ?? null, sections: cab.sections ?? null, drawerHandleTop: false, sinkFront: cab.selections?.['sink_front'] ?? null }, rules);
   const boxes = sectionBoxes(tree, 0, w, y0, y1);
   const act = (a: SectionAction) => {
     setError(null);
@@ -276,59 +332,51 @@ function FrontEditor(props: { cab: CabinetView; item: NonNullable<ReturnType<typ
     }
     if (a === 'remove') setPath(path.slice(0, -1));
   };
-  // The picture: 220px tall at most, to the cabinet's proportions.
-  const H = 200;
-  const k = Math.min(H / (y1 - y0), 260 / w);
-  const X = (x: number) => 6 + x * k;
-  const Y = (y: number) => 6 + (y1 - y) * k;
   const leaf = picked.kind !== 'split';
   const can = props.canEdit;
+  const marks = Object.fromEntries(Object.entries(cab.drawerInserts ?? {}).map(([n, code]) => [n, DRAWER_INSERTS.find((i) => i.code === code)?.mark ?? '?']));
   return (
     <section className={s.sec}>
       <h3 className={s.h3}>Front and interior</h3>
-      <svg className={s.facePreview} width={w * k + 12} height={(y1 - y0) * k + 12} role="group" aria-label="Cabinet face">
-        <rect x={X(0)} y={Y(y1)} width={w * k} height={(y1 - y0) * k} fill="#f3f1ec" stroke="#57524b" />
-        {pieces.map((p, i) =>
-          p.kind === 'door' || p.kind === 'drawer' ? (
-            <g key={i}>
-              <rect x={X(p.x0) + 1} y={Y(p.y1) + 1} width={(p.x1 - p.x0) * k - 2} height={(p.y1 - p.y0) * k - 2} fill="#fbfaf7" stroke="#8f8a82" />
-              {p.kind === 'door' ? (
-                <line x1={X(p.hinge === 'left' ? p.x1 - 1.6 : p.x0 + 1.6)} x2={X(p.hinge === 'left' ? p.x1 - 1.6 : p.x0 + 1.6)} y1={Y(p.handleY + 2.5)} y2={Y(p.handleY - 2.5)} stroke="#57524b" strokeWidth={2} />
-              ) : (
-                <line x1={X((p.x0 + p.x1) / 2 - 2.5)} x2={X((p.x0 + p.x1) / 2 + 2.5)} y1={Y(p.handleY)} y2={Y(p.handleY)} stroke="#57524b" strokeWidth={2} />
-              )}
-            </g>
-          ) : p.kind === 'shelf' || p.kind === 'rollout' ? (
-            <line key={i} x1={X(p.x0) + 3} x2={X(p.x1) - 3} y1={Y(p.y)} y2={Y(p.y)} stroke="#8f8a82" strokeDasharray={p.kind === 'shelf' ? '4 3' : undefined} strokeWidth={p.kind === 'rollout' ? 3 : 1} />
-          ) : p.kind === 'divider' ? (
-            <rect key={i} x={X(p.x0)} y={Y(p.y1)} width={Math.max(1, (p.x1 - p.x0) * k)} height={Math.max(1, (p.y1 - p.y0) * k)} fill="#8f8a82" />
-          ) : null,
-        )}
-        {boxes.map((b) => {
-          const on = b.path.join('.') === path.join('.');
-          return (
-            <rect
-              key={b.path.join('.') || 'all'}
-              x={X(b.x0)}
-              y={Y(b.y1)}
-              width={(b.x1 - b.x0) * k}
-              height={(b.y1 - b.y0) * k}
-              fill={on ? 'rgba(47,125,225,0.12)' : 'transparent'}
-              stroke={on ? SELECT_BLUE : 'transparent'}
-              strokeWidth={2}
-              style={{ cursor: 'pointer' }}
-              role="button"
-              aria-label={`Section ${b.path.map((n) => n + 1).join('-') || 'whole cabinet'}: ${b.section.kind}`}
-              aria-pressed={on}
-              onClick={(e) => {
-                e.stopPropagation();
-                // The deepest part under the pointer wins: parts are listed after their split.
-                setPath(b.path);
-              }}
-            />
-          );
-        })}
-      </svg>
+      <div className={s.facePreview}>
+        <FacePicture
+          pieces={pieces}
+          x0={0}
+          x1={w}
+          y0={y0}
+          y1={y1}
+          maxW={260}
+          maxH={210}
+          marks={marks}
+          label="Cabinet face"
+          overlay={(X, Y, k) =>
+            boxes.map((b) => {
+              const on = b.path.join('.') === path.join('.');
+              return (
+                <rect
+                  key={b.path.join('.') || 'all'}
+                  x={X(b.x0)}
+                  y={Y(b.y1)}
+                  width={(b.x1 - b.x0) * k}
+                  height={(b.y1 - b.y0) * k}
+                  fill={on ? 'rgba(47,125,225,0.12)' : 'transparent'}
+                  stroke={on ? SELECT_BLUE : 'transparent'}
+                  strokeWidth={2}
+                  style={{ cursor: 'pointer' }}
+                  role="button"
+                  aria-label={`Section ${b.path.map((n) => n + 1).join('-') || 'whole cabinet'}: ${b.section.kind}`}
+                  aria-pressed={on}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // The deepest part under the pointer wins: parts are listed after their split.
+                    setPath(b.path);
+                  }}
+                />
+              );
+            })
+          }
+        />
+      </div>
       <p className={s.sub}>
         Picked: <b>{path.length ? `part ${path.map((n) => n + 1).join('-')}` : 'the whole cabinet'}</b> ·{' '}
         {picked.kind === 'split'
@@ -337,7 +385,9 @@ function FrontEditor(props: { cab: CabinetView; item: NonNullable<ReturnType<typ
             ? `doors, ${picked.shelves} shelf${picked.shelves === 1 ? '' : 'ves'}, ${picked.rollouts} roll-out${picked.rollouts === 1 ? '' : 's'}`
             : picked.kind === 'drawers'
               ? `${picked.count} drawer${picked.count === 1 ? '' : 's'}`
-              : `open, ${picked.shelves} shelf${picked.shelves === 1 ? '' : 'ves'}`}
+              : picked.kind === 'pullout'
+                ? `pull-out, ${picked.rollouts} roll-out${picked.rollouts === 1 ? '' : 's'}`
+                : `open, ${picked.shelves} shelf${picked.shelves === 1 ? '' : 'ves'}`}
       </p>
       <div className={s.toolGrid}>
         <button className={s.btnSm} disabled={!can} onClick={() => act('split_vertical')}>
@@ -355,15 +405,18 @@ function FrontEditor(props: { cab: CabinetView; item: NonNullable<ReturnType<typ
         <button className={s.btnSm} disabled={!can || !leaf || picked.kind === 'drawers'} onClick={() => act('drawers')}>
           Drawers
         </button>
+        <button className={s.btnSm} disabled={!can || !leaf || picked.kind === 'pullout'} onClick={() => act('pullout')}>
+          Pull-out
+        </button>
         <button className={s.btnSm} disabled={!can || !leaf || picked.kind === 'open'} onClick={() => act('open')}>
           Open
         </button>
       </div>
       {leaf && (
         <div className={s.counters}>
-          {picked.kind !== 'drawers' && <Counter label="Shelves" value={picked.shelves} can={can} onDown={() => act('remove_shelf')} onUp={() => act('add_shelf')} />}
+          {(picked.kind === 'doors' || picked.kind === 'open') && <Counter label="Shelves" value={picked.shelves} can={can} onDown={() => act('remove_shelf')} onUp={() => act('add_shelf')} />}
           {picked.kind === 'drawers' && <Counter label="Drawers" value={picked.count} can={can} onDown={() => act('remove_drawer')} onUp={() => act('add_drawer')} />}
-          {picked.kind === 'doors' && <Counter label="Roll-outs" value={picked.rollouts} can={can} onDown={() => act('remove_rollout')} onUp={() => act('add_rollout')} />}
+          {(picked.kind === 'doors' || picked.kind === 'pullout') && <Counter label="Roll-outs" value={picked.rollouts} can={can} onDown={() => act('remove_rollout')} onUp={() => act('add_rollout')} />}
         </div>
       )}
       {cab.sections && (

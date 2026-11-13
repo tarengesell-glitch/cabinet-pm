@@ -1,16 +1,40 @@
 {
-  "source": "Owner (Taren), chat 2026-11-10: the kitchen image library variable list, and answers to the follow-up questions the same day. Peninsula and double island are kept from the intake (owner, 2026-11-10). Items marked \"proposed\" are this session's suggestions, not owner decisions.",
+  "source": "Owner (Taren), chat 2026-11-10: the kitchen image library variable list, and answers to the follow-up questions the same day. Peninsula and double island are kept from the intake (owner, 2026-11-10). Owner answers of 2026-11-13 included. Items marked \"proposed\" are this session's suggestions, not owner decisions.",
   "version": 1,
-  "purpose": "Every option the image selector shows, with what each photorealistic image must change. Each step's images vary one thing on the default kitchen; everything else stays as the default. Images are AI edits of one locked base photo per room shape, masked to one region, anchored to an owner-approved real reference photo, and checked automatically before they are kept.",
+  "purpose": "Every option the image selector shows, with what each photorealistic image must change. Each step shows that step's options. There is no single default kitchen (owner, 2026-11-13); how earlier picks show in later images is IK-25. Images are AI edits of one locked base photo per room shape, masked to one region, anchored to an owner-approved real reference photo, and checked automatically before they are kept.",
   "regions": [
-    { "id": "whole_room", "label": "The whole room (a base photo of its own)" },
-    { "id": "cabinet_fronts", "label": "Every door, drawer front and exposed cabinet side" },
-    { "id": "hardware", "label": "Every handle and knob" },
-    { "id": "counter", "label": "Every counter top and edge" },
-    { "id": "island_back", "label": "The island's back panel" },
-    { "id": "island_ends", "label": "The island's two end panels" },
-    { "id": "top_trim", "label": "The trim along the top of the upper cabinets" },
-    { "id": "valance", "label": "The light valance under the upper cabinets" }
+    {
+      "id": "whole_room",
+      "label": "The whole room (a base photo of its own)"
+    },
+    {
+      "id": "cabinet_fronts",
+      "label": "Every door, drawer front and exposed cabinet side"
+    },
+    {
+      "id": "hardware",
+      "label": "Every handle and knob"
+    },
+    {
+      "id": "counter",
+      "label": "Every counter top and edge"
+    },
+    {
+      "id": "island_back",
+      "label": "The island's back panel"
+    },
+    {
+      "id": "island_ends",
+      "label": "The island's two end panels"
+    },
+    {
+      "id": "top_trim",
+      "label": "The trim along the top of the upper cabinets"
+    },
+    {
+      "id": "valance",
+      "label": "The light valance under the upper cabinets"
+    }
   ],
   "groups": [
     {
@@ -23,18 +47,72 @@
           "region": "whole_room",
           "needs_reference": false,
           "options": [
-            { "id": "single_wall", "label": "Single wall, no island", "prompt": "one straight run of cabinets on a single wall, no island" },
-            { "id": "single_wall_island", "label": "Single wall with island", "island": true, "prompt": "one straight run of cabinets on a single wall with a freestanding island in front of it" },
-            { "id": "galley", "label": "Galley, no island", "prompt": "two parallel runs of cabinets facing each other across a walkway, no island" },
-            { "id": "galley_island", "label": "Galley with island", "island": true, "prompt": "two parallel runs of cabinets facing each other with a freestanding island between them" },
-            { "id": "u_shape", "label": "U-shape, no island", "prompt": "cabinets on three walls forming a U, no island" },
-            { "id": "u_shape_island", "label": "U-shape with island", "island": true, "prompt": "cabinets on three walls forming a U with a freestanding island in the middle" },
-            { "id": "l_shape", "label": "L-shape, no island", "prompt": "cabinets on two adjoining walls forming an L, no island" },
-            { "id": "l_shape_island", "label": "L-shape with island", "island": true, "prompt": "cabinets on two adjoining walls forming an L with a freestanding island" },
-            { "id": "g_shape", "label": "G-shape, no island", "prompt": "cabinets on three walls forming a U plus a short connected peninsula forming a G, no island" },
-            { "id": "g_shape_island", "label": "G-shape with island", "island": true, "prompt": "cabinets on three walls plus a short connected peninsula forming a G, with a freestanding island" },
-            { "id": "peninsula", "label": "Peninsula", "prompt": "cabinets on one or two walls with a connected peninsula run extending into the room, no freestanding island" },
-            { "id": "double_island", "label": "Double island", "island": true, "prompt": "cabinets on the walls with two parallel freestanding islands" }
+            {
+              "id": "single_wall",
+              "label": "Single wall, no island",
+              "prompt": "one straight run of cabinets on a single wall, no island"
+            },
+            {
+              "id": "single_wall_island",
+              "label": "Single wall with island",
+              "island": true,
+              "prompt": "one straight run of cabinets on a single wall with a freestanding island in front of it"
+            },
+            {
+              "id": "galley",
+              "label": "Galley, no island",
+              "prompt": "two parallel runs of cabinets facing each other across a walkway, no island"
+            },
+            {
+              "id": "galley_island",
+              "label": "Galley with island",
+              "island": true,
+              "prompt": "two parallel runs of cabinets facing each other with a freestanding island between them"
+            },
+            {
+              "id": "u_shape",
+              "label": "U-shape, no island",
+              "prompt": "cabinets on three walls forming a U, no island"
+            },
+            {
+              "id": "u_shape_island",
+              "label": "U-shape with island",
+              "island": true,
+              "prompt": "cabinets on three walls forming a U with a freestanding island in the middle"
+            },
+            {
+              "id": "l_shape",
+              "label": "L-shape, no island",
+              "prompt": "cabinets on two adjoining walls forming an L, no island"
+            },
+            {
+              "id": "l_shape_island",
+              "label": "L-shape with island",
+              "island": true,
+              "prompt": "cabinets on two adjoining walls forming an L with a freestanding island"
+            },
+            {
+              "id": "g_shape",
+              "label": "G-shape, no island",
+              "prompt": "cabinets on three walls forming a U plus a short connected peninsula forming a G, no island"
+            },
+            {
+              "id": "g_shape_island",
+              "label": "G-shape with island",
+              "island": true,
+              "prompt": "cabinets on three walls plus a short connected peninsula forming a G, with a freestanding island"
+            },
+            {
+              "id": "peninsula",
+              "label": "Peninsula",
+              "prompt": "cabinets on one or two walls with a connected peninsula run extending into the room, no freestanding island"
+            },
+            {
+              "id": "double_island",
+              "label": "Double island",
+              "island": true,
+              "prompt": "cabinets on the walls with two parallel freestanding islands"
+            }
           ]
         }
       ]
@@ -49,16 +127,74 @@
           "region": "cabinet_fronts",
           "needs_reference": true,
           "options": [
-            { "id": "tafisa_tfl", "label": "Tafisa (TFL)", "colour_list": "tafisa_tfl", "prompt": "thermally fused laminate (melamine) cabinet fronts with a crisp factory finish" },
-            { "id": "painted", "label": "Painted", "colour_list": "sherwin_williams", "prompt": "smooth sprayed painted cabinet fronts with a satin sheen, no visible wood grain" },
-            { "id": "red_oak_rift", "label": "Rift cut red oak", "wood": true, "colour_list": "stains", "prompt": "rift cut red oak veneer with tight, straight, parallel grain lines" },
-            { "id": "red_oak_rotary", "label": "Rotary cut red oak", "wood": true, "colour_list": "stains", "prompt": "rotary cut red oak veneer with wide, wavy, open cathedral-like grain" },
-            { "id": "white_oak_rift", "label": "Rift cut white oak", "wood": true, "colour_list": "stains", "prompt": "rift cut white oak veneer with tight, straight, parallel grain lines" },
-            { "id": "white_oak_rotary", "label": "Rotary cut white oak", "wood": true, "colour_list": "stains", "prompt": "rotary cut white oak veneer with wide, wavy, open grain" },
-            { "id": "maple", "label": "Maple", "wood": true, "colour_list": "stains", "prompt": "maple with a fine, even, subtle grain" },
-            { "id": "walnut_rift", "label": "Rift cut walnut", "wood": true, "colour_list": "stains", "prompt": "rift cut walnut veneer with straight, parallel grain" },
-            { "id": "walnut_rotary", "label": "Rotary cut walnut", "wood": true, "colour_list": "stains", "prompt": "rotary cut walnut veneer with wide, wavy, figured grain" },
-            { "id": "cherry", "label": "Cherry", "wood": true, "colour_list": "stains", "prompt": "cherry with a fine, smooth, slightly wavy grain" }
+            {
+              "id": "tafisa_tfl",
+              "label": "Tafisa (TFL)",
+              "colour_list": "tafisa_tfl",
+              "prompt": "thermally fused laminate (melamine) cabinet fronts with a crisp factory finish"
+            },
+            {
+              "id": "painted",
+              "label": "Painted",
+              "colour_list": "sherwin_williams",
+              "prompt": "smooth sprayed painted cabinet fronts with a satin sheen, no visible wood grain"
+            },
+            {
+              "id": "red_oak_rift",
+              "label": "Rift cut red oak",
+              "wood": true,
+              "colour_list": "stains",
+              "prompt": "rift cut red oak veneer with tight, straight, parallel grain lines"
+            },
+            {
+              "id": "red_oak_rotary",
+              "label": "Rotary cut red oak",
+              "wood": true,
+              "colour_list": "stains",
+              "prompt": "rotary cut red oak veneer with wide, wavy, open cathedral-like grain"
+            },
+            {
+              "id": "white_oak_rift",
+              "label": "Rift cut white oak",
+              "wood": true,
+              "colour_list": "stains",
+              "prompt": "rift cut white oak veneer with tight, straight, parallel grain lines"
+            },
+            {
+              "id": "white_oak_rotary",
+              "label": "Rotary cut white oak",
+              "wood": true,
+              "colour_list": "stains",
+              "prompt": "rotary cut white oak veneer with wide, wavy, open grain"
+            },
+            {
+              "id": "maple",
+              "label": "Maple",
+              "wood": true,
+              "colour_list": "stains",
+              "prompt": "maple with a fine, even, subtle grain"
+            },
+            {
+              "id": "walnut_rift",
+              "label": "Rift cut walnut",
+              "wood": true,
+              "colour_list": "stains",
+              "prompt": "rift cut walnut veneer with straight, parallel grain"
+            },
+            {
+              "id": "walnut_rotary",
+              "label": "Rotary cut walnut",
+              "wood": true,
+              "colour_list": "stains",
+              "prompt": "rotary cut walnut veneer with wide, wavy, figured grain"
+            },
+            {
+              "id": "cherry",
+              "label": "Cherry",
+              "wood": true,
+              "colour_list": "stains",
+              "prompt": "cherry with a fine, smooth, slightly wavy grain"
+            }
           ]
         }
       ]
@@ -88,11 +224,31 @@
           "region": "cabinet_fronts",
           "needs_reference": true,
           "options": [
-            { "id": "slab_handleless", "label": "Slab, handleless", "prompt": "flat slab doors and drawer fronts with no handles or knobs, opened by an integrated finger pull or push-to-open" },
-            { "id": "slab", "label": "Slab", "prompt": "flat slab doors and drawer fronts" },
-            { "id": "slim_shaker", "label": "Slim shaker", "prompt": "shaker doors with a narrow frame (about 1 1/4 inch rails and stiles) and a flat recessed centre panel" },
-            { "id": "shaker", "label": "Shaker", "prompt": "classic shaker doors with a wide frame (about 2 1/4 inch rails and stiles) and a flat recessed centre panel" },
-            { "id": "raised_panel", "label": "Raised panel", "prompt": "traditional raised panel doors with a bevelled centre panel inside a frame" }
+            {
+              "id": "slab_handleless",
+              "label": "Slab, handleless",
+              "prompt": "flat slab doors and drawer fronts with no handles or knobs, opened by an integrated finger pull or push-to-open"
+            },
+            {
+              "id": "slab",
+              "label": "Slab",
+              "prompt": "flat slab doors and drawer fronts"
+            },
+            {
+              "id": "slim_shaker",
+              "label": "Slim shaker",
+              "prompt": "shaker doors with a narrow frame (about 1 1/4 inch rails and stiles) and a flat recessed centre panel"
+            },
+            {
+              "id": "shaker",
+              "label": "Shaker",
+              "prompt": "classic shaker doors with a wide frame (about 2 1/4 inch rails and stiles) and a flat recessed centre panel"
+            },
+            {
+              "id": "raised_panel",
+              "label": "Raised panel",
+              "prompt": "traditional raised panel doors with a bevelled centre panel inside a frame"
+            }
           ]
         }
       ]
@@ -100,7 +256,12 @@
     {
       "id": "hardware",
       "label": "Handles",
-      "when": { "variable": "door_style", "not_in": ["slab_handleless"] },
+      "when": {
+        "variable": "door_style",
+        "not_in": [
+          "slab_handleless"
+        ]
+      },
       "variables": [
         {
           "id": "hardware_config",
@@ -108,10 +269,34 @@
           "region": "hardware",
           "needs_reference": false,
           "options": [
-            { "id": "all_handles", "label": "All handles", "door": "handle", "drawer": "handle", "prompt": "bar handles on every door and drawer" },
-            { "id": "all_knobs", "label": "All knobs", "door": "knob", "drawer": "knob", "prompt": "round knobs on every door and drawer" },
-            { "id": "knobs_doors_handles_drawers", "label": "Knobs on doors, handles on drawers", "door": "knob", "drawer": "handle", "prompt": "round knobs on the doors and bar handles on the drawers" },
-            { "id": "handles_doors_knobs_drawers", "label": "Handles on doors, knobs on drawers", "door": "handle", "drawer": "knob", "prompt": "bar handles on the doors and round knobs on the drawers" }
+            {
+              "id": "all_handles",
+              "label": "All handles",
+              "door": "handle",
+              "drawer": "handle",
+              "prompt": "bar handles on every door and drawer"
+            },
+            {
+              "id": "all_knobs",
+              "label": "All knobs",
+              "door": "knob",
+              "drawer": "knob",
+              "prompt": "round knobs on every door and drawer"
+            },
+            {
+              "id": "knobs_doors_handles_drawers",
+              "label": "Knobs on doors, handles on drawers",
+              "door": "knob",
+              "drawer": "handle",
+              "prompt": "round knobs on the doors and bar handles on the drawers"
+            },
+            {
+              "id": "handles_doors_knobs_drawers",
+              "label": "Handles on doors, knobs on drawers",
+              "door": "handle",
+              "drawer": "knob",
+              "prompt": "bar handles on the doors and round knobs on the drawers"
+            }
           ]
         },
         {
@@ -119,10 +304,24 @@
           "label": "Handle direction on doors",
           "region": "hardware",
           "needs_reference": false,
-          "when": { "variable": "hardware_config", "in": ["all_handles", "handles_doors_knobs_drawers"] },
+          "when": {
+            "variable": "hardware_config",
+            "in": [
+              "all_handles",
+              "handles_doors_knobs_drawers"
+            ]
+          },
           "options": [
-            { "id": "vertical", "label": "Vertical on doors", "prompt": "door handles mounted vertically near the opening edge" },
-            { "id": "horizontal", "label": "Horizontal on doors", "prompt": "door handles mounted horizontally near the opening corner" }
+            {
+              "id": "vertical",
+              "label": "Vertical on doors",
+              "prompt": "door handles mounted vertically near the opening edge"
+            },
+            {
+              "id": "horizontal",
+              "label": "Horizontal on doors",
+              "prompt": "door handles mounted horizontally near the opening corner"
+            }
           ]
         },
         {
@@ -131,8 +330,16 @@
           "region": "hardware",
           "needs_reference": false,
           "options": [
-            { "id": "single", "label": "Single on drawers", "prompt": "one handle or knob centred on each drawer front" },
-            { "id": "double", "label": "Double on drawers", "prompt": "two handles or knobs on each drawer front, spaced evenly toward the ends" }
+            {
+              "id": "single",
+              "label": "Single on drawers",
+              "prompt": "one handle or knob centred on each drawer front"
+            },
+            {
+              "id": "double",
+              "label": "Double on drawers",
+              "prompt": "two handles or knobs on each drawer front, spaced evenly toward the ends"
+            }
           ]
         },
         {
@@ -141,30 +348,50 @@
           "region": "hardware",
           "needs_reference": false,
           "options": [
-            { "id": "centred_all", "label": "Centred on all drawers", "prompt": "hardware centred top to bottom on every drawer front" },
-            { "id": "top_aligned", "label": "Centred on top drawers, then the same distance from the top on all others", "prompt": "hardware centred on the top drawers, and on every lower drawer set the same distance down from its top edge, so all hardware sits high on the drawer fronts" }
+            {
+              "id": "centred_all",
+              "label": "Centred on all drawers",
+              "prompt": "hardware centred top to bottom on every drawer front"
+            },
+            {
+              "id": "top_aligned",
+              "label": "Centred on top drawers, then the same distance from the top on all others",
+              "prompt": "hardware centred on the top drawers, and on every lower drawer set the same distance down from its top edge, so all hardware sits high on the drawer fronts"
+            }
           ]
         },
         {
-          "id": "hardware_colour",
-          "label": "Finish colour",
+          "id": "hardware_finish",
+          "label": "Finish",
           "region": "hardware",
           "needs_reference": true,
+          "note": "The five finishes the owner listed are the whole list; colour and texture are not combined (owner, 2026-11-13).",
           "options": [
-            { "id": "nickel", "label": "Nickel", "prompt": "nickel coloured metal" },
-            { "id": "aluminum", "label": "Aluminum", "prompt": "aluminum coloured metal" },
-            { "id": "black", "label": "Black", "prompt": "black metal" },
-            { "id": "oil_rubbed_bronze", "label": "Oil rubbed bronze", "prompt": "dark oil rubbed bronze metal with warm copper highlights" }
-          ]
-        },
-        {
-          "id": "hardware_texture",
-          "label": "Finish texture",
-          "region": "hardware",
-          "needs_reference": true,
-          "note": "Brushed is a texture, not a colour (owner, 2026-11-10). Which other textures are offered is open (IK-19).",
-          "options": [
-            { "id": "brushed", "label": "Brushed", "prompt": "with a fine brushed, satin metal texture" }
+            {
+              "id": "brushed_nickel",
+              "label": "Brushed nickel",
+              "prompt": "brushed nickel metal with a fine satin brushed texture"
+            },
+            {
+              "id": "brushed_aluminum",
+              "label": "Brushed aluminum",
+              "prompt": "brushed aluminum metal with a fine satin brushed texture"
+            },
+            {
+              "id": "brushed",
+              "label": "Brushed",
+              "prompt": "brushed stainless-look metal with a fine satin brushed texture"
+            },
+            {
+              "id": "black",
+              "label": "Black",
+              "prompt": "matte black metal"
+            },
+            {
+              "id": "oil_rubbed_bronze",
+              "label": "Oil rubbed bronze",
+              "prompt": "dark oil rubbed bronze metal with warm copper highlights"
+            }
           ]
         },
         {
@@ -173,11 +400,28 @@
           "region": "hardware",
           "needs_reference": true,
           "note": "Handles only; knobs have no length (owner, 2026-11-10).",
-          "when": { "variable": "hardware_config", "not_in": ["all_knobs"] },
+          "when": {
+            "variable": "hardware_config",
+            "not_in": [
+              "all_knobs"
+            ]
+          },
           "options": [
-            { "id": "len_5_5", "label": "5 1/2\"", "prompt": "bar handles 5 1/2 inches long" },
-            { "id": "len_8", "label": "8\"", "prompt": "bar handles 8 inches long" },
-            { "id": "len_12", "label": "12\"", "prompt": "bar handles 12 inches long" }
+            {
+              "id": "len_5_5",
+              "label": "5 1/2\"",
+              "prompt": "bar handles 5 1/2 inches long"
+            },
+            {
+              "id": "len_8",
+              "label": "8\"",
+              "prompt": "bar handles 8 inches long"
+            },
+            {
+              "id": "len_12",
+              "label": "12\"",
+              "prompt": "bar handles 12 inches long"
+            }
           ]
         }
       ]
@@ -192,9 +436,21 @@
           "region": "counter",
           "needs_reference": true,
           "options": [
-            { "id": "minimal", "label": "Minimal", "prompt": "a solid, almost uniform quartz surface with very faint speckle" },
-            { "id": "medium", "label": "Medium", "prompt": "a quartz surface with soft, moderate veining or speckle" },
-            { "id": "heavy", "label": "Heavy noise", "prompt": "a busy natural-stone look with bold veining and strong movement" }
+            {
+              "id": "minimal",
+              "label": "Minimal",
+              "prompt": "a solid, almost uniform quartz surface with very faint speckle"
+            },
+            {
+              "id": "medium",
+              "label": "Medium",
+              "prompt": "a quartz surface with soft, moderate veining or speckle"
+            },
+            {
+              "id": "heavy",
+              "label": "Heavy noise",
+              "prompt": "a busy natural-stone look with bold veining and strong movement"
+            }
           ]
         },
         {
@@ -202,15 +458,45 @@
           "label": "Colour",
           "region": "counter",
           "needs_reference": true,
-          "varies_with": ["counter_pattern"],
+          "varies_with": [
+            "counter_pattern"
+          ],
           "options": [
-            { "id": "pure_white", "label": "Pure white", "prompt": "pure bright white" },
-            { "id": "creamy_white", "label": "Creamy white", "prompt": "warm creamy off-white" },
-            { "id": "taupe", "label": "Taupe", "prompt": "taupe, a warm grey-brown" },
-            { "id": "brown", "label": "Brown", "prompt": "brown" },
-            { "id": "light_grey", "label": "Light grey", "prompt": "light grey" },
-            { "id": "dark_grey", "label": "Dark grey", "prompt": "dark charcoal grey" },
-            { "id": "black", "label": "Black", "prompt": "black" }
+            {
+              "id": "pure_white",
+              "label": "Pure white",
+              "prompt": "pure bright white"
+            },
+            {
+              "id": "creamy_white",
+              "label": "Creamy white",
+              "prompt": "warm creamy off-white"
+            },
+            {
+              "id": "taupe",
+              "label": "Taupe",
+              "prompt": "taupe, a warm grey-brown"
+            },
+            {
+              "id": "brown",
+              "label": "Brown",
+              "prompt": "brown"
+            },
+            {
+              "id": "light_grey",
+              "label": "Light grey",
+              "prompt": "light grey"
+            },
+            {
+              "id": "dark_grey",
+              "label": "Dark grey",
+              "prompt": "dark charcoal grey"
+            },
+            {
+              "id": "black",
+              "label": "Black",
+              "prompt": "black"
+            }
           ]
         }
       ]
@@ -218,7 +504,17 @@
     {
       "id": "island",
       "label": "Island",
-      "when": { "variable": "room_shape", "in": ["single_wall_island", "galley_island", "u_shape_island", "l_shape_island", "g_shape_island", "double_island"] },
+      "when": {
+        "variable": "room_shape",
+        "in": [
+          "single_wall_island",
+          "galley_island",
+          "u_shape_island",
+          "l_shape_island",
+          "g_shape_island",
+          "double_island"
+        ]
+      },
       "variables": [
         {
           "id": "island_back",
@@ -226,22 +522,89 @@
           "region": "island_back",
           "needs_reference": true,
           "options": [
-            { "id": "slab", "label": "Slab", "prompt": "one flat, plain slab panel" },
-            { "id": "matching_doors", "label": "Matching doors", "varies_with": ["door_style"], "prompt": "panels made to look like the chosen cabinet doors" },
-            { "id": "slats_thin_h", "label": "Thin slats, horizontal", "prompt": "thin horizontal slats (about 1 1/2 inches) with narrow grooves" },
-            { "id": "slats_thick_h", "label": "Thick slats, horizontal", "prompt": "thick horizontal slats (about 3 inches) with narrow grooves" },
-            { "id": "shiplap_h", "label": "Super thick shiplap slats, horizontal", "prompt": "wide horizontal shiplap boards (about 6 inches) with shadow gaps" },
-            { "id": "slats_thin_v", "label": "Thin slats, vertical", "prompt": "thin vertical slats (about 1 1/2 inches) with narrow grooves" },
-            { "id": "slats_thick_v", "label": "Thick slats, vertical", "prompt": "thick vertical slats (about 3 inches) with narrow grooves" },
-            { "id": "shiplap_v", "label": "Super thick shiplap slats, vertical", "prompt": "wide vertical shiplap boards (about 6 inches) with shadow gaps" },
-            { "id": "wainscot_frame", "label": "Wainscotting, frame only, no moulding", "prompt": "wainscotting: one flat frame around the edge, no inner moulding" },
-            { "id": "wainscot_2", "label": "Wainscotting, 2 panels, no moulding", "prompt": "wainscotting: a flat frame divided into 2 recessed panels, no moulding" },
-            { "id": "wainscot_3", "label": "Wainscotting, 3 panels, no moulding", "prompt": "wainscotting: a flat frame divided into 3 recessed panels, no moulding" },
-            { "id": "wainscot_4", "label": "Wainscotting, 4 panels, no moulding", "prompt": "wainscotting: a flat frame divided into 4 recessed panels, no moulding" },
-            { "id": "wainscot_frame_moulding", "label": "Wainscotting, frame only, inside edge moulding", "prompt": "wainscotting: one flat frame with a small moulding along its inside edge" },
-            { "id": "wainscot_2_moulding", "label": "Wainscotting, 2 panels, inside edge moulding", "prompt": "wainscotting: a frame divided into 2 recessed panels with a small moulding along each panel's inside edge" },
-            { "id": "wainscot_3_moulding", "label": "Wainscotting, 3 panels, inside edge moulding", "prompt": "wainscotting: a frame divided into 3 recessed panels with a small moulding along each panel's inside edge" },
-            { "id": "wainscot_4_moulding", "label": "Wainscotting, 4 panels, inside edge moulding", "prompt": "wainscotting: a frame divided into 4 recessed panels with a small moulding along each panel's inside edge" }
+            {
+              "id": "slab",
+              "label": "Slab",
+              "prompt": "one flat, plain slab panel"
+            },
+            {
+              "id": "matching_doors",
+              "label": "Matching doors",
+              "varies_with": [
+                "door_style"
+              ],
+              "prompt": "panels made to look like the chosen cabinet doors"
+            },
+            {
+              "id": "slats_thin_h",
+              "label": "Thin slats, horizontal",
+              "prompt": "thin horizontal slats (about 1 1/2 inches) with narrow grooves"
+            },
+            {
+              "id": "slats_thick_h",
+              "label": "Thick slats, horizontal",
+              "prompt": "thick horizontal slats (about 3 inches) with narrow grooves"
+            },
+            {
+              "id": "shiplap_h",
+              "label": "Super thick shiplap slats, horizontal",
+              "prompt": "wide horizontal shiplap boards (about 6 inches) with shadow gaps"
+            },
+            {
+              "id": "slats_thin_v",
+              "label": "Thin slats, vertical",
+              "prompt": "thin vertical slats (about 1 1/2 inches) with narrow grooves"
+            },
+            {
+              "id": "slats_thick_v",
+              "label": "Thick slats, vertical",
+              "prompt": "thick vertical slats (about 3 inches) with narrow grooves"
+            },
+            {
+              "id": "shiplap_v",
+              "label": "Super thick shiplap slats, vertical",
+              "prompt": "wide vertical shiplap boards (about 6 inches) with shadow gaps"
+            },
+            {
+              "id": "wainscot_frame",
+              "label": "Wainscotting, frame only, no moulding",
+              "prompt": "wainscotting: one flat frame around the edge, no inner moulding"
+            },
+            {
+              "id": "wainscot_2",
+              "label": "Wainscotting, 2 panels, no moulding",
+              "prompt": "wainscotting: a flat frame divided into 2 recessed panels, no moulding"
+            },
+            {
+              "id": "wainscot_3",
+              "label": "Wainscotting, 3 panels, no moulding",
+              "prompt": "wainscotting: a flat frame divided into 3 recessed panels, no moulding"
+            },
+            {
+              "id": "wainscot_4",
+              "label": "Wainscotting, 4 panels, no moulding",
+              "prompt": "wainscotting: a flat frame divided into 4 recessed panels, no moulding"
+            },
+            {
+              "id": "wainscot_frame_moulding",
+              "label": "Wainscotting, frame only, inside edge moulding",
+              "prompt": "wainscotting: one flat frame with a small moulding along its inside edge"
+            },
+            {
+              "id": "wainscot_2_moulding",
+              "label": "Wainscotting, 2 panels, inside edge moulding",
+              "prompt": "wainscotting: a frame divided into 2 recessed panels with a small moulding along each panel's inside edge"
+            },
+            {
+              "id": "wainscot_3_moulding",
+              "label": "Wainscotting, 3 panels, inside edge moulding",
+              "prompt": "wainscotting: a frame divided into 3 recessed panels with a small moulding along each panel's inside edge"
+            },
+            {
+              "id": "wainscot_4_moulding",
+              "label": "Wainscotting, 4 panels, inside edge moulding",
+              "prompt": "wainscotting: a frame divided into 4 recessed panels with a small moulding along each panel's inside edge"
+            }
           ]
         },
         {
@@ -250,12 +613,42 @@
           "region": "island_ends",
           "needs_reference": true,
           "options": [
-            { "id": "match_back", "label": "Match the back panel", "varies_with": ["island_back"], "prompt": "end panels with the same treatment as the island back" },
-            { "id": "gable_1_5_cabinet", "label": "1 1/2\" gables, cabinet depth", "prompt": "1 1/2 inch thick flat end gables, as deep as the cabinets only" },
-            { "id": "gable_1_5_full", "label": "1 1/2\" gables, full island depth", "prompt": "1 1/2 inch thick flat end gables running the full depth of the island" },
-            { "id": "gable_4_cabinet", "label": "4\" gables, cabinet depth", "prompt": "4 inch thick chunky flat end gables, as deep as the cabinets only" },
-            { "id": "gable_4_full", "label": "4\" gables, full island depth", "prompt": "4 inch thick chunky flat end gables running the full depth of the island" },
-            { "id": "waterfall", "label": "Waterfall counter", "varies_with": ["counter_pattern", "counter_colour"], "prompt": "the counter material continues down both island ends to the floor as a waterfall edge" }
+            {
+              "id": "match_back",
+              "label": "Match the back panel",
+              "varies_with": [
+                "island_back"
+              ],
+              "prompt": "end panels with the same treatment as the island back"
+            },
+            {
+              "id": "gable_1_5_cabinet",
+              "label": "1 1/2\" gables, cabinet depth",
+              "prompt": "1 1/2 inch thick flat end gables, as deep as the cabinets only"
+            },
+            {
+              "id": "gable_1_5_full",
+              "label": "1 1/2\" gables, full island depth",
+              "prompt": "1 1/2 inch thick flat end gables running the full depth of the island"
+            },
+            {
+              "id": "gable_4_cabinet",
+              "label": "4\" gables, cabinet depth",
+              "prompt": "4 inch thick chunky flat end gables, as deep as the cabinets only"
+            },
+            {
+              "id": "gable_4_full",
+              "label": "4\" gables, full island depth",
+              "prompt": "4 inch thick chunky flat end gables running the full depth of the island"
+            },
+            {
+              "id": "waterfall",
+              "label": "Waterfall counter",
+              "varies_with": [
+                "counter_colour"
+              ],
+              "prompt": "the counter material continues down both island ends to the floor as a waterfall edge"
+            }
           ]
         }
       ]
@@ -270,10 +663,26 @@
           "region": "top_trim",
           "needs_reference": true,
           "options": [
-            { "id": "none", "label": "None", "prompt": "no trim on top of the upper cabinets" },
-            { "id": "flat_0_75", "label": "3/4\" flat", "prompt": "a thin 3/4 inch flat band along the top of the upper cabinets" },
-            { "id": "flat_3", "label": "3\" flat", "prompt": "a 3 inch flat band along the top of the upper cabinets" },
-            { "id": "crown_3", "label": "3\" crown", "prompt": "a 3 inch crown moulding along the top of the upper cabinets" }
+            {
+              "id": "none",
+              "label": "None",
+              "prompt": "no trim on top of the upper cabinets"
+            },
+            {
+              "id": "flat_0_75",
+              "label": "3/4\" flat",
+              "prompt": "a thin 3/4 inch flat band along the top of the upper cabinets"
+            },
+            {
+              "id": "flat_3",
+              "label": "3\" flat",
+              "prompt": "a 3 inch flat band along the top of the upper cabinets"
+            },
+            {
+              "id": "crown_3",
+              "label": "3\" crown",
+              "prompt": "a 3 inch crown moulding along the top of the upper cabinets"
+            }
           ]
         },
         {
@@ -282,46 +691,67 @@
           "region": "valance",
           "needs_reference": true,
           "options": [
-            { "id": "none", "label": "None", "prompt": "no light valance; the bottom edge of the upper cabinets is plain" },
-            { "id": "hidden", "label": "Hidden", "prompt": "a hidden recessed under-cabinet light strip; no visible valance, warm light washing the backsplash" },
-            { "id": "flat_2", "label": "2\" flat", "prompt": "a 2 inch flat valance strip along the bottom front of the upper cabinets" },
-            { "id": "flat_2_edge", "label": "2\" flat with edge detail", "prompt": "a 2 inch flat valance strip with a small profiled edge detail along the bottom front of the upper cabinets" }
+            {
+              "id": "none",
+              "label": "None",
+              "prompt": "no light valance; the bottom edge of the upper cabinets is plain"
+            },
+            {
+              "id": "hidden",
+              "label": "Hidden",
+              "prompt": "a hidden recessed under-cabinet light strip; no visible valance, warm light washing the backsplash"
+            },
+            {
+              "id": "flat_2",
+              "label": "2\" flat",
+              "prompt": "a 2 inch flat valance strip along the bottom front of the upper cabinets"
+            },
+            {
+              "id": "flat_2_edge",
+              "label": "2\" flat with edge detail",
+              "prompt": "a 2 inch flat valance strip with a small profiled edge detail along the bottom front of the upper cabinets"
+            }
           ]
         }
       ]
     }
   ],
-  "default_kitchen": {
-    "note": "Everything that stays the same while one variable changes. The room shape is the owner's (2026-11-10); the rest is PROPOSED until the owner confirms it (IK-23).",
-    "picks": [
-      { "variable": "room_shape", "option": "l_shape_island", "status": "owner" },
-      { "variable": "material", "option": "painted", "status": "proposed" },
-      { "variable": "colour", "option": null, "status": "proposed", "note": "A white from the Sherwin-Williams shortlist, once it exists (IK-21)." },
-      { "variable": "door_style", "option": "shaker", "status": "proposed" },
-      { "variable": "hardware_config", "option": "all_handles", "status": "proposed" },
-      { "variable": "door_handle_orientation", "option": "vertical", "status": "proposed" },
-      { "variable": "drawer_hardware_count", "option": "single", "status": "proposed" },
-      { "variable": "drawer_hardware_position", "option": "centred_all", "status": "proposed" },
-      { "variable": "hardware_colour", "option": "nickel", "status": "proposed" },
-      { "variable": "hardware_texture", "option": "brushed", "status": "proposed" },
-      { "variable": "handle_length", "option": "len_5_5", "status": "proposed" },
-      { "variable": "counter_pattern", "option": "minimal", "status": "proposed" },
-      { "variable": "counter_colour", "option": "pure_white", "status": "proposed" },
-      { "variable": "island_back", "option": "slab", "status": "proposed" },
-      { "variable": "island_end", "option": "gable_1_5_cabinet", "status": "proposed" },
-      { "variable": "top_trim", "option": "flat_0_75", "status": "proposed" },
-      { "variable": "valance", "option": "hidden", "status": "proposed" }
-    ]
-  },
   "rules": [
-    { "id": "island_only", "text": "Island options show only for room shapes with an island (owner, 2026-11-10). Peninsula does not get them (IK-18)." },
-    { "id": "handleless_skips_hardware", "text": "Slab handleless doors skip every handle step." },
-    { "id": "colour_by_material", "text": "The colours offered come from the chosen material's list: Tafisa → Tafisa TFL colours; painted → Sherwin-Williams paint colours; any wood species → stains. Wood species and stain are separate picks, and stains apply to every species (owner, 2026-11-10)." },
-    { "id": "door_vs_drawer_positions", "text": "Vertical or horizontal applies to handles on doors. Single or double, and centred or top-aligned, apply to whatever is on the drawers." },
-    { "id": "handle_length_handles_only", "text": "Lengths 5 1/2\", 8\" and 12\" apply to handles only (owner, 2026-11-10)." },
-    { "id": "matching_doors_back", "text": "The \"matching doors\" island back uses the client's chosen door style (owner, 2026-11-10), so it has one image per door style." },
-    { "id": "waterfall_uses_counter", "text": "A waterfall end uses the chosen counter, so it has one image per counter pattern and colour." },
-    { "id": "counter_combined", "text": "Counter colours are shown in the chosen pattern, so the counter step has one image per pattern and colour (PROPOSED)." },
-    { "id": "real_references", "text": "Every image is anchored to a real-life reference photo of the door style, material, finish colour or product, found by the tool and approved by the owner before generation, never a guess from words (owner, 2026-11-10)." }
+    {
+      "id": "island_only",
+      "text": "Island options show only for room shapes with an island (owner, 2026-11-10). Peninsula does not get them (IK-18)."
+    },
+    {
+      "id": "handleless_skips_hardware",
+      "text": "Slab handleless doors skip every handle step."
+    },
+    {
+      "id": "colour_by_material",
+      "text": "The colours offered come from the chosen material's list: Tafisa → Tafisa TFL colours; painted → every Sherwin-Williams paint colour, with a shortlist of the 12 most common in each of 5 families shown first; any wood species → stains. Wood species and stain are separate picks, and stains apply to every species (owner, 2026-11-10)."
+    },
+    {
+      "id": "door_vs_drawer_positions",
+      "text": "Vertical or horizontal applies to handles on doors. Single or double, and centred or top-aligned, apply to whatever is on the drawers, knobs included (owner, 2026-11-13)."
+    },
+    {
+      "id": "handle_length_handles_only",
+      "text": "Lengths 5 1/2\", 8\" and 12\" apply to handles only (owner, 2026-11-10)."
+    },
+    {
+      "id": "matching_doors_back",
+      "text": "The \"matching doors\" island back uses the client's chosen door style (owner, 2026-11-10), so it has one image per door style."
+    },
+    {
+      "id": "waterfall_uses_counter",
+      "text": "A waterfall end uses the chosen counter, so it has one image per counter image (pattern and colour)."
+    },
+    {
+      "id": "counter_combined",
+      "text": "Counter colours are shown in the chosen pattern, so the counter step has one image per pattern and colour (PROPOSED)."
+    },
+    {
+      "id": "real_references",
+      "text": "Every image is anchored to a real-life reference photo of the door style, material, finish colour or product, found by the tool and approved by the owner before generation, never a guess from words (owner, 2026-11-10)."
+    }
   ]
 }

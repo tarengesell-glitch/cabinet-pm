@@ -122,10 +122,10 @@ Add new decisions at the bottom of the right list, with the date. Only the owner
 
 ### 2026-11-10: Kitchen image library, the variables (owner, chat, 2026-11-10)
 The image selector needs a photorealistic image for every option, all from the same camera angle and the same kitchen layout, made by an automated generate, check and retry loop. The owner gave the full variable list and answered the follow-up questions. The list is data in `src/modules/visual-library/data/kitchen-image-variables.json` (colour lists in `data/colours/`), checked by `model/variables.ts`. A shared doc, "Kitchen Image Library: Variables", is made from it.
-- **Each step varies one thing** on a fixed default kitchen. Every combination is not pre-rendered.
+- **Each step varies one thing.** Every combination is not pre-rendered. (The fixed default kitchen was dropped on 2026-11-13, see below and IK-25.)
 - **Images are AI edits of one locked base photo per room shape.** Only one masked region changes, and an automatic check approves each image or retries it.
 - **Every image is anchored to a real reference photo** of the door style, material, finish colour or product. The tool finds it and the owner approves it before generation. A guess from words is never used. This is how AI images meet closet-builder's rule that door and finish images "must be real".
-- **Room shapes:** single wall, galley, U, L and G, each with and without an island, plus **peninsula and double island (kept)**. That makes 12. The default kitchen is **L-shape with island**.
+- **Room shapes:** single wall, galley, U, L and G, each with and without an island, plus **peninsula and double island (kept)**. That makes 12. L-shape with island was named the default on 2026-11-10; on 2026-11-13 the owner dropped the single default kitchen.
 - **These lists replace the intake's current ones:**
   - the room shapes replace the intake's shapes;
   - the door styles (slab handleless, slab, slim shaker, shaker, raised panel) replace the feel names. This closes IK-1.
@@ -147,10 +147,15 @@ The image selector needs a photorealistic image for every option, all from the s
   - **The "matching doors" island back** uses the chosen door style.
   - **Island options** show only for shapes with an island.
   - **Top trim:** none, 3/4" flat, 3" flat (the owner confirmed "3\"" meant 3") or 3" crown.
-- **PROPOSED (this session):**
-  - the rest of the default kitchen: painted white shaker, brushed nickel 5 1/2" handles, a minimal white counter, a slab island back, 1 1/2" cabinet-depth gables, 3/4" flat top trim and a hidden valance (IK-23);
-  - counter colours are shown in each pattern (21 images);
-  - single or double, and centred or top-aligned, apply to knobs on drawers as well as handles (IK-24).
+- **Owner answers, 2026-11-13** (IK-19 to IK-24):
+  - **Hardware finish** is the five finishes listed, not colour × texture. This replaces "finish has two parts" above.
+  - **Tafisa:** all their colours.
+  - **Sherwin-Williams:** every colour, with a shortlist of the 12 most common cabinet colours in each of 5 families shown first.
+  - **Stains:** the options listed on cabinets.com.
+  - **No single default kitchen.**
+  - **Single or double, and centred or top-aligned,** apply to knobs on drawers too.
+- **Counted correctly:** an island end that matches the back panel needs one image per back-panel image (20, matching doors in each door style included), not one per back-panel option (16). The base count is 142 plus colours.
+- **PROPOSED (this session):** counter colours are shown in each pattern (21 images).
 
 ### 2026-11-10: Fixes after trying a real job (owner, chat, 2026-11-10)
 The owner compared the placeholder AI design with the 3D drawing on a real kitchen and listed seven problems. Decided and built (designer module: `data/placeholder-draft.json`, `model/placeholder-draft.ts`, `model/cabinets.ts`, `ui/Stage3D.tsx`):
@@ -575,12 +580,13 @@ Five confirmed rules are now checked in the design tool (HARD-014, PREF-011, PRE
 - ~~**IK-18 A drawn island with a layout that has none.**~~ Answered 2026-11-09 (owner): a peninsula does not get the island questions, and a drawn island with a galley, L or U layout is not refused. The brief still refuses an island layout with no island drawn. The question was: the brief refuses a layout with an island (L-shape with island, double island) when the drawing has none. The other way round can't be checked yet: a peninsula is drawn as a floating wall too, and the intake doesn't ask the island questions (colour, panels) for it. Should a peninsula get the island questions? And should a drawn island with a galley, L or U layout be refused?
 
 ### From the kitchen image library (2026-11-10)
-- **IK-19 Hardware textures.** Brushed is a texture. Is there another one, such as polished or matte? Which colours come brushed?
-- **IK-20 Tafisa colours.** Which Tafisa TFL colours does the shop stock? `data/colours/tafisa-tfl.json` is empty until then.
-- **IK-21 Paint colours.** Which Sherwin-Williams colours go on the shortlist (about 40 to 80)? `data/colours/sherwin-williams.json` is empty until then.
-- **IK-22 Stains.** Which stain line does the shop use, and which stains? The most accurate references would be photos of the shop's own stained sample boards in each species. `data/colours/stains.json` is empty until then.
-- **IK-23 Default kitchen.** Everything except the L-shape with island is proposed (see the decision above). Is it right?
-- **IK-24 Knobs on drawers.** Do "single or double" and "centred or top-aligned" apply to knobs on drawers as well as handles?
+- ~~**IK-19 Hardware textures.**~~ Answered 2026-11-13 (owner): colour and texture aren't combined. The five finishes listed (brushed nickel, brushed aluminum, brushed, black, oil-rubbed bronze) are the whole list.
+- ~~**IK-20 Tafisa colours.**~~ Answered 2026-11-13 (owner): "basically all of them".
+- ~~**IK-21 Paint colours.**~~ Answered 2026-11-13 (owner): every Sherwin-Williams colour is in the tool. A shortlist of the 12 most common cabinet colours in each of 5 families is shown first: white/off-white, creams and taupes, medium, dark, accent saturated.
+- ~~**IK-22 Stains.**~~ Answered 2026-11-13 (owner): use the stain options listed on cabinets.com.
+- ~~**IK-23 Default kitchen.**~~ Answered 2026-11-13 (owner): "You don't need a single default kitchen because the flow always has multiple options." Removed from the catalog.
+- ~~**IK-24 Knobs on drawers.**~~ Answered 2026-11-13 (owner): yes, they apply to knobs too.
+- **IK-25 Earlier picks in later images.** With no default kitchen, what do a later step's images show for the picks already made? The client's own picks, which needs a layered or 3D build, or something fixed? This depends on the image engine (see the masks and Blender question raised 2026-11-13).
 
 ### From the AI designer plan (2026-11-09)
 - ~~**AD-1 The upper over a fridge.**~~ Answered 2026-11-09 (owner: "sounds good"): it stays a blocker on drafts until the shop names the cabinet and depth. The room drawing gives it 24" deep, but the catalog has no upper at that depth: `upper_no_shelf` is 12" deep, and its depth limits are not known (CAT-1). Until the shop says which cabinet and depth to use, a draft shows it as a blocker.

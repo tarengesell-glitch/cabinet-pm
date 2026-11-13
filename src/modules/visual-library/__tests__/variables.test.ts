@@ -21,7 +21,6 @@ const reasonFor = (variables: unknown, colourLists: readonly unknown[] = lists):
 };
 type Raw = {
   groups: { id: string; when?: unknown; variables: { id: string; region: string; options: { id: string; varies_with?: string[] }[] }[] }[];
-  default_kitchen: { picks: { variable: string; option: string | null }[] };
 };
 
 describe('kitchen image variables', () => {
@@ -30,8 +29,8 @@ describe('kitchen image variables', () => {
     expect(variable('material').options).toHaveLength(10);
     expect(variable('door_style').options.map((o) => o.id)).toEqual(['slab_handleless', 'slab', 'slim_shaker', 'shaker', 'raised_panel']);
     expect(variable('hardware_config').options).toHaveLength(4);
-    expect(variable('hardware_colour').options).toHaveLength(4);
-    expect(variable('hardware_texture').options.map((o) => o.id)).toEqual(['brushed']);
+    // The five finishes as listed; colour and texture are not combined (owner, 2026-11-13).
+    expect(variable('hardware_finish').options.map((o) => o.id)).toEqual(['brushed_nickel', 'brushed_aluminum', 'brushed', 'black', 'oil_rubbed_bronze']);
     expect(variable('handle_length').options).toHaveLength(3);
     expect(variable('counter_pattern').options).toHaveLength(3);
     expect(variable('counter_colour').options).toHaveLength(7);
@@ -53,10 +52,6 @@ describe('kitchen image variables', () => {
     expect(variable('handle_length').when).toEqual({ variable: 'hardware_config', not_in: ['all_knobs'] });
   });
 
-  it('defaults to the L-shape with island, as the owner chose', () => {
-    expect(cat.default_kitchen.picks.find((p) => p.variable === 'room_shape')).toMatchObject({ option: 'l_shape_island', status: 'owner' });
-  });
-
   it('counts images per step, combinations included', () => {
     const plan = imagePlan(cat);
     const rows = new Map(plan.rows.map((r) => [r.variable, r]));
@@ -64,18 +59,26 @@ describe('kitchen image variables', () => {
     expect(rows.get('counter_colour')?.images).toBe(21);
     // 15 back panels, plus "matching doors" once per door style.
     expect(rows.get('island_back')?.images).toBe(15 + 5);
-    // 4 gables, plus "match back" per back panel, plus waterfall per counter.
-    expect(rows.get('island_end')?.images).toBe(4 + 16 + 21);
-    // No colour list has been supplied yet, and the count says so.
-    expect(rows.get('colour')).toMatchObject({ images: 0, waiting_on: ['tafisa_tfl', 'sherwin_williams', 'stains'] });
+    // 4 gables, plus "match back" per back-panel image (20, matching doors included), plus waterfall per counter image.
+    expect(rows.get('island_end')?.images).toBe(4 + 20 + 21);
+    // Every Tafisa and paint colour once, every stain on each of the 8 wood species.
+    expect(rows.get('colour')).toMatchObject({ images: 155 + 1728 + 12 * 8, waiting_on: [] });
     expect(plan.total).toBe(plan.rows.reduce((n, r) => n + r.images, 0));
   });
 
   it('makes one image per stain per wood species', () => {
-    const stains = { ...stainsData, status: 'owner', colours: [{ id: 'natural', label: 'Natural', prompt: 'clear natural finish' }] };
-    const r = buildImageCatalog({ variables: variablesData, colourLists: [tafisaData, sherwinData, stains] });
+    const none = (l: object) => ({ ...l, colours: [] });
+    const stains = { ...stainsData, colours: [{ id: 'natural', label: 'Natural', prompt: 'clear natural finish' }] };
+    const r = buildImageCatalog({ variables: variablesData, colourLists: [none(tafisaData), none(sherwinData), stains] });
     if (!r.ok) throw new Error(r.reason);
     expect(imagePlan(r.value).rows.find((x) => x.variable === 'colour')?.images).toBe(8);
+  });
+
+  it('shortlists 12 Sherwin-Williams colours in each of the 5 families (owner, 2026-11-13)', () => {
+    const sw = cat.colour_lists.find((l) => l.id === 'sherwin_williams')!;
+    const per = new Map<string, number>();
+    for (const c of sw.colours) if (c.shortlist) per.set(c.shortlist, (per.get(c.shortlist) ?? 0) + 1);
+    expect(Object.fromEntries(per)).toEqual({ white_off_white: 12, cream_taupe: 12, medium: 12, dark: 12, accent: 12 });
   });
 
   it('refuses a condition that names an option that does not exist', () => {
@@ -97,10 +100,11 @@ describe('kitchen image variables', () => {
     expect(reasonFor(raw)).toMatch(/option "slab_handleless" is listed twice/);
   });
 
-  it('refuses a variable with no default pick', () => {
+  it('refuses images that depend on themselves through a chain', () => {
     const raw = clone() as unknown as Raw;
-    raw.default_kitchen.picks = raw.default_kitchen.picks.filter((p) => p.variable !== 'valance');
-    expect(reasonFor(raw)).toMatch(/Default kitchen: "valance" has no pick/);
+    const island = raw.groups.find((g) => g.id === 'island')!;
+    island.variables[0]!.options[0]!.varies_with = ['island_end'];
+    expect(reasonFor(raw)).toMatch(/depend on themselves \(island_back → island_end → island_back\)/);
   });
 
   it('refuses varying with a variable that does not exist', () => {

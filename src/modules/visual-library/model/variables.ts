@@ -76,17 +76,6 @@ const CatalogSchema = z.strictObject({
   purpose: Text,
   regions: z.array(z.strictObject({ id: Id, label: Text })).min(1),
   groups: z.array(GroupSchema).min(1),
-  default_kitchen: z.strictObject({
-    note: Text,
-    picks: z.array(
-      z.strictObject({
-        variable: Id,
-        option: Id.nullable(),
-        status: z.enum(['owner', 'proposed']),
-        note: Text.optional(),
-      }),
-    ),
-  }),
   rules: z.array(z.strictObject({ id: Id, text: Text })).min(1),
 });
 export type ImageCatalogData = z.infer<typeof CatalogSchema>;
@@ -98,6 +87,8 @@ const ColourListSchema = z.strictObject({
   status: z.enum(['awaiting_owner', 'owner']),
   /** The material options this list is offered for. */
   applies_to: z.array(Id).min(1),
+  /** Sherwin-Williams: the articles the shortlist was judged from. */
+  shortlist_sources: z.array(z.string().url()).optional(),
   colours: z.array(
     z.strictObject({
       id: Id,
@@ -106,6 +97,18 @@ const ColourListSchema = z.strictObject({
       code: Text.optional(),
       hex: Hex.optional(),
       prompt: Text,
+      /** The maker's own grouping (e.g. a Tafisa collection). */
+      family: Text.optional(),
+      /** The maker's surface texture name. */
+      texture: Text.optional(),
+      /** Sherwin-Williams: the shortlist family this colour is shown first in. */
+      shortlist: z.enum(['white_off_white', 'cream_taupe', 'medium', 'dark', 'accent']).optional(),
+      /** Stains: the species and cabinet lines it was seen on at the source. */
+      species_seen: z.array(Text).optional(),
+      lines: z.array(Text).optional(),
+      /** Where this colour and its official swatch were found. */
+      source_url: z.string().url().optional(),
+      swatch_url: z.string().url().optional(),
     }),
   ),
 });
@@ -191,6 +194,22 @@ function crossCheck(cat: ImageCatalog): string[] {
     }
   }
 
+  // An image can't depend on itself through a chain (A varies with B, B with A).
+  const deps = (v: ImageVariable): string[] => [...(v.varies_with ?? []), ...v.options.flatMap((o) => o.varies_with ?? [])];
+  const loopFrom = (id: string, path: readonly string[]): readonly string[] | null => {
+    if (path.includes(id)) return [...path, id];
+    const v = byId.get(id);
+    for (const d of v ? deps(v) : []) {
+      const found = loopFrom(d, [...path, id]);
+      if (found) return found;
+    }
+    return null;
+  };
+  for (const v of variables) {
+    const loop = loopFrom(v.id, []);
+    if (loop && loop[0] === v.id) problems.push(`Variable "${v.id}": its images depend on themselves (${loop.join(' → ')}).`);
+  }
+
   const material = byId.get('material');
   for (const l of cat.colour_lists) {
     for (const d of dupes(l.colours.map((c) => c.id))) problems.push(`Colour list "${l.id}": colour "${d}" is listed twice.`);
@@ -200,27 +219,6 @@ function crossCheck(cat: ImageCatalog): string[] {
       else if (opt.colour_list !== l.id) problems.push(`Colour list "${l.id}": material "${m}" names a different colour list.`);
     }
   }
-
-  const picked = new Set<string>();
-  for (const p of cat.default_kitchen.picks) {
-    const v = byId.get(p.variable);
-    if (!v) {
-      problems.push(`Default kitchen: variable "${p.variable}" doesn't exist.`);
-      continue;
-    }
-    if (picked.has(p.variable)) problems.push(`Default kitchen: "${p.variable}" is picked twice.`);
-    picked.add(p.variable);
-    if (p.option === null) {
-      if (!v.options_from) problems.push(`Default kitchen: "${p.variable}" has no pick.`);
-      else if (!p.note) problems.push(`Default kitchen: "${p.variable}" has no pick and no note saying why.`);
-    } else if (v.options_from) {
-      const known = cat.colour_lists.some((l) => l.colours.some((c) => c.id === p.option));
-      if (!known) problems.push(`Default kitchen: colour "${p.option}" isn't in any colour list.`);
-    } else if (!v.options.some((o) => o.id === p.option)) {
-      problems.push(`Default kitchen: "${p.variable}" option "${p.option}" doesn't exist.`);
-    }
-  }
-  for (const v of variables) if (!picked.has(v.id)) problems.push(`Default kitchen: "${v.id}" has no pick.`);
 
   return problems;
 }
@@ -235,13 +233,25 @@ export interface ImagePlanRow {
 }
 
 /**
- * How many images each step needs. One per option, times every combination of the variables it
- * varies with. Room shapes are base photos of their own. A colour list's colours each make one
- * image per material the list applies to.
+ * How many images each step needs. One per option, times the images of every variable it varies
+ * with (so an island end that matches the back panel gets one image per back-panel image,
+ * "matching doors" in each door style included). Room shapes are base photos of their own. A
+ * colour list's colours each make one image per material the list applies to.
  */
 export function imagePlan(cat: ImageCatalog): { readonly rows: readonly ImagePlanRow[]; readonly total: number } {
   const byId = new Map(cat.groups.flatMap((g) => g.variables).map((v) => [v.id, v]));
-  const count = (id: string): number => byId.get(id)?.options.length ?? 0;
+  const images = (v: ImageVariable, seen: readonly string[]): number => {
+    if (seen.includes(v.id)) return 0; // unreachable: crossCheck refuses dependency loops before a catalog exists
+    return v.options.reduce(
+      (n, o) =>
+        n +
+        (o.varies_with ?? v.varies_with ?? []).reduce((k, id) => {
+          const dep = byId.get(id);
+          return k * (dep ? images(dep, [...seen, v.id]) : 0);
+        }, 1),
+      0,
+    );
+  };
   const rows: ImagePlanRow[] = [];
   for (const g of cat.groups) {
     for (const v of g.variables) {
@@ -255,11 +265,7 @@ export function imagePlan(cat: ImageCatalog): { readonly rows: readonly ImagePla
         });
         continue;
       }
-      const images = v.options.reduce(
-        (n, o) => n + (o.varies_with ?? v.varies_with ?? []).reduce((k, id) => k * count(id), 1),
-        0,
-      );
-      rows.push({ group: g.id, variable: v.id, label: v.label, images, waiting_on: [] });
+      rows.push({ group: g.id, variable: v.id, label: v.label, images: images(v, []), waiting_on: [] });
     }
   }
   return { rows, total: rows.reduce((n, r) => n + r.images, 0) };

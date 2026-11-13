@@ -126,6 +126,13 @@ test('the placeholder AI design lays out the drawn room, then the customize scre
   await expect(page.getByRole('region', { name: 'Checks' })).toHaveCount(0);
   await expect(tabs.and(page.locator('[aria-selected="true"]'))).toHaveCount(0);
   await expect(page.getByText('Placed by the placeholder', { exact: true })).toBeVisible();
+  // Open just this cabinet, or every door and drawer (owner, 2026-11-13).
+  await page.getByRole('button', { name: 'Open this cabinet' }).click();
+  await expect(page.getByRole('button', { name: 'Close this cabinet' })).toHaveAttribute('aria-pressed', 'true');
+  await page.getByRole('button', { name: 'Open all doors' }).click();
+  await expect(page.getByRole('button', { name: 'Close all doors' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('button', { name: 'Open this cabinet' })).toHaveAttribute('aria-pressed', 'false');
+  await page.getByRole('button', { name: 'Close all doors' }).click();
   await page.getByRole('button', { name: 'Approve', exact: true }).click();
   await expect(page.getByText('Reviewed', { exact: true })).toBeVisible();
 

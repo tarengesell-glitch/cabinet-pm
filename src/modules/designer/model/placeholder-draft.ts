@@ -119,11 +119,11 @@ export interface TopTrimSize {
   readonly projection: Length;
   readonly steps: number;
 }
-/** A light valance's profile: its height at the ends, thickness, and how far its middle rises (0 for straight). */
+/** A light valance's profile: its height, thickness and shape (flat, or a light rail's cove and bead). */
 export interface ValanceSize {
   readonly height: Length;
   readonly thickness: Length;
-  readonly rise: Length;
+  readonly profile: 'flat' | 'light_rail';
 }
 export interface TrimSettings {
   readonly top: ReadonlyMap<string, TopTrimSize>;
@@ -150,12 +150,10 @@ function readTrim(raw: typeof data.visual.trim): Result<TrimSettings> {
   for (const [id, v] of Object.entries(raw.valance)) {
     const height = len(`valance.${id}.height`, v.height);
     const thickness = len(`valance.${id}.thickness`, v.thickness);
-    const rise = len(`valance.${id}.rise`, v.rise);
     if (!height.ok) return height;
     if (!thickness.ok) return thickness;
-    if (!rise.ok) return rise;
-    if (rise.value >= height.value) return { ok: false, reason: `placeholder-draft.json "visual.trim.valance.${id}": its rise must be less than its height.` };
-    valance.set(id, { height: height.value, thickness: thickness.value, rise: rise.value });
+    if (v.profile !== 'flat' && v.profile !== 'light_rail') return { ok: false, reason: `placeholder-draft.json "visual.trim.valance.${id}.profile" must be "flat" or "light_rail".` };
+    valance.set(id, { height: height.value, thickness: thickness.value, profile: v.profile });
   }
   return { ok: true, value: { top, valance, drawsNothing: { top: new Set(raw.draws_nothing.top), valance: new Set(raw.draws_nothing.valance) } } };
 }

@@ -37,6 +37,10 @@ export interface FinishLook {
   /** The light valance's option ID ("hidden" or "none" draw nothing), or null when not chosen. */
   readonly valance: string | null;
   readonly valanceHex: string;
+  /** The cabinets' inside colour (the Interiors choice), or null when not chosen: drawn in the neutral interior until then. */
+  readonly interiorHex: string | null;
+  /** How many tray organizers go in the cabinet over the fridge (owner, 2026-11-13). */
+  readonly trayOrganizers: number;
 }
 
 export interface DesignChoices {

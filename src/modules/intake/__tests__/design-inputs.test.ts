@@ -22,13 +22,32 @@ interface Captured {
 }
 const before = capture as unknown as readonly Captured[];
 
-const asBefore = (i: RoomDesignInputs) => ({
-  prefs: { drawers: i.drawerLevel.status === 'chosen' ? i.drawerLevel.option_id : null, cornerInsert: i.cornerInsert, garbage: i.garbage, roomSet: i.roomKind, cabinetTop: i.cabinetTop },
-  roomSet: i.roomKind,
-  look: i.look,
-});
+// The look's interior colour and tray organizer count were added after the capture (2026-11-13): checked on their own below.
+const asBefore = (i: RoomDesignInputs) => {
+  const look: Record<string, unknown> = { ...i.look };
+  delete look['interiorHex'];
+  delete look['trayOrganizers'];
+  return {
+    prefs: { drawers: i.drawerLevel.status === 'chosen' ? i.drawerLevel.option_id : null, cornerInsert: i.cornerInsert, garbage: i.garbage, roomSet: i.roomKind, cabinetTop: i.cabinetTop },
+    roomSet: i.roomKind,
+    look,
+  };
+};
 
 describe('a room’s design inputs, read from its answers', () => {
+  it('reads the interior colour and the tray organizers for the 3D view (owner, 2026-11-13)', () => {
+    for (const { state } of scenarios())
+      for (const r of intakeHandover(def, state)) {
+        const look = roomDesignInputs(def, state, r.room_id)!.look;
+        const room = state.rooms.find((x) => x.id === r.room_id)!;
+        const interiors = room.answers['interiors'];
+        // White and maple are their own colours; Tafisa matching is the cabinet colour; unanswered is none.
+        if (interiors === 'tafisa_matching') expect(look.interiorHex).toBe(look.door);
+        else if (interiors === undefined) expect([null, '#D9B98A', '#F4F3EF', look.door]).toContain(look.interiorHex);
+        else expect(look.interiorHex).toMatch(/^#[0-9A-F]{6}$/i);
+        expect(Number.isInteger(look.trayOrganizers) && look.trayOrganizers >= 0).toBe(true);
+      }
+  });
   const all = scenarios();
   for (const [k, { name, state }] of all.entries())
     it(`gives what the studio read before: ${name}`, () => {

@@ -8,6 +8,11 @@ The history of decisions and the evidence of the owner's approval. Only the owne
 
 ## Decided
 
+### 2026-11-13: Top trim and light valance in the 3D view (owner, chat, 2026-11-13)
+"Top trim and light valance doesn't seem to be rendering": the design choices asked for them, but the 3D view never drew either. Built in the designer (`ui/Stage3D.tsx` `trims`, `model/choices.ts` `trimsOf`, `data/placeholder-draft.json` "visual.trim").
+- Top trim is drawn along the tops of upper and tall cabinets, and a light valance under the uppers, each in the colour chosen for it. None draws nothing; a Hidden valance draws nothing; a choice with no profile draws nothing and is listed under To review.
+- **PROPOSED (session's choices):** the profiles are stand-ins until the shop gives real ones (TRIM-1): flat band 3" tall standing 3/4" past the doors; crown 4" tall standing 2 1/2" out in three steps; stepped crown 5" tall, 2 1/2" out in two steps; flat valance 2" tall, shaped valance 3" at its ends rising 1 1/2" in the middle, both 3/4" thick and flush with the doors. A top trim stops at the ceiling, sliding down onto the doors where there is no room above. No valance under a cabinet over a fridge. Corners and finished ends get no returns.
+
 ### 2026-11-13: Customize clean-up, round 2 (owner, chat, 2026-11-13)
 After trying the one-pane layout ("This is not quite correct"). Each quoted request is the approval for the behaviour it specifies. Built in the designer (`ui/Customize.tsx`, `ui/Stage3D.tsx`).
 - **"Room defaults and To Review should be tabs that are side by side … When these are selected they should take up the entire editing window."** To review is open to start.
@@ -663,6 +668,7 @@ Five confirmed rules are now checked in the design tool (HARD-014, PREF-011, PRE
 - ~~**AD-3 Supabase access.**~~ Answered 2026-11-09: the platform's database is the Supabase project **cabinet-pm** (`https://btuwrakpnlutemfdxnve.supabase.co`, organization "Gesell/gray", region ca-central-1, Canada), chosen by the owner. The connector reaches it, so database changes are applied from these sessions and reviewed in a pull request. The earlier link (`kpbcqnnsjtdafxvvarfw`) is not used. The Netlify variables must hold this project's URL and publishable key.
 
 ### From the owner's Fake Design requests (2026-11-12)
+- **TRIM-1 Top trim and valance profiles.** The 3D view draws them with stand-in sizes (2026-11-13 "Top trim and light valance in the 3D view"). What are the shop's real profiles (height, how far each stands out, the valance's shape), and do cabinets to the ceiling drop by the crown's size, as design rule "Crown moulding sets the gap above the cabinets" says? The layout doesn't apply that rule yet.
 - **CV-13 Divided cabinets in the CAD file.** A cabinet divided in Customize (splits, drawers, shelves, roll-outs) and a finished back are saved in the master copy, but nothing says how the CAD program builds them: a library template per arrangement, a parametric section, or something else. Until the samples answer it, the writer must refuse a cabinet with sections or a finished back (rule 9).
 - **LP-1 Which shop parts.** The base library choices (2026-11-13) are catalog bases with their interiors set; three have no library template of their own (full door with four roll-outs, the two full-height garbage pull-outs). Which shop template builds each, and which parts the cutlery, utility and spice inserts are, is for the shop to confirm before the CAD file is written (with CV-13).
 - **FD-1 Integrated finished end.** The owner (2026-11-12, round 2): "an integrated finished end is where the standard gable for the construction of the cabinet is exposed with a finished surface". Is that the catalog's Finished end, as PROPOSED, or another part? To confirm with the shop.

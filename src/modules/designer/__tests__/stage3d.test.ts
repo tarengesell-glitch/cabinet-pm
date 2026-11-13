@@ -4,14 +4,16 @@ import { cabinetViews, placeholderItems, type CabinetView } from '../model/cabin
 import { endOpen, withRuleEnds, type Context } from '../model/ends';
 import { cornerCabinets } from '../model/layout';
 import { draftPlaceholder } from '../model/placeholder-draft';
-import { counters, finishedEnds, seenHits, type FinishLook } from '../ui/Stage3D';
+import { counters, finishedEnds, seenHits, trims, type FinishLook } from '../ui/Stage3D';
+import { trimsOf } from '../model/choices';
+import { itemByCode } from '../model/placeholder-draft';
 import { realKitchenRoom } from './real-kitchen';
 
 const IN = 64;
 let n = 0;
 // Not the fixture's own ID pattern, so a cabinet never shares an ID with an appliance.
 const ids = () => `dddddddd-0000-4000-8000-${String(++n).padStart(12, '0')}`;
-const LOOK: FinishLook = { door: '#eeeeee', baseDoor: '#eeeeee', island: '#666666', counter: '#cccccc', style: 'transitional', doorHw: 'handle', drawerHw: 'handle', pullFinish: '#111111', knobFinish: '#111111', doorOrient: 'vertical', drawerTop: false };
+const LOOK: FinishLook = { door: '#eeeeee', baseDoor: '#eeeeee', island: '#666666', counter: '#cccccc', style: 'transitional', doorHw: 'handle', drawerHw: 'handle', pullFinish: '#111111', knobFinish: '#111111', doorOrient: 'vertical', drawerTop: false, topTrim: null, trimHex: '#ffffff', valance: null, valanceHex: '#ffffff' };
 
 /** The real kitchen as the 3D view sees it, after the placeholder lays it out. */
 function scene(): Context {
@@ -92,5 +94,44 @@ describe('what the pointer is over (owner, 2026-11-13)', () => {
     expect(seenHits(ray, root)[0]?.object.userData['name']).toBe('far wall');
     // Three.js's own ray test still hits the hidden wall: that is what made zoom stop at it.
     expect(ray.intersectObjects(root.children, true)[0]?.object.parent?.userData['name']).toBe('cut-away wall');
+  });
+});
+
+describe('top trim and light valance (owner, 2026-11-13)', () => {
+  it('draws only what is chosen and has a profile; anything else is reported, never drawn as another one', () => {
+    expect(trimsOf({ topTrim: null, valance: null })).toEqual({ top: null, valance: null, problems: [] });
+    expect(trimsOf({ topTrim: 'none', valance: 'hidden' })).toEqual({ top: null, valance: null, problems: [] });
+    expect(trimsOf({ topTrim: 'none', valance: 'none' }).problems).toEqual([]);
+    const crown = trimsOf({ topTrim: 'crown', valance: 'shaped' });
+    expect(crown.top?.steps).toBe(3);
+    expect(crown.valance?.rise).toBeGreaterThan(0);
+    const odd = trimsOf({ topTrim: 'egg_and_dart', valance: 'scalloped' });
+    expect(odd.top).toBeNull();
+    expect(odd.valance).toBeNull();
+    expect(odd.problems).toHaveLength(2);
+  });
+
+  it('puts a crown on every upper and tall cabinet, under the ceiling, and a valance under the uppers only', () => {
+    const ctx = scene();
+    const look = { ...LOOK, topTrim: 'crown', trimHex: '#123456', valance: 'flat', valanceHex: '#654321' };
+    const groups = trims({ mats: new Map() }, ctx, look);
+    const typeOf = (id: string) => itemByCode(ctx.all.find((c) => c.id === id)!.code!)?.type;
+    const tops = ctx.all.filter((c) => c.code && !c.appliance && ['wall', 'corner_wall', 'tall'].includes(itemByCode(c.code)?.type ?? ''));
+    expect(tops.length).toBeGreaterThan(0);
+    expect(groups.map((g) => g.userData['trimOf']).sort()).toEqual(tops.map((c) => c.id).sort());
+    // This kitchen's cabinets go to the ceiling: the crown stops at it.
+    const ceiling = ctx.room.ceiling_height.value / IN;
+    for (const g of groups) {
+      g.updateMatrixWorld(true);
+      expect(new Box3().setFromObject(g).max.y).toBeLessThanOrEqual(ceiling + 1e-6);
+      const valances = g.children.filter((m) => (m as { geometry?: { type: string } }).geometry?.type === 'ExtrudeGeometry');
+      const c = ctx.all.find((x) => x.id === g.userData['trimOf'])!;
+      const overFridge = ctx.all.some((f) => f.appliance === 'fridge' && f.wallId === c.wallId && f.offset < c.offset + c.width && f.offset + f.width > c.offset);
+      expect(valances).toHaveLength(typeOf(c.id) === 'tall' || overFridge ? 0 : 1);
+    }
+    // The cabinet over the fridge has no valance (there is no counter under it).
+    expect(ctx.all.some((c) => c.appliance === 'fridge')).toBe(true);
+    // None of either draws nothing.
+    expect(trims({ mats: new Map() }, ctx, { ...look, topTrim: 'none', valance: 'none' })).toEqual([]);
   });
 });

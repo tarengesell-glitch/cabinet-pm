@@ -14,7 +14,7 @@ import type { CabinetView, ItemEdit } from '../model/cabinets';
 import { endOpen, TOUCH, type Context } from '../model/ends';
 import { cameraPose, FOV, roomFrame, viewName, type CameraPose, type CameraView } from './camera-views';
 import { DRAFT_SETTINGS, isHood, itemByCode, standard } from '../model/placeholder-draft';
-import type { FinishLook, IslandPanels, PanelLook } from '../model/choices';
+import { trimsOf, type FinishLook, type IslandPanels, type PanelLook } from '../model/choices';
 import { chosenLook } from '../model/appliance-looks';
 import { frontPieces } from '../model/fronts';
 import { SELECT_BLUE } from './theme';
@@ -467,6 +467,7 @@ export function Stage3D(props: {
       }
     }
     for (const g of counters(s, ctx, look)) root.add(g);
+    for (const g of trims(s, ctx, look)) root.add(g);
     for (const d of s.doors) {
       const a = angles.get(String(d.userData['key'])) ?? (doorsOpen.current ? (d.userData['dir'] as number) * 1.75 : 0);
       d.userData['angle'] = a;
@@ -695,6 +696,73 @@ export function finishedEnds(c: CabinetView): ('low' | 'high')[] {
     const v = at === 'low' ? c.ends!.low : c.ends!.high;
     return v !== null && finished.has(v);
   });
+}
+
+/**
+ * The top trim along the tops of upper and tall cabinets, and the light valance under the uppers, in
+ * their chosen colours (owner, 2026-11-13: "Top trim and light valance doesn't seem to be
+ * rendering"). One piece per cabinet, so touching cabinets read as one line. The profiles are
+ * PROPOSED stand-ins (placeholder-draft.json "visual.trim"): a top trim stands out past the doors in
+ * steps and stops at the ceiling (sliding down onto the doors where there is no room above); a
+ * valance is flush with the doors, its middle rising for a shaped one, under every upper except one
+ * over a fridge. Each piece belongs to its cabinet's wall and layer, so it is cut away with the cabinet.
+ */
+export function trims(s: Pick<Scene3D, 'mats'>, ctx: Context, look: Pick<FinishLook, 'topTrim' | 'trimHex' | 'valance' | 'valanceHex'>): THREE.Group[] {
+  const { top, valance } = trimsOf(look);
+  if (!top && !valance) return [];
+  const ceiling = inch(ctx.room.ceiling_height.value);
+  /** Whether a fridge stands under a cabinet (on its wall, overlapping it along the wall). */
+  const overFridge = (c: CabinetView) => ctx.all.some((f) => f.appliance === 'fridge' && f.wallId === c.wallId && f.offset < c.offset + c.width - TOUCH && f.offset + f.width > c.offset + TOUCH);
+  const out: THREE.Group[] = [];
+  for (const c of ctx.all) {
+    if (!c.code || c.appliance) continue;
+    const type = itemByCode(c.code)?.type;
+    const upper = type === 'wall' || type === 'corner_wall';
+    if (!upper && type !== 'tall') continue;
+    const wall = ctx.room.walls.find((w) => w.wall_id === c.wallId);
+    const depth = c.depth ?? standard(c.code, 'depth');
+    if (!wall || depth === null) continue;
+    const g = new THREE.Group();
+    g.userData['wallId'] = c.wallId;
+    g.userData['layer'] = c.layer;
+    g.userData['trimOf'] = c.id;
+    const p = placement(ctx.room, wall, c.offset, c.width, 0, c.setback ?? 0);
+    g.position.copy(p.at);
+    g.rotation.y = p.angle;
+    const w = inch(c.width);
+    const face = inch(depth) + DOOR_T;
+    if (top) {
+      const h = inch(top.height);
+      const proj = inch(top.projection);
+      const y1 = Math.min(inch(c.elevation + c.height) + h, ceiling);
+      const step = h / top.steps;
+      for (let k = 0; k < top.steps; k++) {
+        const reach = (proj * (k + 1)) / top.steps;
+        // Each step reaches back onto the face so there is no gap, and stands out further than the one below.
+        box(s, g, w, step, reach + DOOR_T, [0, y1 - h + step * (k + 0.5), face + reach / 2 - DOOR_T / 2], `paint:${look.trimHex}`);
+      }
+    }
+    // A light valance hangs over a counter: not under the cabinet over a fridge.
+    if (valance && upper && !overFridge(c)) {
+      const h = inch(valance.height);
+      const th = inch(valance.thickness);
+      const rise = inch(valance.rise);
+      const y0 = inch(c.elevation);
+      const shape = new THREE.Shape();
+      shape.moveTo(-w / 2, 0);
+      shape.lineTo(w / 2, 0);
+      shape.lineTo(w / 2, -h);
+      if (rise > 0) shape.quadraticCurveTo(0, -h + 2 * rise, -w / 2, -h);
+      else shape.lineTo(-w / 2, -h);
+      shape.closePath();
+      const mesh = new THREE.Mesh(new THREE.ExtrudeGeometry(shape, { depth: th, bevelEnabled: false }), mat(s, `paint:${look.valanceHex}`));
+      mesh.position.set(0, y0, face - th);
+      mesh.castShadow = true;
+      g.add(mesh);
+    }
+    out.push(g);
+  }
+  return out;
 }
 
 /**

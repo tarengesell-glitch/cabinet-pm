@@ -18,7 +18,7 @@ import { cabinetViews, editItems, upperTopOf, type CabinetView, type ItemEdit } 
 import { fillEnds, refreshEnds, reviewEnds } from '../model/ends';
 import { room as roomOf, type Draft } from '../model/editor';
 import { applianceType, LAYOUT_RULES } from '../model/layout-rules';
-import { islandPanelsOf, type DesignChoices } from '../model/choices';
+import { islandPanelsOf, trimsOf, type DesignChoices } from '../model/choices';
 import { itemByCode, standard } from '../model/placeholder-draft';
 import { lookOptions } from '../model/appliance-looks';
 import { placeholderNotes, saveRoom, storedDraft } from './placeholder-store';
@@ -92,6 +92,8 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
   const [lookFor, setLookFor] = useState<string | null>(null);
   /** The island panels, checked: a panel the 3D view can't show is reported. */
   const panels = islandPanelsOf(cr.designChoices);
+  /** A top trim or valance the 3D view can't draw is reported, never drawn as another one. */
+  const trimProblems = trimsOf(cr.designChoices.look).problems;
 
   useEffect(() => {
     const d = storedDraft(cr.key);
@@ -350,9 +352,9 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
               “From the layout” on a cabinet’s end to change that.
             </p>
           )}
-          {panels.problems.length > 0 && (
+          {panels.problems.length + trimProblems.length > 0 && (
             <div className={s.notice} role="status" data-testid="panel-problems">
-              {panels.problems.map((p) => (
+              {[...panels.problems, ...trimProblems].map((p) => (
                 <p key={p}>{p}</p>
               ))}
             </div>

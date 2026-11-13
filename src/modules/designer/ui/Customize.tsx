@@ -38,6 +38,11 @@ export interface CustomizeRoom {
   readonly onChange?: () => void;
 }
 
+type PaneTab = 'defaults' | 'review';
+const PANE_TABS: readonly { id: PaneTab; name: string }[] = [
+  { id: 'defaults', name: 'Room defaults' },
+  { id: 'review', name: 'To review' },
+];
 /** The checks on the room's cabinets: Core's layout checks and the catalog's buildability checks. */
 const CABINET_CHECKS = [...ITEM_CHECKS, catalogItemCheck(CURRENT_CATALOG)];
 
@@ -81,6 +86,8 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
   const [doorsOpen, setDoorsOpen] = useState(false);
   const [message, setMessage] = useState<{ kind: 'error' | 'notice'; text: string } | null>(null);
   const [approveArmed, setApproveArmed] = useState(false);
+  /** The pane's tab while no cabinet is picked; a picked cabinet's editor takes the whole pane (owner, 2026-11-13). */
+  const [tab, setTab] = useState<PaneTab>('review');
   /** The sink, dishwasher or fridge whose look choices are open (owner, 2026-11-12), by placement ID. */
   const [lookFor, setLookFor] = useState<string | null>(null);
   /** The island panels, checked: a panel the 3D view can't show is reported. */
@@ -246,132 +253,140 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
   return (
     <div className={s.ws}>
       <section className={s.pane} aria-label="Settings">
-        <div className={s.top}>
-          <details className={s.fold}>
-            <summary className={s.foldHead}>Room defaults</summary>
-            <div className={s.foldBody}>
-              <p className={s.sub}>
-                Drawn room: ceiling {formatInches(room.ceiling_height.value)} · cabinets to {formatInches(design.upperTop)} · {design.cabinets.filter((c) => c.code !== null).length} cabinets
-              </p>
-              {cr.defaults}
-            </div>
-          </details>
-          <details className={s.fold} open>
-            <summary className={s.foldHead}>
-              To review
-              {issues.length > 0 && <span className={s.count}>{issues.length}</span>}
-            </summary>
-            <div className={s.foldBody}>
-              <div className={s.review}>
-                {pending.length > 0 ? (
-                  <>
-                    <span className={s.tag}>
-                      {pending.length} placement{pending.length === 1 ? '' : 's'} to review
-                    </span>
-                    {approveArmed ? (
-                      <>
-                        <button className={s.btnPrimary} onClick={() => (edit({ kind: 'approve', ids: pending.map((c) => c.id) }), setApproveArmed(false))}>
-                          Yes, approve all {pending.length}
-                        </button>
-                        <button className={s.btnGhost} onClick={() => setApproveArmed(false)}>
-                          Cancel
-                        </button>
-                      </>
-                    ) : (
-                      <button className={s.btn} disabled={!canEdit} onClick={() => setApproveArmed(true)}>
-                        Approve all
-                      </button>
-                    )}
-                  </>
-                ) : (
-                  <span className={s.ok}>Every placement reviewed</span>
-                )}
-                <span className={s.spacer} />
-                <span className={s.price}>Live pricing not connected yet</span>
-              </div>
-              {endReview && !endReview.ok && (
-                <p className={s.error} role="alert">
-                  {endReview.reason}
-                </p>
-              )}
-              {endReview?.ok && endReview.value.missing.length > 0 && (
-                <div className={s.notice} role="status" data-testid="ends-missing">
-                  <p>
-                    {endReview.value.missing.length} cabinet{endReview.value.missing.length === 1 ? ' was' : 's were'} designed before cabinet ends were saved, so the 3D view shows no finished ends on {endReview.value.missing.length === 1 ? 'it' : 'them'}. Setting them works
-                    out each one’s left and right end from the layout (unfinished against a wall, cabinet or panel; an applied finished end where nothing is beside it) and saves a new version. Nothing else on
-                    the cabinets changes.
-                  </p>
-                  <button className={s.btn} disabled={!canEdit} onClick={() => room && endReview.ok && saveEnds(fillEnds(room, endReview.value.missing), 'Set cabinet ends from the layout (older design)')}>
-                    Set their ends from the layout
-                  </button>
-                </div>
-              )}
-              {endReview?.ok && endReview.value.differ.length > 0 && (
-                <div className={s.notice} role="status" data-testid="ends-differ">
-                  <p>
-                    {endReview.value.differ.length} cabinet{endReview.value.differ.length === 1 ? ' has an end' : 's have ends'} that differ from what the layout gives now: either chosen on purpose, or out of date after the
-                    room drawing changed. Updating replaces only those ends.
-                  </p>
-                  <button className={s.btn} disabled={!canEdit} onClick={() => room && endReview.ok && saveEnds(fillEnds(room, endReview.value.differ), 'Updated cabinet ends to match the layout')}>
-                    Update them to match the layout
-                  </button>
-                </div>
-              )}
-              {endReview?.ok && endReview.value.overridden.length > 0 && (
-                <p className={s.notice} role="status" data-testid="ends-overridden">
-                  {endReview.value.overridden.length} cabinet{endReview.value.overridden.length === 1 ? ' has an end' : 's have ends'} chosen by hand that the layout would now set differently. They are kept as chosen; pick
-                  “From the layout” on a cabinet’s end to change that.
-                </p>
-              )}
-              {panels.problems.length > 0 && (
-                <div className={s.notice} role="status" data-testid="panel-problems">
-                  {panels.problems.map((p) => (
-                    <p key={p}>{p}</p>
-                  ))}
-                </div>
-              )}
-              <section className={s.sec} aria-label="Checks">
-                <h3 className={s.h3}>Checks</h3>
-                {issues.length ? (
-                  <div className={s.stack}>
-                    {issues.map((i, k) => (
-                      <button key={k} className={s.issue} onClick={() => i.id && pick(i.id)}>
-                        <span className={i.kind === 'check' ? s.pillWarn : s.pill}>{i.kind === 'check' ? 'Check' : 'Review'}</span>
-                        <span>{i.text}</span>
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <p className={s.sub}>Nothing to fix.</p>
-                )}
-                <p className={s.hint}>Click one to select the cabinet it is about. Core’s layout checks and the catalog’s checks, on the room’s master copy. The placeholder doesn’t choose door style or hinge sides yet, so those show as missing choices. It sets each cabinet’s ends from the layout, except an L-shaped corner cabinet’s, which wait for a decision.</p>
-              </section>
-              <section className={s.sec} aria-label="How the placeholder laid it out">
-                <h3 className={s.h3}>How the placeholder laid it out</h3>
-                <ul className={s.notes}>
-                  {design.notes.map((n) => (
-                    <li key={n}>{n}</li>
-                  ))}
-                </ul>
-                <p className={s.mocked}>
-                  <b>Placeholder.</b> No AI designed this: a fixed recipe filled the cabinet runs. It is kept in this browser and is not in the master copy yet.
-                </p>
-              </section>
-            </div>
-          </details>
+        <div className={s.tabs} role="tablist" aria-label="Settings">
+          {PANE_TABS.map((t) => (
+            <button
+              key={t.id}
+              role="tab"
+              className={s.tab}
+              aria-selected={!sel && tab === t.id}
+              onClick={() => {
+                setSelected(null);
+                setTab(t.id);
+              }}
+            >
+              {t.name}
+              {t.id === 'review' && issues.length > 0 && <span className={s.count}>{issues.length}</span>}
+            </button>
+          ))}
         </div>
-        <section className={s.body} aria-label="Cabinet">
+        <div className={s.body} role={sel ? undefined : 'tabpanel'}>
           {message && (
             <p className={message.kind === 'error' ? s.error : s.notice} role="status">
               {message.text}
             </p>
           )}
-          {!sel ? (
-            <p className={s.empty}>Click a cabinet in the 3D view.</p>
+          {sel ? (
+            <section className={s.sec} aria-label="Cabinet">
+              <CabinetEditor key={sel.id} room={room} cab={sel} name={nameOf(sel)} canEdit={canEdit} onStep={stepCab} onEdit={edit} finish={cr.designChoices.look.door} onLooks={setLookFor} />
+            </section>
+          ) : tab === 'defaults' ? (
+            <>
+              <p className={s.sub}>
+                Drawn room: ceiling {formatInches(room.ceiling_height.value)} · cabinets to {formatInches(design.upperTop)} · {design.cabinets.filter((c) => c.code !== null).length} cabinets
+              </p>
+              {cr.defaults}
+            </>
           ) : (
-            <CabinetEditor key={sel.id} room={room} cab={sel} name={nameOf(sel)} canEdit={canEdit} onStep={stepCab} onEdit={edit} finish={cr.designChoices.look.door} onLooks={setLookFor} />
+            <>
+          <div className={s.review}>
+            {pending.length > 0 ? (
+              <>
+                <span className={s.tag}>
+                  {pending.length} placement{pending.length === 1 ? '' : 's'} to review
+                </span>
+                {approveArmed ? (
+                  <>
+                    <button className={s.btnPrimary} onClick={() => (edit({ kind: 'approve', ids: pending.map((c) => c.id) }), setApproveArmed(false))}>
+                      Yes, approve all {pending.length}
+                    </button>
+                    <button className={s.btnGhost} onClick={() => setApproveArmed(false)}>
+                      Cancel
+                    </button>
+                  </>
+                ) : (
+                  <button className={s.btn} disabled={!canEdit} onClick={() => setApproveArmed(true)}>
+                    Approve all
+                  </button>
+                )}
+              </>
+            ) : (
+              <span className={s.ok}>Every placement reviewed</span>
+            )}
+            <span className={s.spacer} />
+            <span className={s.price}>Live pricing not connected yet</span>
+          </div>
+          {endReview && !endReview.ok && (
+            <p className={s.error} role="alert">
+              {endReview.reason}
+            </p>
           )}
-        </section>
+          {endReview?.ok && endReview.value.missing.length > 0 && (
+            <div className={s.notice} role="status" data-testid="ends-missing">
+              <p>
+                {endReview.value.missing.length} cabinet{endReview.value.missing.length === 1 ? ' was' : 's were'} designed before cabinet ends were saved, so the 3D view shows no finished ends on {endReview.value.missing.length === 1 ? 'it' : 'them'}. Setting them works
+                out each one’s left and right end from the layout (unfinished against a wall, cabinet or panel; an applied finished end where nothing is beside it) and saves a new version. Nothing else on
+                the cabinets changes.
+              </p>
+              <button className={s.btn} disabled={!canEdit} onClick={() => room && endReview.ok && saveEnds(fillEnds(room, endReview.value.missing), 'Set cabinet ends from the layout (older design)')}>
+                Set their ends from the layout
+              </button>
+            </div>
+          )}
+          {endReview?.ok && endReview.value.differ.length > 0 && (
+            <div className={s.notice} role="status" data-testid="ends-differ">
+              <p>
+                {endReview.value.differ.length} cabinet{endReview.value.differ.length === 1 ? ' has an end' : 's have ends'} that differ from what the layout gives now: either chosen on purpose, or out of date after the
+                room drawing changed. Updating replaces only those ends.
+              </p>
+              <button className={s.btn} disabled={!canEdit} onClick={() => room && endReview.ok && saveEnds(fillEnds(room, endReview.value.differ), 'Updated cabinet ends to match the layout')}>
+                Update them to match the layout
+              </button>
+            </div>
+          )}
+          {endReview?.ok && endReview.value.overridden.length > 0 && (
+            <p className={s.notice} role="status" data-testid="ends-overridden">
+              {endReview.value.overridden.length} cabinet{endReview.value.overridden.length === 1 ? ' has an end' : 's have ends'} chosen by hand that the layout would now set differently. They are kept as chosen; pick
+              “From the layout” on a cabinet’s end to change that.
+            </p>
+          )}
+          {panels.problems.length > 0 && (
+            <div className={s.notice} role="status" data-testid="panel-problems">
+              {panels.problems.map((p) => (
+                <p key={p}>{p}</p>
+              ))}
+            </div>
+          )}
+          <section className={s.sec} aria-label="Checks">
+            <h3 className={s.h3}>Checks</h3>
+            {issues.length ? (
+              <div className={s.stack}>
+                {issues.map((i, k) => (
+                  <button key={k} className={s.issue} onClick={() => i.id && pick(i.id)}>
+                    <span className={i.kind === 'check' ? s.pillWarn : s.pill}>{i.kind === 'check' ? 'Check' : 'Review'}</span>
+                    <span>{i.text}</span>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <p className={s.sub}>Nothing to fix.</p>
+            )}
+            <p className={s.hint}>Click one to select the cabinet it is about. Core’s layout checks and the catalog’s checks, on the room’s master copy. The placeholder doesn’t choose door style or hinge sides yet, so those show as missing choices. It sets each cabinet’s ends from the layout, except an L-shaped corner cabinet’s, which wait for a decision.</p>
+          </section>
+          <section className={s.sec} aria-label="How the placeholder laid it out">
+            <h3 className={s.h3}>How the placeholder laid it out</h3>
+            <ul className={s.notes}>
+              {design.notes.map((n) => (
+                <li key={n}>{n}</li>
+              ))}
+            </ul>
+            <p className={s.mocked}>
+              <b>Placeholder.</b> No AI designed this: a fixed recipe filled the cabinet runs. It is kept in this browser and is not in the master copy yet.
+            </p>
+          </section>
+            </>
+          )}
+        </div>
       </section>
       <section className={s.stageCol} aria-label="3D view">
         <Stage3D

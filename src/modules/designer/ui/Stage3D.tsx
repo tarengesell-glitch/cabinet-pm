@@ -196,7 +196,7 @@ export function Stage3D(props: {
     const bodyHit = (e: PointerEvent): { g: THREE.Group; point: THREE.Vector3 } | null => {
       if (!s.body || !s.root) return null;
       ray.setFromCamera(toNdc(e), camera);
-      for (const hit of ray.intersectObjects(s.root.children, true)) {
+      for (const hit of seenHits(ray, s.root)) {
         let o: THREE.Object3D | null = hit.object;
         while (o && !o.userData['cabId']) o = o.parent;
         if (!o) continue;
@@ -310,7 +310,7 @@ export function Stage3D(props: {
       if (drag || !down || Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 5 || !s.root) return;
       const r = el.getBoundingClientRect();
       ray.setFromCamera(new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1), camera);
-      for (const h of ray.intersectObjects(s.root.children, true)) {
+      for (const h of seenHits(ray, s.root)) {
         let o: THREE.Object3D | null = h.object;
         let appliance: string | null = null;
         while (o && !o.userData['cabId']) {
@@ -330,7 +330,7 @@ export function Stage3D(props: {
       if (!s.root) return;
       const r = el.getBoundingClientRect();
       ray.setFromCamera(new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1), camera);
-      const hit = ray.intersectObjects(s.root.children, true)[0];
+      const hit = seenHits(ray, s.root)[0];
       if (!hit) return;
       camera.position.add(hit.point.clone().sub(controls.target));
       controls.target.copy(hit.point);
@@ -342,7 +342,7 @@ export function Stage3D(props: {
     const onWheel = (e: WheelEvent) => {
       if (e.deltaY >= 0 || !s.root) return;
       ray.setFromCamera(toNdc(e), camera);
-      const hit = ray.intersectObjects(s.root.children, true)[0];
+      const hit = seenHits(ray, s.root)[0];
       if (!hit) return;
       const view = camera.getWorldDirection(new THREE.Vector3());
       const depth = hit.point.clone().sub(camera.position).dot(view);
@@ -515,6 +515,20 @@ export function Stage3D(props: {
 }
 
 const OVERALL: CameraView = { kind: 'overall' };
+
+/**
+ * What the pointer's ray hits that is on screen, nearest first. A wall cut away because the camera
+ * stands behind it (and the uppers on it) is hidden but still in the scene; the ray passes through
+ * it, so a click or a zoom reaches what is seen behind it (owner, 2026-11-13: zooming in on a wall
+ * seen through a cut-away wall stopped at the hidden wall).
+ */
+export function seenHits(ray: THREE.Raycaster, root: THREE.Object3D): THREE.Intersection[] {
+  const shown = (o: THREE.Object3D | null): boolean => {
+    for (; o; o = o.parent) if (!o.visible) return false;
+    return true;
+  };
+  return ray.intersectObjects(root.children, true).filter((h) => shown(h.object));
+}
 
 /** Puts the camera at a fixed view (camera-views.ts). False, with the reason shown, when it can't be framed. */
 function show(s: Scene3D, view: CameraView, onError: (reason: string) => void): boolean {

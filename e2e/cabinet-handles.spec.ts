@@ -62,5 +62,6 @@ test('dragging a selected cabinet’s handle in the 3D view changes its width', 
   await expect(width).not.toHaveValue(before);
   // A click on empty space lets go of the cabinet (owner, 2026-11-13).
   await page.mouse.click(box.x + box.width - 20, box.y + box.height - 20);
-  await expect(page.getByText('Click a cabinet in the 3D view.')).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Cabinet' })).toHaveCount(0);
+  await expect(page.getByRole('region', { name: 'Checks' })).toBeVisible();
 });

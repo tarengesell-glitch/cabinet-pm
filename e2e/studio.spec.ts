@@ -102,25 +102,29 @@ test('the placeholder AI design lays out the drawn room, then the customize scre
   const toReview = page.getByText(/^\d+ placements to review$/);
   await expect(toReview).toBeVisible();
 
-  // The pane (owner, 2026-11-13): room defaults and everything to review on top, the cabinet editor
-  // below; no tabs, no reset-view button.
-  await expect(page.getByRole('tab')).toHaveCount(0);
+  // The pane (owner, 2026-11-13): two tabs, Room defaults and To review, each filling the pane; a
+  // picked cabinet's editor fills it instead. No reset-view button.
+  const tabs = page.getByRole('tablist', { name: 'Settings' }).getByRole('tab');
+  await expect(tabs).toHaveText(['Room defaults', /^To review/]);
+  await expect(page.getByRole('tab', { name: /^To review/ })).toHaveAttribute('aria-selected', 'true');
   await expect(page.getByRole('button', { name: 'Reset view' })).toHaveCount(0);
   await expect(page.getByRole('region', { name: 'Checks' })).toBeVisible();
-  await expect(page.getByText('Click a cabinet in the 3D view.')).toBeVisible();
 
-  // The room defaults are the design choices, editable here: a colour shows in the 3D view's look,
-  // and the design choices screen has the same answer.
-  await page.getByText('Room defaults', { exact: true }).click();
+  // The room defaults are the design choices, editable here.
+  await page.getByRole('tab', { name: 'Room defaults' }).click();
+  await expect(page.getByRole('region', { name: 'Checks' })).toHaveCount(0);
   const doorStyle = page.getByTestId('room-defaults').getByRole('combobox', { name: 'Door style' });
   await expect(doorStyle).toBeVisible();
   const otherStyle = await doorStyle.locator('option:not(:checked)').first().getAttribute('value');
   await doorStyle.selectOption(otherStyle!);
   await expect(doorStyle).toHaveValue(otherStyle!);
-  await page.getByText('Room defaults', { exact: true }).click();
+  await page.getByRole('tab', { name: /^To review/ }).click();
 
-  // Pick a base cabinet: it is marked as placed by the placeholder until approved.
+  // Pick a base cabinet: its editor fills the pane (no tab selected), and it is marked as placed by
+  // the placeholder until approved.
   await selectCabinet(page, /^Base/);
+  await expect(page.getByRole('region', { name: 'Checks' })).toHaveCount(0);
+  await expect(tabs.and(page.locator('[aria-selected="true"]'))).toHaveCount(0);
   await expect(page.getByText('Placed by the placeholder', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Approve', exact: true }).click();
   await expect(page.getByText('Reviewed', { exact: true })).toBeVisible();
@@ -174,7 +178,8 @@ test('the placeholder AI design lays out the drawn room, then the customize scre
   await sinkLooks.getByRole('button', { name: 'Close' }).click();
   await expect(sinkLooks).toHaveCount(0);
 
-  // Approve all asks first.
+  // Approve all asks first (on the To review tab).
+  await page.getByRole('tab', { name: /^To review/ }).click();
   await page.getByRole('button', { name: 'Approve all' }).click();
   await page.getByRole('button', { name: /Yes, approve all/ }).click();
   await expect(page.getByText('Every placement reviewed')).toBeVisible();

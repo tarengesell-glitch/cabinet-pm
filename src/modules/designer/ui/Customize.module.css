@@ -22,47 +22,30 @@
   min-width: 0;
 }
 
-/* The top of the pane: the room's defaults and everything to review, each folding away. */
-.top {
-  flex: 0 1 auto;
-  max-height: 55%;
-  overflow: auto;
-  border-bottom: 1px solid var(--rule);
-  background: var(--surface);
-}
-
-.fold + .fold {
-  border-top: 1px solid var(--rule);
-}
-
-.foldHead {
+/* The pane's tabs: the room's defaults and everything to review (owner, 2026-11-13). */
+.tabs {
   display: flex;
+  gap: 2px;
+  border-bottom: 1px solid var(--rule);
+  padding: 0 16px;
+}
+
+.tab {
+  font: 500 13.5px var(--body);
+  padding: 13px 12px 11px;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 11px 16px;
-  font: 600 13.5px var(--body);
+}
+
+.tab[aria-selected='true'] {
   color: var(--navy);
-  cursor: pointer;
-}
-
-.foldHead::-webkit-details-marker {
-  display: none;
-}
-
-.foldHead::before {
-  content: '▸';
-  font-size: 11px;
-  color: var(--muted);
-}
-
-details[open] > .foldHead::before {
-  content: '▾';
-}
-
-.foldBody {
-  display: grid;
-  gap: 14px;
-  padding: 0 16px 16px;
+  border-bottom-color: var(--gold);
 }
 
 .review {

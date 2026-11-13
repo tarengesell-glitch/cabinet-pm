@@ -83,7 +83,8 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
   const [draft, setDraft] = useState<Draft | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
-  const [doorsOpen, setDoorsOpen] = useState(false);
+  /** Which doors and drawers are open: all, one cabinet's (by ID), or none (owner, 2026-11-13). */
+  const [open, setOpen] = useState<'all' | string | null>(null);
   const [message, setMessage] = useState<{ kind: 'error' | 'notice'; text: string } | null>(null);
   const [approveArmed, setApproveArmed] = useState(false);
   /** The pane's tab while no cabinet is picked; a picked cabinet's editor takes the whole pane (owner, 2026-11-13). */
@@ -397,7 +398,8 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
           look={cr.designChoices.look}
           panels={panels}
           selected={selected}
-          doorsOpen={doorsOpen}
+          open={open}
+          insides={{ cornerInsert: cr.designChoices.cornerInsert, garbage: cr.designChoices.garbage }}
           onPick={pick}
           onPickAppliance={setLookFor}
           onDeselect={deselect}
@@ -411,8 +413,13 @@ export function Customize({ user, room: cr }: { user: User; room: CustomizeRoom 
             <div className={s.hudTitle}>{cr.name}</div>
           </div>
           <div className={s.hudRow}>
-            <button className={s.hudBtn} aria-pressed={doorsOpen} onClick={() => setDoorsOpen((o) => !o)}>
-              {doorsOpen ? 'Close doors' : 'Open doors'}
+            {sel && (
+              <button className={s.hudBtn} aria-pressed={open === sel.id} onClick={() => setOpen((o) => (o === sel.id ? null : sel.id))}>
+                {open === sel.id ? 'Close this cabinet' : 'Open this cabinet'}
+              </button>
+            )}
+            <button className={s.hudBtn} aria-pressed={open === 'all'} onClick={() => setOpen((o) => (o === 'all' ? null : 'all'))}>
+              {open === 'all' ? 'Close all doors' : 'Open all doors'}
             </button>
             <button className={s.hudBtn} disabled={!canEdit || undo.length === 0} onClick={() => step('undo')} aria-label="Undo" title="Undo (Ctrl+Z)">
               ↶

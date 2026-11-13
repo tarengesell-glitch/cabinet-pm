@@ -8,6 +8,10 @@
 import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { GTAOPass } from 'three/examples/jsm/postprocessing/GTAOPass.js';
+import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { formatInches, type Room, type Wall } from '@/core/index';
 import { cornerCabinets, direction, halfThickness, insideNormal, insideSpan, wallLength } from '../model/layout';
 import type { CabinetView, ItemEdit } from '../model/cabinets';
@@ -18,6 +22,7 @@ import { trimsOf, type FinishLook, type IslandPanels, type PanelLook } from '../
 import { chosenLook } from '../model/appliance-looks';
 import { frontPieces } from '../model/fronts';
 import { SELECT_BLUE } from './theme';
+import { flatValanceProfile, lightRailProfile, orient, stepProfile, sweep, type Pt } from './mouldings';
 
 export type { FinishLook } from '../model/choices';
 
@@ -49,7 +54,10 @@ interface Scene3D {
   controls: OrbitControls;
   sun: THREE.DirectionalLight;
   root: THREE.Group | null;
-  doors: THREE.Group[];
+  /** Doors and drawers that open, each with its cabinet's ID (see `setOpen`). */
+  doors: THREE.Object3D[];
+  /** The insides of cabinets (`insideOf` their cabinet's ID), shown only while that cabinet is open. */
+  insides: THREE.Object3D[];
   walls: { id: string; g: THREE.Object3D; n: THREE.Vector3; c: THREE.Vector3 }[];
   mats: Map<string, THREE.Material>;
   /** The room and cabinets drawn now, for framing the camera (camera-views.ts). */
@@ -74,7 +82,10 @@ export function Stage3D(props: {
   /** The island panels, checked by `islandPanelsOf`; one it can't show is drawn plain and reported by the screen. */
   panels: IslandPanels;
   selected: string | null;
-  doorsOpen: boolean;
+  /** Which doors and drawers are open: every one, one cabinet's (by ID), or none (owner, 2026-11-13). */
+  open: 'all' | string | null;
+  /** What the room's choices put inside cabinets that the cabinets themselves don't say: the corner insert and the garbage pull-out's place. */
+  insides?: Insides;
   /**
    * A fixed view to show instead of the starting one (the screenshot command's page; the studio
    * doesn't pass it). Once a frame with it is drawn, the view's name is set as `data-view` on the
@@ -96,7 +107,7 @@ export function Stage3D(props: {
 }) {
   const host = useRef<HTMLDivElement | null>(null);
   const s3 = useRef<Scene3D | null>(null);
-  const doorsOpen = useRef(props.doorsOpen);
+  const open = useRef(props.open);
   const onPick = useRef(props.onPick);
   const onPickAppliance = useRef(props.onPickAppliance);
   const onDeselect = useRef(props.onDeselect);
@@ -108,7 +119,7 @@ export function Stage3D(props: {
     onPickAppliance.current = props.onPickAppliance;
     onDeselect.current = props.onDeselect;
     onEdit.current = props.onEdit;
-    doorsOpen.current = props.doorsOpen;
+    open.current = props.open;
     viewRef.current = props.view;
   });
 
@@ -163,13 +174,36 @@ export function Stage3D(props: {
     sun.shadow.bias = -0.0002;
     sun.shadow.normalBias = 0.6;
     scene.add(sun, sun.target, new THREE.HemisphereLight(0xffffff, 0xd9d3c9, 0.8), new THREE.AmbientLight(0xffffff, 0.12));
-    const s: Scene3D = { renderer, scene, camera, controls, sun, root: null, doors: [], walls: [], mats: new Map(), room: null, cabinets: [], drawnView: null, fitted: false, handles: [], body: null, dirty: true };
+    // Ambient occlusion: corners, the insides of open cabinets and the spaces between parts darken as
+    // they do in a real room, so interiors read with their shadows (owner, 2026-11-13: "Interior
+    // renderings should show shadows accurately"). The radius is in inches. Used while anything is open.
+    const composer = new EffectComposer(renderer);
+    composer.addPass(new RenderPass(scene, camera));
+    // Its denoising noise is made from Math.random when the pass is built: a fixed seed while it is
+    // built gives the same picture every time (the screenshot command checks that).
+    const random = Math.random;
+    let seed = 20261113;
+    Math.random = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    let ao: GTAOPass;
+    try {
+      ao = new GTAOPass(scene, camera, 1, 1);
+    } finally {
+      Math.random = random;
+    }
+    ao.updateGtaoMaterial({ radius: 14, distanceExponent: 1, thickness: 4, scale: 1.4, samples: 12 });
+    ao.updatePdMaterial({ lumaPhi: 10, depthPhi: 2, normalPhi: 3, radius: 8, rings: 2, samples: 8 });
+    ao.blendIntensity = 1;
+    composer.addPass(ao);
+    composer.addPass(new OutputPass());
+    const s: Scene3D = { renderer, scene, camera, controls, sun, root: null, doors: [], insides: [], walls: [], mats: new Map(), room: null, cabinets: [], drawnView: null, fitted: false, handles: [], body: null, dirty: true };
     s3.current = s;
 
     const size = () => {
       const r = el.getBoundingClientRect();
       if (!r.width || !r.height) return;
       renderer.setSize(r.width, r.height, false);
+      composer.setPixelRatio(renderer.getPixelRatio());
+      composer.setSize(r.width, r.height);
       camera.aspect = r.width / r.height;
       camera.updateProjectionMatrix();
       s.dirty = true;
@@ -370,15 +404,26 @@ export function Stage3D(props: {
         camera.updateProjectionMatrix();
       }
     });
+    let lastFrame = performance.now();
+    let wasMoving = false;
     const loop = () => {
+      // Doors and drawers move by the time passed, not per frame, so they open as quickly on a slow device.
+      const now = performance.now();
+      const k = 1 - Math.exp(-Math.min(0.25, (now - lastFrame) / 1000) / 0.11);
+      lastFrame = now;
+      let moving = false;
       for (const d of s.doors) {
-        const target = doorsOpen.current ? (d.userData['dir'] as number) * 1.75 : 0;
-        const a = d.userData['angle'] as number;
+        const target = openTarget(d, open.current);
+        const a = d.userData['t'] as number;
         if (Math.abs(target - a) < 1e-4) continue;
-        d.userData['angle'] = Math.abs(target - a) < 0.002 || reduce ? target : a + (target - a) * 0.09;
-        d.rotation.y = d.userData['angle'] as number;
+        setOpen(d, Math.abs(target - a) < 0.004 || reduce ? target : a + (target - a) * k);
         s.dirty = true;
+        moving = true;
       }
+      if (showInsides(s)) s.dirty = true;
+      // Once the doors stop, one more frame with the shading.
+      if (wasMoving && !moving) s.dirty = true;
+      wasMoving = moving;
       controls.update();
       // Grips keep the same size on screen at any zoom.
       if (s.handles.length) {
@@ -405,7 +450,9 @@ export function Stage3D(props: {
         if (!w.g.visible) hidden.add(w.id);
       }
       for (const g of s.root?.children ?? []) if (g.userData['layer'] === 'upper') g.visible = !hidden.has(String(g.userData['wallId']));
-      renderer.render(scene, camera);
+      // The shading is costly, so it is drawn only when something is open (that is when insides show) and has stopped moving.
+      if (!moving && s.doors.some((d) => (d.userData['t'] as number) > 0)) composer.render();
+      else renderer.render(scene, camera);
       if (s.drawnView !== null) {
         el.dataset['view'] = s.drawnView;
         s.drawnView = null;
@@ -427,6 +474,7 @@ export function Stage3D(props: {
       controls.dispose();
       if (s.root) disposeTree(s.root);
       for (const m of s.mats.values()) m.dispose();
+      composer.dispose();
       renderer.dispose();
       renderer.domElement.remove();
       s3.current = null;
@@ -439,11 +487,18 @@ export function Stage3D(props: {
   const editable = props.onEdit !== undefined;
   const lookKey = JSON.stringify(drawLook(props.look, props.panels));
   const look = useMemo(() => JSON.parse(lookKey) as DrawLook, [lookKey]);
+  const insidesKey = JSON.stringify(props.insides ?? NO_INSIDES);
+  const insides = useMemo(() => JSON.parse(insidesKey) as Insides, [insidesKey]);
+  // Opening or closing starts the doors moving.
+  const openKey = props.open;
+  useEffect(() => {
+    if (s3.current) s3.current.dirty = true;
+  }, [openKey]);
   useEffect(() => {
     const s = s3.current;
     if (!s) return;
-    // Doors keep how far open they are across a rebuild (a selection, an edit), so they never start over.
-    const angles = new Map(s.doors.map((d) => [String(d.userData['key']), d.userData['angle'] as number]));
+    // Doors and drawers keep how far open they are across a rebuild (a selection, an edit), so they never start over.
+    const angles = new Map(s.doors.map((d) => [String(d.userData['key']), d.userData['t'] as number]));
     if (s.root) {
       s.scene.remove(s.root);
       disposeTree(s.root);
@@ -456,7 +511,7 @@ export function Stage3D(props: {
     buildRoom(s, root, room);
     const ctx: Context = { room, all: cabinets, corners: cornerCabinets(room) };
     for (const c of cabinets) {
-      const g = cabinet(s, c, ctx, look, c.id === selected);
+      const g = cabinet(s, c, ctx, look, c.id === selected, insides);
       if (g) root.add(g);
       if (g && c.id === selected && editable) {
         const h = addHandles(s, g, c, ctx);
@@ -468,11 +523,12 @@ export function Stage3D(props: {
     }
     for (const g of counters(s, ctx, look)) root.add(g);
     for (const g of trims(s, ctx, look)) root.add(g);
-    for (const d of s.doors) {
-      const a = angles.get(String(d.userData['key'])) ?? (doorsOpen.current ? (d.userData['dir'] as number) * 1.75 : 0);
-      d.userData['angle'] = a;
-      d.rotation.y = a;
-    }
+    for (const d of s.doors) setOpen(d, angles.get(String(d.userData['key'])) ?? openTarget(d, open.current));
+    s.insides = [];
+    root.traverse((o) => {
+      if (o.userData['insideOf']) s.insides.push(o);
+    });
+    showInsides(s);
     s.root = root;
     s.scene.add(root);
     s.dirty = true;
@@ -494,7 +550,7 @@ export function Stage3D(props: {
       if (!show(s, viewRef.current ?? OVERALL, onError)) return;
       s.fitted = true;
     }
-  }, [room, cabinets, look, selected, editable, onError]);
+  }, [room, cabinets, look, insides, selected, editable, onError]);
 
   // A fixed view, when one is asked for (by its name, so an equal view isn't shown again).
   const viewKey = props.view ? viewName(props.view) : null;
@@ -516,6 +572,117 @@ export function Stage3D(props: {
 }
 
 const OVERALL: CameraView = { kind: 'overall' };
+
+/** The room's choices for what goes inside cabinets that the cabinets don't record themselves. */
+export interface Insides {
+  readonly cornerInsert: string | null;
+  readonly garbage: 'none' | 'under_sink' | 'dedicated_cabinet';
+}
+const NO_INSIDES: Insides = { cornerInsert: null, garbage: 'none' };
+
+/**
+ * A drawer's box behind its front (sides, back, bottom and a front inside), or for a full-height
+ * pull-out a frame, so both slide out with the front (owner, 2026-11-13). Inside: the drawer's
+ * insert, or bins in a garbage pull-out.
+ */
+export function drawerBox(
+  s: Pick<Scene3D, 'mats'>,
+  parent: THREE.Object3D,
+  o: { x0: number; x1: number; y0: number; y1: number; depth: number; key: string; pullout: boolean; insert: string | null; bins: boolean },
+): void {
+  const cx = (o.x0 + o.x1) / 2;
+  const iw = Math.max(2, o.x1 - o.x0 - 2.25);
+  const zB = -o.depth / 2 + 1.5;
+  const zF = o.depth / 2 - 0.25;
+  const len = zF - zB;
+  const zc = (zB + zF) / 2;
+  const yb = o.y0 + 1;
+  const part = (w: number, h: number, d: number, pos: [number, number, number]) => outline(s, box(s, parent, w, h, d, pos, o.key));
+  if (o.pullout) {
+    // A pull-out's frame: a floor and a back rail; its bins (garbage) ride on the floor.
+    part(iw, 0.75, len, [cx, yb + 0.375, zc]);
+    part(iw, 4, 0.75, [cx, yb + 2, zB + 0.375]);
+    if (o.bins) bins(s, parent, cx - iw / 2 + 0.5, cx + iw / 2 - 0.5, yb + 0.75, Math.min(o.y1 - o.y0 - 5, 20), zB + 1, zF - 1);
+    return;
+  }
+  const h = Math.max(2, Math.min(o.y1 - o.y0 - 2, 10));
+  const T = 0.5;
+  part(T, h, len, [cx - iw / 2 + T / 2, yb + h / 2, zc]);
+  part(T, h, len, [cx + iw / 2 - T / 2, yb + h / 2, zc]);
+  part(iw - 2 * T, h, T, [cx, yb + h / 2, zB + T / 2]);
+  part(iw - 2 * T, h, T, [cx, yb + h / 2, zF - T / 2]);
+  part(iw - 2 * T, 0.25, len - 2 * T, [cx, yb + 0.125, zc]);
+  if (o.insert) insertIn(s, parent, o.insert, cx - iw / 2 + T, cx + iw / 2 - T, yb + 0.25, Math.min(2.5, h - 0.5), zB + T, zF - T, o.key);
+}
+
+/** A drawer insert (owner, 2026-11-13, data/drawer-inserts.json): cutlery and utility trays with their compartments, or a spice insert's sloped rows. */
+function insertIn(s: Pick<Scene3D, 'mats'>, parent: THREE.Object3D, code: string, x0: number, x1: number, y: number, h: number, z0: number, z1: number, key: string): void {
+  const w = x1 - x0;
+  const len = z1 - z0;
+  const part = (pw: number, ph: number, pd: number, pos: [number, number, number]) => outline(s, box(s, parent, pw, ph, pd, pos, key));
+  if (code === 'spice') {
+    // Rows of jars lying on sloped boards, rising toward the back.
+    for (let k = 0; k < 3; k++) {
+      const zc = z1 - 2.5 - k * 4.5;
+      if (zc - 2.5 < z0) break;
+      const board = box(s, parent, w - 0.5, 0.25, 4.2, [(x0 + x1) / 2, y + 0.8 + k * 0.3, zc], key);
+      board.rotation.x = -0.35;
+      outline(s, board);
+      part(w - 0.5, 0.75, 0.25, [(x0 + x1) / 2, y + 0.4, zc + 2]);
+    }
+    return;
+  }
+  // A tray: a rim round it, compartments running front to back over most of its length, and a cross compartment at the back.
+  const cols = code === 'cutlery' ? 5 : 3;
+  const back = code === 'cutlery' ? len * 0.28 : len * 0.4;
+  part(w, h, 0.25, [(x0 + x1) / 2, y + h / 2, z0 + 0.125]);
+  part(w, h, 0.25, [(x0 + x1) / 2, y + h / 2, z1 - 0.125]);
+  part(0.25, h, len, [x0 + 0.125, y + h / 2, (z0 + z1) / 2]);
+  part(0.25, h, len, [x1 - 0.125, y + h / 2, (z0 + z1) / 2]);
+  part(w, 0.25, 0.25, [(x0 + x1) / 2, y + h - 0.125, z0 + back]);
+  part(w, h, 0.25, [(x0 + x1) / 2, y + h / 2, z0 + back]);
+  for (let k = 1; k < cols; k++) part(0.25, h, len - back, [x0 + (w * k) / cols, y + h / 2, (z0 + back + z1) / 2]);
+  if (code === 'utility') part(0.25, h, back, [(x0 + x1) / 2, y + h / 2, z0 + back / 2]);
+}
+
+/** Garbage and recycling bins standing between x0 and x1: two side by side when there is room, one otherwise. */
+function bins(s: Pick<Scene3D, 'mats'>, parent: THREE.Object3D, x0: number, x1: number, y: number, h: number, z0: number, z1: number): void {
+  if (h < 4 || x1 - x0 < 4 || z1 - z0 < 4) return;
+  const n = x1 - x0 >= 14 ? 2 : 1;
+  const bw = (x1 - x0 - (n - 1) * 0.75) / n;
+  const keys = [`enamel:#3e4246`, `enamel:#4a6b8c`];
+  for (let k = 0; k < n; k++) {
+    const cx = x0 + bw / 2 + k * (bw + 0.75);
+    outline(s, box(s, parent, bw, h, z1 - z0, [cx, y + h / 2, (z0 + z1) / 2], keys[k % 2]!));
+    box(s, parent, bw - 0.6, 0.1, z1 - z0 - 0.6, [cx, y + h + 0.01, (z0 + z1) / 2], `plain:${SURROUNDINGS.black}`, false);
+  }
+}
+
+/** How open a door or drawer should be: 1 when all are open or its cabinet is, else 0. */
+function openTarget(d: THREE.Object3D, open: 'all' | string | null): number {
+  return open === 'all' || (open !== null && open === d.userData['cabId']) ? 1 : 0;
+}
+
+/** Shows the insides of the cabinets with anything open, and hides the rest. True when something changed. */
+function showInsides(s: Pick<Scene3D, 'doors' | 'insides'>): boolean {
+  const open = new Set(s.doors.filter((d) => (d.userData['t'] as number) > 0).map((d) => d.userData['cabId']));
+  let changed = false;
+  for (const o of s.insides) {
+    const v = open.has(o.userData['insideOf']);
+    if (o.visible !== v) {
+      o.visible = v;
+      changed = true;
+    }
+  }
+  return changed;
+}
+
+/** Puts a door (swung on its hinge) or a drawer (slid out) at `t` of the way open. */
+function setOpen(d: THREE.Object3D, t: number): void {
+  d.userData['t'] = t;
+  if (d.userData['kind'] === 'drawer') d.position.z = (d.userData['z0'] as number) + (d.userData['slide'] as number) * t;
+  else d.rotation.y = (d.userData['dir'] as number) * 1.75 * t;
+}
 
 /**
  * What the pointer's ray hits that is on screen, nearest first. A wall cut away because the camera
@@ -568,6 +735,11 @@ function mat(s: Pick<Scene3D, 'mats'>, key: string): THREE.Material {
             ? new THREE.MeshPhysicalMaterial({ color: colour, roughness: 0.08, transparent: true, opacity: 0.55 })
             : kind === 'steel'
               ? new THREE.MeshStandardMaterial({ color: colour, metalness: 1, roughness: 0.34, envMapIntensity: 1.1 })
+              : kind === 'inside'
+                ? // A cabinet's inside: less of the room's soft fill, so the shadows of its sides, top and shelves read (owner, 2026-11-13).
+                  new THREE.MeshPhysicalMaterial({ color: colour, roughness: 0.7, envMapIntensity: 0.3 })
+              : kind === 'moulding'
+                ? new THREE.MeshPhysicalMaterial({ color: colour, roughness: 0.62, clearcoat: 0.06, clearcoatRoughness: 0.5, envMapIntensity: 0.7, side: THREE.DoubleSide })
               : kind === 'enamel'
                 ? new THREE.MeshPhysicalMaterial({ color: colour, roughness: 0.35, clearcoat: 0.5, envMapIntensity: 0.9 })
                 : kind === 'line'
@@ -700,65 +872,90 @@ export function finishedEnds(c: CabinetView): ('low' | 'high')[] {
 
 /**
  * The top trim along the tops of upper and tall cabinets, and the light valance under the uppers, in
- * their chosen colours (owner, 2026-11-13: "Top trim and light valance doesn't seem to be
- * rendering"). One piece per cabinet, so touching cabinets read as one line. The profiles are
- * PROPOSED stand-ins (placeholder-draft.json "visual.trim"): a top trim stands out past the doors in
- * steps and stops at the ceiling (sliding down onto the doors where there is no room above); a
- * valance is flush with the doors, its middle rising for a shaped one, under every upper except one
- * over a fridge. Each piece belongs to its cabinet's wall and layer, so it is cut away with the cabinet.
+ * their chosen colours (owner, 2026-11-13). Each cabinet's moulding is one profile swept along its
+ * face (ui/mouldings.ts), mitred where it turns: back along a finished end to the wall, back to the
+ * next cabinet's face where that one is shallower, and round both inside faces of an L-shaped corner
+ * cabinet (owner, 2026-11-13: "Finished returns aren't showing with trim. The corner cabinets have
+ * significant errors."). A top trim stops at the ceiling, sliding down onto the doors where there is
+ * no room above; no valance under a cabinet over a fridge. Profiles: PROPOSED stand-ins
+ * (placeholder-draft.json "visual.trim"). Each piece belongs to its cabinet's wall and layer, so it
+ * is cut away with the cabinet.
  */
 export function trims(s: Pick<Scene3D, 'mats'>, ctx: Context, look: Pick<FinishLook, 'topTrim' | 'trimHex' | 'valance' | 'valanceHex'>): THREE.Group[] {
   const { top, valance } = trimsOf(look);
   if (!top && !valance) return [];
   const ceiling = inch(ctx.room.ceiling_height.value);
+  const typeOf = (c: CabinetView) => (c.code && !c.appliance ? (itemByCode(c.code)?.type ?? null) : null);
+  const trimmed = ctx.all.filter((c) => ['wall', 'corner_wall', 'tall'].includes(typeOf(c) ?? ''));
+  const depthOf = (c: CabinetView) => c.depth ?? (c.code ? standard(c.code, 'depth') : null);
+  /** How far a cabinet's face stands out from its wall (an L-shaped corner cabinet's face on this wall is its leg's). */
+  const reachOf = (c: CabinetView): number | null => {
+    const d = depthOf(c);
+    const wall = ctx.room.walls.find((w) => w.wall_id === c.wallId);
+    if (d === null || !wall) return null;
+    const inches = typeOf(c) === 'corner_wall' ? cornerFrame(ctx.room, wall, c, inch(c.width), inch(d)).legD : inch(d);
+    return inch(c.setback ?? 0) + inches;
+  };
   /** Whether a fridge stands under a cabinet (on its wall, overlapping it along the wall). */
   const overFridge = (c: CabinetView) => ctx.all.some((f) => f.appliance === 'fridge' && f.wallId === c.wallId && f.offset < c.offset + c.width - TOUCH && f.offset + f.width > c.offset + TOUCH);
   const out: THREE.Group[] = [];
-  for (const c of ctx.all) {
-    if (!c.code || c.appliance) continue;
-    const type = itemByCode(c.code)?.type;
-    const upper = type === 'wall' || type === 'corner_wall';
-    if (!upper && type !== 'tall') continue;
+  for (const c of trimmed) {
     const wall = ctx.room.walls.find((w) => w.wall_id === c.wallId);
-    const depth = c.depth ?? standard(c.code, 'depth');
-    if (!wall || depth === null) continue;
+    const depth = depthOf(c);
+    const reach = reachOf(c);
+    if (!wall || depth === null || reach === null) continue;
     const g = new THREE.Group();
     g.userData['wallId'] = c.wallId;
     g.userData['layer'] = c.layer;
     g.userData['trimOf'] = c.id;
-    const p = placement(ctx.room, wall, c.offset, c.width, 0, c.setback ?? 0);
+    const p = placement(ctx.room, wall, c.offset, c.width, depth, c.setback ?? 0);
     g.position.copy(p.at);
     g.rotation.y = p.angle;
     const w = inch(c.width);
-    const face = inch(depth) + DOOR_T;
+    const d = inch(depth);
+    const zf = d / 2 + DOOR_T;
+    let path: Pt[];
+    if (typeOf(c) === 'corner_wall') {
+      // Along this wall's face from the far end to the inside corner, then along the other leg's face.
+      const { inward, cx0, legD } = cornerFrame(ctx.room, wall, c, w, d);
+      const z1 = -d / 2 + legD + DOOR_T;
+      const xc = cx0 + inward * (legD + DOOR_T);
+      path = orient([[cx0 + inward * w, z1], [xc, z1], [xc, d / 2]], [0, 1]);
+    } else {
+      // Along the face, turning back at either end where the side shows: a finished end (to the
+      // wall), or a touching cabinet with the same top that is shallower (to its face).
+      const sign = alongSign(ctx.room, wall);
+      const topOf = (x: CabinetView) => x.elevation + x.height;
+      const back = (at: 'low' | 'high'): number | null => {
+        const next = trimmed.find((n) => n !== c && n.wallId === c.wallId && Math.abs(topOf(n) - topOf(c)) <= IN && (at === 'low' ? Math.abs(n.offset + n.width - c.offset) <= TOUCH : Math.abs(c.offset + c.width - n.offset) <= TOUCH));
+        if (next) {
+          const r = reachOf(next);
+          return r !== null && r < reach - 1 / 16 ? zf - (reach - r) : null;
+        }
+        return finishedEnds(c).includes(at) ? -d / 2 : null;
+      };
+      const [left, right] = sign > 0 ? [back('low'), back('high')] : [back('high'), back('low')];
+      path = [...(left === null ? [] : [[-w / 2, left] as Pt]), [-w / 2, zf], [w / 2, zf], ...(right === null ? [] : [[w / 2, right] as Pt])];
+    }
+    const add = (geo: THREE.BufferGeometry, hex: string) => {
+      const mesh = new THREE.Mesh(geo, mat(s, `moulding:${hex}`));
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      g.add(mesh);
+      const lines = new THREE.LineSegments(new THREE.EdgesGeometry(geo, 35), mat(s, `line:${SURROUNDINGS.edge}`));
+      lines.raycast = () => {};
+      g.add(lines);
+    };
     if (top) {
       const h = inch(top.height);
-      const proj = inch(top.projection);
       const y1 = Math.min(inch(c.elevation + c.height) + h, ceiling);
-      const step = h / top.steps;
-      for (let k = 0; k < top.steps; k++) {
-        const reach = (proj * (k + 1)) / top.steps;
-        // Each step reaches back onto the face so there is no gap, and stands out further than the one below.
-        box(s, g, w, step, reach + DOOR_T, [0, y1 - h + step * (k + 0.5), face + reach / 2 - DOOR_T / 2], `paint:${look.trimHex}`);
-      }
+      add(sweep(path, stepProfile(h, inch(top.projection), top.steps, DOOR_T), y1 - h), look.trimHex);
     }
-    // A light valance hangs over a counter: not under the cabinet over a fridge.
-    if (valance && upper && !overFridge(c)) {
+    // A light valance hangs over a counter: under the uppers, not under the cabinet over a fridge.
+    if (valance && typeOf(c) !== 'tall' && !overFridge(c)) {
       const h = inch(valance.height);
       const th = inch(valance.thickness);
-      const rise = inch(valance.rise);
-      const y0 = inch(c.elevation);
-      const shape = new THREE.Shape();
-      shape.moveTo(-w / 2, 0);
-      shape.lineTo(w / 2, 0);
-      shape.lineTo(w / 2, -h);
-      if (rise > 0) shape.quadraticCurveTo(0, -h + 2 * rise, -w / 2, -h);
-      else shape.lineTo(-w / 2, -h);
-      shape.closePath();
-      const mesh = new THREE.Mesh(new THREE.ExtrudeGeometry(shape, { depth: th, bevelEnabled: false }), mat(s, `paint:${look.valanceHex}`));
-      mesh.position.set(0, y0, face - th);
-      mesh.castShadow = true;
-      g.add(mesh);
+      add(sweep(path, valance.profile === 'light_rail' ? lightRailProfile(h, th) : flatValanceProfile(h, th), inch(c.elevation)), look.valanceHex);
     }
     out.push(g);
   }
@@ -1025,7 +1222,21 @@ function addHandles(s: Pick<Scene3D, 'mats'>, g: THREE.Group, c: CabinetView, ct
   return { grips, body: { ...data, handle: 'move' } };
 }
 
-export function cabinet(s: Pick<Scene3D, 'mats' | 'doors'>, c: CabinetView, ctx: Context, look: DrawLook, isSelected: boolean): THREE.Group | null {
+/**
+ * An L-shaped corner cabinet in its own frame: which end is in the corner (`cx0`, the corner end's
+ * x), which way is out of the corner along this wall (`inward`), and each leg's depth (`legD`, as
+ * deep as the cabinets beside it). Shared by the cabinet and its trim.
+ */
+export function cornerFrame(room: Room, wall: Wall, c: CabinetView, w: number, d: number): { inward: number; cx0: number; legD: number } {
+  const sign = alongSign(room, wall);
+  const span = insideSpan(room, wall);
+  const atHigh = c.offset > span.start + IN && c.offset + c.width >= span.end - IN;
+  const cs = (atHigh ? 1 : -1) * sign;
+  const legD = Math.min(d, w, inch(standard(c.layer === 'upper' ? 'upper_doors' : 'base_doors', 'depth') ?? 12 * IN));
+  return { inward: -cs, cx0: (cs * w) / 2, legD };
+}
+
+export function cabinet(s: Pick<Scene3D, 'mats' | 'doors'>, c: CabinetView, ctx: Context, look: DrawLook, isSelected: boolean, insides: Insides = NO_INSIDES): THREE.Group | null {
   if (!DRAFT_SETTINGS.ok) return null;
   const v = DRAFT_SETTINGS.value.visual;
   const room = ctx.room;
@@ -1041,7 +1252,8 @@ export function cabinet(s: Pick<Scene3D, 'mats' | 'doors'>, c: CabinetView, ctx:
   const island = wall.kind === 'floating';
   const doorHex = island ? look.island : c.layer === 'upper' || item?.type === 'tall' ? look.door : look.baseDoor;
   const finish = `paint:${doorHex}`;
-  const carcass = `paint:${SURROUNDINGS.interior}`;
+  // The box and everything inside it in the chosen interior (owner, 2026-11-13); neutral until chosen.
+  const carcass = `inside:${look.interiorHex ?? SURROUNDINGS.interior}`;
   const counter = `counter:${look.counter}`;
   const dCode = c.depth ?? (c.code ? standard(c.code, 'depth') : null);
   const depthBase = c.appliance === 'fridge' ? v.fridgeDepth : c.appliance === 'range' ? v.rangeDepth : (dCode ?? standard('base_doors', 'depth') ?? 24 * IN);
@@ -1052,6 +1264,12 @@ export function cabinet(s: Pick<Scene3D, 'mats' | 'doors'>, c: CabinetView, ctx:
   g.userData['layer'] = c.layer;
   const top = inch(c.elevation + c.height);
   const b = (bw: number, bh: number, bd: number, pos: [number, number, number], key: string, shadow = true) => box(s, g, bw, bh, bd, pos, key, shadow);
+  // What is inside (shelves, drawer boxes, inserts, bins, the corner's Lazy Susan): drawn only while
+  // the cabinet is open, as nothing of it shows when closed, which keeps the closed view quick.
+  const hid = new THREE.Group();
+  hid.userData['insideOf'] = c.id;
+  g.add(hid);
+  const bi = (bw: number, bh: number, bd: number, pos: [number, number, number], key: string, shadow = true) => box(s, hid, bw, bh, bd, pos, key, shadow);
 
   const front = (parent: THREE.Object3D, fw: number, fh: number, pos: [number, number, number], drawer: boolean) => {
     const frame = ({ transitional: 1, country: 2.25, classic: 2.25 } as Record<string, number>)[look.style];
@@ -1060,6 +1278,8 @@ export function cabinet(s: Pick<Scene3D, 'mats' | 'doors'>, c: CabinetView, ctx:
     // shadow lines, as they do on real cabinets (owner, 2026-11-12: "lines and shadows on doors and
     // between cabinets need to be more clearly visible"). It moves with a door as it opens.
     box(s, parent, fw + GAP * 0.9, fh + GAP * 0.9, 0.1, at(0, 0, -DOOR_T / 2 - 0.08), `plain:${SURROUNDINGS.reveal}`, false);
+    // The back of the door or drawer front, in its finish, seen when it is open (owner, 2026-11-13).
+    box(s, parent, fw, fh, 0.04, at(0, 0, -DOOR_T / 2 - 0.16), finish, false);
     if (frame && !(drawer && fh < 7)) {
       const fr = Math.min(frame, fh / 4, fw / 4);
       box(s, parent, fr, fh, DOOR_T, at(-fw / 2 + fr / 2, 0, 0), finish);
@@ -1083,20 +1303,37 @@ export function cabinet(s: Pick<Scene3D, 'mats' | 'doors'>, c: CabinetView, ctx:
     mesh.castShadow = true;
     parent.add(mesh);
   };
-  /** One door hung from its hinge edge, so it swings open with "Open doors". `handle` false: no handle (a corner cabinet's second door). */
-  const hangDoor = (x0: number, x1: number, y0: number, y1: number, depth: number, hinge: 'left' | 'right', handleY: number, handle: boolean) => {
+  /** Registers a door or drawer that opens, by its cabinet, so one cabinet or every one can be opened. */
+  const moving = (o: THREE.Object3D, data: Record<string, unknown>) => {
+    o.userData = { ...data, t: 0, key: `${c.id}:${doorN++}`, cabId: c.id };
+    s.doors.push(o);
+  };
+  /** One door hung from its hinge edge, its face at `zFace`, so it swings open. `handle` false: no handle (a corner cabinet's second door). */
+  const hangDoorOn = (parent: THREE.Object3D, x0: number, x1: number, y0: number, y1: number, zFace: number, hinge: 'left' | 'right', handleY: number, handle: boolean) => {
     const dw = x1 - x0 - GAP;
     const dh = y1 - y0 - GAP;
     const dir = hinge === 'left' ? 1 : -1;
     const pv = new THREE.Group();
-    pv.position.set(hinge === 'left' ? x0 : x1, 0, depth / 2 + DOOR_T);
+    pv.position.set(hinge === 'left' ? x0 : x1, 0, zFace);
     const cx = dir * (dw / 2 + GAP / 2);
     front(pv, dw, dh, [cx, (y0 + y1) / 2, -DOOR_T / 2], false);
     if (handle) hardware(pv, cx + dir * (dw / 2 - 1.6), handleY, 0, look.doorOrient === 'vertical', false);
-    pv.userData = { dir: -dir, angle: 0, key: `${c.id}:${doorN++}` };
-    s.doors.push(pv);
-    g.add(pv);
+    moving(pv, { kind: 'door', dir: -dir });
+    parent.add(pv);
   };
+  const hangDoor = (x0: number, x1: number, y0: number, y1: number, depth: number, hinge: 'left' | 'right', handleY: number, handle: boolean) => hangDoorOn(g, x0, x1, y0, y1, depth / 2 + DOOR_T, hinge, handleY, handle);
+  /** A cabinet's box, open at the front: sides, top, bottom and back in the interior, so what is inside shows when it opens. */
+  const shell = (x0: number, x1: number, y0: number, y1: number, z0: number, z1: number) => {
+    const T = 0.75;
+    b(T, y1 - y0, z1 - z0, [x0 + T / 2, (y0 + y1) / 2, (z0 + z1) / 2], carcass);
+    b(T, y1 - y0, z1 - z0, [x1 - T / 2, (y0 + y1) / 2, (z0 + z1) / 2], carcass);
+    b(x1 - x0 - 2 * T, T, z1 - z0, [(x0 + x1) / 2, y0 + T / 2, (z0 + z1) / 2], carcass);
+    b(x1 - x0 - 2 * T, T, z1 - z0, [(x0 + x1) / 2, y1 - T / 2, (z0 + z1) / 2], carcass);
+    b(x1 - x0 - 2 * T, y1 - y0 - 2 * T, 0.5, [(x0 + x1) / 2, (y0 + y1) / 2, z0 + 0.25], carcass);
+  };
+  /** Whether a fridge stands under this cabinet: tray organizers go in the cabinet over the fridge (owner, 2026-11-13). */
+  const overFridge = ctx.all.some((f) => f.appliance === 'fridge' && f.wallId === c.wallId && f.offset < c.offset + c.width - TOUCH && f.offset + f.width > c.offset + TOUCH);
+  const garbageCode = DRAFT_SETTINGS.value.codes.garbage;
   /** A cabinet's face as laid out by model/fronts.ts (sections, door rule, drawer heights, handles). */
   const drawFace = (x0: number, x1: number, y0: number, y1: number, depth: number) => {
     if (!item) return;
@@ -1104,18 +1341,32 @@ export function cabinet(s: Pick<Scene3D, 'mats' | 'doors'>, c: CabinetView, ctx:
       { item, x0, x1, y0, y1, hinge: c.selections?.['hinge_side'] ?? null, sections: c.sections ?? null, drawerHandleTop: look.drawerTop, sinkFront: c.selections?.['sink_front'] ?? null },
       DRAFT_SETTINGS.ok ? DRAFT_SETTINGS.value.fronts : { maxSingleDoor: 20, maxDoorHeight: 48, topDrawer: 6.8125, upperBottom: 54, baseTop: 34.75 },
     );
-    const inner = `paint:${SURROUNDINGS.interior}`;
+    const inner = carcass;
+    let drawerNo = 0;
+    const drawerCount = pieces.filter((p) => p.kind === 'drawer').length;
+    let drawerAt = 0;
     for (const p of pieces) {
       if (p.kind === 'door') hangDoor(p.x0, p.x1, p.y0, p.y1, depth, p.hinge, p.handleY, p.handle);
       else if (p.kind === 'drawer') {
+        // A drawer: its front and a box behind it that slides out together (owner, 2026-11-13).
         const fw = p.x1 - p.x0;
-        front(g, fw - GAP, p.y1 - p.y0 - GAP, [(p.x0 + p.x1) / 2, (p.y0 + p.y1) / 2, depth / 2 + DOOR_T / 2], true);
-        hardware(g, (p.x0 + p.x1) / 2, p.handleY, depth / 2 + DOOR_T, false, true);
-      } else if (p.kind === 'shelf') b(p.x1 - p.x0 - 1.5, 0.75, depth - 2, [(p.x0 + p.x1) / 2, p.y, 0], inner, false);
+        const dg = new THREE.Group();
+        front(dg, fw - GAP, p.y1 - p.y0 - GAP, [(p.x0 + p.x1) / 2, (p.y0 + p.y1) / 2, depth / 2 + DOOR_T / 2], true);
+        hardware(dg, (p.x0 + p.x1) / 2, p.handleY, depth / 2 + DOOR_T, false, true);
+        const n = p.pullout ? null : String(++drawerNo);
+        const dgIn = new THREE.Group();
+        dgIn.userData['insideOf'] = c.id;
+        dg.add(dgIn);
+        drawerBox(s, dgIn, { x0: p.x0, x1: p.x1, y0: p.y0, y1: p.y1, depth, key: inner, pullout: p.pullout === true, insert: n === null ? null : (c.drawerInserts?.[n] ?? null), bins: p.pullout === true && c.code === garbageCode });
+        g.add(dg);
+        // A bank opens in steps, each drawer further out than the one above, so every drawer's inside shows.
+        const step = drawerCount > 1 ? 0.4 + (0.45 * drawerAt++) / (drawerCount - 1) : 0.75;
+        moving(dg, { kind: 'drawer', z0: 0, slide: Math.max(4, Math.min(depth - 4, 20)) * (p.pullout ? 0.85 : step) });
+      } else if (p.kind === 'shelf') bi(p.x1 - p.x0 - 1.5, 0.75, depth - 2, [(p.x0 + p.x1) / 2, p.y, 0], inner, false);
       else if (p.kind === 'rollout') {
         // A roll-out tray: a shallow box behind the doors.
-        b(p.x1 - p.x0 - 2.5, 0.5, depth - 3, [(p.x0 + p.x1) / 2, p.y, 0], inner, false);
-        b(p.x1 - p.x0 - 2.5, 3, 0.5, [(p.x0 + p.x1) / 2, p.y + 1.5, depth / 2 - 1.75], inner, false);
+        bi(p.x1 - p.x0 - 2.5, 0.5, depth - 3, [(p.x0 + p.x1) / 2, p.y, 0], inner, false);
+        bi(p.x1 - p.x0 - 2.5, 3, 0.5, [(p.x0 + p.x1) / 2, p.y + 1.5, depth / 2 - 1.75], inner, false);
       } else if (p.kind === 'divider') b(p.x1 - p.x0, p.y1 - p.y0, depth, [(p.x0 + p.x1) / 2, (p.y0 + p.y1) / 2, 0.01], carcass);
       else if (p.kind === 'open') b(p.x1 - p.x0 - 1.5, p.y1 - p.y0 - 1.5, 0.3, [(p.x0 + p.x1) / 2, (p.y0 + p.y1) / 2, -depth / 2 + 0.75], `paint:${doorHex}`, false);
     }
@@ -1214,22 +1465,53 @@ export function cabinet(s: Pick<Scene3D, 'mats' | 'doors'>, c: CabinetView, ctx:
     } else if (item.type === 'corner_base' || item.type === 'corner_wall') {
       // An L-shaped 90-degree corner cabinet: one leg along this wall, the other along the wall it
       // meets, each as deep as the cabinets beside it, with a door on each inside face.
-      const u = direction(wall);
-      const n = insideNormal(room, wall);
-      const sign = -n.y * u.x + n.x * u.y >= 0 ? 1 : -1;
-      const span = insideSpan(room, wall);
-      const atHigh = c.offset > span.start + IN && c.offset + c.width >= span.end - IN;
-      const cs = (atHigh ? 1 : -1) * sign;
-      const inward = -cs;
-      const cx0 = (cs * w) / 2;
-      const legD = Math.min(d, w, inch(standard(c.layer === 'upper' ? 'upper_doors' : 'base_doors', 'depth') ?? 12 * IN));
+      const { inward, cx0, legD } = cornerFrame(room, wall, c, w, d);
       const xr = (a: number, z: number): [number, number] => [Math.min(cx0 + inward * a, cx0 + inward * z), Math.max(cx0 + inward * a, cx0 + inward * z)];
       const upper = c.layer === 'upper';
       const y0 = upper ? inch(c.elevation) : toe;
       const zFace = -d / 2 + legD;
       const block = (x: [number, number], z0: number, z1: number, yA: number, yB: number, key: string, shadow = true) => b(x[1] - x[0], yB - yA, z1 - z0, [(x[0] + x[1]) / 2, (yA + yB) / 2, (z0 + z1) / 2], key, shadow);
-      block([-w / 2, w / 2], -d / 2, zFace, y0, top, carcass);
-      block(xr(0, legD), zFace, d / 2, y0, top, carcass);
+      // The L-shaped box, open on both inside faces: bottom and top over both legs, a back on each
+      // wall, and an end on each leg (owner, 2026-11-13: what is inside shows when it opens).
+      const T = 0.75;
+      for (const [yA, yB] of [[y0, y0 + T], [top - T, top]] as const) {
+        block([-w / 2, w / 2], -d / 2, zFace, yA, yB, carcass);
+        block(xr(0, legD), zFace, d / 2, yA, yB, carcass);
+      }
+      block([-w / 2, w / 2], -d / 2, -d / 2 + 0.5, y0, top, carcass);
+      block(xr(0, 0.5), -d / 2, d / 2, y0, top, carcass);
+      block(xr(w - T, w), -d / 2, zFace, y0, top, carcass);
+      block(xr(0, legD), d / 2 - T, d / 2, y0, top, carcass);
+      // Inside: a Lazy Susan (two round shelves with the doors' quarter cut out, on a pole) or L-shaped shelves.
+      const lazy = c.code === DRAFT_SETTINGS.value.codes.corner_lazy_susan && insides.cornerInsert === 'lazy_susan';
+      const shelfYs = upper ? [y0 + (top - y0) / 3, y0 + ((top - y0) * 2) / 3] : [y0 + 1.5, y0 + (top - y0) / 2];
+      if (lazy) {
+        const r = Math.max(6, legD - 3);
+        const cx = cx0 + inward * (r + 1);
+        const cz = -d / 2 + r + 1;
+        const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, top - y0 - 1.5, 16), mat(s, `metal:${SURROUNDINGS.handle}`));
+        pole.position.set(cx, (y0 + top) / 2, cz);
+        hid.add(pole);
+        // The cut-out quarter faces the doors: toward the room along this wall (inward) and out from the wall (+z).
+        // (A cylinder's angle runs from +z toward +x.)
+        const cut = Math.atan2(inward, 1);
+        for (const y of shelfYs) {
+          const disc = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 0.75, 48, 1, false, cut + Math.PI / 4, (3 * Math.PI) / 2), mat(s, carcass));
+          disc.position.set(cx, y + 0.375, cz);
+          disc.castShadow = true;
+          disc.receiveShadow = true;
+          hid.add(disc);
+          const lip = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 1.5, 48, 1, true, cut + Math.PI / 4, (3 * Math.PI) / 2), mat(s, `moulding:${look.interiorHex ?? SURROUNDINGS.interior}`));
+          lip.position.set(cx, y + 1.25, cz);
+          hid.add(lip);
+        }
+      } else {
+        const shelf = (x: [number, number], z0: number, z1: number, y: number) => bi(x[1] - x[0], 0.75, z1 - z0, [(x[0] + x[1]) / 2, y + 0.375, (z0 + z1) / 2], carcass);
+        for (const y of shelfYs.slice(upper ? 0 : 1)) {
+          shelf([-w / 2, w / 2], -d / 2 + 0.5, zFace - 0.5, y);
+          shelf(xr(0.5, legD - 0.5), zFace - 0.5, d / 2 - T, y);
+        }
+      }
       if (!upper) {
         block([-w / 2, w / 2], -d / 2, zFace - 3, 0, toe, kick, false);
         block(xr(0, legD - 3), zFace - 3, d / 2, 0, toe, kick, false);
@@ -1243,14 +1525,15 @@ export function cabinet(s: Pick<Scene3D, 'mats' | 'doors'>, c: CabinetView, ctx:
       // where the hinge is").
       const [fx0, fx1] = xr(legD, w);
       if (fx1 - fx0 > 1) hangDoor(fx0, fx1, y0, top, 2 * zFace, inward > 0 ? 'left' : 'right', upper ? y0 + 5 : top - 5, true);
-      // The door on the other leg's face, turned to face along this wall.
+      // The door on the other leg's face, turned to face along this wall. It opens too, hinged at
+      // its far end (the first opened door shows the Lazy Susan or shelves behind both).
       const fw = d - legD;
       if (fw > 1) {
         const face = new THREE.Group();
         face.position.set(cx0 + inward * legD, 0, (zFace + d / 2) / 2);
         face.rotation.y = inward > 0 ? Math.PI / 2 : -Math.PI / 2;
-        // The second door folds with the first: no handle of its own.
-        front(face, fw - GAP, top - y0 - GAP, [0, (y0 + top) / 2, DOOR_T / 2], false);
+        // The second door folds with the first: no handle of its own. Its far end (by the next leg's cabinets) is at local -x when the face turns +90 degrees.
+        hangDoorOn(face, -fw / 2, fw / 2, y0, top, DOOR_T, inward > 0 ? 'left' : 'right', top - 5, false);
         g.add(face);
       }
     } else if (item.type === 'appliance_opening') {
@@ -1277,12 +1560,19 @@ export function cabinet(s: Pick<Scene3D, 'mats' | 'doors'>, c: CabinetView, ctx:
       b(w - 1, toe, d - 3, [0, toe / 2, -1.5], kick, false);
     } else if (c.layer === 'upper') {
       const y0 = inch(c.elevation);
-      b(w, h, d, [0, y0 + h / 2, 0], carcass);
+      shell(-w / 2, w / 2, y0, top, -d / 2, d / 2);
       drawFace(-w / 2, w / 2, y0, top, d);
+      // Tray organizers stand in the cabinet over the fridge (owner, 2026-11-13): three upright dividers each, from the left.
+      if (overFridge && look.trayOrganizers > 0) {
+        let x = -w / 2 + 0.75 + 3.5;
+        for (let k = 0; k < look.trayOrganizers * 3 && x < w / 2 - 1.5; k++, x += 3.5) bi(0.5, top - y0 - 2, d - 2.5, [x, (y0 + top) / 2, 0.5], carcass);
+      }
     } else {
-      b(w, h - toe, d, [0, toe + (h - toe) / 2, 0], carcass);
+      shell(-w / 2, w / 2, toe, h, -d / 2, d / 2);
       b(w, toe, d - 3, [0, toe / 2, -1.5], kick, false);
       drawFace(-w / 2, w / 2, toe, h, d);
+      // Garbage pull-out under the sink, when that is where the room's choices put it.
+      if (insides.garbage === 'under_sink' && c.housed?.kind === 'sink') bins(s, hid, -w / 2 + 2, w / 2 - 2, toe + 0.75, Math.min(h - toe - 10, 18), -d / 2 + 2, d / 2 - 2);
     }
     // A finished back, as chosen on the cabinet (owner, 2026-11-12): a panel, or door panels like the fronts.
     const back = c.selections?.['back'];

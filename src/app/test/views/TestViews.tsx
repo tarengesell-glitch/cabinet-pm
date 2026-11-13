@@ -46,11 +46,13 @@ const CHOICES: DesignChoices = {
     trimHex: '#eeebe4',
     valance: 'flat',
     valanceHex: '#eeebe4',
+    interiorHex: '#D9B98A',
+    trayOrganizers: 1,
   },
 };
 
 export function TestViews() {
-  const [state, setState] = useState<{ room: Room; view: CameraView } | { problem: string } | null>(null);
+  const [state, setState] = useState<{ room: Room; view: CameraView; open: 'all' | null } | { problem: string } | null>(null);
   useEffect(() => {
     void import('@/modules/designer/ui/index').then(({ parseView }) => {
       const name = new URLSearchParams(window.location.search).get('view') ?? 'overall';
@@ -73,7 +75,7 @@ export function TestViews() {
       if (kept) return setState({ problem: kept });
       const room = draftRoom(drawn.room_id, CHOICES, PREVIEW_USER.id);
       if (!room.ok) return setState({ problem: room.reason });
-      setState({ room: room.value, view });
+      setState({ room: room.value, view, open: new URLSearchParams(window.location.search).get('open') === 'all' ? 'all' : null });
     });
   }, []);
   if (process.env.NODE_ENV === 'production') return <p style={{ padding: 16 }}>This page is only for the screenshot command in development.</p>;
@@ -86,7 +88,7 @@ export function TestViews() {
     );
   return (
     <div style={{ position: 'fixed', inset: 0, background: '#f4f2ee' }}>
-      <RoomViews room={state.room} choices={CHOICES} view={state.view} />
+      <RoomViews room={state.room} choices={CHOICES} view={state.view} open={state.open} />
     </div>
   );
 }

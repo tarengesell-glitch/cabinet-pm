@@ -1,19 +1,19 @@
 import { describe, expect, it } from 'vitest';
-import { Box3, BoxGeometry, Group, Mesh, Raycaster, Vector3 } from 'three';
+import { Box3, BoxGeometry, CylinderGeometry, Group, Mesh, Raycaster, Vector3, type Object3D } from 'three';
 import { cabinetViews, placeholderItems, type CabinetView } from '../model/cabinets';
 import { endOpen, withRuleEnds, type Context } from '../model/ends';
 import { cornerCabinets } from '../model/layout';
 import { draftPlaceholder } from '../model/placeholder-draft';
-import { counters, finishedEnds, seenHits, trims, type FinishLook } from '../ui/Stage3D';
+import { cabinet, cornerFrame, counters, drawLook, finishedEnds, seenHits, trims, type FinishLook } from '../ui/Stage3D';
 import { trimsOf } from '../model/choices';
-import { itemByCode } from '../model/placeholder-draft';
+import { itemByCode, standard } from '../model/placeholder-draft';
 import { realKitchenRoom } from './real-kitchen';
 
 const IN = 64;
 let n = 0;
 // Not the fixture's own ID pattern, so a cabinet never shares an ID with an appliance.
 const ids = () => `dddddddd-0000-4000-8000-${String(++n).padStart(12, '0')}`;
-const LOOK: FinishLook = { door: '#eeeeee', baseDoor: '#eeeeee', island: '#666666', counter: '#cccccc', style: 'transitional', doorHw: 'handle', drawerHw: 'handle', pullFinish: '#111111', knobFinish: '#111111', doorOrient: 'vertical', drawerTop: false, topTrim: null, trimHex: '#ffffff', valance: null, valanceHex: '#ffffff' };
+const LOOK: FinishLook = { door: '#eeeeee', baseDoor: '#eeeeee', island: '#666666', counter: '#cccccc', style: 'transitional', doorHw: 'handle', drawerHw: 'handle', pullFinish: '#111111', knobFinish: '#111111', doorOrient: 'vertical', drawerTop: false, topTrim: null, trimHex: '#ffffff', valance: null, valanceHex: '#ffffff', interiorHex: null, trayOrganizers: 0 };
 
 /** The real kitchen as the 3D view sees it, after the placeholder lays it out. */
 function scene(): Context {
@@ -104,7 +104,7 @@ describe('top trim and light valance (owner, 2026-11-13)', () => {
     expect(trimsOf({ topTrim: 'none', valance: 'none' }).problems).toEqual([]);
     const crown = trimsOf({ topTrim: 'crown', valance: 'shaped' });
     expect(crown.top?.steps).toBe(3);
-    expect(crown.valance?.rise).toBeGreaterThan(0);
+    expect(crown.valance?.profile).toBe('light_rail');
     const odd = trimsOf({ topTrim: 'egg_and_dart', valance: 'scalloped' });
     expect(odd.top).toBeNull();
     expect(odd.valance).toBeNull();
@@ -124,14 +124,97 @@ describe('top trim and light valance (owner, 2026-11-13)', () => {
     for (const g of groups) {
       g.updateMatrixWorld(true);
       expect(new Box3().setFromObject(g).max.y).toBeLessThanOrEqual(ceiling + 1e-6);
-      const valances = g.children.filter((m) => (m as { geometry?: { type: string } }).geometry?.type === 'ExtrudeGeometry');
+      // One moulding for the crown, and one for the valance under an upper.
+      const valances = g.children.filter((m) => (m as { isMesh?: boolean }).isMesh).length - 1;
       const c = ctx.all.find((x) => x.id === g.userData['trimOf'])!;
       const overFridge = ctx.all.some((f) => f.appliance === 'fridge' && f.wallId === c.wallId && f.offset < c.offset + c.width && f.offset + f.width > c.offset);
-      expect(valances).toHaveLength(typeOf(c.id) === 'tall' || overFridge ? 0 : 1);
+      expect(valances).toBe(typeOf(c.id) === 'tall' || overFridge ? 0 : 1);
     }
     // The cabinet over the fridge has no valance (there is no counter under it).
     expect(ctx.all.some((c) => c.appliance === 'fridge')).toBe(true);
+    // A finished end gets a return: the moulding wraps back along the side to the wall.
+    const ended = tops.find((c) => typeOf(c.id) === 'wall' && finishedEnds(c).length > 0)!;
+    expect(ended).toBeDefined();
+    const g = groups.find((x) => x.userData['trimOf'] === ended.id)!;
+    const crownBox = new Box3().setFromObject(g.children.find((m) => (m as Mesh).isMesh)!);
+    const depth = (ended.depth ?? standard(ended.code!, 'depth')!) / IN;
+    expect(crownBox.getSize(new Vector3()).z).toBeGreaterThan(depth);
     // None of either draws nothing.
     expect(trims({ mats: new Map() }, ctx, { ...look, topTrim: 'none', valance: 'none' })).toEqual([]);
+  });
+});
+
+describe('opening cabinets (owner, 2026-11-13)', () => {
+  const panels = { back: { kind: 'none' as const }, side: { kind: 'none' as const }, problems: [] };
+  const build = (code: string, look: Partial<FinishLook> = {}, insides = { cornerInsert: 'lazy_susan', garbage: 'dedicated_cabinet' as const }) => {
+    const ctx = scene();
+    const c = ctx.all.find((x) => x.code === code)!;
+    const s = { mats: new Map(), doors: [] as Object3D[] };
+    const g = cabinet(s, c, ctx, drawLook({ ...LOOK, ...look }, panels), false, insides)!;
+    return { ctx, c, s, g };
+  };
+
+  it('every drawer slides and every door swings, each tagged with its cabinet so one cabinet or all can open', () => {
+    const { c, s } = build('base_4_drawers');
+    expect(s.doors).toHaveLength(4);
+    expect(s.doors.every((d) => d.userData['kind'] === 'drawer' && d.userData['cabId'] === c.id)).toBe(true);
+    // A bank opens in steps: each drawer further out than the one above.
+    const slides = s.doors.map((d) => d.userData['slide'] as number);
+    expect([...slides].sort((a, b) => a - b)).toEqual(slides);
+    expect(new Set(slides).size).toBe(4);
+    // An L-shaped corner cabinet's second door opens too.
+    expect(build('corner_base').s.doors.filter((d) => d.userData['kind'] === 'door')).toHaveLength(2);
+  });
+
+  it('draws the box in the chosen interior and the door backs in the door finish', () => {
+    const { s } = build('upper_doors', { interiorHex: '#d9b98a', door: '#123456' });
+    expect([...s.mats.keys()]).toContain('inside:#d9b98a');
+    // Each door has a back panel in its finish.
+    const backs = s.doors.flatMap((d) => d.children).filter((m) => (m as Mesh).isMesh && ((m as Mesh).geometry as BoxGeometry).parameters?.depth === 0.04);
+    expect(backs.length).toBe(s.doors.length);
+    expect(backs.every((m) => (m as Mesh).material === s.mats.get('paint:#123456'))).toBe(true);
+  });
+
+  it('keeps a Lazy Susan inside the L-shaped corner cabinet, its open quarter toward the doors', () => {
+    const { ctx, c, g } = build('corner_base');
+    const wall = ctx.room.walls.find((w) => w.wall_id === c.wallId)!;
+    const w = c.width / IN;
+    const d = (c.depth ?? 0) / IN;
+    const { inward, cx0, legD } = cornerFrame(ctx.room, wall, c, w, d);
+    // The insides are drawn in their own group (shown only while the cabinet is open), at the cabinet's origin.
+    const inside = g.children.find((o) => o.userData['insideOf'] === c.id)!;
+    const discs = inside.children.filter((m) => (m as Mesh).isMesh && (m as Mesh).geometry instanceof CylinderGeometry && ((m as Mesh).geometry as CylinderGeometry).parameters.radiusTop > 2);
+    expect(discs.length).toBeGreaterThanOrEqual(2);
+    for (const m of discs) {
+      m.updateMatrix();
+      const pos = (m as Mesh).geometry.getAttribute('position');
+      for (let i = 0; i < pos.count; i++) {
+        const v = new Vector3().fromBufferAttribute(pos, i).applyMatrix4(m.matrix);
+        const along = (v.x - cx0) * inward; // from the corner along this wall
+        const out = v.z + d / 2; // from this wall
+        expect(along).toBeGreaterThan(-0.01);
+        expect(out).toBeGreaterThan(-0.01);
+        // Inside the L: within one leg's depth of one of the two walls.
+        expect(Math.min(along, out)).toBeLessThan(legD + 0.01);
+      }
+    }
+  });
+
+  it('puts tray organizers in the cabinet over the fridge only', () => {
+    const ctx = scene();
+    const fridge = ctx.all.find((x) => x.appliance === 'fridge')!;
+    const over = ctx.all.find((x) => x.layer === 'upper' && x.wallId === fridge.wallId && x.offset < fridge.offset + fridge.width && x.offset + x.width > fridge.offset)!;
+    const count = (c: typeof over, n: number) => {
+      const s = { mats: new Map(), doors: [] as Object3D[] };
+      const g = cabinet(s, c, ctx, drawLook({ ...LOOK, trayOrganizers: n }, panels), false)!;
+      let found = 0;
+      g.traverse((m) => {
+        if ((m as Mesh).isMesh && ((m as Mesh).geometry as BoxGeometry).parameters?.width === 0.5 && ((m as Mesh).geometry as BoxGeometry).parameters?.height > 10) found++;
+      });
+      return found;
+    };
+    expect(count(over, 1) - count(over, 0)).toBe(3);
+    const other = ctx.all.find((x) => x.code === 'upper_doors' && x !== over)!;
+    expect(count(other, 1) - count(other, 0)).toBe(0);
   });
 });

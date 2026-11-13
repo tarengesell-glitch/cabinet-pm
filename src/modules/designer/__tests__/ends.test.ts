@@ -25,7 +25,7 @@ const MAX_CHOICES: DesignChoices = {
   garbage: 'dedicated_cabinet',
   islandBackPanel: { status: 'unanswered' },
   islandSidePanel: { status: 'unanswered' },
-  look: { door: '#eeeeee', baseDoor: '#eeeeee', island: '#666666', counter: '#cccccc', style: 'transitional', doorHw: 'handle', drawerHw: 'handle', pullFinish: '#111111', knobFinish: '#111111', doorOrient: 'vertical', drawerTop: false, topTrim: null, trimHex: '#ffffff', valance: null, valanceHex: '#ffffff' },
+  look: { door: '#eeeeee', baseDoor: '#eeeeee', island: '#666666', counter: '#cccccc', style: 'transitional', doorHw: 'handle', drawerHw: 'handle', pullFinish: '#111111', knobFinish: '#111111', doorOrient: 'vertical', drawerTop: false, topTrim: null, trimHex: '#ffffff', valance: null, valanceHex: '#ffffff', interiorHex: null, trayOrganizers: 0 },
 };
 const PLAIN: DraftPreferences = { drawers: null, cornerInsert: null, garbage: 'none', cabinetTop: null, roomSet: 'kitchen' };
 

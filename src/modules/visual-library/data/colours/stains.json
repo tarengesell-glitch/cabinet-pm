@@ -1,0 +1,335 @@
+{
+  "id": "stains",
+  "label": "Stains",
+  "source": "cabinets.com stain options (owner, 2026-11-13: \"look up the stain options available on cabinets.com\"), read 2026-11-13 from https://www.cabinets.com/, https://www.cabinets.com/kitchen-cabinets, https://www.cabinets.com/samples. Every stain is shown on every wood species (owner, 2026-11-10); species_seen records where cabinets.com itself offers it. cabinets.com sells no stained walnut. The prompts are our own wording; the site gives no descriptions.",
+  "status": "owner",
+  "applies_to": [
+    "red_oak_rift",
+    "red_oak_rotary",
+    "white_oak_rift",
+    "white_oak_rotary",
+    "maple",
+    "walnut_rift",
+    "walnut_rotary",
+    "cherry"
+  ],
+  "colours": [
+    {
+      "id": "natural",
+      "label": "Natural",
+      "species_seen": [
+        "maple",
+        "cherry",
+        "oak"
+      ],
+      "lines": [
+        "Cosmopolitan",
+        "Shaker",
+        "Shaker II",
+        "Colonial",
+        "Colonial II",
+        "Baldwin",
+        "Sebring",
+        "Hawthorne",
+        "Jupiter",
+        "Belleair",
+        "Springfield",
+        "Bronson",
+        "Monaco",
+        "Lombard",
+        "Lombard II"
+      ],
+      "swatch_url": "https://www.cabinets.com/media/common-assets/color-swatches/natural.svg",
+      "prompt": "clear natural finish showing the raw wood tone (pale on maple/oak, warm on cherry)",
+      "source_url": "https://www.cabinets.com/samples"
+    },
+    {
+      "id": "unfinished",
+      "label": "Unfinished",
+      "species_seen": [
+        "maple"
+      ],
+      "lines": [
+        "Cosmopolitan",
+        "Shaker",
+        "Shaker II",
+        "Colonial",
+        "Colonial II",
+        "Baldwin",
+        "Sebring",
+        "Hawthorne",
+        "Jupiter",
+        "Belleair",
+        "Springfield",
+        "Bronson",
+        "Monaco",
+        "Lombard",
+        "Lombard II"
+      ],
+      "swatch_url": "https://www.cabinets.com/media/common-assets/color-swatches/unfinished.svg",
+      "prompt": "raw unfinished wood, no stain or topcoat",
+      "source_url": "https://www.cabinets.com/samples"
+    },
+    {
+      "id": "toffee",
+      "label": "Toffee",
+      "species_seen": [
+        "maple",
+        "cherry"
+      ],
+      "lines": [
+        "Cosmopolitan",
+        "Shaker",
+        "Shaker II",
+        "Colonial",
+        "Colonial II",
+        "Baldwin",
+        "Sebring",
+        "Hawthorne",
+        "Jupiter",
+        "Belleair",
+        "Springfield",
+        "Bronson",
+        "Monaco",
+        "Lombard",
+        "Lombard II"
+      ],
+      "swatch_url": "https://www.cabinets.com/media/common-assets/color-swatches/toffee.svg",
+      "prompt": "medium warm caramel-brown stain",
+      "source_url": "https://www.cabinets.com/samples"
+    },
+    {
+      "id": "sand",
+      "label": "Sand",
+      "species_seen": [
+        "maple",
+        "oak"
+      ],
+      "lines": [
+        "Cosmopolitan",
+        "Shaker",
+        "Shaker II",
+        "Colonial",
+        "Colonial II",
+        "Baldwin",
+        "Sebring",
+        "Hawthorne",
+        "Jupiter",
+        "Belleair",
+        "Springfield",
+        "Bronson",
+        "Monaco",
+        "Lombard",
+        "Lombard II"
+      ],
+      "swatch_url": "https://www.cabinets.com/media/common-assets/color-swatches/sand.svg",
+      "prompt": "light tan / sandy beige stain",
+      "source_url": "https://www.cabinets.com/samples"
+    },
+    {
+      "id": "latte",
+      "label": "Latte",
+      "species_seen": [
+        "maple",
+        "oak"
+      ],
+      "lines": [
+        "Cosmopolitan",
+        "Shaker",
+        "Shaker II",
+        "Colonial",
+        "Colonial II",
+        "Baldwin",
+        "Sebring",
+        "Hawthorne",
+        "Jupiter",
+        "Belleair",
+        "Springfield",
+        "Bronson",
+        "Monaco",
+        "Lombard",
+        "Lombard II"
+      ],
+      "swatch_url": "https://www.cabinets.com/media/common-assets/color-swatches/latte.svg",
+      "prompt": "light-to-medium creamy brown stain",
+      "source_url": "https://www.cabinets.com/samples"
+    },
+    {
+      "id": "storm",
+      "label": "Storm",
+      "species_seen": [
+        "maple",
+        "cherry"
+      ],
+      "lines": [
+        "Cosmopolitan",
+        "Shaker",
+        "Shaker II",
+        "Colonial",
+        "Colonial II",
+        "Baldwin",
+        "Sebring",
+        "Hawthorne",
+        "Jupiter",
+        "Belleair",
+        "Springfield",
+        "Bronson",
+        "Monaco",
+        "Lombard",
+        "Lombard II"
+      ],
+      "swatch_url": "https://www.cabinets.com/media/common-assets/color-swatches/storm.svg",
+      "prompt": "grey-brown weathered stain",
+      "source_url": "https://www.cabinets.com/samples"
+    },
+    {
+      "id": "slate",
+      "label": "Slate",
+      "species_seen": [
+        "maple"
+      ],
+      "lines": [
+        "Cosmopolitan",
+        "Shaker",
+        "Shaker II",
+        "Colonial",
+        "Colonial II",
+        "Baldwin",
+        "Sebring",
+        "Hawthorne",
+        "Jupiter",
+        "Belleair",
+        "Springfield",
+        "Bronson",
+        "Monaco",
+        "Lombard",
+        "Lombard II"
+      ],
+      "swatch_url": "https://www.cabinets.com/media/common-assets/color-swatches/slate.svg",
+      "prompt": "medium grey stain",
+      "source_url": "https://www.cabinets.com/samples"
+    },
+    {
+      "id": "charcoal",
+      "label": "Charcoal",
+      "species_seen": [
+        "maple"
+      ],
+      "lines": [
+        "Cosmopolitan",
+        "Shaker",
+        "Shaker II",
+        "Colonial",
+        "Colonial II",
+        "Baldwin",
+        "Sebring",
+        "Hawthorne",
+        "Jupiter",
+        "Belleair",
+        "Springfield",
+        "Bronson",
+        "Monaco",
+        "Lombard",
+        "Lombard II"
+      ],
+      "swatch_url": "https://www.cabinets.com/media/common-assets/color-swatches/charcoal.svg",
+      "prompt": "dark charcoal grey stain",
+      "source_url": "https://www.cabinets.com/samples"
+    },
+    {
+      "id": "java",
+      "label": "Java",
+      "species_seen": [
+        "maple",
+        "cherry"
+      ],
+      "lines": [
+        "Cosmopolitan",
+        "Shaker",
+        "Shaker II",
+        "Colonial",
+        "Colonial II",
+        "Baldwin",
+        "Sebring",
+        "Hawthorne",
+        "Jupiter",
+        "Belleair",
+        "Springfield",
+        "Bronson"
+      ],
+      "swatch_url": "https://www.cabinets.com/media/common-assets/color-swatches/java.svg",
+      "prompt": "very dark coffee-brown stain",
+      "source_url": "https://www.cabinets.com/samples"
+    },
+    {
+      "id": "pecan",
+      "label": "Pecan",
+      "species_seen": [
+        "maple"
+      ],
+      "lines": [
+        "Cosmopolitan",
+        "Shaker",
+        "Shaker II",
+        "Colonial",
+        "Colonial II",
+        "Baldwin",
+        "Sebring",
+        "Hawthorne",
+        "Jupiter",
+        "Belleair",
+        "Springfield",
+        "Bronson",
+        "Monaco",
+        "Lombard",
+        "Lombard II"
+      ],
+      "swatch_url": "https://www.cabinets.com/media/common-assets/color-swatches/pecan.svg",
+      "prompt": "medium warm nut-brown stain",
+      "source_url": "https://www.cabinets.com/samples"
+    },
+    {
+      "id": "espresso",
+      "label": "Espresso",
+      "species_seen": [
+        "maple"
+      ],
+      "lines": [
+        "Cosmopolitan",
+        "Shaker",
+        "Shaker II",
+        "Colonial",
+        "Colonial II",
+        "Baldwin",
+        "Sebring",
+        "Hawthorne",
+        "Jupiter",
+        "Belleair",
+        "Springfield",
+        "Bronson",
+        "Monaco",
+        "Lombard",
+        "Lombard II"
+      ],
+      "swatch_url": "https://www.cabinets.com/media/common-assets/color-swatches/espresso.svg",
+      "prompt": "very dark brown, near-black stain",
+      "source_url": "https://www.cabinets.com/samples"
+    },
+    {
+      "id": "nutmeg",
+      "label": "Nutmeg",
+      "species_seen": [
+        "cherry"
+      ],
+      "lines": [
+        "Shaker",
+        "Shaker II",
+        "Hawthorne",
+        "Jupiter"
+      ],
+      "swatch_url": "https://www.cabinets.com/media/common-assets/color-swatches/nutmeg.svg",
+      "prompt": "medium reddish-brown stain on cherry",
+      "source_url": "https://www.cabinets.com/samples"
+    }
+  ]
+}

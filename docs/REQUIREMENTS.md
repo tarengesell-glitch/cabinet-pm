@@ -72,6 +72,12 @@ Last checked against `DECISIONS.md` and the code: 2026-11-13.
 - Design choices → catalog options (door style, colours, handles): no mapping yet, so drafts show them as missing. **Approved** (2026-11-09 "AI designer: how it works"). Built as findings.
 - Intake permissions reuse `room.view` / `room.edit`. **PROPOSED** (IK-16 open).
 
+### Kitchen image library (pictures for the design choices)
+- A photorealistic picture for every option of every design choice, from the same camera and layout for each room shape, made and checked automatically. **Approved** (DECISIONS 2026-11-10 "Kitchen image library, the variables"; OA-3). Not built.
+- The variables, their options and the rules between them: 12 room shapes, 10 materials, colours from the material's list (Tafisa TFL, Sherwin-Williams, stains on each species), 5 door styles, handles, counters, island back and ends, top trim and valance. **Approved** (2026-11-10; IK-19 to IK-24 answered 2026-11-13). Built as data: `visual-library/data/kitchen-image-variables.json` and `data/colours/`, checked by `visual-library/model/variables.ts`. Counter colours shown in each pattern: **PROPOSED**.
+- These room shapes and door styles replace the intake's lists. **Approved** (2026-11-10; closes IK-1). Not built in the intake yet.
+- What later images show for earlier picks (IK-25) and what a handle length measures (IK-26): **Open**.
+
 ### Catalog
 - 50 cabinet types from the shop's library; templates that stretch; 1/16" width step; standard sizes; smallest widths 8" / 12"; door, drawer, shelf, end, filler and sink-base rules; three door styles. **Approved** (2026-11-07 "The cabinet catalog"). Built (`catalog/data/catalog-v1.json`).
 - Size limits other than the standard size. **Open** (CAT-1): only the standard size passes.

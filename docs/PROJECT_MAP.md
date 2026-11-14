@@ -20,7 +20,8 @@ Navigation: what actually runs, where each rule's data and code live, and which 
 | `src/modules/ai-design/model/brief.ts` (the design brief) | Built and tested; not yet used by the app (no AI model is called). |
 | Today and Tasks (`src/app/(office)/`) | Placeholders with demo data. |
 | Clients (`src/app/(office)/clients/`) | **Live.** Real clients from the shared database (`customers`, owned by `projects`, `src/modules/projects/model/customers.ts`), then the demo clients, labelled. New client adds a real one. Jobs aren't records of their own yet: a client's ID is the job's key. |
-| Modules with only a `CLAUDE.md`, README and `contract.ts` (approvals, comparer, purchasing, site-measure, client-messaging, job-notes, test-library, visual-library, appliances) | Not built yet. |
+| Modules with only a `CLAUDE.md`, README and `contract.ts` (approvals, comparer, purchasing, site-measure, client-messaging, job-notes, test-library, appliances) | Not built yet. |
+| `src/modules/visual-library/` | Data only: the kitchen image variables and colour lists, checked by `model/variables.ts`. No screen uses them yet. |
 | The CAD adapter (`src/adapters/cabinet-vision/`) | Not built yet; waits for Phase 0 samples. |
 
 ## Where the rules live (the data and code the app reads)
@@ -38,6 +39,7 @@ Navigation: what actually runs, where each rule's data and code live, and which 
 | Placeholder heights and 3D drawing sizes (where uppers start, the fridge's rough height, toe kick, counter, rough appliance shapes) | `placeholder-draft.json` "visual" | **Not all visual only:** `upper_bottom` and `appliances.fridge_height` also set saved cabinet heights and elevations (`REQUIREMENTS.md` "Known discrepancies"). A few small drawing sizes are in `Stage3D.tsx` itself. |
 | Design choices (the intake questions and options) | `src/modules/intake/data/intake-v1.json` | The answers are the only saved copy. How other steps read them: `src/modules/intake/model/design-inputs.ts` (`roomDesignInputs`); add a new choice the builder or 3D view needs there. |
 | Room and layout checks (walls, runs, items) | `src/core/layout/` | |
+| Kitchen image library: the variables, options and colour lists | `src/modules/visual-library/data/kitchen-image-variables.json`, `data/colours/` | Checked by `visual-library/model/variables.ts`. |
 | Units (1/64 inch) | `src/core/units.ts` | |
 | Module dependency table | `tools/architecture.cjs` (from `docs/ARCHITECTURE.md`) | |
 

@@ -1,0 +1,1561 @@
+{
+  "id": "tafisa_tfl",
+  "label": "Tafisa TFL colours",
+  "source": "Every current Tafisa TFL decor (owner, 2026-11-13: \"basically all of them\"), read 2026-11-13 from https://www.tafisa.ca/en/our-colours and each colour's page. Left out: Secret (HPL only) and the 12 discontinued Isola decors. Tafisa states no hex values, so none are given. The prompts' finish wording is ours, not Tafisa's.",
+  "status": "owner",
+  "applies_to": [
+    "tafisa_tfl"
+  ],
+  "colours": [
+    {
+      "id": "black_high_gloss",
+      "label": "Black",
+      "code": "HG203",
+      "family": "High Gloss",
+      "texture": "High Gloss",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-11/PMHG203_24X24%20%28Medium%29.jpg",
+      "prompt": "solid black colour melamine panel, high-gloss mirror-like finish (Black)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/black-4"
+    },
+    {
+      "id": "carte_blanche_high_gloss",
+      "label": "Carte Blanche",
+      "code": "HG115",
+      "family": "High Gloss",
+      "texture": "High Gloss",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2023-05/PMHG115_24X24%20%28Medium%29-Frame.png",
+      "prompt": "solid white colour melamine panel, high-gloss mirror-like finish (Carte Blanche)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/carte-blanche-0"
+    },
+    {
+      "id": "cashmere_high_gloss",
+      "label": "Cashmere",
+      "code": "HG776",
+      "family": "High Gloss",
+      "texture": "High Gloss",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2024-09/PM776-24x24-RGB_0.jpg",
+      "prompt": "solid white colour melamine panel, high-gloss mirror-like finish (Cashmere)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/cashmere"
+    },
+    {
+      "id": "fashionista_high_gloss",
+      "label": "Fashionista",
+      "code": "HG582",
+      "family": "High Gloss",
+      "texture": "High Gloss",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2024-02/L582%28K%29%20Fashionista_24X24%20%28Medium%29.jpg",
+      "prompt": "mid-brown oak woodgrain melamine panel, high-gloss mirror-like finish (Fashionista)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/fashionista-0"
+    },
+    {
+      "id": "gardenia_high_gloss",
+      "label": "Gardenia",
+      "code": "HG775",
+      "family": "High Gloss",
+      "texture": "High Gloss",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2024-09/PM775-24x24-RGB.jpg",
+      "prompt": "solid white colour melamine panel, high-gloss mirror-like finish (Gardenia)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/gardenia-0"
+    },
+    {
+      "id": "iron_horse",
+      "label": "Iron Horse",
+      "code": "HG 834",
+      "family": "High Gloss",
+      "texture": "High Gloss",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-11/HG834_24X24%20%28Medium%29.jpg",
+      "prompt": "red-brown abstract patterned melamine panel, high-gloss mirror-like finish (Iron Horse)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/iron-horse"
+    },
+    {
+      "id": "midnight_sun_high_gloss",
+      "label": "Midnight Sun",
+      "code": "HG765",
+      "family": "High Gloss",
+      "texture": "High Gloss",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-11/PMHG765_24X24%20%28Medium%29.jpg",
+      "prompt": "solid blue colour melamine panel, high-gloss mirror-like finish (Midnight Sun)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/midnight-sun-1"
+    },
+    {
+      "id": "morning_dew_high_gloss",
+      "label": "Morning Dew",
+      "code": "HG763",
+      "family": "High Gloss",
+      "texture": "High Gloss",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-11/PMHG763_24X24%20%28Medium%29.jpg",
+      "prompt": "solid beige colour melamine panel, high-gloss mirror-like finish (Morning Dew)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/morning-dew-3"
+    },
+    {
+      "id": "north_wind_high_gloss",
+      "label": "North Wind",
+      "code": "HG771",
+      "family": "High Gloss",
+      "texture": "High Gloss",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-11/PMHG771_24X24%20%28Medium%29.jpg",
+      "prompt": "solid grey colour melamine panel, high-gloss mirror-like finish (North Wind)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/north-wind-0"
+    },
+    {
+      "id": "steampunk",
+      "label": "Steampunk",
+      "code": "HG833",
+      "family": "High Gloss",
+      "texture": "High Gloss",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-11/HG833_24X24%20%28Medium%29.jpg",
+      "prompt": "yellow abstract patterned melamine panel, high-gloss mirror-like finish (Steampunk)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/steampunk"
+    },
+    {
+      "id": "summer_drops_high_gloss",
+      "label": "Summer Drops",
+      "code": "HG202",
+      "family": "High Gloss",
+      "texture": "High Gloss",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2023-07/L202_Crystalite_24x24_150dpi_1.jpg",
+      "prompt": "solid grey colour melamine panel, high-gloss mirror-like finish (Summer Drops)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/summer-drops-3"
+    },
+    {
+      "id": "vanilla_orchid_high_gloss",
+      "label": "Vanilla Orchid",
+      "code": "HG100",
+      "family": "High Gloss",
+      "texture": "High Gloss",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-11/PMHG100_24X24%20%28Medium%29.jpg",
+      "prompt": "solid white colour melamine panel, high-gloss mirror-like finish (Vanilla Orchid)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/vanilla-orchid-0"
+    },
+    {
+      "id": "winter_fun_high_gloss",
+      "label": "Winter Fun!",
+      "code": "HG2004",
+      "family": "High Gloss",
+      "texture": "High Gloss",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2024-02/M2004%28Y%29-LessGreen.jpg",
+      "prompt": "white butternut woodgrain melamine panel, high-gloss mirror-like finish (Winter Fun!)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/winter-fun-0"
+    },
+    {
+      "id": "black_perfect_matt",
+      "label": "Black",
+      "code": "PM203",
+      "family": "Perfect Matt",
+      "texture": "Perfect Matt",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-10/PMHG203_24X24%20%28Medium%29.jpg",
+      "prompt": "solid black colour melamine panel, super-matte soft-touch finish (Black)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/black-3"
+    },
+    {
+      "id": "calm_sea",
+      "label": "Calm Sea",
+      "code": "PM772",
+      "family": "Perfect Matt",
+      "texture": "Perfect Matt",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-10/PM772_24X24%20%28Medium%29.jpg",
+      "prompt": "solid blue colour melamine panel, super-matte soft-touch finish (Calm Sea)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/calm-sea"
+    },
+    {
+      "id": "camera_obscura",
+      "label": "Camera Obscura",
+      "code": "PM 835",
+      "family": "Perfect Matt",
+      "texture": "Perfect Matt",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-10/PM835_24X24%20%28Medium%29.jpg",
+      "prompt": "black abstract patterned melamine panel, super-matte soft-touch finish (Camera Obscura)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/camera-obscura"
+    },
+    {
+      "id": "carte_blanche_perfect_matt",
+      "label": "Carte Blanche",
+      "code": "PM115",
+      "family": "Perfect Matt",
+      "texture": "Perfect Matt",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2023-07/PMHG115_24X24%20%28Medium%29-Frame.png",
+      "prompt": "solid white colour melamine panel, super-matte soft-touch finish (Carte Blanche)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/carte-blanche"
+    },
+    {
+      "id": "cashmere_perfect_matt",
+      "label": "Cashmere",
+      "code": "PM776",
+      "family": "Perfect Matt",
+      "texture": "Perfect Matt",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2024-08/PM776-24x24-RGB.jpg",
+      "prompt": "solid white, beige colour melamine panel, super-matte soft-touch finish (Cashmere)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/cashmere-0"
+    },
+    {
+      "id": "cream_puff_perfect_matt",
+      "label": "Cream Puff",
+      "code": "PM781",
+      "family": "Perfect Matt",
+      "texture": "Perfect Matt",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2025-09/pm781_24x24_72_dpi_rgb.jpg",
+      "prompt": "solid beige colour melamine panel, super-matte soft-touch finish (Cream Puff)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/cream-puff-0"
+    },
+    {
+      "id": "eucalyptus",
+      "label": "Eucalyptus",
+      "code": "PM773",
+      "family": "Perfect Matt",
+      "texture": "Perfect Matt",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-10/PM773_24X24%20%28Medium%29.jpg",
+      "prompt": "solid green colour melamine panel, super-matte soft-touch finish (Eucalyptus)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/eucalyptus"
+    },
+    {
+      "id": "gardenia_perfect_matt",
+      "label": "Gardenia",
+      "code": "PM775",
+      "family": "Perfect Matt",
+      "texture": "Perfect Matt",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2024-08/PM775-24x24-RGB.jpg",
+      "prompt": "solid white colour melamine panel, super-matte soft-touch finish (Gardenia)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/gardenia"
+    },
+    {
+      "id": "kiss_curl_perfect_matt",
+      "label": "Kiss Curl",
+      "code": "PM592",
+      "family": "Perfect Matt",
+      "texture": "Perfect Matt",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2024-02/TAFISA_L592K_Karisma_24x24_300dpi%20%28Medium%29.jpg",
+      "prompt": "red-brown acacia woodgrain melamine panel, super-matte soft-touch finish (Kiss Curl)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/kiss-curl-0"
+    },
+    {
+      "id": "midnight_sun_perfect_matt",
+      "label": "Midnight Sun",
+      "code": "PM765",
+      "family": "Perfect Matt",
+      "texture": "Perfect Matt",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-10/PMHG765_24X24%20%28Medium%29.jpg",
+      "prompt": "solid blue colour melamine panel, super-matte soft-touch finish (Midnight Sun)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/midnight-sun-0"
+    },
+    {
+      "id": "morning_dew_perfect_matt",
+      "label": "Morning Dew",
+      "code": "PM763",
+      "family": "Perfect Matt",
+      "texture": "Perfect Matt",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-10/PMHG763_24X24%20%28Medium%29.jpg",
+      "prompt": "solid beige colour melamine panel, super-matte soft-touch finish (Morning Dew)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/morning-dew-2"
+    },
+    {
+      "id": "north_wind_perfect_matt",
+      "label": "North Wind",
+      "code": "PM771",
+      "family": "Perfect Matt",
+      "texture": "Perfect Matt",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-10/PMHG771_24X24%20%28Medium%29.jpg",
+      "prompt": "solid grey colour melamine panel, super-matte soft-touch finish (North Wind)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/north-wind"
+    },
+    {
+      "id": "sage_leaf",
+      "label": "Sage Leaf",
+      "code": "PM779",
+      "family": "Perfect Matt",
+      "texture": "Perfect Matt",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2024-08/PM779-24x24-RGB-2.jpg",
+      "prompt": "solid green colour melamine panel, super-matte soft-touch finish (Sage Leaf)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/sage-leaf"
+    },
+    {
+      "id": "sand_castle_perfect_matt",
+      "label": "Sand Castle",
+      "code": "PM782",
+      "family": "Perfect Matt",
+      "texture": "Perfect Matt",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2025-09/pm782_24x24_72_dpi_rgb.jpg",
+      "prompt": "solid taupe colour melamine panel, super-matte soft-touch finish (Sand Castle)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/sand-castle-0"
+    },
+    {
+      "id": "secret_garden_perfect_matt",
+      "label": "Secret Garden",
+      "code": "PM784",
+      "family": "Perfect Matt",
+      "texture": "Perfect Matt",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2025-09/pm784_24x24_72_dpi_rgb.jpg",
+      "prompt": "solid green colour melamine panel, super-matte soft-touch finish (Secret Garden)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/secret-garden-0"
+    },
+    {
+      "id": "sheer_beauty_perfect_matt",
+      "label": "Sheer Beauty",
+      "code": "PM581",
+      "family": "Perfect Matt",
+      "texture": "Perfect Matt",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2024-02/L581%28K%29%20Sheer%20Beauty_Beaut%C3%A9%20Naturelle_24X24%20%28Medium%29.jpg",
+      "prompt": "natural blond oak woodgrain melamine panel, super-matte soft-touch finish (Sheer Beauty)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/sheer-beauty-0"
+    },
+    {
+      "id": "steel_blue",
+      "label": "Steel Blue",
+      "code": "PM778",
+      "family": "Perfect Matt",
+      "texture": "Perfect Matt",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2024-08/PM778-24x24-RGB.jpg",
+      "prompt": "solid blue colour melamine panel, super-matte soft-touch finish (Steel Blue)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/steel-blue"
+    },
+    {
+      "id": "summer_drops_perfect_matt",
+      "label": "Summer Drops",
+      "code": "PM202",
+      "family": "Perfect Matt",
+      "texture": "Perfect Matt",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2023-07/L202_Crystalite_24x24_150dpi.jpg",
+      "prompt": "solid grey colour melamine panel, super-matte soft-touch finish (Summer Drops)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/summer-drops-2"
+    },
+    {
+      "id": "sunflower",
+      "label": "Sunflower",
+      "code": "PM774",
+      "family": "Perfect Matt",
+      "texture": "Perfect Matt",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-10/PM774_24X24%20%28Medium%29.jpg",
+      "prompt": "solid yellow colour melamine panel, super-matte soft-touch finish (Sunflower)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/sunflower"
+    },
+    {
+      "id": "terrarossa",
+      "label": "Terrarossa",
+      "code": "PM780",
+      "family": "Perfect Matt",
+      "texture": "Perfect Matt",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2024-08/PM780-24x24-RGB.jpg",
+      "prompt": "solid red-brown colour melamine panel, super-matte soft-touch finish (Terrarossa)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/terrarossa"
+    },
+    {
+      "id": "tiramisu_perfect_matt",
+      "label": "Tiramisu",
+      "code": "PM783",
+      "family": "Perfect Matt",
+      "texture": "Perfect Matt",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2025-09/pm783_24x24_72_dpi_rgb.jpg",
+      "prompt": "solid dark brown colour melamine panel, super-matte soft-touch finish (Tiramisu)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/tiramisu-0"
+    },
+    {
+      "id": "urban_vibe_perfect_matt",
+      "label": "Urban Vibe",
+      "code": "PM 832",
+      "family": "Perfect Matt",
+      "texture": "Perfect Matt",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-10/PM832_24X24%20%28Medium%29.jpg",
+      "prompt": "grey, green stone-look melamine panel, super-matte soft-touch finish (Urban Vibe)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/urban-vibe-0"
+    },
+    {
+      "id": "vanilla_orchid_perfect_matt",
+      "label": "Vanilla Orchid",
+      "code": "PM100",
+      "family": "Perfect Matt",
+      "texture": "Perfect Matt",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-10/PMHG100_24X24%20%28Medium%29.jpg",
+      "prompt": "solid white colour melamine panel, super-matte soft-touch finish (Vanilla Orchid)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/vanilla-orchid-1"
+    },
+    {
+      "id": "winter_horizon",
+      "label": "Winter Horizon",
+      "code": "PM777",
+      "family": "Perfect Matt",
+      "texture": "Perfect Matt",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2024-08/PM777-24x24-RGB.jpg",
+      "prompt": "solid white colour melamine panel, super-matte soft-touch finish (Winter Horizon)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/winter-horizon"
+    },
+    {
+      "id": "breakwater",
+      "label": "Breakwater",
+      "code": "L537 (A)",
+      "family": "Prélude Series",
+      "texture": "Alto",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-04/tafisa_L537%28A%29_24X24_72dpi.jpg",
+      "prompt": "grey oak woodgrain melamine panel, deep wood-grain embossed texture (Breakwater)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/breakwater"
+    },
+    {
+      "id": "latitude_east",
+      "label": "Latitude East",
+      "code": "L533 (A)",
+      "family": "Prélude Series",
+      "texture": "Alto",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-04/tafisa_L533%28A%29_24x24_72dpi.jpg",
+      "prompt": "grey wenge woodgrain melamine panel, deep wood-grain embossed texture (Latitude East)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/latitude-east"
+    },
+    {
+      "id": "latitude_north",
+      "label": "Latitude North",
+      "code": "L530 (A)",
+      "family": "Prélude Series",
+      "texture": "Alto",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-04/tafisa_L530%28A%29_24X24_72dpi.jpg",
+      "prompt": "white wenge woodgrain melamine panel, deep wood-grain embossed texture (Latitude North)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/latitude-north"
+    },
+    {
+      "id": "latitude_west",
+      "label": "Latitude West",
+      "code": "L532 (A)",
+      "family": "Prélude Series",
+      "texture": "Alto",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-04/tafisa_L532%28A%29_24X24_72dpi.jpg",
+      "prompt": "dark brown wenge woodgrain melamine panel, deep wood-grain embossed texture (Latitude West)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/latitude-west"
+    },
+    {
+      "id": "mojave",
+      "label": "Mojave",
+      "code": "L546 (A)",
+      "family": "Prélude Series",
+      "texture": "Alto",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-03/Tafisa_L546%28A%29_24X24_72dpi.jpg",
+      "prompt": "natural blond blackwood woodgrain melamine panel, deep wood-grain embossed texture (Mojave)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/mojave"
+    },
+    {
+      "id": "niagara",
+      "label": "Niagara",
+      "code": "L544 (A)",
+      "family": "Prélude Series",
+      "texture": "Alto",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-03/Tafisa_L544%28A%29_24X24_72dpi.jpg",
+      "prompt": "white blackwood woodgrain melamine panel, deep wood-grain embossed texture (Niagara)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/niagara"
+    },
+    {
+      "id": "river_rock",
+      "label": "River Rock",
+      "code": "L538 (A)",
+      "family": "Prélude Series",
+      "texture": "Alto",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-04/tafisa_L538%28A%29_24X24_72dpi.jpg",
+      "prompt": "grey oak woodgrain melamine panel, deep wood-grain embossed texture (River Rock)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/river-rock"
+    },
+    {
+      "id": "southwester",
+      "label": "Southwester",
+      "code": "L535 (A)",
+      "family": "Prélude Series",
+      "texture": "Alto",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-04/tafisa_L535%28A%29_24X24_72dpi.jpg",
+      "prompt": "grey blackwood woodgrain melamine panel, deep wood-grain embossed texture (Southwester)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/southwester"
+    },
+    {
+      "id": "spring_blossom",
+      "label": "Spring Blossom",
+      "code": "L543 (A)",
+      "family": "Prélude Series",
+      "texture": "Alto",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-04/tafisa_L543%28A%29_24X24_72dpi_0.jpg",
+      "prompt": "dark brown ovangkol woodgrain melamine panel, deep wood-grain embossed texture (Spring Blossom)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/spring-blossom"
+    },
+    {
+      "id": "summer_breeze",
+      "label": "Summer Breeze",
+      "code": "L540 (A)",
+      "family": "Prélude Series",
+      "texture": "Alto",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-04/tafisa_L540%28A%29_24X24_72dpi.jpg",
+      "prompt": "natural blond ovangkol woodgrain melamine panel, deep wood-grain embossed texture (Summer Breeze)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/summer-breeze"
+    },
+    {
+      "id": "black_crystalite",
+      "label": "Black",
+      "code": "L203 (C)",
+      "family": "Prélude Series",
+      "texture": "Crystalite",
+      "swatch_url": "https://tafisa.ca/sites/default/files/960x960_L203%28C%29_hires.jpg",
+      "prompt": "solid black colour melamine panel, fine low-sheen textured finish (Black)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/black"
+    },
+    {
+      "id": "brushed_aluminum",
+      "label": "Brushed Aluminum",
+      "code": "L474 (C)",
+      "family": "Prélude Series",
+      "texture": "Crystalite",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-04/tafisa_L474%28C%29_24X24_72dpi.jpg",
+      "prompt": "grey brushed-metal look melamine panel, fine low-sheen textured finish (Brushed Aluminum)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/brushed-aluminum"
+    },
+    {
+      "id": "candlelight",
+      "label": "Candlelight",
+      "code": "L421 (C)",
+      "family": "Prélude Series",
+      "texture": "Crystalite",
+      "swatch_url": "https://tafisa.ca/sites/default/files/960x960_L421%28C%29_hires.jpg",
+      "prompt": "red-brown pearwood woodgrain melamine panel, fine low-sheen textured finish (Candlelight)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/candlelight"
+    },
+    {
+      "id": "carte_blanche_crystalite",
+      "label": "Carte Blanche",
+      "code": "L115 (C)",
+      "family": "Prélude Series",
+      "texture": "Crystalite",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2025-11/pmhg115_24x24_medium-frame_0.png",
+      "prompt": "solid white colour melamine panel, fine low-sheen textured finish (Carte Blanche)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/carte-blanche-2"
+    },
+    {
+      "id": "chocolate_pear_tree",
+      "label": "Chocolate Pear Tree",
+      "code": "L444 (C)",
+      "family": "Prélude Series",
+      "texture": "Crystalite",
+      "swatch_url": "https://tafisa.ca/sites/default/files/960x960_L444%28C%29_hires.jpg",
+      "prompt": "dark brown pearwood woodgrain melamine panel, fine low-sheen textured finish (Chocolate Pear Tree)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/chocolate-pear-tree"
+    },
+    {
+      "id": "dark_rum_cherry",
+      "label": "Dark Rum Cherry",
+      "code": "L473 (C)",
+      "family": "Prélude Series",
+      "texture": "Crystalite",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-04/tafisa_L473%28C%29_24X24_72dpi.jpg",
+      "prompt": "red-brown cherry woodgrain melamine panel, fine low-sheen textured finish (Dark Rum Cherry)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/dark-rum-cherry"
+    },
+    {
+      "id": "daybreak_crystalite",
+      "label": "Daybreak",
+      "code": "L764 (C)",
+      "family": "Prélude Series",
+      "texture": "Crystalite",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-04/tafisa_L764%28C%29_24X24_72dpi_1.jpg",
+      "prompt": "solid taupe, beige colour melamine panel, fine low-sheen textured finish (Daybreak)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/daybreak"
+    },
+    {
+      "id": "evening_star",
+      "label": "Evening Star",
+      "code": "L770 (C)",
+      "family": "Prélude Series",
+      "texture": "Crystalite",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2025-06/C_24x24_RGB_L770_evening_star.jpg",
+      "prompt": "solid grey colour melamine panel, fine low-sheen textured finish (Evening Star)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/evening-star-0"
+    },
+    {
+      "id": "froth_of_sea_crystalite",
+      "label": "Froth of Sea",
+      "code": "L080 (C)",
+      "family": "Prélude Series",
+      "texture": "Crystalite",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2025-05/L080_forth%20of%20the%20sea_ecume%20de%20mer_materia_24x24_CMYK_.jpg",
+      "prompt": "solid white colour melamine panel, fine low-sheen textured finish (Froth of Sea)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/froth-of-sea"
+    },
+    {
+      "id": "glacier_white",
+      "label": "Glacier White",
+      "code": "L191 (C)",
+      "family": "Prélude Series",
+      "texture": "Crystalite",
+      "swatch_url": "https://tafisa.ca/sites/default/files/960x960_L191%28C%29_hires.jpg",
+      "prompt": "solid white colour melamine panel, fine low-sheen textured finish (Glacier White)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/glacier-white"
+    },
+    {
+      "id": "hardrock_maple",
+      "label": "Hardrock Maple",
+      "code": "L303 (C)",
+      "family": "Prélude Series",
+      "texture": "Crystalite",
+      "swatch_url": "https://tafisa.ca/sites/default/files/1000x1000_L303%28C%29_hires.jpg",
+      "prompt": "natural blond maple woodgrain melamine panel, fine low-sheen textured finish (Hardrock Maple)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/hardrock-maple"
+    },
+    {
+      "id": "ivory",
+      "label": "Ivory",
+      "code": "L204 (C)",
+      "family": "Prélude Series",
+      "texture": "Crystalite",
+      "swatch_url": "https://tafisa.ca/sites/default/files/1000x1000_L204%28C%29_hires.jpg",
+      "prompt": "solid beige colour melamine panel, fine low-sheen textured finish (Ivory)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/ivory"
+    },
+    {
+      "id": "milky_way_crystalite",
+      "label": "Milky Way",
+      "code": "L767 (C)",
+      "family": "Prélude Series",
+      "texture": "Crystalite",
+      "swatch_url": "https://tafisa.ca/sites/default/files/960x960_L767%28C%29_hires.jpg",
+      "prompt": "solid taupe colour melamine panel, fine low-sheen textured finish (Milky Way)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/milky-way"
+    },
+    {
+      "id": "moonlight_crystalite",
+      "label": "Moonlight",
+      "code": "L761 (C)",
+      "family": "Prélude Series",
+      "texture": "Crystalite",
+      "swatch_url": "https://tafisa.ca/sites/default/files/960x960_L761%28C%29_hires.jpg",
+      "prompt": "solid grey colour melamine panel, fine low-sheen textured finish (Moonlight)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/moonlight"
+    },
+    {
+      "id": "morning_dew_crystalite",
+      "label": "Morning Dew",
+      "code": "L763 (C)",
+      "family": "Prélude Series",
+      "texture": "Crystalite",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-04/tafisa_L763%28C%29_24X24_72dpi_3.jpg",
+      "prompt": "solid beige colour melamine panel, fine low-sheen textured finish (Morning Dew)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/morning-dew"
+    },
+    {
+      "id": "prestige_maple",
+      "label": "Prestige Maple",
+      "code": "L476 (C)",
+      "family": "Prélude Series",
+      "texture": "Crystalite",
+      "swatch_url": "https://tafisa.ca/sites/default/files/1000x1000_L476%28C%29_hires.jpg",
+      "prompt": "natural blond maple woodgrain melamine panel, fine low-sheen textured finish (Prestige Maple)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/prestige-maple"
+    },
+    {
+      "id": "rain_cloud",
+      "label": "Rain Cloud",
+      "code": "L760 (C)",
+      "family": "Prélude Series",
+      "texture": "Crystalite",
+      "swatch_url": "https://tafisa.ca/sites/default/files/960x960_L760%28C%29_hires.jpg",
+      "prompt": "solid grey colour melamine panel, fine low-sheen textured finish (Rain Cloud)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/rain-cloud"
+    },
+    {
+      "id": "rustik_cherry",
+      "label": "Rustik Cherry",
+      "code": "L521 (C)",
+      "family": "Prélude Series",
+      "texture": "Crystalite",
+      "swatch_url": "https://tafisa.ca/sites/default/files/960x960_L521%28C%29_hires.jpg",
+      "prompt": "red-brown cherry woodgrain melamine panel, fine low-sheen textured finish (Rustik Cherry)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/rustik-cherry"
+    },
+    {
+      "id": "sea_fog",
+      "label": "Sea Fog",
+      "code": "L769 (C)",
+      "family": "Prélude Series",
+      "texture": "Crystalite",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2025-11/l769i_24x24_72dpi_0.jpg",
+      "prompt": "solid grey colour melamine panel, fine low-sheen textured finish (Sea Fog)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/sea-fog-0"
+    },
+    {
+      "id": "shadows",
+      "label": "Shadows",
+      "code": "L201 (C)",
+      "family": "Prélude Series",
+      "texture": "Crystalite",
+      "swatch_url": "https://tafisa.ca/sites/default/files/960x960_L201%28C%29_hires.jpg",
+      "prompt": "solid grey colour melamine panel, fine low-sheen textured finish (Shadows)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/shadows"
+    },
+    {
+      "id": "shiraz_cherry",
+      "label": "Shiraz Cherry",
+      "code": "L472 (C)",
+      "family": "Prélude Series",
+      "texture": "Crystalite",
+      "swatch_url": "https://tafisa.ca/sites/default/files/960x960_L472%28C%29_hires.jpg",
+      "prompt": "red-brown cherry woodgrain melamine panel, fine low-sheen textured finish (Shiraz Cherry)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/shiraz-cherry"
+    },
+    {
+      "id": "slate",
+      "label": "Slate",
+      "code": "L228 (C)",
+      "family": "Prélude Series",
+      "texture": "Crystalite",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-04/tafisa_L228%28C%29_24X24_72dpi.jpg",
+      "prompt": "solid grey, green colour melamine panel, fine low-sheen textured finish (Slate)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/slate"
+    },
+    {
+      "id": "snowfall",
+      "label": "Snowfall",
+      "code": "L105 (C)",
+      "family": "Prélude Series",
+      "texture": "Crystalite",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2024-01/L105-12x12.png",
+      "prompt": "solid white colour melamine panel, fine low-sheen textured finish (Snowfall)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/snowfall"
+    },
+    {
+      "id": "starry_night",
+      "label": "Starry Night",
+      "code": "L762 (C)",
+      "family": "Prélude Series",
+      "texture": "Crystalite",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-04/tafisa_L762%28C%29_24X24_72dpi.jpg",
+      "prompt": "solid blue colour melamine panel, fine low-sheen textured finish (Starry Night)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/starry-night"
+    },
+    {
+      "id": "summer_drops_crystalite",
+      "label": "Summer Drops",
+      "code": "L202 (C)",
+      "family": "Prélude Series",
+      "texture": "Crystalite",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2023-07/L202_Crystalite_24x24_150dpi_6.jpg",
+      "prompt": "solid grey colour melamine panel, fine low-sheen textured finish (Summer Drops)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/summer-drops"
+    },
+    {
+      "id": "summer_flame",
+      "label": "Summer Flame",
+      "code": "L420 (C)",
+      "family": "Prélude Series",
+      "texture": "Crystalite",
+      "swatch_url": "https://tafisa.ca/sites/default/files/960x960_L420%28C%29_hires.jpg",
+      "prompt": "red-brown pearwood woodgrain melamine panel, fine low-sheen textured finish (Summer Flame)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/summer-flame"
+    },
+    {
+      "id": "sundown",
+      "label": "Sundown",
+      "code": "L768 (C)",
+      "family": "Prélude Series",
+      "texture": "Crystalite",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2018-08/960x960_L768_hires_0.jpg",
+      "prompt": "solid green colour melamine panel, fine low-sheen textured finish (Sundown)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/sundown"
+    },
+    {
+      "id": "truffle",
+      "label": "Truffle",
+      "code": "L479 (C)",
+      "family": "Prélude Series",
+      "texture": "Crystalite",
+      "swatch_url": "https://tafisa.ca/sites/default/files/960x960_L479%28C%29_hires.jpg",
+      "prompt": "dark brown maple woodgrain melamine panel, fine low-sheen textured finish (Truffle)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/truffle"
+    },
+    {
+      "id": "tuxedo",
+      "label": "Tuxedo",
+      "code": "L477 (C)",
+      "family": "Prélude Series",
+      "texture": "Crystalite",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-04/tafisa_L477%28C%29_24X24_72dpi.jpg",
+      "prompt": "dark brown teak woodgrain melamine panel, fine low-sheen textured finish (Tuxedo)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/tuxedo"
+    },
+    {
+      "id": "vanilla_orchid_crystalite",
+      "label": "Vanilla Orchid",
+      "code": "L100 (C)",
+      "family": "Prélude Series",
+      "texture": "Crystalite",
+      "swatch_url": "https://tafisa.ca/sites/default/files/960x960_L100%28C%29_hires.jpg",
+      "prompt": "solid white colour melamine panel, fine low-sheen textured finish (Vanilla Orchid)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/vanilla-orchid"
+    },
+    {
+      "id": "white_crystalite",
+      "label": "White",
+      "code": "L175 (C)",
+      "family": "Prélude Series",
+      "texture": "Crystalite",
+      "swatch_url": "https://tafisa.ca/sites/default/files/960x960_L175%28C%29_hires.jpg",
+      "prompt": "solid white colour melamine panel, fine low-sheen textured finish (White)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/white"
+    },
+    {
+      "id": "acacia_honey",
+      "label": "Acacia Honey",
+      "code": "L591 (K)",
+      "family": "Prélude Series",
+      "texture": "Karisma",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2023-05/L591-12x12_Compress%C3%A9.jpg",
+      "prompt": "natural blond acacia woodgrain melamine panel, wood-grain embossed texture (Acacia Honey)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/acacia-honey"
+    },
+    {
+      "id": "black_karisma",
+      "label": "Black",
+      "code": "L203(K)",
+      "family": "Prélude Series",
+      "texture": "Karisma",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2023-10/Karisma_03-square%20%28Large%29_0.png",
+      "prompt": "solid black colour melamine panel, wood-grain embossed texture (Black)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/black-5"
+    },
+    {
+      "id": "fashionista_karisma",
+      "label": "Fashionista",
+      "code": "L582 (K)",
+      "family": "Prélude Series",
+      "texture": "Karisma",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-10/L582%28K%29%20Fashionista_24X24%20%28Medium%29.jpg",
+      "prompt": "mid-brown oak woodgrain melamine panel, wood-grain embossed texture (Fashionista)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/fashionista"
+    },
+    {
+      "id": "first_class",
+      "label": "First Class",
+      "code": "L583 (K)",
+      "family": "Prélude Series",
+      "texture": "Karisma",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-10/L583%28K%29%20First%20Class_Premi%C3%A8re%20Classe_24X24%20%28Medium%29.jpg",
+      "prompt": "dark brown oak woodgrain melamine panel, wood-grain embossed texture (First Class)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/first-class"
+    },
+    {
+      "id": "force_of_nature",
+      "label": "Force of Nature",
+      "code": "L830 (K)",
+      "family": "Prélude Series",
+      "texture": "Karisma",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-10/L830%28K%29%20Force%20of%20Nature_Force%20de%20la%20Nature_24X24%20%28Medium%29.jpg",
+      "prompt": "grey stone-look melamine panel, wood-grain embossed texture (Force of Nature)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/force-of-nature"
+    },
+    {
+      "id": "free_spirit",
+      "label": "Free Spirit",
+      "code": "L580 (K)",
+      "family": "Prélude Series",
+      "texture": "Karisma",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-10/L580%28K%29%20Free%20Spirit_Esprit%20Libre_24X24%20%28Medium%29_0.jpg",
+      "prompt": "white oak woodgrain melamine panel, wood-grain embossed texture (Free Spirit)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/free-spirit"
+    },
+    {
+      "id": "kiss_curl_karisma",
+      "label": "Kiss Curl",
+      "code": "L592 (K)",
+      "family": "Prélude Series",
+      "texture": "Karisma",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2023-05/L592-12x12_Compress%C3%A9.jpg",
+      "prompt": "red-brown acacia woodgrain melamine panel, wood-grain embossed texture (Kiss Curl)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/kiss-curl"
+    },
+    {
+      "id": "love_at_first_sight",
+      "label": "Love at First Sight",
+      "code": "L590 (K)",
+      "family": "Prélude Series",
+      "texture": "Karisma",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2023-05/L590-12x12_Compress%C3%A9.jpg",
+      "prompt": "light natural blond acacia woodgrain melamine panel, wood-grain embossed texture (Love at First Sight)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/love-at-first-sight"
+    },
+    {
+      "id": "mastermind",
+      "label": "Mastermind",
+      "code": "L593 (K)",
+      "family": "Prélude Series",
+      "texture": "Karisma",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2023-05/L593-12x12_Compress%C3%A9-moyen.jpg",
+      "prompt": "grey acacia woodgrain melamine panel, wood-grain embossed texture (Mastermind)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/mastermind"
+    },
+    {
+      "id": "natural_affinity",
+      "label": "Natural Affinity",
+      "code": "L586 (K)",
+      "family": "Prélude Series",
+      "texture": "Karisma",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2023-05/L586K%20NaturalAffinity_12x12.jpg",
+      "prompt": "light natural blond maple woodgrain melamine panel, wood-grain embossed texture (Natural Affinity)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/natural-affinity"
+    },
+    {
+      "id": "rhapsody",
+      "label": "Rhapsody",
+      "code": "L585 (K)",
+      "family": "Prélude Series",
+      "texture": "Karisma",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-10/L585%28K%29%20Rhapsody_Rhapsodie_24X24%20%28Medium%29.jpg",
+      "prompt": "natural blond oak woodgrain melamine panel, wood-grain embossed texture (Rhapsody)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/rhapsody"
+    },
+    {
+      "id": "rock_solid",
+      "label": "Rock Solid",
+      "code": "L831 (K)",
+      "family": "Prélude Series",
+      "texture": "Karisma",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-10/L831%28K%29%20Roc%20Solid_Roc%20Solide_24X24%20%28Medium%29.jpg",
+      "prompt": "grey stone-look melamine panel, wood-grain embossed texture (Rock Solid)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/rock-solid"
+    },
+    {
+      "id": "salt_of_the_earth",
+      "label": "Salt of the Earth",
+      "code": "L589 (K)",
+      "family": "Prélude Series",
+      "texture": "Karisma",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2023-05/L589K%20SaltOfTheEarth_12x12.jpg",
+      "prompt": "mid-brown maple woodgrain melamine panel, wood-grain embossed texture (Salt of the Earth)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/salt-of-the-earth"
+    },
+    {
+      "id": "sheer_beauty_karisma",
+      "label": "Sheer Beauty",
+      "code": "L581 (K)",
+      "family": "Prélude Series",
+      "texture": "Karisma",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-10/L581%28K%29%20Sheer%20Beauty_Beaut%C3%A9%20Naturelle_24X24%20%28Medium%29.jpg",
+      "prompt": "natural blond oak woodgrain melamine panel, wood-grain embossed texture (Sheer Beauty)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/sheer-beauty"
+    },
+    {
+      "id": "sugar_rush",
+      "label": "Sugar Rush",
+      "code": "L587 (K)",
+      "family": "Prélude Series",
+      "texture": "Karisma",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2023-05/L587K%20SugarRush_12x12.jpg",
+      "prompt": "natural blond maple woodgrain melamine panel, wood-grain embossed texture (Sugar Rush)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/sugar-rush"
+    },
+    {
+      "id": "sweet_and_savory",
+      "label": "Sweet & Savory",
+      "code": "L588 (K)",
+      "family": "Prélude Series",
+      "texture": "Karisma",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2023-05/L588K%20Sweet%26Savory_12x12.jpg",
+      "prompt": "mid-brown maple woodgrain melamine panel, wood-grain embossed texture (Sweet & Savory)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/sweet-savory"
+    },
+    {
+      "id": "the_chameleon",
+      "label": "The Chameleon",
+      "code": "L584 (K)",
+      "family": "Prélude Series",
+      "texture": "Karisma",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-10/L584%28K%29%20The%20Chameleon_Le%20Cam%C3%A9l%C3%A9on_24X24%20%28Medium%29.jpg",
+      "prompt": "grey oak woodgrain melamine panel, wood-grain embossed texture (The Chameleon)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/the-chameleon"
+    },
+    {
+      "id": "urban_vibe_karisma",
+      "label": "Urban Vibe",
+      "code": "L832 (K)",
+      "family": "Prélude Series",
+      "texture": "Karisma",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-10/L832%28K%29%20Urban%20Vibe_Amiance%20Urbaine_24X24%20%28Medium%29.jpg",
+      "prompt": "grey, green stone-look melamine panel, wood-grain embossed texture (Urban Vibe)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/urban-vibe"
+    },
+    {
+      "id": "black_materia",
+      "label": "Black",
+      "code": "L203 (M)",
+      "family": "Prélude Series",
+      "texture": "Materia",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2025-05/materia_24x24_RGB_L203_Black_Noir.jpg",
+      "prompt": "solid black colour melamine panel, matte finish (Black)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/black-6"
+    },
+    {
+      "id": "cashmere_materia",
+      "label": "Cashmere",
+      "code": "L776 (M)",
+      "family": "Prélude Series",
+      "texture": "Materia",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2025-05/materia_24x24_RGB_L775_Gardenia_Gard%C3%A9nia_0.jpg",
+      "prompt": "solid white colour melamine panel, matte finish (Cashmere)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/cashmere-1"
+    },
+    {
+      "id": "cream_puff_materia",
+      "label": "Cream Puff",
+      "code": "L781 (M)",
+      "family": "Prélude Series",
+      "texture": "Materia",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2025-05/materia_24x24_RGB_L781_cream%20puff_chou%20a%20la%20creme.jpg",
+      "prompt": "solid beige colour melamine panel, matte finish (Cream Puff)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/cream-puff"
+    },
+    {
+      "id": "daybreak_materia",
+      "label": "Daybreak",
+      "code": "L764 (M)",
+      "family": "Prélude Series",
+      "texture": "Materia",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2025-05/materia_24x24_RGB_L764_Daybreak_Au%20Petit%20Matin.jpg",
+      "prompt": "solid taupe colour melamine panel, matte finish (Daybreak)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/daybreak-2"
+    },
+    {
+      "id": "froth_of_sea_materia",
+      "label": "Froth of Sea",
+      "code": "L080 (M)",
+      "family": "Prélude Series",
+      "texture": "Materia",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2025-05/materia_24x24_RGB__L080_Froth%20of%20Sea_%C3%89cume%20de%20Mer.jpg",
+      "prompt": "solid white colour melamine panel, matte finish (Froth of Sea)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/froth-of-sea-0"
+    },
+    {
+      "id": "gardenia_materia",
+      "label": "Gardenia",
+      "code": "L775 (M)",
+      "family": "Prélude Series",
+      "texture": "Materia",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2025-05/materia_24x24_RGB_L775_Gardenia_Gard%C3%A9nia.jpg",
+      "prompt": "solid white colour melamine panel, matte finish (Gardenia)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/gardenia-1"
+    },
+    {
+      "id": "midnight_sun_materia",
+      "label": "Midnight Sun",
+      "code": "L765 (M)",
+      "family": "Prélude Series",
+      "texture": "Materia",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2025-05/materia_24x24_RGB_L765_Midnight%20Sun_Soleil%20de%20Minuit.jpg",
+      "prompt": "solid grey, blue colour melamine panel, matte finish (Midnight Sun)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/midnight-sun-2"
+    },
+    {
+      "id": "milky_way_materia",
+      "label": "Milky Way",
+      "code": "L767 (M)",
+      "family": "Prélude Series",
+      "texture": "Materia",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2025-05/materia_24x24_RGB_L767_Milky%20Way_Voie%20Lact%C3%A9e.jpg",
+      "prompt": "solid taupe colour melamine panel, matte finish (Milky Way)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/milky-way-0"
+    },
+    {
+      "id": "moonlight_materia",
+      "label": "Moonlight",
+      "code": "L761 (M)",
+      "family": "Prélude Series",
+      "texture": "Materia",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2025-05/materia_24x24_RGB_L761_Moonlight_Claire%20de%20Lune.jpg",
+      "prompt": "solid grey colour melamine panel, matte finish (Moonlight)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/moonlight-0"
+    },
+    {
+      "id": "morning_dew_materia",
+      "label": "Morning Dew",
+      "code": "L763 (M)",
+      "family": "Prélude Series",
+      "texture": "Materia",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2025-05/materia_24x24_RGB_L763_Morning%20Dew_Rose%CC%81e%20du%20Matin.jpg",
+      "prompt": "solid beige colour melamine panel, matte finish (Morning Dew)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/morning-dew-4"
+    },
+    {
+      "id": "sand_castle_materia",
+      "label": "Sand Castle",
+      "code": "L782 (M)",
+      "family": "Prélude Series",
+      "texture": "Materia",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2025-05/materia_24x24_RGB_L782_Sand%20Castle_Ch%C3%A2teau%20de%20Sable.jpg",
+      "prompt": "solid taupe colour melamine panel, matte finish (Sand Castle)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/sand-castle"
+    },
+    {
+      "id": "secret_garden_materia",
+      "label": "Secret Garden",
+      "code": "L784 (M)",
+      "family": "Prélude Series",
+      "texture": "Materia",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2025-05/materia_24x24_RGB_L784_Secret%20Garden_Jardin%20Secret.jpg",
+      "prompt": "solid green colour melamine panel, matte finish (Secret Garden)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/secret-garden"
+    },
+    {
+      "id": "summer_drops_materia",
+      "label": "Summer Drops",
+      "code": "L202 (M)",
+      "family": "Prélude Series",
+      "texture": "Materia",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2025-05/materia_24x24_RGB_L202_Summer%20Drops_Grisaille.jpg",
+      "prompt": "solid grey colour melamine panel, matte finish (Summer Drops)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/summer-drops-4"
+    },
+    {
+      "id": "tiramisu_materia",
+      "label": "Tiramisu",
+      "code": "L783 (M)",
+      "family": "Prélude Series",
+      "texture": "Materia",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2025-05/materia_24x24_RGB_L783_Tiramisu_Tiramisu.jpg",
+      "prompt": "solid dark brown colour melamine panel, matte finish (Tiramisu)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/tiramisu"
+    },
+    {
+      "id": "white_materia",
+      "label": "White",
+      "code": "L175 (M)",
+      "family": "Prélude Series",
+      "texture": "Materia",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2025-05/materia_24x24_RGB_L175_White_Blanc.jpg",
+      "prompt": "solid white colour melamine panel, matte finish (White)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/white-2"
+    },
+    {
+      "id": "antigua",
+      "label": "Antigua",
+      "code": "L498 (S)",
+      "family": "Prélude Series",
+      "texture": "Smoothwood",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-04/tafisa_L498%28S%29_24X24_72dpi.jpg",
+      "prompt": "mid-brown pearwood woodgrain melamine panel, smooth satin finish (Antigua)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/antigua"
+    },
+    {
+      "id": "beach_memories",
+      "label": "Beach Memories",
+      "code": "L491 (S)",
+      "family": "Prélude Series",
+      "texture": "Smoothwood",
+      "swatch_url": "https://tafisa.ca/sites/default/files/960x960_L491%28S%29_hires.jpg",
+      "prompt": "dark blond walnut woodgrain melamine panel, smooth satin finish (Beach Memories)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/beach-memories"
+    },
+    {
+      "id": "bora_bora",
+      "label": "Bora Bora",
+      "code": "L497 (S)",
+      "family": "Prélude Series",
+      "texture": "Smoothwood",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-04/tafisa_L497%28S%29_24X24_72dpi_0.jpg",
+      "prompt": "mid-brown pearwood woodgrain melamine panel, smooth satin finish (Bora Bora)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/bora-bora"
+    },
+    {
+      "id": "copa_cabana",
+      "label": "Copa Cabana",
+      "code": "L489 (S)",
+      "family": "Prélude Series",
+      "texture": "Smoothwood",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-04/tafisa_L489%28S%29_24X24_72dpi.jpg",
+      "prompt": "mid-brown pearwood woodgrain melamine panel, smooth satin finish (Copa Cabana)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/copa-cabana"
+    },
+    {
+      "id": "dolce_vita",
+      "label": "Dolce Vita",
+      "code": "L488 (S)",
+      "family": "Prélude Series",
+      "texture": "Smoothwood",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-04/tafisa_L488%28S%29_24X24_72dpi.jpg",
+      "prompt": "mid-brown, taupe pearwood woodgrain melamine panel, smooth satin finish (Dolce Vita)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/dolce-vita"
+    },
+    {
+      "id": "grenada",
+      "label": "Grenada",
+      "code": "L499 (S)",
+      "family": "Prélude Series",
+      "texture": "Smoothwood",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-04/tafisa_L499%28S%29_24X24_72dpi.jpg",
+      "prompt": "dark brown pearwood woodgrain melamine panel, smooth satin finish (Grenada)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/grenada"
+    },
+    {
+      "id": "hot_cinnamon",
+      "label": "Hot Cinnamon",
+      "code": "L480 (S)",
+      "family": "Prélude Series",
+      "texture": "Smoothwood",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-04/Tafisa_L480%28S%29_24X24_72dpi.jpg",
+      "prompt": "mid-brown walnut woodgrain melamine panel, smooth satin finish (Hot Cinnamon)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/hot-cinnamon"
+    },
+    {
+      "id": "nutmeg",
+      "label": "Nutmeg",
+      "code": "L481 (S)",
+      "family": "Prélude Series",
+      "texture": "Smoothwood",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-04/tafisa_L481%28S%29_24X24_72dpi.jpg",
+      "prompt": "taupe, mid-brown walnut woodgrain melamine panel, smooth satin finish (Nutmeg)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/nutmeg"
+    },
+    {
+      "id": "dark_chocolate",
+      "label": "Dark Chocolate",
+      "code": "L494 (R)",
+      "family": "Prélude Series",
+      "texture": "Urbania",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-04/tafisa_L494%28R%29_24X24_72dpi.jpg",
+      "prompt": "dark brown teak woodgrain melamine panel, rustic rough-sawn wood texture (Dark Chocolate)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/dark-chocolate"
+    },
+    {
+      "id": "fogo_harbour",
+      "label": "Fogo Harbour",
+      "code": "L565 (R)",
+      "family": "Prélude Series",
+      "texture": "Urbania",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-04/tafisa_L565%28R%29_24X24_72dpi.jpg",
+      "prompt": "white maple woodgrain melamine panel, rustic rough-sawn wood texture (Fogo Harbour)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/fogo-harbour"
+    },
+    {
+      "id": "laurentian_path",
+      "label": "Laurentian Path",
+      "code": "L556 (R)",
+      "family": "Prélude Series",
+      "texture": "Urbania",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-04/tafisa_L556%28R%29_24X24_72dpi.jpg",
+      "prompt": "taupe, mid-brown anigre woodgrain melamine panel, rustic rough-sawn wood texture (Laurentian Path)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/laurentian-path"
+    },
+    {
+      "id": "maritime_dune",
+      "label": "Maritime Dune",
+      "code": "L555 (R)",
+      "family": "Prélude Series",
+      "texture": "Urbania",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-04/tafisa_L555%28R%29_24X24_72dpi.jpg",
+      "prompt": "natural blond anigre woodgrain melamine panel, rustic rough-sawn wood texture (Maritime Dune)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/maritime-dune"
+    },
+    {
+      "id": "megantic",
+      "label": "Mégantic",
+      "code": "L563 (R)",
+      "family": "Prélude Series",
+      "texture": "Urbania",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-03/Tafisa_L563%28R%29_24X24_72dpi.jpg",
+      "prompt": "grey, taupe cherry woodgrain melamine panel, rustic rough-sawn wood texture (Mégantic)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/megantic"
+    },
+    {
+      "id": "rocky_mountain",
+      "label": "Rocky Mountain",
+      "code": "L557 (R)",
+      "family": "Prélude Series",
+      "texture": "Urbania",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-04/tafisa_L557%28R%29_24X24_72dpi.jpg",
+      "prompt": "mid-brown anigre woodgrain melamine panel, rustic rough-sawn wood texture (Rocky Mountain)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/rocky-mountain"
+    },
+    {
+      "id": "sable_island",
+      "label": "Sable Island",
+      "code": "L562 (R)",
+      "family": "Prélude Series",
+      "texture": "Urbania",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-03/Tafisa_L562%28R%29_24X24_72dpi.jpg",
+      "prompt": "white, beige cherry woodgrain melamine panel, rustic rough-sawn wood texture (Sable Island)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/sable-island"
+    },
+    {
+      "id": "tofino",
+      "label": "Tofino",
+      "code": "L564 (R)",
+      "family": "Prélude Series",
+      "texture": "Urbania",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-03/Tafisa_L564%28R%29_24X24_72dpi.jpg",
+      "prompt": "natural blond cherry woodgrain melamine panel, rustic rough-sawn wood texture (Tofino)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/tofino"
+    },
+    {
+      "id": "white_chocolate",
+      "label": "White Chocolate",
+      "code": "L492 (R)",
+      "family": "Prélude Series",
+      "texture": "Urbania",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-04/tafisa_L492%28R%29_24X24_72dpi.jpg",
+      "prompt": "white teak woodgrain melamine panel, rustic rough-sawn wood texture (White Chocolate)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/white-chocolate"
+    },
+    {
+      "id": "black_brava",
+      "label": "Black",
+      "code": "M203(B)",
+      "family": "Sommet Series",
+      "texture": "BRAVA",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2019-11/M203B%20-%2012%27x12%27.jpg",
+      "prompt": "solid black colour melamine panel, textured finish (Black)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/black-2"
+    },
+    {
+      "id": "black_tie",
+      "label": "Black Tie",
+      "code": "M2035 (B)",
+      "family": "Sommet Series",
+      "texture": "BRAVA",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2018-08/M2035%28B%29-Black-Tie_Cravate-Noire_24X24.jpg",
+      "prompt": "black, grey teak woodgrain melamine panel, textured finish (Black Tie)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/black-tie"
+    },
+    {
+      "id": "creme_de_la_creme",
+      "label": "Crème de la Crème",
+      "code": "M2031 (B)",
+      "family": "Sommet Series",
+      "texture": "BRAVA",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2018-08/M2031%28B%29-Creme-de-la-Creme_Creme-de-la-Creme-_24x24.jpg",
+      "prompt": "beige teak woodgrain melamine panel, textured finish (Crème de la Crème)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/creme-de-la-creme"
+    },
+    {
+      "id": "home_sweet_home",
+      "label": "Home Sweet Home",
+      "code": "M2034 (B)",
+      "family": "Sommet Series",
+      "texture": "BRAVA",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2018-08/M2034%28B%29-Home-Sweet-Home_Home-Sweet-Home_24x24.jpg",
+      "prompt": "grey teak woodgrain melamine panel, textured finish (Home Sweet Home)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/home-sweet-home"
+    },
+    {
+      "id": "new_wave",
+      "label": "New Wave",
+      "code": "M2041 (B)",
+      "family": "Sommet Series",
+      "texture": "BRAVA",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2018-08/M2041%28B%29-New-Wave_Nouvelle-Vague_24x24.jpg",
+      "prompt": "taupe teak woodgrain melamine panel, textured finish (New Wave)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/new-wave"
+    },
+    {
+      "id": "white_brava",
+      "label": "White",
+      "code": "M175(B)",
+      "family": "Sommet Series",
+      "texture": "BRAVA",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2019-11/M175B%20-%2012%27%27x12%27%27.jpg",
+      "prompt": "solid white colour melamine panel, textured finish (White)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/white-1"
+    },
+    {
+      "id": "black_iconiq",
+      "label": "Black",
+      "code": "M203(Q)",
+      "family": "Sommet Series",
+      "texture": "ICONIQ",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2026-03/texture_iconiq_retouche_low-res.png",
+      "prompt": "solid black colour melamine panel, textured finish (Black)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/black-7"
+    },
+    {
+      "id": "emblem",
+      "label": "Emblem",
+      "code": "M2063 (Q)",
+      "family": "Sommet Series",
+      "texture": "ICONIQ",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2026-02/iconiq_24x24_m2063q_emblem_embleme_med_res.png",
+      "prompt": "dark blond oak woodgrain melamine panel, textured finish (Emblem)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/emblem"
+    },
+    {
+      "id": "maestro",
+      "label": "Maestro",
+      "code": "M2065 (Q)",
+      "family": "Sommet Series",
+      "texture": "ICONIQ",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2026-02/iconiq_24x24_m2065q_maestro_maestro_med_res.png",
+      "prompt": "mid-brown oak woodgrain melamine panel, textured finish (Maestro)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/maestro"
+    },
+    {
+      "id": "masterpiece",
+      "label": "Masterpiece",
+      "code": "M2062 (Q)",
+      "family": "Sommet Series",
+      "texture": "ICONIQ",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2026-02/iconiq_24x24_m2062q_mast_chef-doeuvre_med_res.png",
+      "prompt": "natural blond oak woodgrain melamine panel, textured finish (Masterpiece)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/masterpiece"
+    },
+    {
+      "id": "morning_dew_iconiq",
+      "label": "Morning Dew",
+      "code": "M763(Q)",
+      "family": "Sommet Series",
+      "texture": "ICONIQ",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2026-02/iconiq_24x24_m763q_morning_dew_rosee_du_matin_med_res.png",
+      "prompt": "solid beige colour melamine panel, textured finish (Morning Dew)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/morning-dew-5"
+    },
+    {
+      "id": "muse",
+      "label": "Muse",
+      "code": "M2061 (Q)",
+      "family": "Sommet Series",
+      "texture": "ICONIQ",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2026-02/iconiq_24x24_m2061q_muse_muse_med_res.png",
+      "prompt": "light natural blond oak woodgrain melamine panel, textured finish (Muse)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/muse"
+    },
+    {
+      "id": "pioneer",
+      "label": "Pioneer",
+      "code": "M2066 (Q)",
+      "family": "Sommet Series",
+      "texture": "ICONIQ",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2026-02/iconiq_24x24_m2066q_pioneer_pionnier_med_res.png",
+      "prompt": "dark brown oak woodgrain melamine panel, textured finish (Pioneer)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/pioneer"
+    },
+    {
+      "id": "prodigy",
+      "label": "Prodigy",
+      "code": "M2064 (Q)",
+      "family": "Sommet Series",
+      "texture": "ICONIQ",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2026-02/iconiq_24x24_m2064q_prodigy_virtuose_med_res.png",
+      "prompt": "taupe oak woodgrain melamine panel, textured finish (Prodigy)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/prodigy"
+    },
+    {
+      "id": "after_hours",
+      "label": "After-Hours",
+      "code": "M2010 (Y)",
+      "family": "Sommet Series",
+      "texture": "VIVA",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-03/tafisa_M2010%28Y%29_24X24_72dpi.jpg",
+      "prompt": "black, dark brown butternut woodgrain melamine panel, textured finish (After-Hours)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/after-hours"
+    },
+    {
+      "id": "apres_ski",
+      "label": "Après-Ski",
+      "code": "M2015 (Y)",
+      "family": "Sommet Series",
+      "texture": "VIVA",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-03/tafisa_M2015%28Y%29_24X24_72dpi.jpg",
+      "prompt": "taupe, natural blond butternut woodgrain melamine panel, textured finish (Après-Ski)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/apres-ski"
+    },
+    {
+      "id": "black_viva",
+      "label": "Black",
+      "code": "M203(Y)",
+      "family": "Sommet Series",
+      "texture": "VIVA",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2019-11/M203Y%20-%2012%27%27x12%27%27.jpg",
+      "prompt": "solid black colour melamine panel, textured finish (Black)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/black-1"
+    },
+    {
+      "id": "casting_at_first_light",
+      "label": "Casting at First Light",
+      "code": "M2007 (Y)",
+      "family": "Sommet Series",
+      "texture": "VIVA",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-03/Tafisa_M2007%28Y%29_24X24_72dpi.jpg",
+      "prompt": "natural blond butternut woodgrain melamine panel, textured finish (Casting at First Light)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/casting-at-first-light"
+    },
+    {
+      "id": "sugar_on_ice",
+      "label": "Sugar on Ice",
+      "code": "M2014 (Y)",
+      "family": "Sommet Series",
+      "texture": "VIVA",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-03/Tafisa_M2014%28Y%29_24X24_72dpi.jpg",
+      "prompt": "mid-brown, red-brown butternut woodgrain melamine panel, textured finish (Sugar on Ice)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/sugar-on-ice"
+    },
+    {
+      "id": "summertime_blues",
+      "label": "Summertime Blues",
+      "code": "M2013 (Y)",
+      "family": "Sommet Series",
+      "texture": "VIVA",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-03/tafisa_M2013%28Y%29_24X24_72dpi.jpg",
+      "prompt": "grey butternut woodgrain melamine panel, textured finish (Summertime Blues)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/summertime-blues"
+    },
+    {
+      "id": "sunday_brunch",
+      "label": "Sunday Brunch",
+      "code": "M2005 (Y)",
+      "family": "Sommet Series",
+      "texture": "VIVA",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-03/tafisa_M2005%28Y%29_24X24_72dpi.jpg",
+      "prompt": "mid-brown butternut woodgrain melamine panel, textured finish (Sunday Brunch)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/sunday-brunch"
+    },
+    {
+      "id": "sunset_cruise",
+      "label": "Sunset Cruise",
+      "code": "M2002 (Y)",
+      "family": "Sommet Series",
+      "texture": "VIVA",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-03/tafisa_M2002%28Y%29_24X24_72dpi.jpg",
+      "prompt": "grey butternut woodgrain melamine panel, textured finish (Sunset Cruise)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/sunset-cruise"
+    },
+    {
+      "id": "tea_for_two",
+      "label": "Tea for Two",
+      "code": "M2006 (Y)",
+      "family": "Sommet Series",
+      "texture": "VIVA",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-03/tafisa_M2006%28Y%29_24X24_72dpi.jpg",
+      "prompt": "mid-brown butternut woodgrain melamine panel, textured finish (Tea for Two)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/tea-for-two"
+    },
+    {
+      "id": "tete_a_tete",
+      "label": "Tête-à-Tête",
+      "code": "M2001 (Y)",
+      "family": "Sommet Series",
+      "texture": "VIVA",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-03/tafisa_M2001%28Y%29_24X24_72dpi_0.jpg",
+      "prompt": "mid-brown butternut woodgrain melamine panel, textured finish (Tête-à-Tête)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/tete-a-tete"
+    },
+    {
+      "id": "weekend_getaway",
+      "label": "Weekend Getaway",
+      "code": "M2003 (Y)",
+      "family": "Sommet Series",
+      "texture": "VIVA",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-03/tafisa_M2003%28Y%29_24X24_72dpi_1.jpg",
+      "prompt": "white, beige butternut woodgrain melamine panel, textured finish (Weekend Getaway)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/weekend-getaway"
+    },
+    {
+      "id": "white_viva",
+      "label": "White",
+      "code": "M175(Y)",
+      "family": "Sommet Series",
+      "texture": "VIVA",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2019-11/M175Y%20-%2012%27%27x12%27%27.jpg",
+      "prompt": "solid white colour melamine panel, textured finish (White)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/white-0"
+    },
+    {
+      "id": "winter_fun_viva",
+      "label": "Winter Fun!",
+      "code": "M2004 (Y)",
+      "family": "Sommet Series",
+      "texture": "VIVA",
+      "swatch_url": "https://tafisa.ca/sites/default/files/2020-03/Tafisa_M2004%28Y%29_24X24_72dpi.jpg",
+      "prompt": "white butternut woodgrain melamine panel, textured finish (Winter Fun!)",
+      "source_url": "https://www.tafisa.ca/en/our-colours/winter-fun"
+    }
+  ]
+}

@@ -45,9 +45,16 @@ def configure(scene, job, a):
     scene.cycles.device = "GPU"
     scene.cycles.samples = a.samples or job["samples"]
     scene.cycles.use_adaptive_sampling = True
-    scene.cycles.adaptive_threshold = 0.015
+    scene.cycles.adaptive_threshold = job.get("noise_threshold", 0.015)
     scene.cycles.use_denoising = True
     scene.cycles.denoiser = "OPENIMAGEDENOISE"
+    # sharpness: the denoiser keeps fine detail (wood grain, tile joints) when it is fed clean albedo and
+    # normal passes and runs at its highest quality; a 1-pixel filter keeps edges crisp
+    scene.cycles.denoising_input_passes = "RGB_ALBEDO_NORMAL"
+    scene.cycles.denoising_prefilter = "ACCURATE"
+    if hasattr(scene.cycles, "denoising_quality"):
+        scene.cycles.denoising_quality = "HIGH"
+    scene.cycles.filter_width = job.get("pixel_filter_px", 1.5)
     scene.cycles.seed = 0
     scene.cycles.max_bounces = 8
     scene.render.resolution_x = int(job["resolution"][0] * a.scale)

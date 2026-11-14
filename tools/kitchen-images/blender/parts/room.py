@@ -38,7 +38,7 @@ def build_room(S, M):
     box("splash_back_a", 0, -0.01, top, x0, 0.3, ub, M["tile"], "room", bevel=0)
     box("splash_back_b", x0, -0.01, top, x1, 0.3, z0, M["tile"], "room", bevel=0)
     box("splash_back_c", x1, -0.01, top, W, 0.3, ub, M["tile"], "room", bevel=0)
-    box("splash_left", -0.01, 0.3, top, 0.3, S["splash_left_to"], ub, M["tile"], "room", bevel=0)
+    box("splash_left", -0.01, 0.3, top, 0.3, S["splash_left_to"], ub, M["tile_side"], "room", bevel=0)
     # behind a hood the tile runs up to whatever is above it: the chimney goes to the ceiling, so the
     # tile does too (a hood with a cabinet above would stop at that cabinet's underside)
     for run in S["runs"]:

@@ -12,6 +12,9 @@ import cv2
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from finish import finish  # noqa: E402
 
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent / "qa"))
+from check import length_tol_px  # noqa: E402
+
 TESTS = [
     ("paint", "Paint colour", "Five Sherwin-Williams shortlist colours, each a full render. Dark cabinets darken the "
      "whole room, as they do in life."),
@@ -52,7 +55,7 @@ def chip(ok, text):
 
 def figure(name, label, chips=""):
     return (f'<figure><a href="img/{name}.jpg"><img src="img/{name}_s.jpg" alt="{html.escape(label)}" '
-            f'loading="lazy" width="1200" height="800"></a><figcaption><span>{html.escape(label)}</span>'
+            f'loading="lazy" width="1800" height="1200"></a><figcaption><span>{html.escape(label)}</span>'
             f'{chips}</figcaption></figure>')
 
 
@@ -67,11 +70,11 @@ def main():
     for v in job["variants"]:
         src = out / v["id"] / "image.png"
         jpg(src, sheet / "img" / f"{v['id']}.jpg")
-        jpg(src, sheet / "img" / f"{v['id']}_s.jpg", 1200)
+        jpg(src, sheet / "img" / f"{v['id']}_s.jpg", 1800)
         files += [f"img/{v['id']}.jpg", f"img/{v['id']}_s.jpg"]
         if (out / v["id"] / "recolour.png").exists():
             jpg(out / v["id"] / "recolour.png", sheet / "img" / f"{v['id']}_rc.jpg")
-            jpg(out / v["id"] / "recolour.png", sheet / "img" / f"{v['id']}_rc_s.jpg", 1200)
+            jpg(out / v["id"] / "recolour.png", sheet / "img" / f"{v['id']}_rc_s.jpg", 1800)
             files += [f"img/{v['id']}_rc.jpg", f"img/{v['id']}_rc_s.jpg"]
 
     # headline numbers
@@ -90,7 +93,7 @@ def main():
         ("Layout stays locked", f"{lock_ok} of {len(qa['variants'])}",
          f"variants keep every object in the same pixels outside the changed area (worst {worst_lock:.2f}% moved)"),
         ("Handle lengths", f"{worst_h:.1f} px" if worst_h is not None else "none",
-         f"largest error across {len(handles)} measured pulls (limit 2 px)"),
+         f"largest error across {len(handles)} measured pulls (limit {length_tol_px(job['resolution'][0]):.1f} px at this size)"),
         ("Re-colour", f"ΔE {rc_de:.1f}" if rc_de is not None else "n/a",
          f"worst mean colour difference from a full render when re-coloured from a nearby colour; "
          f"{rc_s:.0f} s each vs {avg / 60:.1f} min to render (under 2 is hard to see)"),

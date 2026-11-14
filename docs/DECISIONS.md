@@ -149,8 +149,13 @@ A pilot rendered the L-shape-with-island kitchen 14 ways: 5 paints, 4 door style
   - the tile behind the hood runs up to whatever is above the hood (the ceiling, for a chimney hood);
   - the hood is now the common wall-mount pyramid chimney style;
   - the island pendants and stools were removed;
-  - for realism: finishes are slightly uneven (paint sheen, quartz, stainless, tile), and the review images get a fixed camera finish (slight bloom, darker corners, colour fringe at the edges, fine grain). The finish runs after QA, so the checks still measure the raw render.
+  - for realism: finishes are slightly uneven (paint sheen, quartz, stainless, tile), and the review images get a fixed camera finish (slight bloom, darker corners, colour fringe at the edges, fine grain; the colour fringe was removed in round 5). The finish runs after QA, so the checks still measure the raw render.
   - All checks still pass (layout locked, handles within 1.5 px, re-colour from a nearby colour ΔE 0.8–1.3).
+- **Round 5, after the owner's review (2026-11-13): sharper images, matching tile.**
+  - Full definition: renders are 3840 × 2560 (was 2400 × 1600), with 256 samples and a tighter noise limit. The denoiser now uses its high-quality mode with the colour and surface-direction guides, and the pixel filter is 1 px (was 1.5), so fine detail is no longer smoothed away. The camera finish no longer adds a colour fringe (it resampled and blurred the image). It adds the light sharpening a camera applies instead. Measured sharpness went from 104 to 182.
+  - The fridge wall's backsplash is now the same subway tile as the sink wall, with the rows lining up at the corner. The tile pattern had been laid out for the back wall only, so on the side wall it smeared into horizontal slats.
+  - The handle-length limit now scales with image width: 2 px at 1600 px wide, as planned, so 4.8 px at 3840. That keeps the same real-world accuracy. The worst measured pull is 2.1 px. The self-test covers both cases: a 4 px error passes at 3840 wide and fails at 300 wide.
+  - **Cost:** about 17 minutes per image on this Mac, up from 4. The whole library (about 401 renders, with paint colours re-coloured from a few of them) is now about 114 hours unattended on this Mac, up from about 26. A rented cloud GPU would cut that to roughly a day.
 - **PROPOSED, set by eye for the pilot:**
   - the scene's sizes;
   - the counter colours;

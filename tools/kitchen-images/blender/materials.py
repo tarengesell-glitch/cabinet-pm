@@ -245,7 +245,12 @@ def quartz(name: str, base_hex: str, vein_hex: str, pattern: str):
     return mat
 
 
-def subway_tile(name: str):
+def subway_tile(name: str, wall_axis: str = "y"):
+    """3 x 6 subway tile laid in a running bond. wall_axis is the axis the wall faces along: "y" for the
+    back wall, "x" for a side wall. The brick pattern is laid out in that wall's own plane, so the tile
+    reads the same on every wall (projected the wrong way it smears into horizontal slats)."""
+    if wall_axis not in ("x", "y"):
+        raise ValueError(f"wall_axis must be 'x' or 'y', not {wall_axis!r}")
     mat, b, nt = _principled(name)
     coord = nt.nodes.new("ShaderNodeTexCoord")
     brick = nt.nodes.new("ShaderNodeTexBrick")
@@ -256,10 +261,12 @@ def subway_tile(name: str):
     brick.inputs["Brick Width"].default_value = 6 * 0.0254
     brick.inputs["Row Height"].default_value = 3 * 0.0254
     brick.inputs["Mortar Size"].default_value = 0.0025
-    mapping = nt.nodes.new("ShaderNodeMapping")
-    mapping.inputs["Rotation"].default_value = (1.5708, 0, 0)
-    nt.links.new(coord.outputs["Object"], mapping.inputs["Vector"])
-    nt.links.new(mapping.outputs["Vector"], brick.inputs["Vector"])
+    sep = nt.nodes.new("ShaderNodeSeparateXYZ")
+    nt.links.new(coord.outputs["Object"], sep.inputs["Vector"])
+    plane = nt.nodes.new("ShaderNodeCombineXYZ")  # (along the wall, up the wall, 0)
+    nt.links.new(sep.outputs["X" if wall_axis == "y" else "Y"], plane.inputs["X"])
+    nt.links.new(sep.outputs["Z"], plane.inputs["Y"])
+    nt.links.new(plane.outputs["Vector"], brick.inputs["Vector"])
     nt.links.new(brick.outputs["Color"], b.inputs["Base Color"])
     bump = nt.nodes.new("ShaderNodeBump")
     bump.inputs["Strength"].default_value = 0.3

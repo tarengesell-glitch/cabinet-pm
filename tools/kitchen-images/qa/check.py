@@ -33,7 +33,12 @@ MARGIN_PX = 8   # shadow margin for the light-change figure
 EDGE_PX = 2     # an object's edge pixels may flip when its neighbour changes shape
 LAYOUT_LIMIT_PCT = 0.05
 DRIFT_LIMIT_PCT = 0.5  # used by the self-test's pixel drift cases
-LENGTH_TOL_PX = 2.0
+LENGTH_TOL_PX = 2.0      # at LENGTH_TOL_WIDTH; scaled with the image so it means the same real accuracy
+LENGTH_TOL_WIDTH = 1600  # the pilot plan set +/-2 px at 1600 px wide (round 5 renders at 3840)
+
+
+def length_tol_px(width: int) -> float:
+    return LENGTH_TOL_PX * max(1.0, width / LENGTH_TOL_WIDTH)
 
 
 def png(path):
@@ -66,6 +71,7 @@ def layout_lock(idx_a, idx_b, regions):
 
 def handle_lengths(meta, idx, hw_index=2):
     hw = idx == hw_index
+    tol = length_tol_px(idx.shape[1])
     results = []
     for p in meta["pulls"]:
         (x0, y0, z0), (x1, y1, _) = p["ends_px"]
@@ -104,7 +110,7 @@ def handle_lengths(meta, idx, hw_index=2):
         measured = float(hi - lo + 1)
         results.append({"pull": p["name"], "length_in": p["length_in"], "expected_px": round(expected, 1),
                         "measured_px": round(measured, 1), "error_px": round(measured - expected, 1),
-                        "ok": bool(abs(measured - expected) <= LENGTH_TOL_PX)})
+                        "ok": bool(abs(measured - expected) <= tol)})
     return results
 
 

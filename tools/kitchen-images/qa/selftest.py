@@ -46,6 +46,20 @@ def main() -> int:
     h = check.handle_lengths(meta, idx)
     ok &= expect(bool(h) and not h[0]["ok"], f"a bar 20 px too long fails ({h[0]['error_px'] if h else 'none'} px)")
 
+    # the length limit scales with image width: same real accuracy at 3840 px as at 1600 px
+    big = np.zeros((200, 3840), np.int32)
+    cv2.rectangle(big, (50, 99), (173, 101), 2, -1)  # 124 px drawn
+    meta4 = {"pulls": [{"name": "p", "length_in": 8, "ends_px": [[50.0, 100.5, 1], [170.0, 100.5, 1]]}]}
+    h = check.handle_lengths(meta4, big)
+    ok &= expect(bool(h) and h[0]["ok"], f"4 px off at 3840 wide passes (limit {check.length_tol_px(3840)} px)")
+    cv2.rectangle(big, (50, 99), (179, 101), 2, -1)  # 130 px drawn
+    h = check.handle_lengths(meta4, big)
+    ok &= expect(bool(h) and not h[0]["ok"], f"10 px off at 3840 wide fails ({h[0]['error_px'] if h else 'none'} px)")
+    small = np.zeros((200, 300), np.int32)
+    cv2.rectangle(small, (50, 99), (173, 101), 2, -1)
+    h = check.handle_lengths(meta4, small)
+    ok &= expect(bool(h) and not h[0]["ok"], f"4 px off at 300 wide still fails (limit {check.length_tol_px(300)} px)")
+
     hidden = idx.copy()
     hidden[95:105, 100:120] = 0  # something in front of the middle of the bar
     meta["pulls"][0]["ends_px"][1][0] = 170.0

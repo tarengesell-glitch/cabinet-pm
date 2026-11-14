@@ -21,6 +21,7 @@ Navigation: what actually runs, where each rule's data and code live, and which 
 | Today and Tasks (`src/app/(office)/`) | Placeholders with demo data. |
 | Clients (`src/app/(office)/clients/`) | **Live.** Real clients from the shared database (`customers`, owned by `projects`, `src/modules/projects/model/customers.ts`), then the demo clients, labelled. New client adds a real one. Jobs aren't records of their own yet: a client's ID is the job's key. |
 | Modules with only a `CLAUDE.md`, README and `contract.ts` (approvals, comparer, purchasing, site-measure, client-messaging, job-notes, test-library, appliances) | Not built yet. |
+| `tools/kitchen-images/` (outside the app) | The kitchen image pilot: builds the kitchen in Blender, renders it, checks it (`qa/check.py`, `qa/selftest.py`) and makes the review page. See its README. Renders are not committed. |
 | `src/modules/visual-library/` | Data only: the kitchen image variables and colour lists, checked by `model/variables.ts`. No screen uses them yet. |
 | The CAD adapter (`src/adapters/cabinet-vision/`) | Not built yet; waits for Phase 0 samples. |
 

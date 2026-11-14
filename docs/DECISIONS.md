@@ -226,6 +226,49 @@ The owner looked at a test job's design (the "Fake Design" kitchen, a made-up cl
 - **Room drawing, round 9 (owner, 2026-11-05): edge scrolling.** While drawing walls or dragging a handle, a cursor within 40 px of the plan's edge scrolls the plan that way, faster nearer the edge, as AutoCAD, SketchUp and Figma do. The wall or drag being made follows the cursor. It stops when the cursor moves back in.
 - Room capture is pulled ahead of Phase 5 (BUILD_PLAN). Order: scaffold (1a), then Core walls and openings, then the Designer drawing screen.
 
+### 2026-11-13: Kitchen image library: Blender first, and the pilot's results (owner, chat, 2026-11-13)
+The owner asked whether AI can reliably make perfect masks, and shared outside advice to build the images in Blender. Decided: **Blender first, AI only for touch-ups.** This replaces "AI edits of one locked base photo" in the 2026-11-10 entry. The images are full 3D renders of one scene per room shape, from a fixed camera, with every option built to size in code. Masks come straight from the render, so they are exact.
+
+A pilot rendered the L-shape-with-island kitchen 14 ways: 5 paints, 4 door styles, 3 handle lengths, 2 waterfall ends and 2 stains. The code is in `tools/kitchen-images/` and the review page is at https://claude.ai/artifact/1rRYLr691X9Z7BfW6w3KuY. What it measured:
+- **The layout stays locked:** outside the area each test changes, no object moved by a single pixel in any of the 13 variants (object-index pass).
+- **Sizes are exact:** 50 fully visible handles measured within 2 px of their exact length in the picture.
+- **Paint colours can be re-coloured instead of rendered:** a render re-coloured to another colour from its light passes takes about a second.
+  - From a nearby colour, the result matches a full render (mean ΔE2000 0.8).
+  - From white straight to a dark colour, it doesn't (mean ΔE 2.6), because dark cabinets darken the whole room.
+  - So about 8 rendered paint colours spread across light to dark can produce all 1,728 Sherwin-Williams colours.
+- **Time:** about 3.8 min a render on this Mac at 2400 × 1600, so about 26 hours unattended for the roughly 400 renders the library needs.
+- **Round 2, after the owner's review (2026-11-13):**
+  - the island moved to 42" clear of the fridge and the sink run;
+  - the camera was re-aimed so the kitchen sits in the middle of the frame;
+  - the picture was brightened;
+  - the resolution went up from 1600 × 1067 to 2400 × 1600;
+  - the oversized cutting board that read as a wood panel was removed;
+  - added real scanned CC0 objects (counter stools, a vase, a bowl), a real outdoor photo outside the window, plaster texture on the walls, and toe kicks painted to match.
+  - All checks still pass. Re-colour from a nearby colour: mean ΔE 0.8–1.1. From white straight to Iron Ore: 4.0, so the anchor-colour plan stands.
+- **Round 3, after the owner's review (2026-11-13):**
+  - shaker frames had looked rounded over; the door parts now have square edges with only a tiny edge break;
+  - wood grain is now set per part, as in a real five-piece door: stiles and panels run vertically, rails run horizontally, and each part starts at a different place in the veneer;
+  - white kitchens had looked washed out: the fill light and the exposure were lowered so the shadow lines on white doors show.
+  - All checks still pass (layout locked, handles within 1.7 px). Re-colour from a nearby colour: mean ΔE 0.8–1.3.
+- **Round 4, after the owner's review (2026-11-13):**
+  - the cabinet over the fridge is now as deep as the fridge panels (26"), so the panels no longer stick out past it;
+  - the tile behind the hood runs up to whatever is above the hood (the ceiling, for a chimney hood);
+  - the hood is now the common wall-mount pyramid chimney style;
+  - the island pendants and stools were removed;
+  - for realism: finishes are slightly uneven (paint sheen, quartz, stainless, tile), and the review images get a fixed camera finish (slight bloom, darker corners, colour fringe at the edges, fine grain; the colour fringe was removed in round 5). The finish runs after QA, so the checks still measure the raw render.
+  - All checks still pass (layout locked, handles within 1.5 px, re-colour from a nearby colour ΔE 0.8–1.3).
+- **Round 5, after the owner's review (2026-11-13): sharper images, matching tile.**
+  - Full definition: renders are 3840 × 2560 (was 2400 × 1600), with 256 samples and a tighter noise limit. The denoiser now uses its high-quality mode with the colour and surface-direction guides, and the pixel filter is 1 px (was 1.5), so fine detail is no longer smoothed away. The camera finish no longer adds a colour fringe (it resampled and blurred the image). It adds the light sharpening a camera applies instead. Measured sharpness went from 104 to 182.
+  - The fridge wall's backsplash is now the same subway tile as the sink wall, with the rows lining up at the corner. The tile pattern had been laid out for the back wall only, so on the side wall it smeared into horizontal slats.
+  - The handle-length limit now scales with image width: 2 px at 1600 px wide, as planned, so 4.8 px at 3840. That keeps the same real-world accuracy. The worst measured pull is 2.1 px. The self-test covers both cases: a 4 px error passes at 3840 wide and fails at 300 wide.
+  - **Cost:** about 17 minutes per image on this Mac, up from 4. The whole library (about 401 renders, with paint colours re-coloured from a few of them) is now about 114 hours unattended on this Mac, up from about 26. A rented cloud GPU would cut that to roughly a day.
+- **PROPOSED, set by eye for the pilot:**
+  - the scene's sizes;
+  - the counter colours;
+  - the stain tints;
+  - "handle length" read as the overall length (IK-26; the owner answered centre to centre on 2026-11-14, so this changes with the next render).
+- ~~**The open question for the owner:** are the renders good enough to show clients?~~ Answered 2026-11-14 (owner, after round 5): "Yes, those look good." The pilot is a go: Blender is the image engine.
+
 ### 2026-11-11: Cabinet ends saved on each cabinet (owner: "one authoritative finished-end decision, shared by the saved design and the rendering")
 - **Built (designer):** the decided ends rule (2026-11-07 "The cabinet catalog", CB-FACT-10, and round 2 2026-11-10) is worked out once, in `src/modules/designer/model/ends.ts`, from data in `data/placeholder-draft.json` "ends", and saved on each cabinet as the catalog's `end_left` / `end_right`. The 3D view draws only what is saved, and the counter overhangs only past a saved finished end (HARD-011). Before, the 3D view worked ends out while drawing and the saved design had none. On the real kitchen the 3D view is unchanged (every shape compared before and after).
 - **After a layout change** an end is worked out again when its saved value equals what the rule gave before the change; an end that differs is kept. Corrected 2026-11-11: this does not protect every person's choice. Today every saved end comes from the rule (no screen sets one). Requirements for manual end editing: END-4. **Older designs** aren't changed on opening: Customize lists cabinets with no saved ends and sets them only when someone asks; ends that differ from the layout (for example after the room drawing changed) are listed the same way.
@@ -721,7 +764,8 @@ Five confirmed rules are now checked in the design tool (HARD-014, PREF-011, PRE
 - ~~**IK-22 Stains.**~~ Answered 2026-11-13 (owner): use the stain options listed on cabinets.com.
 - ~~**IK-23 Default kitchen.**~~ Answered 2026-11-13 (owner): "You don't need a single default kitchen because the flow always has multiple options." Removed from the catalog.
 - ~~**IK-24 Knobs on drawers.**~~ Answered 2026-11-13 (owner): yes, they apply to knobs too.
-- **IK-25 Earlier picks in later images.** With no default kitchen, what do a later step's images show for the picks already made? The client's own picks, which needs a layered or 3D build, or something fixed? This depends on the image engine (see the masks and Blender question raised 2026-11-13).
+- ~~**IK-25 Earlier picks in later images.**~~ Answered 2026-11-14 (owner): the client's own picks. "The image gets closer and closer to what their ideal design is." It can't wait for a render at any step ("a full stop no"), so everything is generated ahead of time. With no default kitchen, what do a later step's images show for the picks already made? The client's own picks, which needs a layered or 3D build, or something fixed? This depends on the image engine (see the masks and Blender question raised 2026-11-13).
+- ~~**IK-26 Handle length.**~~ Answered 2026-11-14 (owner): the distance between the screw holes (centre to centre). The pilot still draws overall length; fix it with the next render. Are 5 1/2", 8" and 12" the handle's overall length, or the distance between its screw holes (centre to centre)? The pilot draws them as overall length.
 
 ### From the AI designer plan (2026-11-09)
 - ~~**AD-1 The upper over a fridge.**~~ Answered 2026-11-09 (owner: "sounds good"): it stays a blocker on drafts until the shop names the cabinet and depth. The room drawing gives it 24" deep, but the catalog has no upper at that depth: `upper_no_shelf` is 12" deep, and its depth limits are not known (CAT-1). Until the shop says which cabinet and depth to use, a draft shows it as a blocker.

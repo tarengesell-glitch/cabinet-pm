@@ -1,0 +1,200 @@
+{
+ "source": "Pilot job (2026-11-13), from the approved pilot plan. Option IDs are the catalog's (visual-library/data/kitchen-image-variables.json). Everything under \"looks\" is PROPOSED by eye for the pilot: counter colours have no hex in the catalog, and the stain tints are not yet anchored to approved reference photos.",
+ "scene": "l_shape_island",
+ "resolution": [
+  3840,
+  2560
+ ],
+ "samples": 256,
+ "noise_threshold": 0.008,
+ "pixel_filter_px": 1.0,
+ "base": {
+  "material": "painted",
+  "colour": "sw_7005",
+  "door_style": "shaker",
+  "hardware_config": "all_handles",
+  "door_handle_orientation": "vertical",
+  "drawer_hardware_count": "single",
+  "drawer_hardware_position": "centred_all",
+  "hardware_finish": "brushed_nickel",
+  "handle_length": "len_5_5",
+  "counter_pattern": "minimal",
+  "counter_colour": "pure_white",
+  "island_back": "slab",
+  "island_end": "gable_1_5_cabinet",
+  "top_trim": "flat_0_75",
+  "valance": "hidden"
+ },
+ "variants": [
+  {
+   "id": "base",
+   "test": "base",
+   "region": null,
+   "picks": {}
+  },
+  {
+   "id": "paint_agreeable_gray",
+   "test": "paint",
+   "region": "cabinet_fronts",
+   "picks": {
+    "colour": "sw_7029"
+   },
+   "recolour_from": "base"
+  },
+  {
+   "id": "paint_pewter_green",
+   "test": "paint",
+   "region": "cabinet_fronts",
+   "picks": {
+    "colour": "sw_6208"
+   },
+   "recolour_from": "paint_iron_ore"
+  },
+  {
+   "id": "paint_iron_ore",
+   "test": "paint",
+   "region": "cabinet_fronts",
+   "picks": {
+    "colour": "sw_7069"
+   },
+   "recolour_from": "base"
+  },
+  {
+   "id": "paint_naval",
+   "test": "paint",
+   "region": "cabinet_fronts",
+   "picks": {
+    "colour": "sw_6244"
+   },
+   "recolour_from": "paint_iron_ore"
+  },
+  {
+   "id": "door_slab",
+   "test": "door",
+   "region": "cabinet_fronts",
+   "picks": {
+    "door_style": "slab"
+   }
+  },
+  {
+   "id": "door_slim_shaker",
+   "test": "door",
+   "region": "cabinet_fronts",
+   "picks": {
+    "door_style": "slim_shaker"
+   }
+  },
+  {
+   "id": "door_raised_panel",
+   "test": "door",
+   "region": "cabinet_fronts",
+   "picks": {
+    "door_style": "raised_panel"
+   }
+  },
+  {
+   "id": "handle_8",
+   "test": "handle",
+   "region": "hardware",
+   "picks": {
+    "handle_length": "len_8"
+   }
+  },
+  {
+   "id": "handle_12",
+   "test": "handle",
+   "region": "hardware",
+   "picks": {
+    "handle_length": "len_12"
+   }
+  },
+  {
+   "id": "waterfall_white",
+   "test": "waterfall",
+   "region": "island_ends",
+   "picks": {
+    "island_end": "waterfall"
+   }
+  },
+  {
+   "id": "waterfall_dark_heavy",
+   "test": "waterfall",
+   "region": "island_ends",
+   "picks": {
+    "island_end": "waterfall",
+    "counter_pattern": "heavy",
+    "counter_colour": "dark_grey"
+   }
+  },
+  {
+   "id": "stain_white_oak_natural",
+   "test": "stain",
+   "region": "cabinet_fronts",
+   "picks": {
+    "material": "white_oak_rift",
+    "colour": "natural"
+   }
+  },
+  {
+   "id": "stain_white_oak_espresso",
+   "test": "stain",
+   "region": "cabinet_fronts",
+   "picks": {
+    "material": "white_oak_rift",
+    "colour": "espresso"
+   }
+  }
+ ],
+ "looks": {
+  "counter_colours": {
+   "pure_white": {
+    "base": "#F4F3F0",
+    "vein": "#C9C6C0"
+   },
+   "dark_grey": {
+    "base": "#4A4A4C",
+    "vein": "#D8D6D2"
+   }
+  },
+  "finishes": {
+   "brushed_nickel": {
+    "hex": "#C2BBAC",
+    "roughness": 0.32,
+    "anisotropic": 0.6
+   },
+   "brushed_aluminum": {
+    "hex": "#CDD0D2",
+    "roughness": 0.3,
+    "anisotropic": 0.6
+   },
+   "brushed": {
+    "hex": "#BEBFBD",
+    "roughness": 0.3,
+    "anisotropic": 0.6
+   },
+   "black": {
+    "hex": "#1B1B1B",
+    "roughness": 0.45
+   },
+   "oil_rubbed_bronze": {
+    "hex": "#3E2C21",
+    "roughness": 0.38
+   }
+  },
+  "stains": {
+   "natural": {
+    "tint": "#F4E7D2",
+    "strength": 0.12,
+    "darken": 0.0
+   },
+   "espresso": {
+    "tint": "#3A271C",
+    "strength": 0.85,
+    "darken": 0.45
+   }
+  },
+  "veneer_tile_in": 30,
+  "led_strength": 6.0
+ },
+ "exposure": 0.0
+}

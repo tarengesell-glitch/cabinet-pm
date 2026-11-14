@@ -20,11 +20,11 @@ Every option the image selector shows, and what each photorealistic image must c
 
 How the images get made (owner, 2026-11-10):
 - There is no single default kitchen (owner, 2026-11-13). How earlier picks show in later images is open (IK-25).
-- Images are AI edits of one locked base photo per room shape, masked to one region.
+- Images are Blender renders of one scene per room shape, from a fixed camera.
 - Each image is anchored to a real reference photo the owner has approved.
 - Each image is checked automatically before it is kept.
 
-The reference finder, the base photos and masks, and the generate, check and retry loop are later steps.
+The images are rendered in Blender by `tools/kitchen-images/` (owner, 2026-11-13: Blender first, AI only for touch-ups). The L-shape-with-island pilot has run; see that folder's README and `docs/DECISIONS.md`.
 
 ## Public API
 `contract.ts`: `IMAGE_CATALOG` (the checked catalog, or the reason it can't load), `imagePlan`, and their types. No other module uses it yet.

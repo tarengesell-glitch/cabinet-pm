@@ -37,6 +37,7 @@ Core owns no tables. It owns the master copy *format*: Job, Room, Wall, PlacedIt
   - Islands are floating walls with a run on them (A-21), not a separate shape.
   - Later, when `appliances` exists: a placement gains a reference to the job's appliance record, whose specs live there; the master copy keeps a copy of the confirmed size it was designed to.
 - **Placed cabinets (schema 2, 2026-11-08):** each room has `items` (PlacedItem). Positions are wall-referenced in the CAD import file's terms: wall, side, offset along the wall from its start corner, elevation from the floor, setback from the wall face; exact 1/64" values. Selections at job, room and item level. See DECISIONS "Placed cabinets in the master copy".
+- **Optional, 2026-11-12 (PROPOSED):** a placed item's `sections` (its front and interior as divided in Customize), `set_by_hand` (the options a person chose) and `drawer_inserts` (2026-11-13); an appliance placement's `selections` (how it looks). Absent on older saves. See DECISIONS "Owner requests after the Fake Design kitchen".
 - **PROPOSED:**
   - **Price shown live** is calculated from the catalog and is never stored in the master copy. Quotes freeze it (`projects`).
 
@@ -51,7 +52,7 @@ Core owns no tables. It owns the master copy *format*: Job, Room, Wall, PlacedIt
 
 ## shop-settings
 
-- **design_rules**: structured rule, plain-language description, default severity (warn), and the shop's promotion to block.
+- **design_rules**: structured rule, plain-language description, and its design-tool setting (won't let it be drawn, error, or suggestion; DECISIONS 2026-11-08 "Design rules reviewed"). Today a data file, `src/modules/shop-settings/data/design-rules.json`, not a table.
 - **default_selections**, **preferences**.
 
 ## visual-library

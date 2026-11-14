@@ -1,0 +1,20 @@
+{
+  "source": "Owner (Taren), chat, 2026-11-13: \"Clicking library cabinets on the left hand pane doesn't seem to do anything. The following should be options for bases. These icons should show the interior parts (shelves, roll outs, etc)\", then the twelve below in this order, with their defaults.",
+  "mapping_note": "PROPOSED (2026-11-13): each option is a catalog cabinet with its front and interior set as listed (sections, saved on the placed cabinet). Which shop library template builds each one, the three with no template of their own (full door with four roll-outs, the two full-height garbage pull-outs) above all, is for the shop to confirm (DECISIONS LP-1).",
+  "kinds": {
+    "base": [
+      { "id": "full_door", "name": "Full door", "note": "Two shelves", "code": "base_doors", "sections": { "kind": "doors", "shelves": 2, "rollouts": 0, "size": null } },
+      { "id": "door_drawer", "name": "Door and drawer", "note": "One shelf", "code": "base_drawer_doors", "sections": { "kind": "split", "direction": "horizontal", "size": null, "parts": [{ "kind": "drawers", "count": 1, "size": "6 13/16" }, { "kind": "doors", "shelves": 1, "rollouts": 0, "size": null }] } },
+      { "id": "door_drawer_2ro", "name": "Door and drawer, two roll-outs", "note": "Two roll-outs behind the door", "code": "base_drawer_doors_rollouts", "sections": { "kind": "split", "direction": "horizontal", "size": null, "parts": [{ "kind": "drawers", "count": 1, "size": "6 13/16" }, { "kind": "doors", "shelves": 0, "rollouts": 2, "size": null }] } },
+      { "id": "full_door_3ro", "name": "Full door, three roll-outs", "code": "base_doors_rollouts", "sections": { "kind": "doors", "shelves": 0, "rollouts": 3, "size": null } },
+      { "id": "full_door_4ro", "name": "Full door, four roll-outs", "code": "base_doors_rollouts", "sections": { "kind": "doors", "shelves": 0, "rollouts": 4, "size": null } },
+      { "id": "four_drawers", "name": "Four drawer bank", "code": "base_4_drawers", "sections": { "kind": "drawers", "count": 4, "size": null } },
+      { "id": "three_drawers", "name": "Three drawer bank", "code": "base_3_drawers", "sections": { "kind": "drawers", "count": 3, "size": null } },
+      { "id": "garbage_std", "name": "Garbage pull-out", "note": "A standard drawer on top; a door front below that opens like a drawer", "code": "garbage_pullout", "sections": null },
+      { "id": "garbage_full", "name": "Garbage pull-out, full height", "note": "One full-height front that opens like a drawer", "code": "garbage_pullout", "sections": { "kind": "pullout", "rollouts": 0, "size": null } },
+      { "id": "garbage_full_ro", "name": "Garbage pull-out, full height, roll-out", "note": "One full-height front that opens like a drawer, a roll-out at the top", "code": "garbage_pullout", "sections": { "kind": "pullout", "rollouts": 1, "size": null } },
+      { "id": "sink", "name": "Sink base", "note": "Full-height doors; plywood box", "code": "sink_base", "sections": null },
+      { "id": "angled", "name": "Angled cabinet", "note": "Two shelves", "code": "angled_end_base", "sections": { "kind": "doors", "shelves": 2, "rollouts": 0, "size": null } }
+    ]
+  }
+}

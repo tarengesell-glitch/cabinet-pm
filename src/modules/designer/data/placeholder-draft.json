@@ -1,9 +1,11 @@
 {
   "source": "PLACEHOLDER for the AI design step, from the owner's Kitchen Studio prototype (https://claude.ai/artifact/Tkd2r8vTUswCs3ioJnGjqg, 2026-11-08; owner: \"a placeholder AI design animation (with no actual AI design)\"). None of these numbers are the shop's: the AI designer will choose cabinets from the shop's design rules and catalog instead (OA-3). Cabinet types and their heights and depths come from the catalog.",
   "fill": {
-    "note": "The prototype's recipe: split each stretch into equal cabinets no wider than the largest width, in whole steps, and give what is left to a filler.",
+    "note": "Owner, 2026-11-10 (chat, after trying a real job): \"Widths are custom and made to fit the space\", not large increments with fillers. Each stretch is split into as few equal cabinets as fit under the largest width (the prototype's 36\"), on the catalog's width step (1/16\", catalog-v1.json, owner-review). A filler only where a space is too narrow for a cabinet. Replaces the prototype's 3\" steps with a filler for the rest.",
     "largest_width": "36",
-    "width_step": "3"
+    "width_step": "1/16",
+    "flank_filler_max": "1 1/2",
+    "flank_filler_note": "PROPOSED (2026-11-10, this session): the uppers either side of a hood are one width (PREF-019); when one side is a little longer, the difference up to this much is a filler at that side's far end (against the corner, fridge panel or wall), so each side keeps one cabinet instead of being split into narrow ones. For the owner to confirm."
   },
   "cabinets": {
     "note": "Catalog codes the placeholder uses, by job.",
@@ -25,6 +27,14 @@
       },
       "maximum": {
         "all": "base_3_drawers"
+      },
+      "four_banks": {
+        "source": "Shop design rules PREF-006 (\"A bank of four drawers should be close to the sink cabinet and dishwasher\") and PREF-007 (\"At least one, ideally two, four-drawer banks for pots and pans right beside the cooking appliance\"), both confirmed 2026-11-08. Owner, 2026-11-12: \"This kitchen didn't include any banks of four drawers. The design rules say some of these should exist.\" With a drawer level chosen, the base cabinets right beside a range or cooktop (up to two) and the nearest one to the sink base or dishwasher become four-drawer banks; Minimum makes only one, beside the cooking first. Which cabinet counts as beside the cooking is this session's reading (PROPOSED): touching the cooking appliance, or the next one along from a bank that does. Near the sink: see near_sink_note (owner).",
+        "code": "base_4_drawers",
+        "beside_cooking": 2,
+        "near_sink": 1,
+        "near_sink_within": 3,
+        "near_sink_note": "Owner, 2026-11-12 (round 2): \"the bank of four drawers should ideally be within the first 1-3 cabinets away from the sink, the nearer the better. It can be immediately adjacent to either the sink or the dishwasher, either is ok.\" Counted along the wall from the sink base or the dishwasher, base cabinets only."
       }
     },
     "base_filler": "base_filler",
@@ -37,6 +47,13 @@
     "corner_double_shelf": "corner_base_adjustable",
     "corner_default": "corner_base",
     "garbage": "garbage_pullout",
+    "bath": {
+      "note": "PROPOSED (2026-11-10): bathrooms use the catalog's vanities, not the kitchen's base cabinets (owner: the bathroom's cabinet types were pulling from the kitchen library). Vanity, drawer over doors for most (there is no doors-only vanity), the vanity sink under a vanity sink, the vanity filler, and 3-drawer vanities for the Maximum drawer level. For the owner to confirm.",
+      "base": "vanity_drawer_doors",
+      "sink": "vanity_sink",
+      "base_filler": "vanity_filler",
+      "maximum": "vanity_3_drawers"
+    },
     "upper": "upper_doors",
     "upper_over_fridge": "upper_no_shelf",
     "upper_over_cooking": "upper_no_shelf",
@@ -46,12 +63,36 @@
     "fridge_panel": "tall_filler",
     "panels_note": "Owner, 2026-11-10 (chat): an island's back is always covered by a finished back panel (the catalog's Island back panel), and a fridge always has a full-height, full-depth panel on each side. The catalog has no fridge panel, so it is drafted as the Tall filler at the panel's depth until the shop names its part (DECISIONS AD-6, PROPOSED). Its size limits are not known yet (CAT-1), so the catalog check flags it."
   },
+  "ends": {
+    "source": "DECISIONS 2026-11-07 \"The cabinet catalog\" (decided): ends are a setting on each cabinet: Unfinished beside a wall or cabinet (with a filler at every wall); an open end gets an Applied finished end by default, or a Finished end by request. Shop design rule CB-FACT-10. Owner, 2026-11-10 (round 2): every end with nothing beside it, beside a range and an island's ends included, is covered from the floor to the top.",
+    "open": "applied_finished",
+    "closed": "unfinished",
+    "finished": ["applied_finished", "finished"],
+    "types": ["base", "vanity", "wall", "tall"],
+    "types_note": "The catalog types whose ends the builder sets: the cabinets the 3D view draws ends on. Corner cabinets (corner_base, corner_wall) also offer end_left and end_right, but which leg is which, and whether an L-shaped corner cabinet can have an open end, isn't decided: their ends are left for the designer (DECISIONS open question END-2).",
+    "orientation_note": "PROPOSED (2026-11-11, not decided): end_left and end_right are as seen standing in front of the cabinet, facing its doors. The catalog doesn't say; to confirm with the shop before the import file is written (DECISIONS open question END-1)."
+  },
   "visual": {
     "note": "For drawing the 3D view only (visual approximation, BUILD_SPEC 5.5); never sent to the shop.",
     "toe_kick_height": "4",
     "counter_thickness": "1 1/2",
     "counter_overhang": "1",
     "upper_bottom": "54",
+    "top_drawer_front": "6 13/16",
+    "top_drawer_front_note": "The standard top drawer front, lined up across cabinets (DECISIONS 2026-11-07 \"The cabinet catalog\", Drawers). The door sizes the 3D view draws come from shop design rule CB-FACT-16 (one door up to 20\" wide, then a pair; up to 48\" tall, then stacked).",
+    "trim": {
+      "note": "PROPOSED stand-ins for drawing the top trim and light valance in the 3D view (2026-11-13), until the shop gives real profiles. Top trim sits on the tops of upper and tall cabinets, projecting past the doors in steps (a crown flares in three small steps, a stepped crown in two big ones), and never above the ceiling. A valance hangs under upper cabinets, flush with the doors: flat, or a light rail (a flat face, a cove and a bead; owner, 2026-11-13, from a maple light rail photo). Both wrap back along finished ends and where a cabinet steps back to a shallower one, and follow both faces of an L-shaped corner cabinet. Hidden valances and None draw nothing.",
+      "top": {
+        "flat_band": { "height": "3", "projection": "3/4", "steps": 1 },
+        "crown": { "height": "4", "projection": "2 1/2", "steps": 3 },
+        "stepped_crown": { "height": "5", "projection": "2 1/2", "steps": 2 }
+      },
+      "valance": {
+        "flat": { "height": "2", "thickness": "3/4", "profile": "flat" },
+        "shaped": { "height": "2", "thickness": "3/4", "profile": "light_rail" }
+      },
+      "draws_nothing": { "top": ["none"], "valance": ["hidden", "none"] }
+    },
     "appliances": {
       "note": "Rough appliance shapes for the 3D view only, from the prototype; real sizes come from confirmed appliance specs (OA-4).",
       "fridge_height": "70",
@@ -66,6 +107,8 @@
     "over_fridge": "2",
     "over_fridge_note": "The cabinet over a fridge comes down to 2\" above the fridge: \"should only have 2 inches of clearance over a fridge\". The fridge's height is the rough one below until its spec is confirmed (OA-4).",
     "fridge_panel_depth": "26",
-    "fridge_panel_depth_note": "\"26 inches to go past the depth of adjacent counters\". Full height: from the floor to the cabinets' top line."
+    "fridge_panel_depth_note": "\"26 inches to go past the depth of adjacent counters\". Full height: from the floor to the cabinets' top line.",
+    "over_fridge_case_short": "7/8",
+    "over_fridge_case_short_note": "Owner, 2026-11-12 (chat): \"Make cabinets over top of a fridge deep enough that the front of the door is flush with the front of the fridge panel. So if the fridge panel is 26\"d, then the front of the doors of the cabinet over top of the fridge should be 26\" from the back wall, and the case should be 25 1/8\"d.\" The case over a fridge is the fridge panel's depth less this much. Replaces the room drawing's 24\" for the drafted cabinet."
   }
 }

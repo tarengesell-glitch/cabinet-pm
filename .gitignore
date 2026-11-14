@@ -7,3 +7,6 @@ test-results/
 playwright-report/
 .env*
 !.env.example
+
+# npm run views: pictures of the 3D view (docs/DEVELOPMENT.md)
+views-output/

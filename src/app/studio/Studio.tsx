@@ -14,10 +14,10 @@
 import Link from 'next/link';
 import { useCallback, useMemo, useState, type ReactNode } from 'react';
 import type { User } from '@/platform/index';
-import { roomDrawingStatus, type DraftPreferences, type DrawerLevel, type RoomDrawingStatus } from '@/modules/designer/contract';
+import { layoutPreferences, roomDrawingStatus, type DesignChoices, type RoomDrawingStatus } from '@/modules/designer/contract';
 import { Customize, RoomCapture } from '@/modules/designer/ui/index';
-import { INTAKE_DEFINITION, intakeHandover, loadIntakeState, roomLook, roomSummary, roughCabinetTop, roughCeiling, type IntakeState, type RoomHandover } from '@/modules/intake/contract';
-import { IntakeScreen } from '@/modules/intake/ui/index';
+import { INTAKE_DEFINITION, intakeHandover, loadIntakeState, roomDesignInputs, roughCeiling, type IntakeState, type RoomDesignInputs, type RoomHandover } from '@/modules/intake/contract';
+import { IntakeScreen, RoomDefaults } from '@/modules/intake/ui/index';
 import { clientHref, type ClientInfo } from '../clients';
 import { jobName } from '../demo-data';
 import { WhoIsIn } from '../sync/session';
@@ -33,41 +33,16 @@ const STEPS: readonly { readonly id: Stage; readonly name: string }[] = [
   { id: 'customize', name: 'Customize' },
 ];
 const STANDALONE_NEXT = { href: '/rooms/preview/', label: 'Next: walls, cabinets and appliances' } as const;
-const DRAWER_LEVELS: readonly DrawerLevel[] = ['minimum', 'moderate', 'maximum'];
 
 /** A room's drawing counts as done once it has walls and cabinet runs and no problems (owner, 2026-11-08). */
 const drawingDone = (st: RoomDrawingStatus | undefined): boolean => st?.kind === 'drawn' && st.walls > 0 && st.runs > 0 && st.problems === 0;
 
-/** What the placeholder recipe reads from a room's design choices. Missing answers stay missing. */
-function prefsOf(r: RoomHandover, intake: IntakeState | null): DraftPreferences {
-  const option = (k: string): string | null => {
-    const a = r.answers[k];
-    return a && 'option_id' in a ? a.option_id : null;
-  };
-  const drawers = option('drawer_level');
-  const garbage = option('garbage_recycling') === 'yes' ? option('garbage_location') : null;
-  return {
-    drawers: DRAWER_LEVELS.find((d) => d === drawers) ?? null,
-    cornerInsert: option('corner_insert'),
-    garbage: garbage === 'under_sink' || garbage === 'dedicated_cabinet' ? garbage : 'none',
-    cabinetTop: (() => {
-      if (!intake || !INTAKE_DEFINITION.ok) return null;
-      const top = roughCabinetTop(INTAKE_DEFINITION.value, intake, r.room_id);
-      return top.ok ? top.value : null;
-    })(),
-  };
-}
-
 /**
- * Which kind of room it is for the drawing's fixtures and depths (owner, 2026-11-09): rooms the
- * design choices group as bathrooms (their "bath" insert set) are "bath"; every other room uses the
- * kitchen's until the owner says otherwise.
+ * The room's design inputs as the designer takes them. The intake reads the answers
+ * (`roomDesignInputs`) and the designer checks them before use (`layoutPreferences`,
+ * `islandPanelsOf`); nothing is interpreted here. The assignment keeps the two contracts in step.
  */
-function roomSetOf(r: RoomHandover): string {
-  if (!INTAKE_DEFINITION.ok) return 'kitchen';
-  const type = INTAKE_DEFINITION.value.intake.room_types.types.find((t) => t.id === r.room_type);
-  return type?.inserts === 'bath' ? 'bath' : 'kitchen';
-}
+const designChoices = (i: RoomDesignInputs): DesignChoices => i;
 
 function readIntake(job: string | null): IntakeState | null {
   const loaded = loadIntakeState(job);
@@ -87,6 +62,18 @@ export function Studio({ user, saveStatus, client }: { user: User; saveStatus: R
   const bump = useCallback(() => setTick((t) => t + 1), []);
 
   const rooms: readonly RoomHandover[] = useMemo(() => (intake && INTAKE_DEFINITION.ok ? intakeHandover(INTAKE_DEFINITION.value, intake) : []), [intake]);
+  /**
+   * A room's design choices, read from the answers by the intake when a later step needs them,
+   * and kept until the answers change. Null only when the room isn't in the design choices.
+   */
+  const inputsOf = useMemo(() => {
+    const def = INTAKE_DEFINITION.ok ? INTAKE_DEFINITION.value : null;
+    const read = new Map<string, RoomDesignInputs | null>();
+    return (roomId: string): RoomDesignInputs | null => {
+      if (!read.has(roomId)) read.set(roomId, intake && def ? roomDesignInputs(def, intake, roomId) : null);
+      return read.get(roomId) ?? null;
+    };
+  }, [intake]);
   const drawings = useMemo(() => {
     void tick;
     return new Map(rooms.map((r) => [r.room_id, roomDrawingStatus(r.room_id)]));
@@ -109,7 +96,17 @@ export function Studio({ user, saveStatus, client }: { user: User; saveStatus: R
   const notDrawn = rooms.filter((r) => !drawingDone(drawings.get(r.room_id)));
   const drawingReason =
     rooms.length === 0 ? 'Make the design choices first.' : missingChoices.length > 0 ? `Finish the design choices for ${missingChoices.map((r) => r.name.toLowerCase()).join(', ')} first.` : null;
-  const aiReason = drawingReason ?? (notDrawn.length > 0 ? `Draw the walls and cabinet runs of the ${notDrawn.map((r) => r.name.toLowerCase()).join(', ')} first, with no problems.` : null);
+  /** The first room whose choices can't be used for a layout, with the designer's reason (read only once everything else is ready). */
+  const unusable = (): string | null => {
+    for (const r of rooms) {
+      const inputs = inputsOf(r.room_id);
+      const p = inputs ? layoutPreferences(designChoices(inputs)) : null;
+      if (!p) return `The design choices for the ${r.name.toLowerCase()} can’t be read.`;
+      if (!p.ok) return `The ${r.name.toLowerCase()} can’t be laid out from its design choices: ${p.reason}`;
+    }
+    return null;
+  };
+  const aiReason = drawingReason ?? (notDrawn.length > 0 ? `Draw the walls and cabinet runs of the ${notDrawn.map((r) => r.name.toLowerCase()).join(', ')} first, with no problems.` : unusable());
   const customizeReason = rooms.length > 0 && rooms.every((r) => designed.has(r.room_id)) ? null : 'Run the AI design step first.';
 
   const onIntakeChange = useCallback((state: IntakeState) => {
@@ -144,8 +141,10 @@ export function Studio({ user, saveStatus, client }: { user: User; saveStatus: R
     stage === 'choices' ? r.complete : stage === 'drawing' ? drawingDone(drawings.get(r.room_id)) : designed.has(r.room_id);
   const drawingProblem = current ? drawings.get(current.room_id) : undefined;
 
-  const look = current && intake && INTAKE_DEFINITION.ok ? roomLook(INTAKE_DEFINITION.value, intake, current.room_id) : null;
-  const choices = current && intake && INTAKE_DEFINITION.ok ? roomSummary(INTAKE_DEFINITION.value, intake, current.room_id) : [];
+  const currentInputs = current && stage !== 'choices' ? inputsOf(current.room_id) : null;
+  const aiRooms = stage === 'ai' ? rooms.map((r) => ({ room: r, inputs: inputsOf(r.room_id) })) : [];
+  /** Rooms a later step needs whose design choices can't be read: said plainly, never skipped. */
+  const unreadable = (stage === 'ai' ? aiRooms.filter((a) => !a.inputs).map((a) => a.room) : current && stage !== 'choices' && !currentInputs ? [current] : []).map((r) => r.name.toLowerCase());
 
   return (
     <div className={s.flow}>
@@ -189,20 +188,25 @@ export function Studio({ user, saveStatus, client }: { user: User; saveStatus: R
         </nav>
       )}
       <div className={stage === 'choices' || stage === 'ai' ? s.body : s.bodyFixed}>
+        {unreadable.length > 0 && (
+          <p className={s.alert} role="alert">
+            The design choices for the {unreadable.join(', ')} can&apos;t be read, so this step can&apos;t use them.
+          </p>
+        )}
         {stage === 'choices' && <IntakeScreen user={user} next={STANDALONE_NEXT} flow={{ roomId, onChange: onIntakeChange, onDraw: toDrawing, job }} />}
-        {stage === 'drawing' && current && (
+        {stage === 'drawing' && current && currentInputs && (
           <>
             {drawingProblem?.kind === 'problem' && (
               <p className={s.alert} role="alert">
                 The {current.name.toLowerCase()}&apos;s drawing can&apos;t be read: {drawingProblem.reason}
               </p>
             )}
-            <RoomCapture key={current.room_id} user={user} studio={{ key: current.room_id, name: current.name, ceiling, onChange: bump, roomSet: roomSetOf(current) }} />
+            <RoomCapture key={current.room_id} user={user} studio={{ key: current.room_id, name: current.name, ceiling, onChange: bump, roomSet: currentInputs.roomKind }} />
           </>
         )}
-        {stage === 'ai' && (
+        {stage === 'ai' && unreadable.length === 0 && (
           <AiStep
-            rooms={rooms.map((r) => ({ id: r.room_id, name: r.name, prefs: prefsOf(r, intake) }))}
+            rooms={aiRooms.flatMap(({ room, inputs }) => (inputs ? [{ id: room.room_id, name: room.name, choices: { ok: true as const, value: designChoices(inputs) } }] : []))}
             alreadyDesigned={rooms.length > 0 && rooms.every((r) => designed.has(r.room_id))}
             userId={user.id}
             onDrafted={bump}
@@ -212,17 +216,15 @@ export function Studio({ user, saveStatus, client }: { user: User; saveStatus: R
             }}
           />
         )}
-        {stage === 'customize' && current && look && (
+        {stage === 'customize' && current && currentInputs && (
           <Customize
             key={current.room_id}
             user={user}
             room={{
               key: current.room_id,
               name: current.name,
-              look,
-              choices,
-              prefs: prefsOf(current, intake),
-              onEditChoices: () => setStage('choices'),
+              defaults: intake && <RoomDefaults user={user} job={job} roomId={current.room_id} state={intake} onChange={onIntakeChange} onOpenChoices={() => setStage('choices')} />,
+              designChoices: designChoices(currentInputs),
               onChange: bump,
             }}
           />

@@ -16,9 +16,4 @@ Runs the golden test cases (files in `golden/<adapter>/`) and records regression
 - None.
 
 ## Rules for AI sessions in this module
-- Only edit files inside this folder unless explicitly told otherwise.
-- The public API is `contract.ts` only. Changing it is a breaking change: list every consumer and stop for approval first.
-- Business values come from data with a recorded source, never literals in code.
-- Every failure blocks the step and creates an alert. No silent catches, no defaults that hide missing data.
-- Never name a CAD vendor outside its adapter folder.
-- Tests live in `__tests__/` inside this folder.
+The root `CLAUDE.md` applies in full, including "Working across modules": change other modules when the requested behaviour needs it, through their contracts and within the dependency table. Tests live in `__tests__/` inside this folder.

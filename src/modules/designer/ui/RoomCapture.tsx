@@ -41,6 +41,7 @@ import {
   type Env,
   type Timeline,
 } from '../model/editor';
+import type { DesignChoices } from '../model/choices';
 import { findAppliance, findRun } from '../model/layout';
 import { freestandingKinds, LAYOUT_RULES, rulesForRoom } from '../model/layout-rules';
 import { ApplianceTray, RunsFrame } from './LayoutPanels';
@@ -118,9 +119,9 @@ export interface StudioRoom {
   readonly onChange?: () => void;
   /**
    * Which kind of room it is, for its fixtures and cabinet depths (owner, 2026-11-09): "bath" for
-   * bathroom-type rooms, "kitchen" otherwise. From the design choices, through the app.
+   * bathroom-type rooms, "kitchen" otherwise. From the design choices (`DesignChoices.roomKind`), through the app.
    */
-  readonly roomSet?: string;
+  readonly roomSet?: DesignChoices['roomKind'] | null;
 }
 
 export function RoomCapture({ user, studio }: { user: User; studio?: StudioRoom }) {

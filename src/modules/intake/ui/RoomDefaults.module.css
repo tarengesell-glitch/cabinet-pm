@@ -1,0 +1,119 @@
+/* A room's design choices as a compact list of editable defaults (the customize screen). */
+.defaults {
+  display: grid;
+  gap: 10px;
+  font-family: var(--body);
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.hint {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.error {
+  margin: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--error);
+  border-radius: 10px;
+  color: var(--error);
+  font-size: 12.5px;
+}
+
+.group {
+  display: grid;
+  gap: 4px;
+}
+
+.section {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 130px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+}
+
+.name {
+  color: var(--muted);
+}
+
+.pick {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid var(--rule-strong);
+  flex: none;
+}
+
+.select,
+.input {
+  font: 500 13px var(--body);
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  height: 28px;
+  padding: 0 8px;
+  min-width: 0;
+  width: 100%;
+}
+
+.height {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.height .input {
+  width: 64px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.chip {
+  font: 500 12px var(--body);
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  padding: 3px 10px;
+  cursor: pointer;
+}
+
+.chip[aria-pressed='true'] {
+  border-color: var(--navy);
+  color: var(--navy);
+  box-shadow: inset 0 0 0 1px var(--navy);
+}
+
+.link {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: 500 12.5px var(--body);
+  color: var(--navy);
+  text-decoration: underline;
+  cursor: pointer;
+}

@@ -56,6 +56,7 @@ const FileSchema = z.strictObject({
     fridge_panel_kinds: z.array(z.string().min(1)).min(1),
     fridge_panel_kinds_note: z.string().min(1),
     fridge_height: z.strictObject({ value: z.string(), status: Status, source: z.string().min(1) }),
+    flank_filler_max: z.strictObject({ value: z.string(), status: Status, source: z.string().min(1) }),
   }),
   drawer_levels: z.strictObject({ source: z.string().min(1), minimum: Level, moderate: Level, maximum: Level }),
   ranking: z.strictObject({ status: Status, source: z.string().min(1), strength_order: z.array(z.string()).min(1) }),
@@ -120,6 +121,8 @@ export interface DraftConfig {
     readonly fridgePanelKinds: readonly string[];
     /** Rough until the fridge's spec is confirmed (OA-4). */
     readonly fridgeHeight: Length;
+    /** The widest filler that keeps a hood's flank one cabinet when its side is a little longer (2026-11-10, proposed). */
+    readonly flankFillerMax: Length;
   };
   readonly drawerLevels: Readonly<Record<DrawerLevelId, DrawerLevel>>;
   readonly strengthOrder: readonly string[];
@@ -193,6 +196,7 @@ export function readDraftConfig(catalog: Catalog, rules: DesignRules, data: unkn
       fridgePanelDepth: length(d.clearances.fridge_panel_depth, 'clearances.fridge_panel_depth'),
       fridgePanelKinds: d.clearances.fridge_panel_kinds,
       fridgeHeight: length(d.clearances.fridge_height.value, 'clearances.fridge_height'),
+      flankFillerMax: length(d.clearances.flank_filler_max.value, 'clearances.flank_filler_max'),
     },
     drawerLevels: {
       minimum: { banksOf4: d.drawer_levels.minimum.banks_of_4, banksOf3: d.drawer_levels.minimum.banks_of_3, moreBanks: d.drawer_levels.minimum.more_banks },
@@ -217,6 +221,7 @@ export function readDraftConfig(catalog: Catalog, rules: DesignRules, data: unkn
       ...(d.corner_inserts.status === 'proposed' ? ['the corner cabinet used for the client\'s corner choice'] : []),
       ...(i.fridge_panel.status === 'proposed' ? ['the Tall filler drafted as the panel each side of a fridge (DECISIONS AD-6)'] : []),
       ...(d.clearances.fridge_height.status === 'proposed' ? [`the fridge's rough ${d.clearances.fridge_height.value}" height, used to hang the cabinet over it, until its spec is confirmed (OA-4)`] : []),
+      ...(d.clearances.flank_filler_max.status === 'proposed' ? [`a filler of up to ${d.clearances.flank_filler_max.value}" at the far end of the longer side beside a hood, so each side keeps one upper of the same width`] : []),
       ...(['moderate', 'maximum'] as const).filter((l) => d.drawer_levels[l].status === 'proposed').map((l) => `the "${l}" drawer level's cabinets that are not drawer banks`),
       ...(d.ranking.status === 'proposed' ? ['how options are ranked'] : []),
     ],

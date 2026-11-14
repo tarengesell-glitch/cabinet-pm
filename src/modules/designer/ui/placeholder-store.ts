@@ -5,9 +5,11 @@
  * Every failure is returned with its reason (rule 7).
  */
 import { type Job, type Result, type Room } from '@/core/index';
-import { placeholderItems } from '../model/cabinets';
+import { applyMoves, placeholderItems } from '../model/cabinets';
 import { loadJob, room as roomOf, upgradeStoredDraft, type Draft } from '../model/editor';
-import { draftPlaceholder, type DraftPreferences } from '../model/placeholder-draft';
+import { withRuleEnds } from '../model/ends';
+import { layoutPreferences, type DesignChoices } from '../model/choices';
+import { draftPlaceholder } from '../model/placeholder-draft';
 import { readStored, storageKey, writeStored } from './storage';
 
 /** History entries the placeholder writes start with this, so its notes can be found again. */
@@ -63,15 +65,22 @@ export function saveRoom(
  * The studio's AI design step (a PLACEHOLDER, no AI): lays out the room's runs with catalog
  * cabinets and writes them into its master copy as an AI draft, replacing any cabinets it had.
  */
-export function draftRoom(roomKey: string, prefs: DraftPreferences, userId: string): Result<Room> {
+export function draftRoom(roomKey: string, choices: DesignChoices, userId: string): Result<Room> {
+  // Checked first: a choice the recipe can't use leaves the saved design exactly as it was.
+  const prefs = layoutPreferences(choices);
+  if (!prefs.ok) return prefs;
   const d = storedDraft(roomKey);
   if (!d.ok) return d;
-  const room = roomOf(d.value);
-  const design = draftPlaceholder(room, prefs, () => crypto.randomUUID());
+  const drawn = roomOf(d.value);
+  const design = draftPlaceholder(drawn, prefs.value, () => crypto.randomUUID());
   if (!design.ok) return design;
+  const room = applyMoves(drawn, design.value);
   const items = placeholderItems(room, design.value);
   if (!items.ok) return items;
-  const saved = saveRoom(roomKey, d.value, { ...room, items: items.value }, [PLACEHOLDER, ...design.value.notes].join(' · '), 'ai', userId, 'ai_draft');
+  // Every cabinet's ends, worked out once and saved with it (the 3D view draws what is saved).
+  const ended = withRuleEnds({ ...room, items: items.value });
+  if (!ended.ok) return ended;
+  const saved = saveRoom(roomKey, d.value, ended.value, [PLACEHOLDER, ...design.value.notes].join(' · '), 'ai', userId, 'ai_draft');
   return saved.ok ? { ok: true, value: roomOf(saved.value) } : saved;
 }
 

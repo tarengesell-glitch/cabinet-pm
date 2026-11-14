@@ -6,6 +6,7 @@ import intakeData from '../data/intake-v1.json';
 import coloursData from '../data/colours.json';
 import listsData from '../data/lists.json';
 import presetsData from '../data/presets-standin.json';
+import { answerRoom } from './answer';
 
 if (!DEFINITION.ok) throw new Error(DEFINITION.reason);
 const def: Definition = DEFINITION.value;
@@ -21,32 +22,6 @@ const field = (key: string) => {
   return f;
 };
 
-/** Answers every open question on every step of the room on screen, with `pick` overrides. */
-function answerRoom(x: Intake, pick: Record<string, string> = {}): void {
-  for (let guard = 0; guard < 60; guard++) {
-    const { step } = x.current();
-    if (step.review) return;
-    for (let pass = 0; pass < 5; pass++) {
-      for (const f of x.fields(step)) {
-        if (x.eff(f) !== undefined) continue;
-        if (f.type === 'height') {
-          x.type(f.key, '9', 'ft');
-          continue;
-        }
-        if (f.type === 'text') {
-          x.type(f.key, 'the hutch');
-          continue;
-        }
-        const os = x.options(f);
-        const want = pick[f.key] ?? os[Math.min(1, os.length - 1)]?.id;
-        if (!want) throw new Error(`${f.key} has no options`);
-        x.pick(f.key, want);
-        if (x.state.pending) throw new Error(`unexpected linked-rooms choice on ${f.key}`);
-      }
-    }
-    if (!x.next()) throw new Error(`stuck on ${step.id}: ${x.missing(step)}`);
-  }
-}
 
 const KITCHEN = { shape: 'galley', material: 'painted', feel: 'country', colour_tone: 'white.medium', door_style: 'country', hardware: 'handles', garbage_recycling: 'no' };
 

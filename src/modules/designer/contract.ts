@@ -2,4 +2,5 @@
 export { roomDrawingStatus, type RoomDrawingStatus } from './ui/status';
 /** The PLACEHOLDER for the AI design step (no AI): see model/placeholder-draft.ts. It writes placed cabinets into the master copy. */
 export { draftRoom, exportRoomData, importRoomData, roomMasterCopy, type RoomData } from './ui/placeholder-store';
-export type { DrawerLevel, DraftPreferences } from './model/placeholder-draft';
+/** The input contract for a room's design choices (from the intake), checked before the builder or the 3D view uses them. */
+export { islandPanelsOf, layoutPreferences, trimsOf, type DesignChoice, type DesignChoices, type FinishLook, type IslandPanels, type PanelLook, type TrimLook } from './model/choices';

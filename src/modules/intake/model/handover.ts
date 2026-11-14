@@ -28,36 +28,45 @@ export interface RoomHandover {
 
 export function intakeHandover(def: Definition, state: IntakeState): RoomHandover[] {
   const x = new Intake(def, state);
-  return state.rooms.map((room, i) =>
-    x.inRoom(i, () => {
-      const carried = x.carried();
-      const fields = [...x.steps().flatMap((s) => (s.review ? [] : x.fields(s))), ...(carried?.fields ?? [])];
-      const answers: Record<string, HandoverAnswer> = {};
-      for (const f of fields) {
-        const v = x.eff(f);
-        const label = x.label(f);
-        if (v === undefined || label === null) continue;
-        if (f.type === 'height' && typeof v === 'object' && !Array.isArray(v)) {
-          const h = heightLength(v as { ft: string; in: string });
-          if (h.ok) answers[f.key] = { status: 'selected', length: h.value, text: label };
-        } else if (f.type === 'count' && typeof v === 'string') answers[f.key] = { status: 'selected', count: Number(v) };
-        else if (f.type === 'text' && typeof v === 'string') answers[f.key] = { status: 'selected', text: label };
-        else if (Array.isArray(v)) {
-          const os = x.options(f).filter((o) => v.includes(o.id));
-          answers[f.key] = { status: 'selected', option_ids: os.map((o) => o.id), labels: os.map((o) => o.label) };
-        } else if (typeof v === 'string') answers[f.key] = { status: 'selected', option_id: v, label };
-      }
-      const type = i === 0 ? def.intake.primary_room.id : room.answers['room_type'];
-      return {
-        room_id: room.id,
-        room_type: typeof type === 'string' ? type : 'unknown',
-        name: x.roomName(i),
-        complete: x.roomComplete(i),
-        design_from: carried?.from ?? null,
-        answers,
-      };
-    }),
-  );
+  return state.rooms.map((_, i) => roomHandoverAt(def, x, i));
+}
+
+/** One room's handover record (the room at index `i`), without reading the other rooms'. */
+export function roomHandover(def: Definition, state: IntakeState, roomId: string): RoomHandover | null {
+  const i = state.rooms.findIndex((r) => r.id === roomId);
+  return i < 0 ? null : roomHandoverAt(def, new Intake(def, state), i);
+}
+
+function roomHandoverAt(def: Definition, x: Intake, i: number): RoomHandover {
+  const room = x.state.rooms[i]!;
+  return x.inRoom(i, () => {
+    const carried = x.carried();
+    const fields = [...x.steps().flatMap((s) => (s.review ? [] : x.fields(s))), ...(carried?.fields ?? [])];
+    const answers: Record<string, HandoverAnswer> = {};
+    for (const f of fields) {
+      const v = x.eff(f);
+      const label = x.label(f);
+      if (v === undefined || label === null) continue;
+      if (f.type === 'height' && typeof v === 'object' && !Array.isArray(v)) {
+        const h = heightLength(v as { ft: string; in: string });
+        if (h.ok) answers[f.key] = { status: 'selected', length: h.value, text: label };
+      } else if (f.type === 'count' && typeof v === 'string') answers[f.key] = { status: 'selected', count: Number(v) };
+      else if (f.type === 'text' && typeof v === 'string') answers[f.key] = { status: 'selected', text: label };
+      else if (Array.isArray(v)) {
+        const os = x.options(f).filter((o) => v.includes(o.id));
+        answers[f.key] = { status: 'selected', option_ids: os.map((o) => o.id), labels: os.map((o) => o.label) };
+      } else if (typeof v === 'string') answers[f.key] = { status: 'selected', option_id: v, label };
+    }
+    const type = i === 0 ? def.intake.primary_room.id : room.answers['room_type'];
+    return {
+      room_id: room.id,
+      room_type: typeof type === 'string' ? type : 'unknown',
+      name: x.roomName(i),
+      complete: x.roomComplete(i),
+      design_from: carried?.from ?? null,
+      answers,
+    };
+    });
 }
 
 /**

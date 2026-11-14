@@ -4,7 +4,7 @@
  * selected cabinet. Drawn to the cabinet's proportions; a picture, not a measurement.
  */
 import type { CatalogItem } from '@/modules/catalog/contract';
-import { GOLD, INK, MUTED, NAVY } from './theme';
+import { INK, MUTED, NAVY, SELECT_BLUE } from './theme';
 
 const CARCASS = '#ffffff';
 const FRONT = '#f4f1ea';
@@ -90,7 +90,7 @@ export function FrontIcon({ item, appliance, width, height, size = 56, selected 
     doors(inY, inH, 'd');
   }
   return (
-    <svg width={W + 2 * pad} height={H + 2 * pad} viewBox={`0 0 ${W + 2 * pad} ${H + 2 * pad}`} aria-hidden="true" style={{ display: 'block', filter: selected ? `drop-shadow(0 0 3px ${GOLD})` : undefined }}>
+    <svg width={W + 2 * pad} height={H + 2 * pad} viewBox={`0 0 ${W + 2 * pad} ${H + 2 * pad}`} aria-hidden="true" style={{ display: 'block', filter: selected ? `drop-shadow(0 0 3px ${SELECT_BLUE})` : undefined }}>
       {parts}
     </svg>
   );

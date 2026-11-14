@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { answerKitchen, next, question, tile } from './intake-steps';
+import { answerKitchen, next, question, selectCabinet, tile } from './intake-steps';
 
 const step = (page: Page, name: string) => page.getByRole('navigation', { name: 'Progress' }).getByRole('button', { name });
 const roomBar = (page: Page) => page.getByRole('navigation', { name: 'Rooms' });
@@ -96,28 +96,97 @@ test('the placeholder AI design lays out the drawn room, then the customize scre
   // When every room is laid out, it moves on by itself.
   await expect(step(page, 'Customize')).toHaveAttribute('aria-current', 'step', { timeout: 15_000 });
   await expect(page.getByTestId('stage-3d').locator('canvas')).toBeVisible();
+  // A fresh design saves every cabinet's ends, so there is nothing to set by hand.
+  await expect(page.getByTestId('ends-missing')).toHaveCount(0);
   await expect(page.getByText('Live pricing not connected yet')).toBeVisible();
   const toReview = page.getByText(/^\d+ placements to review$/);
   await expect(toReview).toBeVisible();
 
-  // Pick a base cabinet from its run; it is marked as placed by the placeholder until approved.
-  await page.getByRole('tab', { name: 'Run' }).click();
-  await page.locator('button[aria-label^="Base"]').first().click();
-  await page.getByRole('tab', { name: 'Cabinet' }).click();
-  await expect(page.getByText('Placed by the placeholder')).toBeVisible();
+  // The pane (owner, 2026-11-13): two tabs, Room defaults and To review, each filling the pane; a
+  // picked cabinet's editor fills it instead. No reset-view button.
+  const tabs = page.getByRole('tablist', { name: 'Settings' }).getByRole('tab');
+  await expect(tabs).toHaveText(['Room defaults', /^To review/]);
+  await expect(page.getByRole('tab', { name: /^To review/ })).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByRole('button', { name: 'Reset view' })).toHaveCount(0);
+  await expect(page.getByRole('region', { name: 'Checks' })).toBeVisible();
+
+  // The room defaults are the design choices, editable here.
+  await page.getByRole('tab', { name: 'Room defaults' }).click();
+  await expect(page.getByRole('region', { name: 'Checks' })).toHaveCount(0);
+  const doorStyle = page.getByTestId('room-defaults').getByRole('combobox', { name: 'Door style' });
+  await expect(doorStyle).toBeVisible();
+  const otherStyle = await doorStyle.locator('option:not(:checked)').first().getAttribute('value');
+  await doorStyle.selectOption(otherStyle!);
+  await expect(doorStyle).toHaveValue(otherStyle!);
+  await page.getByRole('tab', { name: /^To review/ }).click();
+
+  // Pick a base cabinet: its editor fills the pane (no tab selected), and it is marked as placed by
+  // the placeholder until approved.
+  await selectCabinet(page, /^Base/);
+  await expect(page.getByRole('region', { name: 'Checks' })).toHaveCount(0);
+  await expect(tabs.and(page.locator('[aria-selected="true"]'))).toHaveCount(0);
+  await expect(page.getByText('Placed by the placeholder', { exact: true })).toBeVisible();
+  // Open just this cabinet, or every door and drawer (owner, 2026-11-13).
+  await page.getByRole('button', { name: 'Open this cabinet' }).click();
+  await expect(page.getByRole('button', { name: 'Close this cabinet' })).toHaveAttribute('aria-pressed', 'true');
+  await page.getByRole('button', { name: 'Open all doors' }).click();
+  await expect(page.getByRole('button', { name: 'Close all doors' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('button', { name: 'Open this cabinet' })).toHaveAttribute('aria-pressed', 'false');
+  await page.getByRole('button', { name: 'Close all doors' }).click();
   await page.getByRole('button', { name: 'Approve', exact: true }).click();
   await expect(page.getByText('Reviewed', { exact: true })).toBeVisible();
 
-  // Its type comes from the catalog, and stays within its kind.
-  await page.getByRole('radiogroup', { name: 'Cabinet type' }).getByRole('radio', { name: 'Base, 4 drawers' }).click();
+  // The base library choices (owner, 2026-11-13), each a catalog cabinet with its interior.
+  await page.getByRole('radiogroup', { name: 'Cabinet type' }).getByRole('radio', { name: 'Four drawer bank' }).click();
   await expect(page.getByRole('heading', { name: 'Base, 4 drawers' })).toBeVisible();
+  await expect(page.getByRole('radiogroup', { name: 'Cabinet type' }).getByRole('radio', { name: 'Four drawer bank' })).toHaveAttribute('aria-checked', 'true');
+  // A drawer's insert, by drawer.
+  await page.getByRole('radiogroup', { name: 'Drawer 1 insert' }).getByRole('radio', { name: 'Cutlery' }).click();
+  await expect(page.getByRole('radiogroup', { name: 'Drawer 1 insert' }).getByRole('radio', { name: 'Cutlery' })).toHaveAttribute('aria-checked', 'true');
 
   // A width the cabinet beside it can't give is refused with the reason.
   await page.getByRole('textbox', { name: 'Width' }).fill('400');
-  await page.getByRole('button', { name: 'Apply' }).click();
-  await expect(page.getByText(/can grow by that much at most/)).toBeVisible();
+  await page.getByRole('textbox', { name: 'Width' }).press('Enter');
+  await expect(page.getByText(/can grow by that much at most|would run past|would run into/)).toBeVisible();
 
-  // Approve all asks first.
+  // The cabinet's own controls (owner, 2026-11-12): door opening, front and interior, ends, back.
+  await page.getByRole('radiogroup', { name: 'Cabinet type' }).getByRole('radio', { name: 'Full door', exact: true }).click();
+  await page.getByRole('radiogroup', { name: 'Door opening' }).getByRole('radio', { name: 'Hinged right' }).click();
+  await expect(page.getByRole('radiogroup', { name: 'Door opening' }).getByRole('radio', { name: 'Hinged right' })).toHaveAttribute('aria-checked', 'true');
+  // Undo and redo (Ctrl+Z, Ctrl+Shift+Z), outside a text box, with no running narrative of what was undone.
+  await page.getByRole('heading', { name: 'Base, doors' }).click();
+  await page.keyboard.press('Control+z');
+  await expect(page.getByRole('radiogroup', { name: 'Door opening' }).getByRole('radio', { name: 'By width' })).toHaveAttribute('aria-checked', 'true');
+  await expect(page.getByText(/^Undid:/)).toHaveCount(0);
+  await page.keyboard.press('Control+Shift+z');
+  await expect(page.getByRole('radiogroup', { name: 'Door opening' }).getByRole('radio', { name: 'Hinged right' })).toHaveAttribute('aria-checked', 'true');
+  await page.getByRole('button', { name: 'Vertical divider' }).click();
+  await expect(page.getByRole('button', { name: /^Section 1:/ })).toBeVisible();
+  await page.getByRole('button', { name: 'Drawers', exact: true }).click();
+  await page.getByRole('button', { name: 'More drawers' }).click();
+  await expect(page.getByRole('region', { name: 'Cabinet' }).getByLabel('Drawers', { exact: true })).toHaveText('4');
+  await page.getByRole('button', { name: /^Section 2:/ }).click();
+  await page.getByRole('button', { name: 'More shelves' }).click();
+  await page.getByRole('button', { name: 'More roll-outs' }).click();
+  await expect(page.getByRole('region', { name: 'Cabinet' }).getByLabel('Roll-outs', { exact: true })).toHaveText('1');
+  await page.getByRole('radiogroup', { name: 'Left end' }).getByRole('radio', { name: 'Integrated FE' }).click();
+  await expect(page.getByRole('radiogroup', { name: 'Left end' }).getByRole('radio', { name: 'Integrated FE' })).toHaveAttribute('aria-checked', 'true');
+  await page.getByRole('radiogroup', { name: 'Back' }).getByRole('radio', { name: 'Finished door' }).click();
+  await expect(page.getByRole('radiogroup', { name: 'Back' }).getByRole('radio', { name: 'Finished door' })).toHaveAttribute('aria-checked', 'true');
+
+  // The sink's look, from its sink base (or by clicking the sink in the 3D view).
+  await selectCabinet(page, /^Sink base/);
+  await page.getByRole('button', { name: 'Sink options' }).click();
+  const sinkLooks = page.getByRole('dialog', { name: 'Sink options' });
+  await sinkLooks.getByRole('radiogroup', { name: 'Sink colour' }).getByRole('radio', { name: 'Taupe' }).click();
+  await sinkLooks.getByRole('radiogroup', { name: 'Bowls' }).getByRole('radio', { name: 'Double, 60/40 bowls' }).click();
+  await sinkLooks.getByRole('radiogroup', { name: 'Faucet finish' }).getByRole('radio', { name: 'Brushed bronze' }).click();
+  await expect(sinkLooks.getByRole('radio', { name: 'Double, 60/40 bowls' })).toHaveAttribute('aria-checked', 'true');
+  await sinkLooks.getByRole('button', { name: 'Close' }).click();
+  await expect(sinkLooks).toHaveCount(0);
+
+  // Approve all asks first (on the To review tab).
+  await page.getByRole('tab', { name: /^To review/ }).click();
   await page.getByRole('button', { name: 'Approve all' }).click();
   await page.getByRole('button', { name: /Yes, approve all/ }).click();
   await expect(page.getByText('Every placement reviewed')).toBeVisible();
@@ -129,6 +198,45 @@ test('the placeholder AI design lays out the drawn room, then the customize scre
   await expect(page.getByRole('heading', { name: 'Your design is ready' })).toBeVisible();
   await page.getByRole('button', { name: 'Open the customizer' }).click();
   await expect(page.getByText('Every placement reviewed')).toBeVisible();
+
+  // A design saved before cabinet ends were: said plainly, and its ends set only when asked.
+  await page.evaluate(() => {
+    for (const k of Object.keys(localStorage)) {
+      const v = localStorage.getItem(k);
+      if (!v || !v.includes('"end_left"')) continue;
+      const d = JSON.parse(v) as { job?: { rooms: { items: { item_selections: Record<string, string> }[] }[] } };
+      for (const r of d.job?.rooms ?? [])
+        for (const i of r.items) {
+          delete i.item_selections['end_left'];
+          delete i.item_selections['end_right'];
+        }
+      localStorage.setItem(k, JSON.stringify(d));
+    }
+  });
+  await page.reload();
+  await page.getByRole('button', { name: /Start laying out room dimensions/ }).click();
+  await step(page, 'AI design').click();
+  await page.getByRole('button', { name: 'Open the customizer' }).click();
+  await expect(page.getByTestId('ends-missing')).toContainText('designed before cabinet ends were saved');
+  await page.getByRole('button', { name: 'Set their ends from the layout' }).click();
+  await expect(page.getByText('Cabinet ends saved.')).toBeVisible();
+  await expect(page.getByTestId('ends-missing')).toHaveCount(0);
+  await expect(page.getByText('Every placement reviewed')).toBeVisible();
+
+  // Saved choices that aren't options (an older or damaged save): the design still opens with its
+  // cabinets; the island panel is reported, and nothing is laid out again from the drawer level.
+  await page.evaluate(() => {
+    const key = 'cabinet-pm.intake-preview.v1.job.c2';
+    const st = JSON.parse(localStorage.getItem(key)!) as { rooms: { answers: Record<string, unknown> }[] };
+    Object.assign(st.rooms[0]!.answers, { shape: 'l_shape_island', drawer_level: 'lots', island_back_panel: 'beadboard', island_side_panel: 'waterfall_stone' });
+    localStorage.setItem(key, JSON.stringify(st));
+  });
+  await page.reload();
+  await expect(step(page, 'AI design')).toBeDisabled();
+  await step(page, 'Customize').click();
+  await expect(page.getByText('Every placement reviewed')).toBeVisible();
+  await expect(page.getByTestId('panel-problems')).toContainText('"beadboard"');
+  await expect(page.getByTestId('panel-problems')).toContainText('stand-in');
 });
 
 test('Test data: save a job as the test start and load it into another job', async ({ page }) => {

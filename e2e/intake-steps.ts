@@ -48,3 +48,17 @@ export async function answerKitchen(page: Page, path = '/intake') {
   await expect(question(page)).toHaveText('Here is your kitchen so far');
 }
 
+
+/**
+ * Selects a cabinet on the customize screen: the first one to review (from the review list), then
+ * "Next cabinet" until the editor's heading matches `name` (`skip` matches are passed over).
+ */
+export async function selectCabinet(page: Page, name: RegExp, skip = 0) {
+  const heading = page.getByRole('region', { name: 'Cabinet' }).getByRole('heading', { level: 2 });
+  if (!(await heading.isVisible())) await page.getByRole('region', { name: 'Checks' }).getByRole('button').first().click();
+  for (let i = 0; i < 80; i++) {
+    if (name.test((await heading.textContent()) ?? '') && skip-- === 0) return;
+    await page.getByRole('button', { name: 'Next cabinet' }).click();
+  }
+  throw new Error(`No cabinet named ${name.source}`);
+}

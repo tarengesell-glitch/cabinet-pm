@@ -4,7 +4,7 @@
   "made_from": {
     "master_copy_schema_version": 2,
     "catalog": {
-      "version": 1,
+      "version": 2,
       "shop_id": "526e7ec9-47a3-5c86-9fd3-4db7010be90a",
       "shop_name": "The colony shop"
     },
@@ -1282,6 +1282,26 @@
       "toe_kick": false,
       "options": [
         {
+          "code": "back",
+          "name": "Back",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "finished_door",
+              "name": "Finished door"
+            },
+            {
+              "code": "finished_panel",
+              "name": "Finished panel"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished"
+            }
+          ]
+        },
+        {
           "code": "door_style",
           "name": "Door style",
           "required": true,
@@ -1313,7 +1333,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -1333,7 +1353,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -1343,17 +1363,21 @@
         },
         {
           "code": "hinge_side",
-          "name": "Hinge side (single door)",
+          "name": "Door opening",
           "required": false,
           "default": null,
           "choices": [
             {
               "code": "left",
-              "name": "Hinged on the left"
+              "name": "Hinged on the left (handle on the right)"
+            },
+            {
+              "code": "pair",
+              "name": "Double doors (handles in the middle)"
             },
             {
               "code": "right",
-              "name": "Hinged on the right"
+              "name": "Hinged on the right (handle on the left)"
             }
           ]
         }
@@ -1399,6 +1423,26 @@
       "toe_kick": true,
       "options": [
         {
+          "code": "back",
+          "name": "Back",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "finished_door",
+              "name": "Finished door"
+            },
+            {
+              "code": "finished_panel",
+              "name": "Finished panel"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished"
+            }
+          ]
+        },
+        {
           "code": "door_style",
           "name": "Door style",
           "required": true,
@@ -1430,7 +1474,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -1450,7 +1494,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -1476,17 +1520,21 @@
         },
         {
           "code": "hinge_side",
-          "name": "Hinge side (single door)",
+          "name": "Door opening",
           "required": false,
           "default": null,
           "choices": [
             {
               "code": "left",
-              "name": "Hinged on the left"
+              "name": "Hinged on the left (handle on the right)"
+            },
+            {
+              "code": "pair",
+              "name": "Double doors (handles in the middle)"
             },
             {
               "code": "right",
-              "name": "Hinged on the right"
+              "name": "Hinged on the right (handle on the left)"
             }
           ]
         }
@@ -1540,6 +1588,26 @@
       "toe_kick": true,
       "options": [
         {
+          "code": "back",
+          "name": "Back",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "finished_door",
+              "name": "Finished door"
+            },
+            {
+              "code": "finished_panel",
+              "name": "Finished panel"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished"
+            }
+          ]
+        },
+        {
           "code": "door_style",
           "name": "Door style",
           "required": true,
@@ -1571,7 +1639,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -1591,7 +1659,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -1601,17 +1669,21 @@
         },
         {
           "code": "hinge_side",
-          "name": "Hinge side (single door)",
+          "name": "Door opening",
           "required": false,
           "default": null,
           "choices": [
             {
               "code": "left",
-              "name": "Hinged on the left"
+              "name": "Hinged on the left (handle on the right)"
+            },
+            {
+              "code": "pair",
+              "name": "Double doors (handles in the middle)"
             },
             {
               "code": "right",
-              "name": "Hinged on the right"
+              "name": "Hinged on the right (handle on the left)"
             }
           ]
         }
@@ -1655,6 +1727,26 @@
       "toe_kick": true,
       "options": [
         {
+          "code": "back",
+          "name": "Back",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "finished_door",
+              "name": "Finished door"
+            },
+            {
+              "code": "finished_panel",
+              "name": "Finished panel"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished"
+            }
+          ]
+        },
+        {
           "code": "door_style",
           "name": "Door style",
           "required": true,
@@ -1686,7 +1778,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -1706,7 +1798,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -1754,6 +1846,26 @@
       "toe_kick": true,
       "options": [
         {
+          "code": "back",
+          "name": "Back",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "finished_door",
+              "name": "Finished door"
+            },
+            {
+              "code": "finished_panel",
+              "name": "Finished panel"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished"
+            }
+          ]
+        },
+        {
           "code": "door_style",
           "name": "Door style",
           "required": true,
@@ -1785,7 +1897,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -1805,7 +1917,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -1855,6 +1967,26 @@
       "toe_kick": true,
       "options": [
         {
+          "code": "back",
+          "name": "Back",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "finished_door",
+              "name": "Finished door"
+            },
+            {
+              "code": "finished_panel",
+              "name": "Finished panel"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished"
+            }
+          ]
+        },
+        {
           "code": "door_style",
           "name": "Door style",
           "required": true,
@@ -1886,7 +2018,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -1906,7 +2038,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -1916,17 +2048,21 @@
         },
         {
           "code": "hinge_side",
-          "name": "Hinge side (single door)",
+          "name": "Door opening",
           "required": false,
           "default": null,
           "choices": [
             {
               "code": "left",
-              "name": "Hinged on the left"
+              "name": "Hinged on the left (handle on the right)"
+            },
+            {
+              "code": "pair",
+              "name": "Double doors (handles in the middle)"
             },
             {
               "code": "right",
-              "name": "Hinged on the right"
+              "name": "Hinged on the right (handle on the left)"
             }
           ]
         }
@@ -1972,6 +2108,26 @@
       "toe_kick": true,
       "options": [
         {
+          "code": "back",
+          "name": "Back",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "finished_door",
+              "name": "Finished door"
+            },
+            {
+              "code": "finished_panel",
+              "name": "Finished panel"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished"
+            }
+          ]
+        },
+        {
           "code": "door_style",
           "name": "Door style",
           "required": true,
@@ -2003,7 +2159,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -2023,7 +2179,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -2033,17 +2189,21 @@
         },
         {
           "code": "hinge_side",
-          "name": "Hinge side (single door)",
+          "name": "Door opening",
           "required": false,
           "default": null,
           "choices": [
             {
               "code": "left",
-              "name": "Hinged on the left"
+              "name": "Hinged on the left (handle on the right)"
+            },
+            {
+              "code": "pair",
+              "name": "Double doors (handles in the middle)"
             },
             {
               "code": "right",
-              "name": "Hinged on the right"
+              "name": "Hinged on the right (handle on the left)"
             }
           ]
         }
@@ -2093,6 +2253,26 @@
       "toe_kick": true,
       "options": [
         {
+          "code": "back",
+          "name": "Back",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "finished_door",
+              "name": "Finished door"
+            },
+            {
+              "code": "finished_panel",
+              "name": "Finished panel"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished"
+            }
+          ]
+        },
+        {
           "code": "door_style",
           "name": "Door style",
           "required": true,
@@ -2124,7 +2304,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -2144,7 +2324,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -2154,17 +2334,21 @@
         },
         {
           "code": "hinge_side",
-          "name": "Hinge side (single door)",
+          "name": "Door opening",
           "required": false,
           "default": null,
           "choices": [
             {
               "code": "left",
-              "name": "Hinged on the left"
+              "name": "Hinged on the left (handle on the right)"
+            },
+            {
+              "code": "pair",
+              "name": "Double doors (handles in the middle)"
             },
             {
               "code": "right",
-              "name": "Hinged on the right"
+              "name": "Hinged on the right (handle on the left)"
             }
           ]
         }
@@ -2214,6 +2398,26 @@
       "toe_kick": true,
       "options": [
         {
+          "code": "back",
+          "name": "Back",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "finished_door",
+              "name": "Finished door"
+            },
+            {
+              "code": "finished_panel",
+              "name": "Finished panel"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished"
+            }
+          ]
+        },
+        {
           "code": "door_style",
           "name": "Door style",
           "required": true,
@@ -2245,7 +2449,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -2265,7 +2469,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -2275,17 +2479,21 @@
         },
         {
           "code": "hinge_side",
-          "name": "Hinge side (single door)",
+          "name": "Door opening",
           "required": false,
           "default": null,
           "choices": [
             {
               "code": "left",
-              "name": "Hinged on the left"
+              "name": "Hinged on the left (handle on the right)"
+            },
+            {
+              "code": "pair",
+              "name": "Double doors (handles in the middle)"
             },
             {
               "code": "right",
-              "name": "Hinged on the right"
+              "name": "Hinged on the right (handle on the left)"
             }
           ]
         }
@@ -2370,6 +2578,26 @@
       "toe_kick": true,
       "options": [
         {
+          "code": "back",
+          "name": "Back",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "finished_door",
+              "name": "Finished door"
+            },
+            {
+              "code": "finished_panel",
+              "name": "Finished panel"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished"
+            }
+          ]
+        },
+        {
           "code": "door_style",
           "name": "Door style",
           "required": true,
@@ -2401,7 +2629,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -2421,7 +2649,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -2447,17 +2675,21 @@
         },
         {
           "code": "hinge_side",
-          "name": "Hinge side (single door)",
+          "name": "Door opening",
           "required": false,
           "default": null,
           "choices": [
             {
               "code": "left",
-              "name": "Hinged on the left"
+              "name": "Hinged on the left (handle on the right)"
+            },
+            {
+              "code": "pair",
+              "name": "Double doors (handles in the middle)"
             },
             {
               "code": "right",
-              "name": "Hinged on the right"
+              "name": "Hinged on the right (handle on the left)"
             }
           ]
         }
@@ -2517,7 +2749,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -2537,7 +2769,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -2587,6 +2819,26 @@
       "toe_kick": true,
       "options": [
         {
+          "code": "back",
+          "name": "Back",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "finished_door",
+              "name": "Finished door"
+            },
+            {
+              "code": "finished_panel",
+              "name": "Finished panel"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished"
+            }
+          ]
+        },
+        {
           "code": "door_style",
           "name": "Door style",
           "required": true,
@@ -2618,7 +2870,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -2638,7 +2890,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -2648,17 +2900,21 @@
         },
         {
           "code": "hinge_side",
-          "name": "Hinge side (single door)",
+          "name": "Door opening",
           "required": true,
           "default": null,
           "choices": [
             {
               "code": "left",
-              "name": "Hinged on the left"
+              "name": "Hinged on the left (handle on the right)"
+            },
+            {
+              "code": "pair",
+              "name": "Double doors (handles in the middle)"
             },
             {
               "code": "right",
-              "name": "Hinged on the right"
+              "name": "Hinged on the right (handle on the left)"
             }
           ]
         }
@@ -2704,6 +2960,26 @@
       "toe_kick": true,
       "options": [
         {
+          "code": "back",
+          "name": "Back",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "finished_door",
+              "name": "Finished door"
+            },
+            {
+              "code": "finished_panel",
+              "name": "Finished panel"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished"
+            }
+          ]
+        },
+        {
           "code": "door_style",
           "name": "Door style",
           "required": true,
@@ -2735,7 +3011,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -2755,7 +3031,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -2765,17 +3041,21 @@
         },
         {
           "code": "hinge_side",
-          "name": "Hinge side (single door)",
+          "name": "Door opening",
           "required": true,
           "default": null,
           "choices": [
             {
               "code": "left",
-              "name": "Hinged on the left"
+              "name": "Hinged on the left (handle on the right)"
+            },
+            {
+              "code": "pair",
+              "name": "Double doors (handles in the middle)"
             },
             {
               "code": "right",
-              "name": "Hinged on the right"
+              "name": "Hinged on the right (handle on the left)"
             }
           ]
         }
@@ -2821,6 +3101,26 @@
       "toe_kick": true,
       "options": [
         {
+          "code": "back",
+          "name": "Back",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "finished_door",
+              "name": "Finished door"
+            },
+            {
+              "code": "finished_panel",
+              "name": "Finished panel"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished"
+            }
+          ]
+        },
+        {
           "code": "door_style",
           "name": "Door style",
           "required": true,
@@ -2852,7 +3152,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -2872,7 +3172,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -2928,6 +3228,26 @@
       "toe_kick": true,
       "options": [
         {
+          "code": "back",
+          "name": "Back",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "finished_door",
+              "name": "Finished door"
+            },
+            {
+              "code": "finished_panel",
+              "name": "Finished panel"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished"
+            }
+          ]
+        },
+        {
           "code": "door_style",
           "name": "Door style",
           "required": true,
@@ -2959,7 +3279,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -2979,7 +3299,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -3005,17 +3325,21 @@
         },
         {
           "code": "hinge_side",
-          "name": "Hinge side (single door)",
+          "name": "Door opening",
           "required": false,
           "default": null,
           "choices": [
             {
               "code": "left",
-              "name": "Hinged on the left"
+              "name": "Hinged on the left (handle on the right)"
+            },
+            {
+              "code": "pair",
+              "name": "Double doors (handles in the middle)"
             },
             {
               "code": "right",
-              "name": "Hinged on the right"
+              "name": "Hinged on the right (handle on the left)"
             }
           ]
         }
@@ -3164,6 +3488,26 @@
       "toe_kick": true,
       "options": [
         {
+          "code": "back",
+          "name": "Back",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "finished_door",
+              "name": "Finished door"
+            },
+            {
+              "code": "finished_panel",
+              "name": "Finished panel"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished"
+            }
+          ]
+        },
+        {
           "code": "door_style",
           "name": "Door style",
           "required": true,
@@ -3195,7 +3539,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -3215,7 +3559,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -3225,7 +3569,7 @@
         }
       ],
       "notes": [
-        "The handle on the pull-out front is not centred: it sits as far down from the top of the front as the handle on the middle drawer of a three-drawer bank."
+        "A working drawer at the top, over a full-height pull-out front. The handle on the pull-out front is not centred: it sits where the handle of the second drawer from the top of a four-drawer bank sits (owner, 2026-11-12; before, the middle drawer of a three-drawer bank)."
       ]
     },
     {
@@ -3331,7 +3675,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -3351,7 +3695,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -3361,17 +3705,21 @@
         },
         {
           "code": "hinge_side",
-          "name": "Hinge side (single door)",
+          "name": "Door opening",
           "required": true,
           "default": null,
           "choices": [
             {
               "code": "left",
-              "name": "Hinged on the left"
+              "name": "Hinged on the left (handle on the right)"
+            },
+            {
+              "code": "pair",
+              "name": "Double doors (handles in the middle)"
             },
             {
               "code": "right",
-              "name": "Hinged on the right"
+              "name": "Hinged on the right (handle on the left)"
             }
           ]
         }
@@ -3448,7 +3796,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -3468,7 +3816,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -3478,17 +3826,21 @@
         },
         {
           "code": "hinge_side",
-          "name": "Hinge side (single door)",
+          "name": "Door opening",
           "required": true,
           "default": null,
           "choices": [
             {
               "code": "left",
-              "name": "Hinged on the left"
+              "name": "Hinged on the left (handle on the right)"
+            },
+            {
+              "code": "pair",
+              "name": "Double doors (handles in the middle)"
             },
             {
               "code": "right",
-              "name": "Hinged on the right"
+              "name": "Hinged on the right (handle on the left)"
             }
           ]
         }
@@ -3538,6 +3890,26 @@
       "toe_kick": false,
       "options": [
         {
+          "code": "back",
+          "name": "Back",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "finished_door",
+              "name": "Finished door"
+            },
+            {
+              "code": "finished_panel",
+              "name": "Finished panel"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished"
+            }
+          ]
+        },
+        {
           "code": "door_style",
           "name": "Door style",
           "required": true,
@@ -3569,7 +3941,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -3589,7 +3961,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -3599,17 +3971,21 @@
         },
         {
           "code": "hinge_side",
-          "name": "Hinge side (single door)",
+          "name": "Door opening",
           "required": false,
           "default": null,
           "choices": [
             {
               "code": "left",
-              "name": "Hinged on the left"
+              "name": "Hinged on the left (handle on the right)"
+            },
+            {
+              "code": "pair",
+              "name": "Double doors (handles in the middle)"
             },
             {
               "code": "right",
-              "name": "Hinged on the right"
+              "name": "Hinged on the right (handle on the left)"
             }
           ]
         }
@@ -3686,7 +4062,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -3706,7 +4082,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -3716,17 +4092,21 @@
         },
         {
           "code": "hinge_side",
-          "name": "Hinge side (single door)",
+          "name": "Door opening",
           "required": true,
           "default": null,
           "choices": [
             {
               "code": "left",
-              "name": "Hinged on the left"
+              "name": "Hinged on the left (handle on the right)"
+            },
+            {
+              "code": "pair",
+              "name": "Double doors (handles in the middle)"
             },
             {
               "code": "right",
-              "name": "Hinged on the right"
+              "name": "Hinged on the right (handle on the left)"
             }
           ]
         }
@@ -3772,6 +4152,26 @@
       "toe_kick": false,
       "options": [
         {
+          "code": "back",
+          "name": "Back",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "finished_door",
+              "name": "Finished door"
+            },
+            {
+              "code": "finished_panel",
+              "name": "Finished panel"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished"
+            }
+          ]
+        },
+        {
           "code": "end_left",
           "name": "Left end",
           "required": true,
@@ -3783,7 +4183,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -3803,7 +4203,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -3926,6 +4326,26 @@
       "toe_kick": true,
       "options": [
         {
+          "code": "back",
+          "name": "Back",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "finished_door",
+              "name": "Finished door"
+            },
+            {
+              "code": "finished_panel",
+              "name": "Finished panel"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished"
+            }
+          ]
+        },
+        {
           "code": "door_style",
           "name": "Door style",
           "required": true,
@@ -3957,7 +4377,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -3977,7 +4397,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -3987,17 +4407,21 @@
         },
         {
           "code": "hinge_side",
-          "name": "Hinge side (single door)",
+          "name": "Door opening",
           "required": false,
           "default": null,
           "choices": [
             {
               "code": "left",
-              "name": "Hinged on the left"
+              "name": "Hinged on the left (handle on the right)"
+            },
+            {
+              "code": "pair",
+              "name": "Double doors (handles in the middle)"
             },
             {
               "code": "right",
-              "name": "Hinged on the right"
+              "name": "Hinged on the right (handle on the left)"
             }
           ]
         },
@@ -4063,6 +4487,26 @@
       "toe_kick": true,
       "options": [
         {
+          "code": "back",
+          "name": "Back",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "finished_door",
+              "name": "Finished door"
+            },
+            {
+              "code": "finished_panel",
+              "name": "Finished panel"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished"
+            }
+          ]
+        },
+        {
           "code": "door_style",
           "name": "Door style",
           "required": true,
@@ -4094,7 +4538,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -4114,7 +4558,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -4175,6 +4619,26 @@
       "toe_kick": true,
       "options": [
         {
+          "code": "back",
+          "name": "Back",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "finished_door",
+              "name": "Finished door"
+            },
+            {
+              "code": "finished_panel",
+              "name": "Finished panel"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished"
+            }
+          ]
+        },
+        {
           "code": "door_style",
           "name": "Door style",
           "required": true,
@@ -4206,7 +4670,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -4226,7 +4690,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -4236,17 +4700,21 @@
         },
         {
           "code": "hinge_side",
-          "name": "Hinge side (single door)",
+          "name": "Door opening",
           "required": false,
           "default": null,
           "choices": [
             {
               "code": "left",
-              "name": "Hinged on the left"
+              "name": "Hinged on the left (handle on the right)"
+            },
+            {
+              "code": "pair",
+              "name": "Double doors (handles in the middle)"
             },
             {
               "code": "right",
-              "name": "Hinged on the right"
+              "name": "Hinged on the right (handle on the left)"
             }
           ]
         }
@@ -4301,6 +4769,26 @@
       "toe_kick": true,
       "options": [
         {
+          "code": "back",
+          "name": "Back",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "finished_door",
+              "name": "Finished door"
+            },
+            {
+              "code": "finished_panel",
+              "name": "Finished panel"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished"
+            }
+          ]
+        },
+        {
           "code": "door_style",
           "name": "Door style",
           "required": true,
@@ -4332,7 +4820,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -4352,7 +4840,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -4362,17 +4850,21 @@
         },
         {
           "code": "hinge_side",
-          "name": "Hinge side (single door)",
+          "name": "Door opening",
           "required": false,
           "default": null,
           "choices": [
             {
               "code": "left",
-              "name": "Hinged on the left"
+              "name": "Hinged on the left (handle on the right)"
+            },
+            {
+              "code": "pair",
+              "name": "Double doors (handles in the middle)"
             },
             {
               "code": "right",
-              "name": "Hinged on the right"
+              "name": "Hinged on the right (handle on the left)"
             }
           ]
         }
@@ -4462,6 +4954,26 @@
       "toe_kick": true,
       "options": [
         {
+          "code": "back",
+          "name": "Back",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "finished_door",
+              "name": "Finished door"
+            },
+            {
+              "code": "finished_panel",
+              "name": "Finished panel"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished"
+            }
+          ]
+        },
+        {
           "code": "door_style",
           "name": "Door style",
           "required": true,
@@ -4493,7 +5005,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -4513,7 +5025,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -4523,17 +5035,21 @@
         },
         {
           "code": "hinge_side",
-          "name": "Hinge side (single door)",
+          "name": "Door opening",
           "required": false,
           "default": null,
           "choices": [
             {
               "code": "left",
-              "name": "Hinged on the left"
+              "name": "Hinged on the left (handle on the right)"
+            },
+            {
+              "code": "pair",
+              "name": "Double doors (handles in the middle)"
             },
             {
               "code": "right",
-              "name": "Hinged on the right"
+              "name": "Hinged on the right (handle on the left)"
             }
           ]
         }
@@ -4583,6 +5099,26 @@
       "toe_kick": true,
       "options": [
         {
+          "code": "back",
+          "name": "Back",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "finished_door",
+              "name": "Finished door"
+            },
+            {
+              "code": "finished_panel",
+              "name": "Finished panel"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished"
+            }
+          ]
+        },
+        {
           "code": "door_style",
           "name": "Door style",
           "required": true,
@@ -4614,7 +5150,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -4634,7 +5170,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -4644,17 +5180,21 @@
         },
         {
           "code": "hinge_side",
-          "name": "Hinge side (single door)",
+          "name": "Door opening",
           "required": false,
           "default": null,
           "choices": [
             {
               "code": "left",
-              "name": "Hinged on the left"
+              "name": "Hinged on the left (handle on the right)"
+            },
+            {
+              "code": "pair",
+              "name": "Double doors (handles in the middle)"
             },
             {
               "code": "right",
-              "name": "Hinged on the right"
+              "name": "Hinged on the right (handle on the left)"
             }
           ]
         }
@@ -4759,6 +5299,26 @@
       "toe_kick": false,
       "options": [
         {
+          "code": "back",
+          "name": "Back",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "finished_door",
+              "name": "Finished door"
+            },
+            {
+              "code": "finished_panel",
+              "name": "Finished panel"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished"
+            }
+          ]
+        },
+        {
           "code": "door_style",
           "name": "Door style",
           "required": true,
@@ -4790,7 +5350,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -4810,7 +5370,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -4820,17 +5380,21 @@
         },
         {
           "code": "hinge_side",
-          "name": "Hinge side (single door)",
+          "name": "Door opening",
           "required": true,
           "default": null,
           "choices": [
             {
               "code": "left",
-              "name": "Hinged on the left"
+              "name": "Hinged on the left (handle on the right)"
+            },
+            {
+              "code": "pair",
+              "name": "Double doors (handles in the middle)"
             },
             {
               "code": "right",
-              "name": "Hinged on the right"
+              "name": "Hinged on the right (handle on the left)"
             }
           ]
         }
@@ -4876,6 +5440,26 @@
       "toe_kick": false,
       "options": [
         {
+          "code": "back",
+          "name": "Back",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "finished_door",
+              "name": "Finished door"
+            },
+            {
+              "code": "finished_panel",
+              "name": "Finished panel"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished"
+            }
+          ]
+        },
+        {
           "code": "door_style",
           "name": "Door style",
           "required": true,
@@ -4907,7 +5491,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -4927,7 +5511,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -4937,17 +5521,21 @@
         },
         {
           "code": "hinge_side",
-          "name": "Hinge side (single door)",
+          "name": "Door opening",
           "required": true,
           "default": null,
           "choices": [
             {
               "code": "left",
-              "name": "Hinged on the left"
+              "name": "Hinged on the left (handle on the right)"
+            },
+            {
+              "code": "pair",
+              "name": "Double doors (handles in the middle)"
             },
             {
               "code": "right",
-              "name": "Hinged on the right"
+              "name": "Hinged on the right (handle on the left)"
             }
           ]
         }
@@ -4993,6 +5581,26 @@
       "toe_kick": false,
       "options": [
         {
+          "code": "back",
+          "name": "Back",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "finished_door",
+              "name": "Finished door"
+            },
+            {
+              "code": "finished_panel",
+              "name": "Finished panel"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished"
+            }
+          ]
+        },
+        {
           "code": "door_style",
           "name": "Door style",
           "required": true,
@@ -5024,7 +5632,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -5044,7 +5652,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -5054,17 +5662,21 @@
         },
         {
           "code": "hinge_side",
-          "name": "Hinge side (single door)",
+          "name": "Door opening",
           "required": false,
           "default": null,
           "choices": [
             {
               "code": "left",
-              "name": "Hinged on the left"
+              "name": "Hinged on the left (handle on the right)"
+            },
+            {
+              "code": "pair",
+              "name": "Double doors (handles in the middle)"
             },
             {
               "code": "right",
-              "name": "Hinged on the right"
+              "name": "Hinged on the right (handle on the left)"
             }
           ]
         }
@@ -5110,6 +5722,26 @@
       "toe_kick": false,
       "options": [
         {
+          "code": "back",
+          "name": "Back",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "finished_door",
+              "name": "Finished door"
+            },
+            {
+              "code": "finished_panel",
+              "name": "Finished panel"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished"
+            }
+          ]
+        },
+        {
           "code": "door_style",
           "name": "Door style",
           "required": true,
@@ -5141,7 +5773,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -5161,7 +5793,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -5171,17 +5803,21 @@
         },
         {
           "code": "hinge_side",
-          "name": "Hinge side (single door)",
+          "name": "Door opening",
           "required": false,
           "default": null,
           "choices": [
             {
               "code": "left",
-              "name": "Hinged on the left"
+              "name": "Hinged on the left (handle on the right)"
+            },
+            {
+              "code": "pair",
+              "name": "Double doors (handles in the middle)"
             },
             {
               "code": "right",
-              "name": "Hinged on the right"
+              "name": "Hinged on the right (handle on the left)"
             }
           ]
         }
@@ -5225,6 +5861,26 @@
       "toe_kick": false,
       "options": [
         {
+          "code": "back",
+          "name": "Back",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "finished_door",
+              "name": "Finished door"
+            },
+            {
+              "code": "finished_panel",
+              "name": "Finished panel"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished"
+            }
+          ]
+        },
+        {
           "code": "door_style",
           "name": "Door style",
           "required": true,
@@ -5256,7 +5912,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -5276,7 +5932,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -5286,17 +5942,21 @@
         },
         {
           "code": "hinge_side",
-          "name": "Hinge side (single door)",
+          "name": "Door opening",
           "required": false,
           "default": null,
           "choices": [
             {
               "code": "left",
-              "name": "Hinged on the left"
+              "name": "Hinged on the left (handle on the right)"
+            },
+            {
+              "code": "pair",
+              "name": "Double doors (handles in the middle)"
             },
             {
               "code": "right",
-              "name": "Hinged on the right"
+              "name": "Hinged on the right (handle on the left)"
             }
           ]
         }
@@ -5342,6 +6002,26 @@
       "toe_kick": false,
       "options": [
         {
+          "code": "back",
+          "name": "Back",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "finished_door",
+              "name": "Finished door"
+            },
+            {
+              "code": "finished_panel",
+              "name": "Finished panel"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished"
+            }
+          ]
+        },
+        {
           "code": "door_style",
           "name": "Door style",
           "required": true,
@@ -5373,7 +6053,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -5393,7 +6073,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -5403,17 +6083,21 @@
         },
         {
           "code": "hinge_side",
-          "name": "Hinge side (single door)",
+          "name": "Door opening",
           "required": false,
           "default": null,
           "choices": [
             {
               "code": "left",
-              "name": "Hinged on the left"
+              "name": "Hinged on the left (handle on the right)"
+            },
+            {
+              "code": "pair",
+              "name": "Double doors (handles in the middle)"
             },
             {
               "code": "right",
-              "name": "Hinged on the right"
+              "name": "Hinged on the right (handle on the left)"
             }
           ]
         }
@@ -5457,6 +6141,26 @@
       "toe_kick": true,
       "options": [
         {
+          "code": "back",
+          "name": "Back",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "finished_door",
+              "name": "Finished door"
+            },
+            {
+              "code": "finished_panel",
+              "name": "Finished panel"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished"
+            }
+          ]
+        },
+        {
           "code": "door_style",
           "name": "Door style",
           "required": true,
@@ -5488,7 +6192,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -5508,7 +6212,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -5556,6 +6260,26 @@
       "toe_kick": true,
       "options": [
         {
+          "code": "back",
+          "name": "Back",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "finished_door",
+              "name": "Finished door"
+            },
+            {
+              "code": "finished_panel",
+              "name": "Finished panel"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished"
+            }
+          ]
+        },
+        {
           "code": "door_style",
           "name": "Door style",
           "required": true,
@@ -5587,7 +6311,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -5607,7 +6331,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -5661,6 +6385,26 @@
       "toe_kick": true,
       "options": [
         {
+          "code": "back",
+          "name": "Back",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "finished_door",
+              "name": "Finished door"
+            },
+            {
+              "code": "finished_panel",
+              "name": "Finished panel"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished"
+            }
+          ]
+        },
+        {
           "code": "door_style",
           "name": "Door style",
           "required": true,
@@ -5692,7 +6436,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -5712,7 +6456,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -5722,17 +6466,21 @@
         },
         {
           "code": "hinge_side",
-          "name": "Hinge side (single door)",
+          "name": "Door opening",
           "required": false,
           "default": null,
           "choices": [
             {
               "code": "left",
-              "name": "Hinged on the left"
+              "name": "Hinged on the left (handle on the right)"
+            },
+            {
+              "code": "pair",
+              "name": "Double doors (handles in the middle)"
             },
             {
               "code": "right",
-              "name": "Hinged on the right"
+              "name": "Hinged on the right (handle on the left)"
             }
           ]
         }
@@ -5822,6 +6570,26 @@
       "toe_kick": false,
       "options": [
         {
+          "code": "back",
+          "name": "Back",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "finished_door",
+              "name": "Finished door"
+            },
+            {
+              "code": "finished_panel",
+              "name": "Finished panel"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished"
+            }
+          ]
+        },
+        {
           "code": "door_style",
           "name": "Door style",
           "required": true,
@@ -5853,7 +6621,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -5873,7 +6641,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -5932,6 +6700,26 @@
       "toe_kick": false,
       "options": [
         {
+          "code": "back",
+          "name": "Back",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "finished_door",
+              "name": "Finished door"
+            },
+            {
+              "code": "finished_panel",
+              "name": "Finished panel"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished"
+            }
+          ]
+        },
+        {
           "code": "door_style",
           "name": "Door style",
           "required": true,
@@ -5963,7 +6751,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -5983,7 +6771,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -6031,6 +6819,26 @@
       "toe_kick": true,
       "options": [
         {
+          "code": "back",
+          "name": "Back",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "finished_door",
+              "name": "Finished door"
+            },
+            {
+              "code": "finished_panel",
+              "name": "Finished panel"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished"
+            }
+          ]
+        },
+        {
           "code": "door_style",
           "name": "Door style",
           "required": true,
@@ -6062,7 +6870,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -6082,7 +6890,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -6092,17 +6900,21 @@
         },
         {
           "code": "hinge_side",
-          "name": "Hinge side (single door)",
+          "name": "Door opening",
           "required": false,
           "default": null,
           "choices": [
             {
               "code": "left",
-              "name": "Hinged on the left"
+              "name": "Hinged on the left (handle on the right)"
+            },
+            {
+              "code": "pair",
+              "name": "Double doors (handles in the middle)"
             },
             {
               "code": "right",
-              "name": "Hinged on the right"
+              "name": "Hinged on the right (handle on the left)"
             }
           ]
         },
@@ -6174,6 +6986,26 @@
       "toe_kick": true,
       "options": [
         {
+          "code": "back",
+          "name": "Back",
+          "required": false,
+          "default": null,
+          "choices": [
+            {
+              "code": "finished_door",
+              "name": "Finished door"
+            },
+            {
+              "code": "finished_panel",
+              "name": "Finished panel"
+            },
+            {
+              "code": "unfinished",
+              "name": "Unfinished"
+            }
+          ]
+        },
+        {
           "code": "door_style",
           "name": "Door style",
           "required": true,
@@ -6205,7 +7037,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -6225,7 +7057,7 @@
             },
             {
               "code": "finished",
-              "name": "Finished end (open end, by request)"
+              "name": "Integrated finished end (open end, by request)"
             },
             {
               "code": "unfinished",
@@ -6251,17 +7083,21 @@
         },
         {
           "code": "hinge_side",
-          "name": "Hinge side (single door)",
+          "name": "Door opening",
           "required": false,
           "default": null,
           "choices": [
             {
               "code": "left",
-              "name": "Hinged on the left"
+              "name": "Hinged on the left (handle on the right)"
+            },
+            {
+              "code": "pair",
+              "name": "Double doors (handles in the middle)"
             },
             {
               "code": "right",
-              "name": "Hinged on the right"
+              "name": "Hinged on the right (handle on the left)"
             }
           ]
         },

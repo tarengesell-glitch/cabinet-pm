@@ -24,6 +24,8 @@ const ApplianceSchema = z.strictObject({
 const FileSchema = z.strictObject({
   source: z.string().min(1),
   proposed: z.record(z.string(), z.string().min(1)),
+  /** Owner decisions behind values below, by topic (the owner's words and the date). */
+  decided: z.record(z.string(), z.string().min(1)).optional(),
   default_run_kind: RunKindSchema,
   island_run_kind: RunKindSchema,
   run_depths: z.strictObject({ base: Size, upper_only: Size, upper_band: Size }),

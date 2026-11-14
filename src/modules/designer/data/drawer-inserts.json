@@ -1,0 +1,9 @@
+{
+  "source": "Owner (Taren), chat, 2026-11-13: \"Base cabinets with at least one drawer should have options for inserts and which drawer they go into. Cutlery insert, utility insert, spice insert.\"",
+  "note": "Saved on the placed cabinet by drawer number from the top of its face (PlacedItem.drawer_inserts). Which shop part each is, is for the shop to confirm (DECISIONS LP-1).",
+  "inserts": [
+    { "code": "cutlery", "name": "Cutlery insert", "mark": "C" },
+    { "code": "utility", "name": "Utility insert", "mark": "U" },
+    { "code": "spice", "name": "Spice insert", "mark": "S" }
+  ]
+}

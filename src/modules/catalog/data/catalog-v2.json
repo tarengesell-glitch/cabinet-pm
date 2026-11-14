@@ -1,0 +1,5121 @@
+{
+  "catalog_version": 2,
+  "shop": {
+    "id": "526e7ec9-47a3-5c86-9fd3-4db7010be90a",
+    "name": "The colony shop"
+  },
+  "sources": {
+    "owner-review": "Owner (Taren), answers on the library review page and in chat, 2026-11-06 to 2026-11-07",
+    "library": "The shop's own design library (Solid_11.zip, catalog \"New Catalog\"): the template's example size",
+    "unknown": "Not known yet. Anything that needs this value is refused until the owner gives it.",
+    "owner-request-2026-11-12": "Owner (Taren), chat, 2026-11-12, asking for cabinet edits in Customize: a door can be hinged left (handle on the right), hinged right (handle on the left) or a double door (handles in the middle); ends can be unfinished, an applied finished end or an integrated finished end; the back can be unfinished, a finished panel or a finished door. The earlier values are from the owner's library review (owner-review)."
+  },
+  "options": [
+    {
+      "code": "door_style",
+      "name": "Door style",
+      "source": "owner-review",
+      "values": [
+        {
+          "code": "shaker_2_1_4",
+          "name": "Shaker, 2 1/4\" frame"
+        },
+        {
+          "code": "slim_shaker_1",
+          "name": "Slim shaker, 1\" frame"
+        },
+        {
+          "code": "slab",
+          "name": "Slab"
+        }
+      ]
+    },
+    {
+      "code": "hinge_side",
+      "name": "Door opening",
+      "source": "owner-request-2026-11-12",
+      "values": [
+        {
+          "code": "left",
+          "name": "Hinged on the left (handle on the right)"
+        },
+        {
+          "code": "right",
+          "name": "Hinged on the right (handle on the left)"
+        },
+        {
+          "code": "pair",
+          "name": "Double doors (handles in the middle)"
+        }
+      ]
+    },
+    {
+      "code": "hand",
+      "name": "Left or right version",
+      "source": "owner-review",
+      "values": [
+        {
+          "code": "left",
+          "name": "Left"
+        },
+        {
+          "code": "right",
+          "name": "Right"
+        }
+      ]
+    },
+    {
+      "code": "end_left",
+      "name": "Left end",
+      "source": "owner-request-2026-11-12",
+      "values": [
+        {
+          "code": "unfinished",
+          "name": "Unfinished (a wall or cabinet beside it)"
+        },
+        {
+          "code": "applied_finished",
+          "name": "Applied finished end (open end, the usual choice)"
+        },
+        {
+          "code": "finished",
+          "name": "Integrated finished end (open end, by request)"
+        }
+      ]
+    },
+    {
+      "code": "end_right",
+      "name": "Right end",
+      "source": "owner-request-2026-11-12",
+      "values": [
+        {
+          "code": "unfinished",
+          "name": "Unfinished (a wall or cabinet beside it)"
+        },
+        {
+          "code": "applied_finished",
+          "name": "Applied finished end (open end, the usual choice)"
+        },
+        {
+          "code": "finished",
+          "name": "Integrated finished end (open end, by request)"
+        }
+      ]
+    },
+    {
+      "code": "back",
+      "name": "Back",
+      "source": "owner-request-2026-11-12",
+      "values": [
+        {
+          "code": "unfinished",
+          "name": "Unfinished"
+        },
+        {
+          "code": "finished_panel",
+          "name": "Finished panel"
+        },
+        {
+          "code": "finished_door",
+          "name": "Finished door"
+        }
+      ]
+    },
+    {
+      "code": "sink_front",
+      "name": "Sink front",
+      "source": "owner-review",
+      "values": [
+        {
+          "code": "full_height_doors_skirt",
+          "name": "Full-height doors with a skirt front"
+        },
+        {
+          "code": "false_drawer_front",
+          "name": "False drawer front (upgrade)"
+        },
+        {
+          "code": "tip_out_tray",
+          "name": "Tip-out tray (upgrade)"
+        }
+      ]
+    }
+  ],
+  "invalid_combinations": [],
+  "not_included": [
+    {
+      "template": 22,
+      "name": "Fluted Filler Corbell Combo",
+      "what": "Fluted filler with corbel",
+      "reason": "Removed by the owner",
+      "source": "owner-review"
+    },
+    {
+      "template": 25,
+      "name": "Fluted Filler",
+      "what": "Fluted filler",
+      "reason": "Removed by the owner",
+      "source": "owner-review"
+    },
+    {
+      "template": 33,
+      "name": "Accessible",
+      "what": "Accessible sink base",
+      "reason": "Removed by the owner",
+      "source": "owner-review"
+    },
+    {
+      "template": 43,
+      "name": "MedCab",
+      "what": "Medicine cabinet over false drawer",
+      "reason": "Removed by the owner",
+      "source": "owner-review"
+    },
+    {
+      "template": 51,
+      "name": "Hood Shlef",
+      "what": "Hood shelf",
+      "reason": "Removed by the owner",
+      "source": "owner-review"
+    },
+    {
+      "template": 57,
+      "name": "Closet Cabinet",
+      "what": "Closet wall cabinet",
+      "reason": "Removed by the owner",
+      "source": "owner-review"
+    },
+    {
+      "template": 70,
+      "name": "Accessible Sink",
+      "what": "Accessible vanity sink",
+      "reason": "Removed by the owner",
+      "source": "owner-review"
+    },
+    {
+      "template": 77,
+      "name": "Accesible Vanity with Pl. Cover",
+      "what": "Accessible vanity with plumbing cover",
+      "reason": "Removed by the owner",
+      "source": "owner-review"
+    },
+    {
+      "template": 78,
+      "name": "Accessible W/Cover",
+      "what": "Accessible vanity with plumbing cover",
+      "reason": "Removed by the owner",
+      "source": "owner-review"
+    },
+    {
+      "template": 82,
+      "name": "Pull out hair dryer",
+      "what": "Hair dryer pull-out",
+      "reason": "Removed by the owner",
+      "source": "owner-review"
+    },
+    {
+      "template": 182,
+      "name": "BCC 33 X 33",
+      "what": "Corner panels (Altima job)",
+      "reason": "Removed by the owner",
+      "source": "owner-review"
+    },
+    {
+      "template": 183,
+      "name": "BCC 31 X 33",
+      "what": "Corner panels (Altima job)",
+      "reason": "Removed by the owner",
+      "source": "owner-review"
+    },
+    {
+      "template": 184,
+      "name": "BCC 33 X 31",
+      "what": "Corner panels (Altima job)",
+      "reason": "Removed by the owner",
+      "source": "owner-review"
+    },
+    {
+      "template": 187,
+      "name": "30 Vanity cabinet",
+      "what": "Vanity sink (Altima job)",
+      "reason": "Removed by the owner",
+      "source": "owner-review"
+    }
+  ],
+  "items": [
+    {
+      "id": "0832a4bf-b8f9-582f-aa99-3c76cac293aa",
+      "code": "base_filler",
+      "name": "Base filler",
+      "type": "filler",
+      "availability": "available",
+      "description": null,
+      "from_library": [
+        {
+          "template": 1,
+          "name": "BaseFiller124",
+          "example": "1 x 34 1/2 x 23 3/4"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "3/4",
+            "source": "owner-review"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "34 1/2",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "23 3/4",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [],
+      "inside": {},
+      "toe_kick": true,
+      "options": [],
+      "required": [],
+      "defaults": {},
+      "notes": [
+        {
+          "value": "Cut to fit on site, sold at a fixed price rather than by the inch, 3/4\" wide by default.",
+          "source": "owner-review"
+        }
+      ]
+    },
+    {
+      "id": "f3ff9ded-d296-5085-9f22-f8274d87245e",
+      "code": "wall_filler",
+      "name": "Upper filler",
+      "type": "filler",
+      "availability": "available",
+      "description": null,
+      "from_library": [
+        {
+          "template": 2,
+          "name": "WallFiller130",
+          "example": "1 x 30 x 12"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "3/4",
+            "source": "owner-review"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "30",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "12",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [],
+      "inside": {},
+      "toe_kick": false,
+      "options": [],
+      "required": [],
+      "defaults": {},
+      "notes": [
+        {
+          "value": "Cut to fit on site, sold at a fixed price rather than by the inch, 3/4\" wide by default.",
+          "source": "owner-review"
+        }
+      ]
+    },
+    {
+      "id": "1ca0ee90-0aa3-5237-aa4f-6488f6d84266",
+      "code": "tall_filler",
+      "name": "Tall filler",
+      "type": "filler",
+      "availability": "available",
+      "description": null,
+      "from_library": [
+        {
+          "template": 3,
+          "name": "TallFiller384",
+          "example": "3 x 84 x 23 3/4"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "3/4",
+            "source": "owner-review"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "84",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "23 3/4",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [],
+      "inside": {},
+      "toe_kick": true,
+      "options": [],
+      "required": [],
+      "defaults": {},
+      "notes": [
+        {
+          "value": "Cut to fit on site, sold at a fixed price rather than by the inch, 3/4\" wide by default.",
+          "source": "owner-review"
+        }
+      ]
+    },
+    {
+      "id": "bf12b0e2-94c2-58e9-89bf-8ef07fa32950",
+      "code": "vanity_filler",
+      "name": "Vanity filler",
+      "type": "filler",
+      "availability": "available",
+      "description": null,
+      "from_library": [
+        {
+          "template": 4,
+          "name": "VanityFiller121",
+          "example": "1 x 32 1/2 x 20 3/4"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "3/4",
+            "source": "owner-review"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "32 1/2",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "20 3/4",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [],
+      "inside": {},
+      "toe_kick": true,
+      "options": [],
+      "required": [],
+      "defaults": {},
+      "notes": [
+        {
+          "value": "Cut to fit on site, sold at a fixed price rather than by the inch, 3/4\" wide by default.",
+          "source": "owner-review"
+        }
+      ]
+    },
+    {
+      "id": "aa503a4d-7387-5a25-a0f0-91b37f80e7bd",
+      "code": "thick_end",
+      "name": "Thick end",
+      "type": "panel",
+      "availability": "available",
+      "description": "A narrow box with a fixed front panel. At the end of a run it makes the end look thick instead of 3/4\".",
+      "from_library": [
+        {
+          "template": 37,
+          "name": "Thick End Cabinet",
+          "example": "3 x 34 1/2 x 23 3/4"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "3",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "34 1/2",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "23 3/4",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [
+        {
+          "kind": "fixed_panel",
+          "count": 1
+        }
+      ],
+      "inside": {},
+      "toe_kick": false,
+      "options": [
+        "door_style"
+      ],
+      "required": [
+        "door_style"
+      ],
+      "defaults": {},
+      "notes": []
+    },
+    {
+      "id": "000b51a2-a89f-54ca-86fa-28bde9ba631b",
+      "code": "island_back_panel",
+      "name": "Island back panel",
+      "type": "panel",
+      "availability": "available",
+      "description": "A flat finished panel that covers the back of an island.",
+      "from_library": [
+        {
+          "template": 31,
+          "name": "Island Panel",
+          "example": "97 7/32 x 34 1/2 x 3/4"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "97 7/32",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "34 1/2",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "3/4",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [],
+      "inside": {},
+      "toe_kick": false,
+      "options": [],
+      "required": [],
+      "defaults": {},
+      "notes": []
+    },
+    {
+      "id": "3b5d7ad2-79d1-5cf4-9f6d-b649a9f4fa6f",
+      "code": "furniture_end_panel",
+      "name": "Furniture end panel",
+      "type": "panel",
+      "availability": "available",
+      "description": "A thick, hollow end panel for the exposed end of a run, built as a frame with two dividers inside.",
+      "from_library": [
+        {
+          "template": 32,
+          "name": "End Panel352",
+          "example": "35 x 34 3/4 x 2 1/4"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "35",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "34 3/4",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "2 1/4",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [],
+      "inside": {},
+      "toe_kick": false,
+      "options": [],
+      "required": [],
+      "defaults": {},
+      "notes": []
+    },
+    {
+      "id": "7eb10db5-8600-5108-8c5c-6ca25aac8fde",
+      "code": "base_doors",
+      "name": "Base, doors",
+      "type": "base",
+      "availability": "available",
+      "description": null,
+      "from_library": [
+        {
+          "template": 6,
+          "name": "Base 2 Doors",
+          "example": "30 x 34 1/2 x 23 3/4"
+        },
+        {
+          "template": 8,
+          "name": "Base 1 Door",
+          "example": "12 x 34 3/4 x 23 3/4"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "30",
+            "source": "library"
+          },
+          "min": {
+            "value": "8",
+            "source": "owner-review"
+          },
+          "max": {
+            "value": "40 1/4",
+            "source": "owner-review"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "34 3/4",
+            "source": "owner-review"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "23 3/4",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [
+        {
+          "kind": "doors",
+          "count": null
+        }
+      ],
+      "inside": {
+        "adjustable_shelves": 2
+      },
+      "toe_kick": true,
+      "options": [
+        "door_style",
+        "hinge_side",
+        "end_left",
+        "end_right",
+        "back"
+      ],
+      "required": [
+        "door_style",
+        "end_left",
+        "end_right"
+      ],
+      "defaults": {},
+      "notes": []
+    },
+    {
+      "id": "397e68bb-eddf-546c-81aa-c8edfafd3572",
+      "code": "base_doors_rollouts",
+      "name": "Base, doors with roll-outs",
+      "type": "base",
+      "availability": "available",
+      "description": null,
+      "from_library": [
+        {
+          "template": 7,
+          "name": "Base 2 Doors 2 Rollouts",
+          "example": "30 x 34 3/4 x 23 3/4"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "30",
+            "source": "library"
+          },
+          "min": {
+            "value": "8",
+            "source": "owner-review"
+          },
+          "max": {
+            "value": "40 1/4",
+            "source": "owner-review"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "34 3/4",
+            "source": "owner-review"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "23 3/4",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [
+        {
+          "kind": "doors",
+          "count": null
+        }
+      ],
+      "inside": {
+        "rollouts": 2
+      },
+      "toe_kick": true,
+      "options": [
+        "door_style",
+        "hinge_side",
+        "end_left",
+        "end_right",
+        "back"
+      ],
+      "required": [
+        "door_style",
+        "end_left",
+        "end_right"
+      ],
+      "defaults": {},
+      "notes": []
+    },
+    {
+      "id": "273602a5-a800-5e5c-aeab-43af8384d703",
+      "code": "base_drawer_doors",
+      "name": "Base, drawer over doors",
+      "type": "base",
+      "availability": "available",
+      "description": null,
+      "from_library": [
+        {
+          "template": 10,
+          "name": "Base 1 Drw 1 Door",
+          "example": "15 x 34 3/4 x 23 3/4"
+        },
+        {
+          "template": 11,
+          "name": "Base 1 Drw",
+          "example": "30 x 34 3/4 x 23 3/4"
+        },
+        {
+          "template": 30,
+          "name": "Base2524",
+          "example": "25 x 34 1/2 x 23 3/4"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "15",
+            "source": "library"
+          },
+          "min": {
+            "value": "12",
+            "source": "owner-review"
+          },
+          "max": {
+            "value": "40 1/4",
+            "source": "owner-review"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "34 3/4",
+            "source": "owner-review"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "23 3/4",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [
+        {
+          "kind": "drawers",
+          "count": 1
+        },
+        {
+          "kind": "doors",
+          "count": null
+        }
+      ],
+      "inside": {
+        "adjustable_shelves": 1
+      },
+      "toe_kick": true,
+      "options": [
+        "door_style",
+        "hinge_side",
+        "end_left",
+        "end_right",
+        "back"
+      ],
+      "required": [
+        "door_style",
+        "end_left",
+        "end_right"
+      ],
+      "defaults": {},
+      "notes": []
+    },
+    {
+      "id": "b799fe8e-675c-5403-a3f1-101b62006f11",
+      "code": "base_drawer_doors_rollouts",
+      "name": "Base, drawer over doors with roll-outs",
+      "type": "base",
+      "availability": "available",
+      "description": null,
+      "from_library": [
+        {
+          "template": 9,
+          "name": "Base 1 Draw 2 RO",
+          "example": "30 x 34 1/2 x 23 3/4"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "30",
+            "source": "library"
+          },
+          "min": {
+            "value": "12",
+            "source": "owner-review"
+          },
+          "max": {
+            "value": "40 1/4",
+            "source": "owner-review"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "34 3/4",
+            "source": "owner-review"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "23 3/4",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [
+        {
+          "kind": "drawers",
+          "count": 1
+        },
+        {
+          "kind": "doors",
+          "count": null
+        }
+      ],
+      "inside": {
+        "rollouts": 2
+      },
+      "toe_kick": true,
+      "options": [
+        "door_style",
+        "hinge_side",
+        "end_left",
+        "end_right",
+        "back"
+      ],
+      "required": [
+        "door_style",
+        "end_left",
+        "end_right"
+      ],
+      "defaults": {},
+      "notes": []
+    },
+    {
+      "id": "bee7204c-ea2b-541d-9b0d-01d00d970713",
+      "code": "base_2drawers_doors_rollouts",
+      "name": "Base, two drawers over doors with roll-outs",
+      "type": "base",
+      "availability": "available",
+      "description": null,
+      "from_library": [
+        {
+          "template": 12,
+          "name": "Base 2 Draw 2 RO",
+          "example": "30 x 34 1/2 x 23 3/4"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "30",
+            "source": "library"
+          },
+          "min": {
+            "value": "12",
+            "source": "owner-review"
+          },
+          "max": {
+            "value": "40 1/4",
+            "source": "owner-review"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "34 3/4",
+            "source": "owner-review"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "23 3/4",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [
+        {
+          "kind": "drawers",
+          "count": 2
+        },
+        {
+          "kind": "doors",
+          "count": null
+        }
+      ],
+      "inside": {
+        "rollouts": 2,
+        "fixed_shelves": 1,
+        "dividers": 2
+      },
+      "toe_kick": true,
+      "options": [
+        "door_style",
+        "hinge_side",
+        "end_left",
+        "end_right",
+        "back"
+      ],
+      "required": [
+        "door_style",
+        "end_left",
+        "end_right"
+      ],
+      "defaults": {},
+      "notes": []
+    },
+    {
+      "id": "0eb8f295-d9ef-5e50-b9b8-c88cef05c6f1",
+      "code": "base_3_drawers",
+      "name": "Base, 3 drawers",
+      "type": "base",
+      "availability": "available",
+      "description": null,
+      "from_library": [
+        {
+          "template": 13,
+          "name": "Base 3 Draw",
+          "example": "30 x 34 1/2 x 23 3/4"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "30",
+            "source": "library"
+          },
+          "min": {
+            "value": "12",
+            "source": "owner-review"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "34 3/4",
+            "source": "owner-review"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "23 3/4",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [
+        {
+          "kind": "drawers",
+          "count": 3
+        }
+      ],
+      "inside": {},
+      "toe_kick": true,
+      "options": [
+        "door_style",
+        "end_left",
+        "end_right",
+        "back"
+      ],
+      "required": [
+        "door_style",
+        "end_left",
+        "end_right"
+      ],
+      "defaults": {},
+      "notes": []
+    },
+    {
+      "id": "ebbe2b76-acf1-5e07-911a-509320098887",
+      "code": "base_4_drawers",
+      "name": "Base, 4 drawers",
+      "type": "base",
+      "availability": "available",
+      "description": null,
+      "from_library": [
+        {
+          "template": 14,
+          "name": "Base 4 Draw",
+          "example": "30 x 34 1/2 x 23 3/4"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "30",
+            "source": "library"
+          },
+          "min": {
+            "value": "12",
+            "source": "owner-review"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "34 3/4",
+            "source": "owner-review"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "23 3/4",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [
+        {
+          "kind": "drawers",
+          "count": 4
+        }
+      ],
+      "inside": {},
+      "toe_kick": true,
+      "options": [
+        "door_style",
+        "end_left",
+        "end_right",
+        "back"
+      ],
+      "required": [
+        "door_style",
+        "end_left",
+        "end_right"
+      ],
+      "defaults": {},
+      "notes": []
+    },
+    {
+      "id": "f65d5700-4ee1-5cfc-b7ee-1e74d01ad1b2",
+      "code": "sink_base",
+      "name": "Sink base",
+      "type": "base",
+      "availability": "available",
+      "description": null,
+      "from_library": [
+        {
+          "template": 15,
+          "name": "Sink3624",
+          "example": "36 x 34 3/4 x 23 3/4"
+        },
+        {
+          "template": 16,
+          "name": "FlipDownSink",
+          "example": "36 x 34 3/4 x 23 3/4"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "36",
+            "source": "library"
+          },
+          "min": {
+            "value": "8",
+            "source": "owner-review"
+          },
+          "max": {
+            "value": "40 1/4",
+            "source": "owner-review"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "34 3/4",
+            "source": "owner-review"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "23 3/4",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [
+        {
+          "kind": "doors",
+          "count": null
+        }
+      ],
+      "inside": {},
+      "toe_kick": true,
+      "options": [
+        "door_style",
+        "hinge_side",
+        "end_left",
+        "end_right",
+        "back",
+        "sink_front"
+      ],
+      "required": [
+        "door_style",
+        "end_left",
+        "end_right",
+        "sink_front"
+      ],
+      "defaults": {
+        "sink_front": {
+          "value": "full_height_doors_skirt",
+          "source": "owner-review"
+        }
+      },
+      "notes": [
+        {
+          "value": "Default build: full-height doors with a skirt front, plywood, a cut-out bottom and back for plumbing, plus loose full panels to cover the side the plumbing does not come through. A false drawer front or a tip-out tray is an upgrade.",
+          "source": "owner-review"
+        }
+      ]
+    },
+    {
+      "id": "2b064150-bfda-5f23-9b9f-d2b4960a1a41",
+      "code": "dishwasher_opening",
+      "name": "Dishwasher opening",
+      "type": "appliance_opening",
+      "availability": "available",
+      "description": null,
+      "from_library": [
+        {
+          "template": 23,
+          "name": "Dishwasher Box",
+          "example": "25 1/4 x 34 3/4 x 24 1/2"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "25 1/4",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "34 3/4",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "24 1/2",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [],
+      "inside": {},
+      "toe_kick": false,
+      "options": [],
+      "required": [],
+      "defaults": {},
+      "notes": []
+    },
+    {
+      "id": "7431da08-2b56-5597-bca5-8e95c5bee27d",
+      "code": "pencil_drawer",
+      "name": "Pencil drawer",
+      "type": "drawer_unit",
+      "availability": "available",
+      "description": "A shallow drawer box (6 1/2\" high in the example) that hangs under a counter or desk.",
+      "from_library": [
+        {
+          "template": 24,
+          "name": "Pencil Dr2624",
+          "example": "26 1/8 x 6 1/2 x 23 3/4"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "26 1/8",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "6 1/2",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "23 3/4",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [
+        {
+          "kind": "drawers",
+          "count": 1
+        }
+      ],
+      "inside": {},
+      "toe_kick": false,
+      "options": [
+        "door_style"
+      ],
+      "required": [
+        "door_style"
+      ],
+      "defaults": {},
+      "notes": []
+    },
+    {
+      "id": "17c4b404-a512-5579-acab-ee5c9b576a89",
+      "code": "angled_end_base",
+      "name": "Angled end base",
+      "type": "base",
+      "availability": "available",
+      "description": "An angled end cabinet: its door sits on a 45-degree face, so the run steps back at the end instead of stopping square.",
+      "from_library": [
+        {
+          "template": 26,
+          "name": "Angled Right side",
+          "example": "13 x 34 1/2 x 23 3/4"
+        },
+        {
+          "template": 27,
+          "name": "Angled Left Side",
+          "example": "12 x 34 1/2 x 18"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "13",
+            "source": "library"
+          },
+          "min": {
+            "value": "8",
+            "source": "owner-review"
+          },
+          "max": {
+            "value": "40 1/4",
+            "source": "owner-review"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "34 3/4",
+            "source": "owner-review"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "23 3/4",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [
+        {
+          "kind": "doors",
+          "count": 1
+        }
+      ],
+      "inside": {
+        "adjustable_shelves": 2
+      },
+      "toe_kick": true,
+      "options": [
+        "door_style",
+        "hinge_side",
+        "hand",
+        "end_left",
+        "end_right",
+        "back"
+      ],
+      "required": [
+        "door_style",
+        "hand",
+        "end_left",
+        "end_right"
+      ],
+      "defaults": {},
+      "notes": [
+        {
+          "value": "A base cabinet with a toe kick like every other base. The library template leaves the toe kick out.",
+          "source": "owner-review"
+        }
+      ],
+      "hand_meaning": "Which end of the run it finishes. The door sits on a 45-degree face."
+    },
+    {
+      "id": "7b015a7b-8997-51f0-9244-58f7fb3c9c48",
+      "code": "spice_pullout",
+      "name": "Spice pull-out",
+      "type": "base",
+      "availability": "available",
+      "description": "A narrow, full-height pull-out for spices.",
+      "from_library": [
+        {
+          "template": 28,
+          "name": "Pullout824",
+          "example": "7 1/2 x 34 3/4 x 23 3/4"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "7 1/2",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "34 3/4",
+            "source": "owner-review"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "23 3/4",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [
+        {
+          "kind": "pullout",
+          "count": 1
+        }
+      ],
+      "inside": {},
+      "toe_kick": true,
+      "options": [
+        "door_style",
+        "end_left",
+        "end_right",
+        "back"
+      ],
+      "required": [
+        "door_style",
+        "end_left",
+        "end_right"
+      ],
+      "defaults": {},
+      "notes": [
+        {
+          "value": "A narrow, full-height door pull-out for spices.",
+          "source": "owner-review"
+        }
+      ]
+    },
+    {
+      "id": "1018c7c3-0f17-5bd7-b02d-4bce2e537205",
+      "code": "garbage_pullout",
+      "name": "Garbage pull-out",
+      "type": "base",
+      "availability": "available",
+      "description": "A drawer over a pull-out for a double garbage can.",
+      "from_library": [
+        {
+          "template": 29,
+          "name": "Pullout Garbage1724",
+          "example": "16 1/2 x 34 3/4 x 23 3/4"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "16 1/2",
+            "source": "library"
+          },
+          "min": {
+            "value": "12",
+            "source": "owner-review"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "34 3/4",
+            "source": "owner-review"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "23 3/4",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [
+        {
+          "kind": "drawers",
+          "count": 1
+        },
+        {
+          "kind": "pullout",
+          "count": 1
+        }
+      ],
+      "inside": {
+        "fixed_shelves": 1
+      },
+      "toe_kick": true,
+      "options": [
+        "door_style",
+        "end_left",
+        "end_right",
+        "back"
+      ],
+      "required": [
+        "door_style",
+        "end_left",
+        "end_right"
+      ],
+      "defaults": {},
+      "notes": [
+        {
+          "value": "A working drawer at the top, over a full-height pull-out front. The handle on the pull-out front is not centred: it sits where the handle of the second drawer from the top of a four-drawer bank sits (owner, 2026-11-12; before, the middle drawer of a three-drawer bank).",
+          "source": "owner-request-2026-11-12"
+        }
+      ]
+    },
+    {
+      "id": "89390a63-38fb-5d7d-95d4-ba4a8acf0383",
+      "code": "blind_corner_base",
+      "name": "Blind corner base",
+      "type": "base",
+      "availability": "available",
+      "description": "A blind-corner base: one door beside a fixed blind panel that tucks into the corner behind the cabinet on the other wall.",
+      "from_library": [
+        {
+          "template": 34,
+          "name": "Base3724",
+          "example": "36 1/2 x 34 3/4 x 23 3/4"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "36 1/2",
+            "source": "library"
+          },
+          "min": {
+            "value": "8",
+            "source": "owner-review"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "34 3/4",
+            "source": "owner-review"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "23 3/4",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [
+        {
+          "kind": "doors",
+          "count": 1
+        },
+        {
+          "kind": "fixed_panel",
+          "count": 1
+        }
+      ],
+      "inside": {
+        "dividers": 1
+      },
+      "toe_kick": true,
+      "options": [
+        "door_style",
+        "hinge_side",
+        "hand",
+        "end_left",
+        "end_right",
+        "back"
+      ],
+      "required": [
+        "door_style",
+        "hand",
+        "end_left",
+        "end_right"
+      ],
+      "defaults": {},
+      "notes": [
+        {
+          "value": "Confirmed as the blind-corner base.",
+          "source": "owner-review"
+        }
+      ],
+      "hand_meaning": "Which side the blind (fixed) panel is on. It tucks behind the cabinet on the other wall."
+    },
+    {
+      "id": "ff53cf46-0eff-5db3-8bb3-4110eda9fff4",
+      "code": "corner_organizer_base",
+      "name": "Blind corner base with pull-out organizer",
+      "type": "base",
+      "availability": "available",
+      "description": "A blind-corner base with a pull-out corner organizer: one door beside a fixed blind panel.",
+      "from_library": [
+        {
+          "template": 35,
+          "name": "Cornerstone Maxx Right",
+          "example": "36 1/2 x 34 3/4 x 23 3/4"
+        },
+        {
+          "template": 36,
+          "name": "Cornerstone Maxx Left",
+          "example": "38 1/2 x 34 3/4 x 23 3/4"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "36 1/2",
+            "source": "library"
+          },
+          "min": {
+            "value": "8",
+            "source": "owner-review"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "34 3/4",
+            "source": "owner-review"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "23 3/4",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [
+        {
+          "kind": "fixed_panel",
+          "count": 1
+        },
+        {
+          "kind": "doors",
+          "count": 1
+        }
+      ],
+      "inside": {
+        "dividers": 1
+      },
+      "toe_kick": true,
+      "options": [
+        "door_style",
+        "hinge_side",
+        "hand",
+        "end_left",
+        "end_right",
+        "back"
+      ],
+      "required": [
+        "door_style",
+        "hand",
+        "end_left",
+        "end_right"
+      ],
+      "defaults": {},
+      "notes": [],
+      "hand_meaning": "Which side the blind (fixed) panel is on."
+    },
+    {
+      "id": "ff0b25c2-8cde-5981-91b5-e82b965c42b7",
+      "code": "corner_base",
+      "name": "Corner base",
+      "type": "corner_base",
+      "availability": "available",
+      "description": "An L-shaped corner base with its door on the inside corner.",
+      "from_library": [
+        {
+          "template": 17,
+          "name": "BCC3636",
+          "example": "36 x 34 3/4 x 36"
+        },
+        {
+          "template": 18,
+          "name": "BCC3434",
+          "example": "34 x 34 3/4 x 34"
+        },
+        {
+          "template": 20,
+          "name": "BCC3333",
+          "example": "33 x 34 3/4 x 33"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "36",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "34 3/4",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "36",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [
+        {
+          "kind": "doors",
+          "count": 1
+        }
+      ],
+      "inside": {
+        "fixed_shelves": 1
+      },
+      "toe_kick": true,
+      "options": [
+        "door_style",
+        "hinge_side",
+        "end_left",
+        "end_right",
+        "back"
+      ],
+      "required": [
+        "door_style",
+        "hinge_side",
+        "end_left",
+        "end_right"
+      ],
+      "defaults": {},
+      "notes": []
+    },
+    {
+      "id": "bd33b05f-87e4-5f8f-a1c1-5f7ae14b365a",
+      "code": "corner_base_adjustable",
+      "name": "Corner base, adjustable shelves",
+      "type": "corner_base",
+      "availability": "available",
+      "description": "The corner base with adjustable shelves instead of a fixed one.",
+      "from_library": [
+        {
+          "template": 19,
+          "name": "BCADJ3434",
+          "example": "34 x 34 3/4 x 34"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "34",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "34 3/4",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "34",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [
+        {
+          "kind": "doors",
+          "count": 1
+        }
+      ],
+      "inside": {
+        "adjustable_shelves": 2
+      },
+      "toe_kick": true,
+      "options": [
+        "door_style",
+        "hinge_side",
+        "end_left",
+        "end_right",
+        "back"
+      ],
+      "required": [
+        "door_style",
+        "hinge_side",
+        "end_left",
+        "end_right"
+      ],
+      "defaults": {},
+      "notes": []
+    },
+    {
+      "id": "d0c6a46d-2e7a-5fd9-874f-4899561fdf1b",
+      "code": "corner_drawer_base",
+      "name": "Corner drawer base",
+      "type": "corner_base",
+      "availability": "available",
+      "description": "Three drawers on the angled face of a corner cabinet. It is made in one size only.",
+      "from_library": [
+        {
+          "template": 21,
+          "name": "BC Drawer",
+          "example": "36 5/8 x 34 3/4 x 36 5/8"
+        }
+      ],
+      "resizable": false,
+      "size": {
+        "width": {
+          "default": {
+            "value": "36 5/8",
+            "source": "library"
+          },
+          "min": {
+            "value": "36 5/8",
+            "source": "owner-review"
+          },
+          "max": {
+            "value": "36 5/8",
+            "source": "owner-review"
+          },
+          "step": {
+            "value": null,
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "34 3/4",
+            "source": "library"
+          },
+          "min": {
+            "value": "34 3/4",
+            "source": "owner-review"
+          },
+          "max": {
+            "value": "34 3/4",
+            "source": "owner-review"
+          },
+          "step": {
+            "value": null,
+            "source": "owner-review"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "36 5/8",
+            "source": "library"
+          },
+          "min": {
+            "value": "36 5/8",
+            "source": "owner-review"
+          },
+          "max": {
+            "value": "36 5/8",
+            "source": "owner-review"
+          },
+          "step": {
+            "value": null,
+            "source": "owner-review"
+          }
+        }
+      },
+      "front": [
+        {
+          "kind": "drawers",
+          "count": 3
+        }
+      ],
+      "inside": {
+        "dividers": 2
+      },
+      "toe_kick": true,
+      "options": [
+        "door_style",
+        "end_left",
+        "end_right",
+        "back"
+      ],
+      "required": [
+        "door_style",
+        "end_left",
+        "end_right"
+      ],
+      "defaults": {},
+      "notes": [
+        {
+          "value": "Fixed size only.",
+          "source": "owner-review"
+        }
+      ]
+    },
+    {
+      "id": "eb5fbf3d-5f04-5076-8f04-41a3071ea179",
+      "code": "upper_doors",
+      "name": "Upper, doors",
+      "type": "wall",
+      "availability": "available",
+      "description": null,
+      "from_library": [
+        {
+          "template": 38,
+          "name": "Std Upper",
+          "example": "28 x 30 x 12"
+        },
+        {
+          "template": 40,
+          "name": "Std Upper Single Door",
+          "example": "15 x 30 x 12"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "28",
+            "source": "library"
+          },
+          "min": {
+            "value": "8",
+            "source": "owner-review"
+          },
+          "max": {
+            "value": "40 1/4",
+            "source": "owner-review"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "30",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "12",
+            "source": "owner-review"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [
+        {
+          "kind": "doors",
+          "count": null
+        }
+      ],
+      "inside": {
+        "adjustable_shelves": 2
+      },
+      "toe_kick": false,
+      "options": [
+        "door_style",
+        "hinge_side",
+        "end_left",
+        "end_right",
+        "back"
+      ],
+      "required": [
+        "door_style",
+        "end_left",
+        "end_right"
+      ],
+      "defaults": {},
+      "notes": []
+    },
+    {
+      "id": "49f3319c-afc8-5d2d-a019-59ac9423262f",
+      "code": "upper_doors_36",
+      "name": "Upper, doors, 36\" high or more",
+      "type": "wall",
+      "availability": "available",
+      "description": null,
+      "from_library": [
+        {
+          "template": 39,
+          "name": "Std Upper 36 high or more",
+          "example": "32 x 36 x 12"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "32",
+            "source": "library"
+          },
+          "min": {
+            "value": "8",
+            "source": "owner-review"
+          },
+          "max": {
+            "value": "40 1/4",
+            "source": "owner-review"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "36",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "12",
+            "source": "owner-review"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [
+        {
+          "kind": "doors",
+          "count": null
+        }
+      ],
+      "inside": {
+        "adjustable_shelves": 3
+      },
+      "toe_kick": false,
+      "options": [
+        "door_style",
+        "hinge_side",
+        "end_left",
+        "end_right",
+        "back"
+      ],
+      "required": [
+        "door_style",
+        "end_left",
+        "end_right"
+      ],
+      "defaults": {},
+      "notes": []
+    },
+    {
+      "id": "8e2fe940-ca09-5d0b-bc3e-d774691b8788",
+      "code": "upper_no_shelf",
+      "name": "Upper, short, no shelf",
+      "type": "wall",
+      "availability": "available",
+      "description": "A short upper with no shelf, for example over a fridge.",
+      "from_library": [
+        {
+          "template": 41,
+          "name": "Std Upper no shelf",
+          "example": "30 x 15 x 12"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "30",
+            "source": "library"
+          },
+          "min": {
+            "value": "8",
+            "source": "owner-review"
+          },
+          "max": {
+            "value": "40 1/4",
+            "source": "owner-review"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "15",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "12",
+            "source": "owner-review"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [
+        {
+          "kind": "doors",
+          "count": null
+        }
+      ],
+      "inside": {},
+      "toe_kick": false,
+      "options": [
+        "door_style",
+        "hinge_side",
+        "end_left",
+        "end_right",
+        "back"
+      ],
+      "required": [
+        "door_style",
+        "end_left",
+        "end_right"
+      ],
+      "defaults": {},
+      "notes": []
+    },
+    {
+      "id": "11f23571-1fc8-544d-a2ac-4b4699f05da4",
+      "code": "upper_with_lights",
+      "name": "Upper with under-cabinet light",
+      "type": "wall",
+      "availability": "available",
+      "description": "An upper with an LED strip light and a light-rail panel under it.",
+      "from_library": [
+        {
+          "template": 42,
+          "name": "Upper with Lights",
+          "example": "33 x 30 x 12"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "33",
+            "source": "library"
+          },
+          "min": {
+            "value": "8",
+            "source": "owner-review"
+          },
+          "max": {
+            "value": "40 1/4",
+            "source": "owner-review"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "30",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "12",
+            "source": "owner-review"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [
+        {
+          "kind": "doors",
+          "count": null
+        }
+      ],
+      "inside": {
+        "adjustable_shelves": 2
+      },
+      "toe_kick": false,
+      "options": [
+        "door_style",
+        "hinge_side",
+        "end_left",
+        "end_right",
+        "back"
+      ],
+      "required": [
+        "door_style",
+        "end_left",
+        "end_right"
+      ],
+      "defaults": {},
+      "notes": []
+    },
+    {
+      "id": "db68c587-f2e8-5089-a52a-c0c6a86f447a",
+      "code": "microwave_upper",
+      "name": "Microwave upper",
+      "type": "wall",
+      "availability": "available",
+      "description": "Short doors on top, and an open space below whose floor holds a microwave.",
+      "from_library": [
+        {
+          "template": 44,
+          "name": "Micro Cabinet",
+          "example": "25 3/8 x 30 x 12"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "25 3/8",
+            "source": "library"
+          },
+          "min": {
+            "value": "8",
+            "source": "owner-review"
+          },
+          "max": {
+            "value": "40 1/4",
+            "source": "owner-review"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "30",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "12",
+            "source": "owner-review"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [
+        {
+          "kind": "doors",
+          "count": null
+        },
+        {
+          "kind": "open",
+          "count": null
+        }
+      ],
+      "inside": {
+        "fixed_shelves": 1
+      },
+      "toe_kick": false,
+      "options": [
+        "door_style",
+        "hinge_side",
+        "end_left",
+        "end_right",
+        "back"
+      ],
+      "required": [
+        "door_style",
+        "end_left",
+        "end_right"
+      ],
+      "defaults": {},
+      "notes": []
+    },
+    {
+      "id": "b23feea8-3502-5fbe-983e-c935a21610b0",
+      "code": "upper_corner_45",
+      "name": "Upper corner, 45-degree",
+      "type": "corner_wall",
+      "availability": "available",
+      "description": "An upper corner cabinet with its door on a 45-degree face.",
+      "from_library": [
+        {
+          "template": 45,
+          "name": "45 Corner Clip",
+          "example": "24 x 30 x 24"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "24",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "30",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "24",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [
+        {
+          "kind": "doors",
+          "count": 1
+        }
+      ],
+      "inside": {
+        "adjustable_shelves": 2
+      },
+      "toe_kick": false,
+      "options": [
+        "door_style",
+        "hinge_side",
+        "end_left",
+        "end_right",
+        "back"
+      ],
+      "required": [
+        "door_style",
+        "hinge_side",
+        "end_left",
+        "end_right"
+      ],
+      "defaults": {},
+      "notes": []
+    },
+    {
+      "id": "1ea4f394-6345-521a-8d12-7e13d2276ff8",
+      "code": "upper_corner_90",
+      "name": "Upper corner",
+      "type": "corner_wall",
+      "availability": "available",
+      "description": "The standard upper corner cabinet. Its two sides are ideally the same length, but they can differ so the cabinets beside it measure out better.",
+      "from_library": [
+        {
+          "template": 46,
+          "name": "90 Upper Corner Clip",
+          "example": "24 x 38 x 24"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "24",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "38",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "24",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [
+        {
+          "kind": "doors",
+          "count": 1
+        }
+      ],
+      "inside": {
+        "adjustable_shelves": 2
+      },
+      "toe_kick": false,
+      "options": [
+        "door_style",
+        "hinge_side",
+        "end_left",
+        "end_right",
+        "back"
+      ],
+      "required": [
+        "door_style",
+        "hinge_side",
+        "end_left",
+        "end_right"
+      ],
+      "defaults": {},
+      "notes": []
+    },
+    {
+      "id": "f683f905-992c-587b-b662-2a16e49209e6",
+      "code": "floating_shelf",
+      "name": "Floating shelf",
+      "type": "shelf",
+      "availability": "available",
+      "description": "A 2\"-thick floating shelf with a light rail on three sides. No box and no doors.",
+      "from_library": [
+        {
+          "template": 48,
+          "name": "Floating Shelf",
+          "example": "29 3/4 x 2 x 10"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "29 3/4",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "2",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "10",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [],
+      "inside": {},
+      "toe_kick": false,
+      "options": [],
+      "required": [],
+      "defaults": {},
+      "notes": []
+    },
+    {
+      "id": "5e42f50a-1f86-5ad2-83cd-581aeba0903b",
+      "code": "open_shelf_end",
+      "name": "Open shelf end",
+      "type": "wall",
+      "availability": "available",
+      "description": "An open, door-less shelving unit for the end of a run of uppers, with shelves that wrap around the corner.",
+      "from_library": [
+        {
+          "template": 49,
+          "name": "Open Shelf Left",
+          "example": "12 x 30 x 12"
+        },
+        {
+          "template": 50,
+          "name": "Open Shelf Right",
+          "example": "12 x 30 x 12"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "12",
+            "source": "library"
+          },
+          "min": {
+            "value": "8",
+            "source": "owner-review"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "30",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "12",
+            "source": "owner-review"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [
+        {
+          "kind": "open",
+          "count": null
+        }
+      ],
+      "inside": {
+        "fixed_shelves": 2
+      },
+      "toe_kick": false,
+      "options": [
+        "hand",
+        "end_left",
+        "end_right",
+        "back"
+      ],
+      "required": [
+        "hand",
+        "end_left",
+        "end_right"
+      ],
+      "defaults": {},
+      "notes": [],
+      "hand_meaning": "Which end of the run of uppers it finishes."
+    },
+    {
+      "id": "0a89c797-1c0a-5db8-b5d3-9b15726145b3",
+      "code": "above_toilet",
+      "name": "Upper over toilet",
+      "type": "wall",
+      "availability": "available",
+      "description": "Doors at the top and an open shelf space at the bottom.",
+      "from_library": [
+        {
+          "template": 68,
+          "name": "Above Commode",
+          "example": "33 x 36 x 12"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "33",
+            "source": "library"
+          },
+          "min": {
+            "value": "8",
+            "source": "owner-review"
+          },
+          "max": {
+            "value": "40 1/4",
+            "source": "owner-review"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "36",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "12",
+            "source": "owner-review"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [
+        {
+          "kind": "doors",
+          "count": null
+        },
+        {
+          "kind": "open",
+          "count": null
+        }
+      ],
+      "inside": {
+        "fixed_shelves": 1,
+        "adjustable_shelves": 2
+      },
+      "toe_kick": false,
+      "options": [
+        "door_style",
+        "hinge_side",
+        "end_left",
+        "end_right",
+        "back"
+      ],
+      "required": [
+        "door_style",
+        "end_left",
+        "end_right"
+      ],
+      "defaults": {},
+      "notes": []
+    },
+    {
+      "id": "61b9f0fd-359b-5c49-b916-b6438bab81f0",
+      "code": "mirror_cabinet",
+      "name": "Mirror cabinet",
+      "type": "bath",
+      "availability": "available",
+      "description": "A bathroom wall cabinet whose door is a mirror.",
+      "from_library": [
+        {
+          "template": 53,
+          "name": "MIrror cab",
+          "example": "24 x 34 x 8"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "24",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "34",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "8",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [
+        {
+          "kind": "doors",
+          "count": 1
+        }
+      ],
+      "inside": {
+        "adjustable_shelves": 2
+      },
+      "toe_kick": false,
+      "options": [
+        "door_style",
+        "hinge_side",
+        "end_left",
+        "end_right"
+      ],
+      "required": [
+        "door_style",
+        "hinge_side",
+        "end_left",
+        "end_right"
+      ],
+      "defaults": {},
+      "notes": []
+    },
+    {
+      "id": "af4f3b02-80dc-59d0-bfdd-4009baf91b91",
+      "code": "medicine_cabinet",
+      "name": "Medicine cabinet",
+      "type": "bath",
+      "availability": "available",
+      "description": "A recessed medicine cabinet: one door and shelves.",
+      "from_library": [
+        {
+          "template": 69,
+          "name": "Medicine Cabinet",
+          "example": "30 x 36 x 5"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "30",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "36",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "5",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [
+        {
+          "kind": "doors",
+          "count": 1
+        }
+      ],
+      "inside": {
+        "adjustable_shelves": 3
+      },
+      "toe_kick": false,
+      "options": [
+        "door_style",
+        "hinge_side",
+        "end_left",
+        "end_right"
+      ],
+      "required": [
+        "door_style",
+        "hinge_side",
+        "end_left",
+        "end_right"
+      ],
+      "defaults": {},
+      "notes": []
+    },
+    {
+      "id": "bdc52bcd-a64f-59b0-bad9-02941587f89b",
+      "code": "medicine_cabinet_small",
+      "name": "Small medicine cabinet",
+      "type": "bath",
+      "availability": "available",
+      "description": null,
+      "from_library": [
+        {
+          "template": 74,
+          "name": "Small Medicine Cabinet",
+          "example": "14 x 21 x 4 1/2"
+        },
+        {
+          "template": 76,
+          "name": "LSM MEDICINE",
+          "example": "14 1/4 x 21 x 4"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "14",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "21",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "4 1/2",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [
+        {
+          "kind": "doors",
+          "count": 1
+        }
+      ],
+      "inside": {
+        "adjustable_shelves": 2
+      },
+      "toe_kick": false,
+      "options": [
+        "door_style",
+        "hinge_side",
+        "end_left",
+        "end_right"
+      ],
+      "required": [
+        "door_style",
+        "hinge_side",
+        "end_left",
+        "end_right"
+      ],
+      "defaults": {},
+      "notes": []
+    },
+    {
+      "id": "11123856-fdd2-5ad6-8298-e4765eedf050",
+      "code": "tall_oven",
+      "name": "Tall, oven opening",
+      "type": "tall",
+      "availability": "available",
+      "description": "A drawer at the bottom, an open space for a wall oven, and doors on top.",
+      "from_library": [
+        {
+          "template": 58,
+          "name": "With Opening",
+          "example": "30 x 84 x 26"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "30",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": "40 1/4",
+            "source": "owner-review"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "84",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "26",
+            "source": "owner-review"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [
+        {
+          "kind": "doors",
+          "count": null
+        },
+        {
+          "kind": "open",
+          "count": null
+        },
+        {
+          "kind": "drawers",
+          "count": 1
+        }
+      ],
+      "inside": {
+        "fixed_shelves": 3,
+        "adjustable_shelves": 1
+      },
+      "toe_kick": true,
+      "options": [
+        "door_style",
+        "hinge_side",
+        "end_left",
+        "end_right",
+        "back"
+      ],
+      "required": [
+        "door_style",
+        "end_left",
+        "end_right"
+      ],
+      "defaults": {},
+      "notes": []
+    },
+    {
+      "id": "f01721f6-671b-5c71-abd9-6edbbbda74cf",
+      "code": "tall_pantry",
+      "name": "Tall pantry",
+      "type": "tall",
+      "availability": "available",
+      "description": null,
+      "from_library": [
+        {
+          "template": 59,
+          "name": "Std Tall",
+          "example": "30 x 84 x 23 3/4"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "30",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": "40 1/4",
+            "source": "owner-review"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "84",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "26",
+            "source": "owner-review"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [
+        {
+          "kind": "doors",
+          "count": null
+        },
+        {
+          "kind": "doors",
+          "count": null
+        }
+      ],
+      "inside": {
+        "fixed_shelves": 1
+      },
+      "toe_kick": true,
+      "options": [
+        "door_style",
+        "hinge_side",
+        "end_left",
+        "end_right",
+        "back"
+      ],
+      "required": [
+        "door_style",
+        "end_left",
+        "end_right"
+      ],
+      "defaults": {},
+      "notes": []
+    },
+    {
+      "id": "fdcf3330-3124-57f4-8b1e-761e9cca7629",
+      "code": "tall_double_oven",
+      "name": "Tall, double wall oven",
+      "type": "tall",
+      "availability": "available",
+      "description": "Doors on top, an open space for a double wall oven, and a drawer at the bottom.",
+      "from_library": [
+        {
+          "template": 60,
+          "name": "Double Wall Oven Pantry",
+          "example": "30 x 104 x 26"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "30",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": "40 1/4",
+            "source": "owner-review"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "104",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "26",
+            "source": "owner-review"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [
+        {
+          "kind": "doors",
+          "count": null
+        },
+        {
+          "kind": "open",
+          "count": null
+        },
+        {
+          "kind": "drawers",
+          "count": 1
+        }
+      ],
+      "inside": {
+        "fixed_shelves": 3,
+        "adjustable_shelves": 1
+      },
+      "toe_kick": true,
+      "options": [
+        "door_style",
+        "hinge_side",
+        "end_left",
+        "end_right",
+        "back"
+      ],
+      "required": [
+        "door_style",
+        "end_left",
+        "end_right"
+      ],
+      "defaults": {},
+      "notes": []
+    },
+    {
+      "id": "7cf9e303-1071-510d-bc07-7fe2e11c80b8",
+      "code": "tall_appliance_stack",
+      "name": "Tall, appliance stack",
+      "type": "tall",
+      "availability": "available",
+      "description": "Doors on top, an open space for appliances, a roll-out shelf and a drawer at the bottom.",
+      "from_library": [
+        {
+          "template": 61,
+          "name": "Duplrc",
+          "example": "27 x 84 x 26"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "27",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": "40 1/4",
+            "source": "owner-review"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "84",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "26",
+            "source": "owner-review"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [
+        {
+          "kind": "doors",
+          "count": null
+        },
+        {
+          "kind": "open",
+          "count": null
+        },
+        {
+          "kind": "drawers",
+          "count": 1
+        }
+      ],
+      "inside": {
+        "fixed_shelves": 3,
+        "rollouts": 1
+      },
+      "toe_kick": true,
+      "options": [
+        "door_style",
+        "hinge_side",
+        "end_left",
+        "end_right",
+        "back"
+      ],
+      "required": [
+        "door_style",
+        "end_left",
+        "end_right"
+      ],
+      "defaults": {},
+      "notes": []
+    },
+    {
+      "id": "82b6ced5-3a94-5bf2-a1e9-72a5ced3c3a0",
+      "code": "closet_tower",
+      "name": "Closet tower",
+      "type": "closet",
+      "availability": "available",
+      "description": "An open bedroom closet tower with shelves and no doors.",
+      "from_library": [
+        {
+          "template": 62,
+          "name": "Bedroom Closet",
+          "example": "27 x 80 x 18"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "27",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "80",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "18",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [
+        {
+          "kind": "open",
+          "count": null
+        }
+      ],
+      "inside": {
+        "fixed_shelves": 1,
+        "adjustable_shelves": 4
+      },
+      "toe_kick": false,
+      "options": [
+        "end_left",
+        "end_right"
+      ],
+      "required": [
+        "end_left",
+        "end_right"
+      ],
+      "defaults": {},
+      "notes": []
+    },
+    {
+      "id": "90a76e04-4562-52dc-82b5-7ad79782c255",
+      "code": "vanity_sink",
+      "name": "Vanity sink",
+      "type": "vanity",
+      "availability": "available",
+      "description": null,
+      "from_library": [
+        {
+          "template": 63,
+          "name": "VanitySink24",
+          "example": "24 x 32 1/2 x 20 3/4"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "24",
+            "source": "library"
+          },
+          "min": {
+            "value": "8",
+            "source": "owner-review"
+          },
+          "max": {
+            "value": "40 1/4",
+            "source": "owner-review"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "32 1/2",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "20 3/4",
+            "source": "owner-review"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [
+        {
+          "kind": "doors",
+          "count": null
+        }
+      ],
+      "inside": {},
+      "toe_kick": true,
+      "options": [
+        "door_style",
+        "hinge_side",
+        "end_left",
+        "end_right",
+        "back",
+        "sink_front"
+      ],
+      "required": [
+        "door_style",
+        "end_left",
+        "end_right",
+        "sink_front"
+      ],
+      "defaults": {
+        "sink_front": {
+          "value": "full_height_doors_skirt",
+          "source": "owner-review"
+        }
+      },
+      "notes": [
+        {
+          "value": "Follows the kitchen sink base rules and defaults at vanity sizes: full-height doors by default, a false drawer front as an upgrade.",
+          "source": "owner-review"
+        }
+      ]
+    },
+    {
+      "id": "1744876b-40d5-5b4a-b063-1a4ae1e940d7",
+      "code": "vanity_3_drawers",
+      "name": "Vanity, 3 drawers",
+      "type": "vanity",
+      "availability": "available",
+      "description": null,
+      "from_library": [
+        {
+          "template": 64,
+          "name": "Vanity3Dr",
+          "example": "22 1/2 x 32 1/2 x 20 3/4"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "22 1/2",
+            "source": "library"
+          },
+          "min": {
+            "value": "12",
+            "source": "owner-review"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "32 1/2",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "20 3/4",
+            "source": "owner-review"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [
+        {
+          "kind": "drawers",
+          "count": 3
+        }
+      ],
+      "inside": {},
+      "toe_kick": true,
+      "options": [
+        "door_style",
+        "end_left",
+        "end_right",
+        "back"
+      ],
+      "required": [
+        "door_style",
+        "end_left",
+        "end_right"
+      ],
+      "defaults": {},
+      "notes": []
+    },
+    {
+      "id": "4487689f-bb85-5375-99c8-0c1b64dadffa",
+      "code": "vanity_4_drawers",
+      "name": "Vanity, 4 drawers",
+      "type": "vanity",
+      "availability": "available",
+      "description": null,
+      "from_library": [
+        {
+          "template": 65,
+          "name": "V4D",
+          "example": "27 x 30 x 20 3/4"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "27",
+            "source": "library"
+          },
+          "min": {
+            "value": "12",
+            "source": "owner-review"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "30",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "20 3/4",
+            "source": "owner-review"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [
+        {
+          "kind": "drawers",
+          "count": 4
+        }
+      ],
+      "inside": {},
+      "toe_kick": true,
+      "options": [
+        "door_style",
+        "end_left",
+        "end_right",
+        "back"
+      ],
+      "required": [
+        "door_style",
+        "end_left",
+        "end_right"
+      ],
+      "defaults": {},
+      "notes": []
+    },
+    {
+      "id": "4862214c-6a74-596f-b704-534ecf3b911b",
+      "code": "vanity_drawer_doors",
+      "name": "Vanity, drawer over doors",
+      "type": "vanity",
+      "availability": "available",
+      "description": null,
+      "from_library": [
+        {
+          "template": 66,
+          "name": "Vanity 1 drawer AS",
+          "example": "24 x 32 1/2 x 20 3/4"
+        },
+        {
+          "template": 67,
+          "name": "Vanity1Draw1Door",
+          "example": "15 3/8 x 32 1/2 x 20 3/4"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "24",
+            "source": "library"
+          },
+          "min": {
+            "value": "12",
+            "source": "owner-review"
+          },
+          "max": {
+            "value": "40 1/4",
+            "source": "owner-review"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "32 1/2",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "20 3/4",
+            "source": "owner-review"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [
+        {
+          "kind": "drawers",
+          "count": 1
+        },
+        {
+          "kind": "doors",
+          "count": null
+        }
+      ],
+      "inside": {
+        "adjustable_shelves": 1
+      },
+      "toe_kick": true,
+      "options": [
+        "door_style",
+        "hinge_side",
+        "end_left",
+        "end_right",
+        "back"
+      ],
+      "required": [
+        "door_style",
+        "end_left",
+        "end_right"
+      ],
+      "defaults": {},
+      "notes": []
+    },
+    {
+      "id": "721b87f3-feda-507b-b94e-811968f2de5e",
+      "code": "vanity_furniture_2_drawers",
+      "name": "Furniture vanity, 2 drawers",
+      "type": "vanity",
+      "availability": "available",
+      "description": "Furniture style: a false front across the top over two drawers, legs on each side and a low shelf.",
+      "from_library": [
+        {
+          "template": 72,
+          "name": "Specialty vanity cabinet",
+          "example": "36 x 32 1/2 x 20 3/4"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "36",
+            "source": "library"
+          },
+          "min": {
+            "value": "12",
+            "source": "owner-review"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "32 1/2",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "20 3/4",
+            "source": "owner-review"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [
+        {
+          "kind": "false_front",
+          "count": 1
+        },
+        {
+          "kind": "drawers",
+          "count": 2
+        },
+        {
+          "kind": "open",
+          "count": null
+        }
+      ],
+      "inside": {
+        "fixed_shelves": 2,
+        "dividers": 2
+      },
+      "toe_kick": false,
+      "options": [
+        "door_style",
+        "end_left",
+        "end_right",
+        "back"
+      ],
+      "required": [
+        "door_style",
+        "end_left",
+        "end_right"
+      ],
+      "defaults": {},
+      "notes": []
+    },
+    {
+      "id": "28869dbe-c073-5e54-9fbb-4086a0359a91",
+      "code": "vanity_furniture_1_drawer",
+      "name": "Furniture vanity, 1 drawer",
+      "type": "vanity",
+      "availability": "available",
+      "description": "Furniture style: a false front across the top over one drawer, legs on each side and an open shelf below.",
+      "from_library": [
+        {
+          "template": 73,
+          "name": "Specialty vanity cabinet2",
+          "example": "41 x 32 1/2 x 20 3/4"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "41",
+            "source": "library"
+          },
+          "min": {
+            "value": "12",
+            "source": "owner-review"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "32 1/2",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "20 3/4",
+            "source": "owner-review"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [
+        {
+          "kind": "false_front",
+          "count": 1
+        },
+        {
+          "kind": "drawers",
+          "count": 1
+        },
+        {
+          "kind": "open",
+          "count": null
+        }
+      ],
+      "inside": {
+        "fixed_shelves": 2,
+        "dividers": 2
+      },
+      "toe_kick": false,
+      "options": [
+        "door_style",
+        "end_left",
+        "end_right",
+        "back"
+      ],
+      "required": [
+        "door_style",
+        "end_left",
+        "end_right"
+      ],
+      "defaults": {},
+      "notes": []
+    },
+    {
+      "id": "95338e12-5a95-52ee-a7de-b481c949b2e7",
+      "code": "vanity_sink_side_drawers",
+      "name": "Vanity sink with side drawers",
+      "type": "vanity",
+      "availability": "available",
+      "description": "A vanity sink with a bank of drawers on one side.",
+      "from_library": [
+        {
+          "template": 79,
+          "name": "Vanity Sink plus drawers on left",
+          "example": "36 x 32 1/2 x 20 3/4"
+        },
+        {
+          "template": 80,
+          "name": "Vanity Sink plus drawer on right",
+          "example": "36 x 32 1/2 x 20 3/4"
+        }
+      ],
+      "resizable": true,
+      "size": {
+        "width": {
+          "default": {
+            "value": "36",
+            "source": "library"
+          },
+          "min": {
+            "value": "12",
+            "source": "owner-review"
+          },
+          "max": {
+            "value": "40 1/4",
+            "source": "owner-review"
+          },
+          "step": {
+            "value": "1/16",
+            "source": "owner-review"
+          }
+        },
+        "height": {
+          "default": {
+            "value": "32 1/2",
+            "source": "library"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        },
+        "depth": {
+          "default": {
+            "value": "20 3/4",
+            "source": "owner-review"
+          },
+          "min": {
+            "value": null,
+            "source": "unknown"
+          },
+          "max": {
+            "value": null,
+            "source": "unknown"
+          },
+          "step": {
+            "value": null,
+            "source": "unknown"
+          }
+        }
+      },
+      "front": [
+        {
+          "kind": "false_front",
+          "count": 1
+        },
+        {
+          "kind": "doors",
+          "count": null
+        }
+      ],
+      "inside": {
+        "dividers": 1
+      },
+      "toe_kick": true,
+      "options": [
+        "door_style",
+        "hinge_side",
+        "hand",
+        "end_left",
+        "end_right",
+        "back",
+        "sink_front"
+      ],
+      "required": [
+        "door_style",
+        "hand",
+        "end_left",
+        "end_right",
+        "sink_front"
+      ],
+      "defaults": {
+        "sink_front": {
+          "value": "false_drawer_front",
+          "source": "owner-review"
+        }
+      },
+      "notes": [
+        {
+          "value": "This one has a false drawer front over the sink by default (only this template).",
+          "source": "owner-review"
+        }
+      ],
+      "hand_meaning": "Which side the bank of drawers is on."
+    }
+  ]
+}

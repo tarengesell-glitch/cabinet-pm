@@ -6,6 +6,8 @@
  */
 export const NAVY = '#1a3045';
 export const GOLD = '#d4b57f';
+/** A cabinet selected in Customize's 3D view and panel: the usual blue for a selection (owner, 2026-11-12). */
+export const SELECT_BLUE = '#2f7de1';
 export const INK = '#18181b';
 export const MUTED = '#71717a';
 export const RULE = '#e4e4e7';

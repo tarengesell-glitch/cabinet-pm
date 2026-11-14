@@ -25,6 +25,13 @@ export interface Look {
   readonly trimHex: string;
   readonly valance: string | null;
   readonly valanceHex: string;
+  /** The island's back and side panels, as chosen (null when not chosen): the 3D view draws them. */
+  readonly islandBack: string | null;
+  readonly islandSide: string | null;
+  /** The inside of the cabinets (the Interiors choice), or null when not chosen. */
+  readonly interiorHex: string | null;
+  /** How many tray organizers were asked for (they go in the cabinet over the fridge; owner, 2026-11-13). */
+  readonly trayOrganizers: number;
   /** Not a kitchen: no range or hood. */
   readonly plain: boolean;
   readonly counters: boolean;
@@ -314,9 +321,14 @@ export function corner(id: string): string {
   return svg('0 0 120 120', s);
 }
 
+/** The colour of an Interiors option: white, maple, or matching the cabinet colour. Null for an option it doesn't know. */
+export function interiorColour(id: string, door: string): string | null {
+  return id === 'white' ? '#F4F3EF' : id === 'prestige_maple' ? '#D9B98A' : id === 'tafisa_matching' ? door : null;
+}
+
 /** An open cabinet showing its inside colour. */
 export function interior(id: string, o: Look): string {
-  const col = id === 'white' ? '#F4F3EF' : id === 'prestige_maple' ? '#D9B98A' : o.door;
+  const col = interiorColour(id, o.door) ?? o.door;
   const g = id === 'prestige_maple' ? grain(col) : null;
   let s = (g ? `<defs>${g.def}</defs>` : '') + wall(160, 128) + R(0, 118, 160, 10, FLOOR);
   s += R(38, 12, 84, 106, mix(col, -0.08), `stroke="${mix(col, -0.3)}" stroke-width="1"`) + R(44, 16, 72, 96, col) + (g ? R(44, 16, 72, 96, `url(#${g.id})`) : '');

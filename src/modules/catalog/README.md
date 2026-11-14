@@ -2,10 +2,10 @@
 
 Our own list of what can be designed: item types, allowed size ranges and increments, options, required selections and invalid combinations. Stable IDs and a version history. Pricing reads from here (prices are not in yet: the owner sets per-inch prices later, kept separate from cabinet data).
 
-Status: **catalog version 1** (2026-11-07), 50 cabinet types built from the owner's review of the shop's own design library. See `docs/DECISIONS.md` "2026-11-07: The cabinet catalog".
+Status: **catalog version 2** (2026-11-12), the current one; version 1 (2026-11-07) is kept as published. 50 cabinet types built from the owner's review of the shop's own design library. See `docs/DECISIONS.md` "2026-11-07: The cabinet catalog". Version 2 adds the owner's 2026-11-12 choices ("Owner requests after the Fake Design kitchen"): the door opening (was Hinge side) gains Double doors; a Back option (unfinished, finished panel, finished door) on every cabinet with ends, not required; the Finished end is named Integrated finished end; the garbage pull-out's handle note. Item IDs are unchanged.
 
 ## Where things are
-- `data/catalog-v1.json`: the catalog, as data. Every value carries the key of its source (`owner-review`, `library` or `unknown`).
+- `data/catalog-v2.json` (current) and `data/catalog-v1.json`: the catalog, as data. Every value carries the key of its source (`owner-review`, `library`, `owner-request-2026-11-12` or `unknown`).
 - `model/catalog.ts`: reads and checks the file. A bad file stops the app at start-up with every problem listed.
 - `model/current.ts`: the published versions. **A published version file is never edited.** A change is a new file (`catalog-v2.json`) with a higher `catalog_version`; `__tests__/versions.test.ts` holds each published file's fingerprint and fails if one changes.
 - `model/checks.ts`: the buildability checks.

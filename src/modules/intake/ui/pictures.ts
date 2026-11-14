@@ -5,7 +5,7 @@
  */
 import type { Definition, FieldDef } from '../model/definition';
 import { Intake, type Answer, type IntakeState, type Option } from '../model/engine';
-import { backPanel, corner, doorClose, elevation, hardwareClose, interior, islandScene, plan, sidePanel, unitClose, type Look } from './art';
+import { backPanel, corner, doorClose, elevation, hardwareClose, interior, interiorColour, islandScene, plan, sidePanel, unitClose, type Look } from './art';
 
 const NEUTRAL_DOOR = '#DAD6CE';
 const NEUTRAL_COUNTER = '#B4ADA3';
@@ -59,6 +59,10 @@ export function lookOf(x: Intake): Look {
     trimHex: trim(x.effKey('top_trim_colour'), 'top_trim_colour_other'),
     valance: str(x.effKey('light_valance')) ?? null,
     valanceHex: trim(x.effKey('light_valance_colour'), 'light_valance_colour_other'),
+    interiorHex: ((id) => (id ? interiorColour(id, cab) : null))(str(x.effKey('interiors'))),
+    trayOrganizers: Number(x.effKey('tray_organizers') ?? 0) || 0,
+    islandBack: str(x.effKey('island_back_panel')) ?? null,
+    islandSide: str(x.effKey('island_side_panel')) ?? null,
     plain: !x.isPrimary(),
     counters: true,
   };

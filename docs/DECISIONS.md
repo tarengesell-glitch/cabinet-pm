@@ -160,8 +160,8 @@ A pilot rendered the L-shape-with-island kitchen 14 ways: 5 paints, 4 door style
   - the scene's sizes;
   - the counter colours;
   - the stain tints;
-  - "handle length" read as the overall length (IK-26).
-- **The open question for the owner:** are the renders good enough to show clients? Go, tune, or add an AI realism pass.
+  - "handle length" read as the overall length (IK-26; the owner answered centre to centre on 2026-11-14, so this changes with the next render).
+- ~~**The open question for the owner:** are the renders good enough to show clients?~~ Answered 2026-11-14 (owner, after round 5): "Yes, those look good." The pilot is a go: Blender is the image engine.
 
 ### 2026-11-10: Kitchen image library, the variables (owner, chat, 2026-11-10)
 The image selector needs a photorealistic image for every option, all from the same camera angle and the same kitchen layout, made by an automated generate, check and retry loop. The owner gave the full variable list and answered the follow-up questions. The list is data in `src/modules/visual-library/data/kitchen-image-variables.json` (colour lists in `data/colours/`), checked by `model/variables.ts`. A shared doc, "Kitchen Image Library: Variables", is made from it.
@@ -629,8 +629,8 @@ Five confirmed rules are now checked in the design tool (HARD-014, PREF-011, PRE
 - ~~**IK-22 Stains.**~~ Answered 2026-11-13 (owner): use the stain options listed on cabinets.com.
 - ~~**IK-23 Default kitchen.**~~ Answered 2026-11-13 (owner): "You don't need a single default kitchen because the flow always has multiple options." Removed from the catalog.
 - ~~**IK-24 Knobs on drawers.**~~ Answered 2026-11-13 (owner): yes, they apply to knobs too.
-- **IK-25 Earlier picks in later images.** With no default kitchen, what do a later step's images show for the picks already made? The client's own picks, which needs a layered or 3D build, or something fixed? This depends on the image engine (see the masks and Blender question raised 2026-11-13).
-- **IK-26 Handle length.** Are 5 1/2", 8" and 12" the handle's overall length, or the distance between its screw holes (centre to centre)? The pilot draws them as overall length.
+- ~~**IK-25 Earlier picks in later images.**~~ Answered 2026-11-14 (owner): the client's own picks. "The image gets closer and closer to what their ideal design is." It can't wait for a render at any step ("a full stop no"), so everything is generated ahead of time. With no default kitchen, what do a later step's images show for the picks already made? The client's own picks, which needs a layered or 3D build, or something fixed? This depends on the image engine (see the masks and Blender question raised 2026-11-13).
+- ~~**IK-26 Handle length.**~~ Answered 2026-11-14 (owner): the distance between the screw holes (centre to centre). The pilot still draws overall length; fix it with the next render. Are 5 1/2", 8" and 12" the handle's overall length, or the distance between its screw holes (centre to centre)? The pilot draws them as overall length.
 
 ### From the AI designer plan (2026-11-09)
 - ~~**AD-1 The upper over a fridge.**~~ Answered 2026-11-09 (owner: "sounds good"): it stays a blocker on drafts until the shop names the cabinet and depth. The room drawing gives it 24" deep, but the catalog has no upper at that depth: `upper_no_shelf` is 12" deep, and its depth limits are not known (CAT-1). Until the shop says which cabinet and depth to use, a draft shows it as a blocker.

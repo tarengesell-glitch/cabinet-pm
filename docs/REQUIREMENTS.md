@@ -21,7 +21,7 @@ Last checked against `DECISIONS.md` and the code: 2026-11-13.
 
 | `BUILD_SPEC.md` says | Now | Evidence |
 |---|---|---|
-| §2: photorealistic rendering out of scope | In scope; its form is open (R-1) | OA-3 |
+| §2: photorealistic rendering out of scope | In scope: a 3D view the client can turn, realistic while it moves (R-1, 2026-11-14); how it is made is open | OA-3, R-1 |
 | §6: base unit "a candidate is 1/64 inch" | 1/64 inch; mm input rounds to the nearest 1/64" with the original kept | DECISIONS 2026-11-05, U-1, U-2 |
 | §6 Wall: `height` | No wall height; walls are as high as the ceiling | OA-11 |
 | OA-11: new walls start 5 1/2" thick | Interior walls start 4 1/2" thick | DECISIONS 2026-11-09 "Owner updates after trying a real job (round 3)" |
@@ -35,7 +35,7 @@ Last checked against `DECISIONS.md` and the code: 2026-11-13.
 
 ### Scope
 - In-house only; a shop is a manufacturing partner (one colony now, more possible). **Approved** (OA-1). Built for one shop.
-- Remove manual drawing: rough inputs + design choices + design rules → a well-designed room with photorealistic viewing and live pricing; no parametrics, construction or sheet optimization. **Approved** (OA-2, OA-3). Partly built: the 3D view is not photorealistic (R-1 open); pricing not built.
+- Remove manual drawing: rough inputs + design choices + design rules → a well-designed room with photorealistic viewing and live pricing; no parametrics, construction or sheet optimization. **Approved** (OA-2, OA-3). Partly built: the 3D view is not photorealistic (R-1: turnable and realistic while moving; method open); pricing not built.
 - The platform doesn't engineer cabinets; construction comes from the shop's library. **Approved** (§1; DECISIONS 2026-11-08 "Design rules reviewed").
 - Only the CAD adapter knows the vendor. **Approved** (P2, G4). Enforced by `npm run vendor-names`.
 
